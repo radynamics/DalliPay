@@ -27,6 +27,8 @@ Examples are shown in run_pain001.cmd and run_camt054.cmd.
 -wallet         Wallet used as sender for "pain001ToCrypto" or as source for "cryptoToCamt054"
 -walletSecret   Secret/PrivateKey of sending wallet. Only needed for "pain001ToCrypto".
 -n              "test" for Testnet, "live" for Livenet
+-from           Transactions from in format yyyyMMddHHmmss (last 7 days if omitted)
+-until          Transactions until in format yyyyMMddHHmmss (now if omitted)
 ```
 
 ## Run demo
