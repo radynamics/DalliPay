@@ -1,0 +1,218 @@
+package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
+
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
+import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
+import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.*;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
+import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public class Camt054Writer {
+    private final Ledger ledger;
+    private TransformInstruction transformInstruction;
+    private CurrencyConverter ccyConverter;
+    private IdGenerator idGenerator;
+    private LocalDateTime creationDate;
+
+    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, CurrencyConverter ccyConverter) {
+        this.ledger = ledger;
+        this.transformInstruction = transformInstruction;
+        this.ccyConverter = ccyConverter;
+        this.idGenerator = new UUIDIdGenerator();
+        this.creationDate = LocalDateTime.now();
+    }
+
+    public ByteArrayOutputStream create(Transaction[] transactions) throws JAXBException, DatatypeConfigurationException {
+        var d = new Document();
+
+        d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV04());
+        d.getBkToCstmrDbtCdtNtfctn().setGrpHdr(new GroupHeader58());
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgId(idGenerator.createMsgId());
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setCreDtTm(Utils.toXmlDateTime(creationDate));
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgRcpt(createMsgRcpt());
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgPgntn(new Pagination());
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setPgNb("1");
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);
+
+        for (var t : transactions) {
+            var stmt = new AccountNotification7();
+            d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
+            stmt.setId(idGenerator.createStmId());
+            stmt.setElctrncSeqNb(BigDecimal.valueOf(1));
+            stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
+
+            stmt.setAcct(new CashAccount25());
+            stmt.getAcct().setId(new AccountIdentification4Choice());
+            stmt.getAcct().getId().setIBAN(transformInstruction.getIban(t.getSender(), t.getSender().getPublicKey()));
+            //stmt.getAcct().getId().setOthr(new GenericAccountIdentification1());
+            //stmt.getAcct().getId().getOthr().setId(receiver.getPublicKey());
+            stmt.getAcct().setCcy(transformInstruction.getTargetCcy());
+
+            stmt.getNtry().add(createNtry(t));
+        }
+        return toXml(d);
+    }
+
+    private PartyIdentification43 createMsgRcpt() {
+        // see FI_camt_054_sample.xml.xml
+        var o = new PartyIdentification43();
+
+        o.setId(new Party11Choice());
+        o.getId().setOrgId(new OrganisationIdentification8());
+
+        var othr = new GenericOrganisationIdentification1();
+        o.getId().getOrgId().getOthr().add(othr);
+        othr.setId("CryptoIso20022Interop");
+        othr.setSchmeNm(new OrganisationIdentificationSchemeName1Choice());
+        othr.getSchmeNm().setCd("CUST");
+
+        return o;
+    }
+
+    private ReportEntry4 createNtry(Transaction trx) throws DatatypeConfigurationException {
+        var ntry = new ReportEntry4();
+
+        // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
+        ntry.setNtryRef(transformInstruction.getIban(trx.getSender(), trx.getSender().getPublicKey()));
+        ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
+
+        var amtValue = BigDecimal.ZERO;
+        var amtCcy = "";
+        if (trx.getCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
+            amtValue = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
+            amtCcy = trx.getCcy();
+        } else {
+            var amt = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
+            var value = ccyConverter.convert(amt, trx.getCcy(), transformInstruction.getTargetCcy());
+            // TODO: improve rounding (ex. JPY)
+            amtValue = BigDecimal.valueOf(Math.round(value * 100.0) / 100.0);
+            amtCcy = transformInstruction.getTargetCcy();
+        }
+        ntry.getAmt().setValue(amtValue);
+        ntry.getAmt().setCcy(amtCcy);
+
+        ntry.setCdtDbtInd(CreditDebitCode.CRDT);
+        ntry.setSts(EntryStatus2Code.BOOK);
+
+        var booked = new DateAndDateTimeChoice();
+        booked.setDtTm(Utils.toXmlDateTime(trx.getBooked()));
+        ntry.setBookgDt(booked);
+        ntry.setValDt(booked);
+
+        ntry.setAcctSvcrRef(trx.getId());
+
+        ntry.setBkTxCd(new BankTransactionCodeStructure4());
+        ntry.getBkTxCd().setDomn(createDomn());
+
+        var dtls = new EntryDetails3();
+        ntry.getNtryDtls().add(dtls);
+        dtls.setBtch(new BatchInformation2());
+        dtls.getBtch().setNbOfTxs(String.valueOf(1));
+
+        var txDtls = new EntryTransaction4();
+        dtls.getTxDtls().add(txDtls);
+        txDtls.setRefs(new TransactionReferences3());
+        txDtls.getRefs().setAcctSvcrRef(trx.getId());
+        txDtls.setAmt(new ActiveOrHistoricCurrencyAndAmount());
+        txDtls.getAmt().setValue(amtValue);
+        txDtls.getAmt().setCcy(amtCcy);
+        txDtls.setCdtDbtInd(CreditDebitCode.CRDT);
+        txDtls.setBkTxCd(new BankTransactionCodeStructure4());
+        txDtls.getBkTxCd().setDomn(createDomn());
+
+        var hasStrd = trx.getStructuredReferences() != null || trx.getInvoiceId() != null;
+        if (hasStrd || trx.getMessages().length > 0) {
+            txDtls.setRmtInf(new RemittanceInformation7());
+        }
+
+        if (hasStrd) {
+            txDtls.getRmtInf().getStrd().add(createStrd(trx.getStructuredReferences(), trx.getInvoiceId()));
+        }
+
+        var sb = new StringBuilder();
+        for (String s : trx.getMessages()) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(s);
+        }
+        if (sb.length() > 0) {
+            txDtls.getRmtInf().getUstrd().add(sb.toString());
+        }
+
+        return ntry;
+    }
+
+    private StructuredRemittanceInformation9 createStrd(StructuredReference[] structuredReferences, String invoiceNo) {
+        StructuredRemittanceInformation9 strd = null;
+
+        if (invoiceNo != null && invoiceNo.length() > 0) {
+            strd = new StructuredRemittanceInformation9();
+            var x = new ReferredDocumentInformation3();
+            strd.getRfrdDocInf().add(x);
+            x.setTp(new ReferredDocumentType2());
+            x.getTp().setCdOrPrtry(new ReferredDocumentType1Choice());
+            x.getTp().getCdOrPrtry().setCd(DocumentType5Code.CINV);
+            x.setNb(invoiceNo);
+        }
+
+        if (structuredReferences != null && structuredReferences.length > 0) {
+            if (strd == null) {
+                strd = new StructuredRemittanceInformation9();
+            }
+            strd.setCdtrRefInf(new CreditorReferenceInformation2());
+            for (var ref : structuredReferences) {
+                strd.getCdtrRefInf().setTp(new CreditorReferenceType2());
+                strd.getCdtrRefInf().getTp().setCdOrPrtry(new CreditorReferenceType1Choice());
+                strd.getCdtrRefInf().getTp().getCdOrPrtry().setPrtry(CreditorReferenceConverter.toPrtry(ref.getType()));
+                strd.getCdtrRefInf().setRef(ref.getUnformatted());
+            }
+        }
+
+        return strd;
+    }
+
+    private BankTransactionCodeStructure5 createDomn() {
+        var o = new BankTransactionCodeStructure5();
+        o.setCd("PMNT");
+        o.setFmly(new BankTransactionCodeStructure6());
+        o.getFmly().setCd("RCDT");
+        o.getFmly().setSubFmlyCd("VCOM");
+        return o;
+    }
+
+    private ByteArrayOutputStream toXml(Document document) throws JAXBException {
+        var ctx = JAXBContext.newInstance(Document.class);
+        var marshaller = ctx.createMarshaller();
+        var stream = new ByteArrayOutputStream();
+        marshaller.marshal(document, stream);
+
+        return stream;
+    }
+
+    public IdGenerator getIdGenerator() {
+        return idGenerator;
+    }
+
+    public void setIdGenerator(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+}
