@@ -4,6 +4,10 @@ import org.apache.commons.lang3.NotImplementedException;
 
 public final class StructuredReferenceFactory {
     public static StructuredReference create(String typeText, String reference) {
+        if (typeText == null) throw new IllegalArgumentException("Parameter 'typeText' cannot be null");
+        if (reference == null) throw new IllegalArgumentException("Parameter 'reference' cannot be null");
+        if (reference.length() == 0) throw new IllegalArgumentException("Parameter 'reference' cannot be empty");
+
         switch (typeText.toLowerCase()) {
             case "qrr":
                 return new StructuredReference() {
