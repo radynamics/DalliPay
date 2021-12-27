@@ -8,8 +8,11 @@ import org.json.JSONObject;
 import java.text.ParseException;
 
 public final class MemoConverter {
+    private static final int VERSION = 1;
+
     public static String toMemo(StructuredReference[] refs, String[] freeText) {
-        final int VERSION = 1;
+        if (refs == null) throw new IllegalArgumentException("Parameter 'refs' cannot be null");
+        if (freeText == null) throw new IllegalArgumentException("Parameter 'freeText' cannot be null");
 
         var json = new JSONObject();
         json.put("v", VERSION);
@@ -35,6 +38,8 @@ public final class MemoConverter {
     public static MemoData fromMemo(String text) {
         try {
             return parse(text);
+        } catch (ParseException e) {
+            return null;
         } catch (Exception e) {
             var allFreeText = new MemoData();
             allFreeText.add(text);
@@ -43,19 +48,15 @@ public final class MemoConverter {
     }
 
     private static MemoData parse(String text) throws ParseException {
-        if (text == null) {
-            throw new ParseException("json text is null", 0);
-        }
+        if (text == null) throw new ParseException("json text is null", 0);
 
         JSONObject json = new JSONObject(text);
 
-        // TODO: handle versioning
         var v = json.getInt("v");
-        if (v <= 0) {
+        if (v != VERSION) {
             return null;
         }
 
-        // TODO: validate format
         var data = new MemoData();
         {
             var arr = json.getJSONArray("ft");
