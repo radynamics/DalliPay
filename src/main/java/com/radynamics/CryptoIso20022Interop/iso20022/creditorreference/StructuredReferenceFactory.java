@@ -29,6 +29,18 @@ public final class StructuredReferenceFactory {
                         return reference;
                     }
                 };
+            case "isr":
+                return new StructuredReference() {
+                    @Override
+                    public ReferenceType getType() {
+                        return ReferenceType.Isr;
+                    }
+
+                    @Override
+                    public String getUnformatted() {
+                        return reference;
+                    }
+                };
             default:
                 throw new NotImplementedException(String.format("Structured reference %s unknown.", typeText));
         }

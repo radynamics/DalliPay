@@ -7,6 +7,10 @@ import org.json.JSONObject;
 
 public final class StructuredReferenceConverter {
     public static JSONObject toMemo(StructuredReference ref) {
+        if (ref == null) {
+            throw new IllegalArgumentException("Parameter 'ref' cannot be null");
+        }
+
         var json = new JSONObject();
 
         json.put("t", toType(ref.getType())); // subtype, ex. QRR, SCOR
