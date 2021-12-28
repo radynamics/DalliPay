@@ -68,7 +68,7 @@ public final class MemoConverter {
             var arr = json.getJSONArray("CdOrPrtry");
             for (int i = 0; i < arr.length(); i++) {
                 var obj = arr.getJSONObject(i);
-                data.add(StructuredReferenceFactory.create(obj.getString("t"), obj.getString("v")));
+                data.add(StructuredReferenceFactory.create(obj.getString("t"), obj.getString("v").replace(" ", "")));
             }
         }
         return data;

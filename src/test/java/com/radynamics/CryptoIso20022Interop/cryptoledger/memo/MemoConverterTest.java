@@ -86,4 +86,16 @@ public class MemoConverterTest {
         assertEquals("test2", md.freeTexts()[0]);
         assertEquals("test1", md.freeTexts()[1]);
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void fromMemoScor(boolean formatted) {
+        var scor = formatted ? "RF71 2348 231" : "RF712348231";
+        var md = MemoConverter.fromMemo(String.format("{\"CdOrPrtry\":[{\"t\":\"scor\",\"v\":\"%s\"}],\"v\":1,\"ft\":[]}", scor));
+        assertNotNull(md);
+        assertEquals(1, md.structuredReferences().length);
+        assertEquals(ReferenceType.Scor, md.structuredReferences()[0].getType());
+        assertEquals("RF712348231", md.structuredReferences()[0].getUnformatted());
+        assertEquals(0, md.freeTexts().length);
+    }
 }
