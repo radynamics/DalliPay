@@ -61,7 +61,14 @@ public final class StructuredReferenceFactory {
         map.put("qrr", ReferenceType.SwissQrBill);
         map.put("scor", ReferenceType.Scor);
         map.put("isr", ReferenceType.Isr);
-        return map.get(typeText);
+
+        for (var item : map.entrySet()) {
+            if (item.getKey().equals(typeText)) {
+                return item.getValue();
+            }
+        }
+
+        throw new NotImplementedException(String.format("Structured reference %s unknown.", typeText));
     }
 
     public static ReferenceType detectType(String ref) {
