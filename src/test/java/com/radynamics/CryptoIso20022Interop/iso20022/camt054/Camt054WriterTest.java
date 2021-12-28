@@ -46,6 +46,7 @@ public class Camt054WriterTest {
         var list = new ArrayList<Transaction>();
         list.add(createTestTransaction1(ledger));
         list.add(createTestTransaction2(ledger));
+        list.add(createTestTransactionScor(ledger));
         return list.toArray(new Transaction[0]);
     }
 
@@ -69,6 +70,18 @@ public class Camt054WriterTest {
         t.setId("57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11));
         t.addStructuredReference(StructuredReferenceFactory.create("QRR", "210000000003139471430009017"));
+
+        return t;
+    }
+
+    private static Transaction createTestTransactionScor(Ledger ledger) {
+        var t = ledger.createTransaction(
+                ledger.createWallet("rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4", null),
+                ledger.createWallet("r9Knt1X7s4kTtmLiCTEairzAbmZoXnU8GQ", null),
+                391000000, ledger.getNativeCcySymbol());
+        t.setId("4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9");
+        t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11));
+        t.addStructuredReference(StructuredReferenceFactory.create("SCOR", "RF712348231"));
 
         return t;
     }
