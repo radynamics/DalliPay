@@ -26,7 +26,7 @@ public class MemoConverterTest {
                 MemoConverter.toMemo(new StructuredReference[0], new String[0]));
 
         var refs = new ArrayList<StructuredReference>();
-        refs.add(StructuredReferenceFactory.create("qrr", "210000000003139471430009017"));
+        refs.add(StructuredReferenceFactory.create(ReferenceType.SwissQrBill, "210000000003139471430009017"));
 
         assertEquals("{\"CdOrPrtry\":[{\"t\":\"qrr\",\"v\":\"210000000003139471430009017\"}],\"v\":1,\"ft\":[]}",
                 MemoConverter.toMemo(refs.toArray(new StructuredReference[0]), new String[0]));
@@ -37,7 +37,7 @@ public class MemoConverterTest {
         assertEquals("{\"CdOrPrtry\":[{\"t\":\"qrr\",\"v\":\"210000000003139471430009017\"}],\"v\":1,\"ft\":[\"test2\",\"test1\"]}",
                 MemoConverter.toMemo(refs.toArray(new StructuredReference[0]), freeTexts.toArray(new String[0])));
 
-        refs.add(StructuredReferenceFactory.create("scor", "RF18539007547034"));
+        refs.add(StructuredReferenceFactory.create(ReferenceType.Scor, "RF18539007547034"));
         assertEquals("{\"CdOrPrtry\":[{\"t\":\"qrr\",\"v\":\"210000000003139471430009017\"},{\"t\":\"scor\",\"v\":\"RF18539007547034\"}],\"v\":1,\"ft\":[]}",
                 MemoConverter.toMemo(refs.toArray(new StructuredReference[0]), new String[0]));
     }

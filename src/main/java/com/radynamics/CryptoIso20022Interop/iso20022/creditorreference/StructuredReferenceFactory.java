@@ -5,11 +5,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.HashMap;
 
 public final class StructuredReferenceFactory {
-    public static StructuredReference create(String typeText, String reference) {
-        if (typeText == null) throw new IllegalArgumentException("Parameter 'typeText' cannot be null");
-        return create(getType(typeText.toLowerCase()), reference);
-    }
-
     public static StructuredReference create(ReferenceType type, String reference) {
         if (reference == null) throw new IllegalArgumentException("Parameter 'reference' cannot be null");
         if (reference.length() == 0) throw new IllegalArgumentException("Parameter 'reference' cannot be empty");
@@ -57,6 +52,9 @@ public final class StructuredReferenceFactory {
     }
 
     public static ReferenceType getType(String typeText) {
+        if (typeText == null) throw new IllegalArgumentException("Parameter 'typeText' cannot be null");
+        if (typeText.length() == 0) throw new IllegalArgumentException("Parameter 'typeText' cannot be empty");
+
         var map = new HashMap<String, ReferenceType>();
         map.put("qrr", ReferenceType.SwissQrBill);
         map.put("scor", ReferenceType.Scor);

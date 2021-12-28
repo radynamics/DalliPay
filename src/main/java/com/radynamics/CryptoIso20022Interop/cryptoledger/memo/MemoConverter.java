@@ -69,7 +69,7 @@ public final class MemoConverter {
             for (int i = 0; i < arr.length(); i++) {
                 var obj = arr.getJSONObject(i);
                 if (!obj.isNull("v") && obj.getString("v").length() > 0) {
-                    data.add(StructuredReferenceFactory.create(obj.getString("t"), obj.getString("v").replace(" ", "")));
+                    data.add(StructuredReferenceFactory.create(StructuredReferenceFactory.getType(obj.getString("t")), obj.getString("v").replace(" ", "")));
                 }
             }
         }

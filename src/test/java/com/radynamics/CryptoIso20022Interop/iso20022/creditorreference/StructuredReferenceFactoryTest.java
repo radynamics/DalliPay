@@ -8,29 +8,30 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class StructuredReferenceFactoryTest {
     @ParameterizedTest
-    @CsvSource({",", ",\"\""})
-    public void createTypeTextNull(String typeText, String reference) {
+    @CsvSource(value = {"null", "''"}, nullValues = {"null"})
+    public void getTypeNullOrEmpty(String typeText) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            StructuredReferenceFactory.create(typeText, reference);
+            StructuredReferenceFactory.getType(typeText);
         });
     }
 
     @ParameterizedTest
-    @CsvSource({"\"\",\"\"", "\"unknown\",\"\""})
-    public void createTypeTextUnknown(String typeText, String reference) {
+    @CsvSource({"unknown", "abc"})
+    public void createTypeTextUnknown(String typeText) {
         Assertions.assertThrows(NotImplementedException.class, () -> {
-            StructuredReferenceFactory.create(typeText, reference);
+            StructuredReferenceFactory.getType(typeText);
         });
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"qrr", "scor", "isr"})
     public void createReference(String typeText) {
+        var type = StructuredReferenceFactory.getType(typeText);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            StructuredReferenceFactory.create(typeText, null);
+            StructuredReferenceFactory.create(type, null);
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            StructuredReferenceFactory.create(typeText, "");
+            StructuredReferenceFactory.create(type, "");
         });
     }
 }

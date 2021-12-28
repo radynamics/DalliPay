@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
@@ -69,7 +70,7 @@ public class Camt054WriterTest {
                 50000000, ledger.getNativeCcySymbol());
         t.setId("57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11));
-        t.addStructuredReference(StructuredReferenceFactory.create("QRR", "210000000003139471430009017"));
+        t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.SwissQrBill, "210000000003139471430009017"));
 
         return t;
     }
@@ -81,7 +82,7 @@ public class Camt054WriterTest {
                 391000000, ledger.getNativeCcySymbol());
         t.setId("4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9");
         t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11));
-        t.addStructuredReference(StructuredReferenceFactory.create("SCOR", "RF712348231"));
+        t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.Scor, "RF712348231"));
 
         return t;
     }
