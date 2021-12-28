@@ -3,6 +3,9 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.schema.generated.AccountIdentification4ChoiceCH;
@@ -77,9 +80,8 @@ public class Pain001Reader {
         return StructuredReferenceFactory.getType(typeText);
     }
 
-    private String getAccount(AccountIdentification4ChoiceCH id) {
-        // TODO: 2021-12-28 create specific types (new OtherAccount("010832052"), new IbanAccount(...))
-        return id.getIBAN() != null ? id.getIBAN() : id.getOthr().getId();
+    private Account getAccount(AccountIdentification4ChoiceCH id) {
+        return id.getIBAN() != null ? new IbanAccount(id.getIBAN()) : new OtherAccount(id.getOthr().getId());
     }
 
     private Document fromXml(InputStream input) throws JAXBException {

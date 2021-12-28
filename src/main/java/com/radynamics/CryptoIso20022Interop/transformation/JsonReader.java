@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeFactory;
+import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -25,7 +26,7 @@ public class JsonReader {
         var arr = json.getJSONArray("accountMapping");
         for (int i = 0; i < arr.length(); i++) {
             var obj = arr.getJSONObject(i);
-            ti.add(new AccountMapping(obj.getString("iban"), obj.getString("ledgerWallet")));
+            ti.add(new AccountMapping(new IbanAccount(obj.getString("iban")), obj.getString("ledgerWallet")));
         }
 
         return ti;

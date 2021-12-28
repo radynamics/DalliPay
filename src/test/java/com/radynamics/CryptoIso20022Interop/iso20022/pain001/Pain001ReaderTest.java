@@ -3,6 +3,8 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -16,13 +18,12 @@ public class Pain001ReaderTest {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
         // DbtrAcct
-        ti.add(new AccountMapping("CH5481230000001998736", "sender_CH5481230000001998736"));
+        ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
-        // TODO: 2021-12-28 create specific types (new OtherAccount("010832052"), new IbanAccount(...))
-        ti.add(new AccountMapping("010832052", "receiver_010832052"));
-        ti.add(new AccountMapping("010391391", "receiver_010391391"));
-        ti.add(new AccountMapping("010649858", "receiver_010649858"));
-        ti.add(new AccountMapping("032233441", "receiver_032233441"));
+        ti.add(new AccountMapping(new OtherAccount("010832052"), "receiver_010832052"));
+        ti.add(new AccountMapping(new OtherAccount("010391391"), "receiver_010391391"));
+        ti.add(new AccountMapping(new OtherAccount("010649858"), "receiver_010649858"));
+        ti.add(new AccountMapping(new OtherAccount("032233441"), "receiver_032233441"));
         ExchangeRate[] rates = {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
                 new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1),
