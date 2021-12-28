@@ -52,14 +52,11 @@ public class MemoConverterTest {
             "",
             "test1",
             "{]",
-            "{\"v\":1}",
-            "{\"CdOrPrtry_\":[{\"t\":\"qrr\",\"v\":\"210000000003139471430009017\"}],\"v\":1}",
             "{\"CdOrPrtry\":\"invalid\",\"v\":1}",
             "{\"CdOrPrtry\":[\"invalid\"],\"v\":1}",
             "{\"CdOrPrtry\":{\"invalid\":2},\"v\":1}",
             "{\"CdOrPrtry\":[{\"t_\":\"qrr\",\"v\":\"210000000003139471430009017\"}],\"v\":1,\"ft\":[]}",
             "{\"CdOrPrtry\":[{\"t\":\"qrr_\",\"v\":\"210000000003139471430009017\"}],\"v\":1,\"ft\":[]}",
-            "{\"CdOrPrtry\":[{\"t\":\"qrr\",\"v_\":\"210000000003139471430009017\"}],\"v\":1,\"ft\":[]}",
     })
     public void fromMemoFreeTexts(String json) {
         var md = MemoConverter.fromMemo(json);
@@ -67,6 +64,45 @@ public class MemoConverterTest {
         assertEquals(0, md.structuredReferences().length);
         assertEquals(1, md.freeTexts().length);
         assertEquals(json, md.freeTexts()[0]);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{\"CdOrPrtry\":[{\"t\":\"scor\",\"v\":\"RF712348231\"}],\"v\":1}",
+            "{\"CdOrPrtry\":[{\"t\":\"scor\",\"v\":\"RF712348231\"}],\"v\":1,\"ft\":[]}",
+    })
+    public void fromMemoWithoutFreetexts(String json) {
+        var md = MemoConverter.fromMemo(json);
+        assertNotNull(md);
+        assertEquals(1, md.structuredReferences().length);
+        assertEquals(ReferenceType.Scor, md.structuredReferences()[0].getType());
+        assertEquals("RF712348231", md.structuredReferences()[0].getUnformatted());
+        assertEquals(0, md.freeTexts().length);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{\"v\":1,\"ft\":[\"test1\"]}}",
+            "{\"CdOrPrtry_\":[{\"t\":\"scor\",\"v\":\"RF712348231\"}],\"v\":1,\"ft\":[\"test1\"]}",
+            "{\"CdOrPrtry\":[{\"t\":\"scor\"}],\"v\":1,\"ft\":[\"test1\"]}",
+            "{\"CdOrPrtry\":[{\"t\":\"scor\",\"v\":\"\"}],\"v\":1,\"ft\":[\"test1\"]}",
+            "{\"CdOrPrtry\":[{\"t\":\"scor\",\"v\":null}],\"v\":1,\"ft\":[\"test1\"]}",
+            "{\"CdOrPrtry\":[{\"t\":\"scor\",\"v_\":\"RF712348231\"}],\"v\":1,\"ft\":[\"test1\"]}",
+    })
+    public void fromMemoWithoutReference(String json) {
+        var md = MemoConverter.fromMemo(json);
+        assertNotNull(md);
+        assertEquals(0, md.structuredReferences().length);
+        assertEquals(1, md.freeTexts().length);
+        assertEquals("test1", md.freeTexts()[0]);
+    }
+
+    @Test
+    public void fromMemoWithoutReferenceAndFreetexts() {
+        var md = MemoConverter.fromMemo("{\"v\":1}}");
+        assertNotNull(md);
+        assertEquals(0, md.structuredReferences().length);
+        assertEquals(0, md.freeTexts().length);
     }
 
     @ParameterizedTest

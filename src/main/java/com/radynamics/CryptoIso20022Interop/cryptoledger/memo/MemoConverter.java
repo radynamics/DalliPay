@@ -58,17 +58,19 @@ public final class MemoConverter {
         }
 
         var data = new MemoData();
-        {
+        if (json.has("ft")) {
             var arr = json.getJSONArray("ft");
             for (int i = 0; i < arr.length(); i++) {
                 data.add(arr.getString(i));
             }
         }
-        {
+        if (json.has("CdOrPrtry")) {
             var arr = json.getJSONArray("CdOrPrtry");
             for (int i = 0; i < arr.length(); i++) {
                 var obj = arr.getJSONObject(i);
-                data.add(StructuredReferenceFactory.create(obj.getString("t"), obj.getString("v").replace(" ", "")));
+                if (!obj.isNull("v") && obj.getString("v").length() > 0) {
+                    data.add(StructuredReferenceFactory.create(obj.getString("t"), obj.getString("v").replace(" ", "")));
+                }
             }
         }
         return data;
