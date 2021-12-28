@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns="http://www.six-interbank-clearing.com/de/pain.001.001.03.ch.02.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.six-interbank-clearing.com/de/pain.001.001.03.ch.02.xsd pain.001.001.03.ch.02.xsd">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>Msg9bd3cf711e7d4edaa89fb47b2b911c69</MsgId>
+      <CreDtTm>2010-02-15T07:30:00</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>199.95</CtrlSum>
+      <InitgPty>
+        <Nm>MUSTER AG</Nm>
+        <CtctDtls>
+          <Nm>CryptoIso20022Interop/radynamics software solutions</Nm>
+          <Othr>9999.1.0.4238</Othr>
+        </CtctDtls>
+      </InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>Pmta0e413e50411416280d27d8d3fca4e50</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <BtchBookg>true</BtchBookg>
+      <ReqdExctnDt>2019-10-08</ReqdExctnDt>
+      <Dbtr>
+        <Nm>MUSTER AG</Nm>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>CH5481230000001998736</IBAN>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>CHBCC</Cd>
+            </ClrSysId>
+            <MmbId>1234</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>Trxa14b850fd52e4b2d827283cd1a62e58a</InstrId>
+          <EndToEndId>E2E65e21077567d4052a1dbfebabae93989</EndToEndId>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="CHF">199.95</InstdAmt>
+        </Amt>
+        <CdtrAgt>
+          <FinInstnId>
+            <ClrSysMmbId>
+              <ClrSysId>
+                <Cd>CHBCC</Cd>
+              </ClrSysId>
+              <MmbId>791</MmbId>
+            </ClrSysMmbId>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Robert Schneider AG </Nm>
+          <PstlAdr>
+            <StrtNm>Rue du Lac</StrtNm>
+            <PstCd>2501</PstCd>
+            <TwnNm>Biel</TwnNm>
+            <Ctry>CH</Ctry>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>CH5800791123000889012</IBAN>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Strd>
+            <CdtrRefInf>
+              <Tp>
+                <CdOrPrtry>
+                  <Cd>SCOR</Cd>
+                </CdOrPrtry>
+              </Tp>
+              <Ref>RF18539007547034</Ref>
+            </CdtrRefInf>
+          </Strd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

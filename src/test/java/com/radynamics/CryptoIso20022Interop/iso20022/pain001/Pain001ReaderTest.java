@@ -93,6 +93,28 @@ public class Pain001ReaderTest {
         assertTransaction(transactions[0], "receiver_CH4431999123000889012", 1949750, ReferenceType.SwissQrBill, "210000000003139471430009017");
     }
 
+    @Test
+    public void readSwissQrBillWithScorReference() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        // DbtrAcct
+        ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
+        // CdtrAcct
+        ti.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "receiver_CH4431999123000889012"));
+        ExchangeRate[] rates = {
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger, ti, ccyConverter);
+
+        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithScorReference.xml"));
+
+        assertNotNull(transactions);
+        assertEquals(1, transactions.length);
+
+        assertTransaction(transactions[0], "receiver_CH4431999123000889012", 199950, ReferenceType.Scor, "RF18539007547034");
+    }
+
     private void assertTransaction(Transaction t, String receiver, double amount) {
         assertTransaction(t, receiver, amount, null, null);
     }
