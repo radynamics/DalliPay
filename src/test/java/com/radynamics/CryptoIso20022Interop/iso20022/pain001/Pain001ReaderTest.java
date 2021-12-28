@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class Pain001ReaderTest {
     @Test
-    public void readPain001ExampleZA1() throws Exception {
+    public void readExampleZA1() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
         // DbtrAcct
@@ -43,7 +43,7 @@ public class Pain001ReaderTest {
     }
 
     @Test
-    public void readPain001ExampleZA6Scor() throws Exception {
+    public void readExampleZA6Scor() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
         // DbtrAcct
