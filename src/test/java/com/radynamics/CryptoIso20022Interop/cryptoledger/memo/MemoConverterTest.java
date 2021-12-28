@@ -82,6 +82,7 @@ public class MemoConverterTest {
         assertNotNull(md);
         assertEquals(1, md.structuredReferences().length);
         assertEquals(ReferenceType.SwissQrBill, md.structuredReferences()[0].getType());
+        assertEquals("210000000003139471430009017", md.structuredReferences()[0].getUnformatted());
         assertEquals(2, md.freeTexts().length);
         assertEquals("test2", md.freeTexts()[0]);
         assertEquals("test1", md.freeTexts()[1]);
