@@ -63,7 +63,7 @@ public final class StructuredReferenceFactory {
         map.put("isr", ReferenceType.Isr);
 
         for (var item : map.entrySet()) {
-            if (item.getKey().equals(typeText)) {
+            if (item.getKey().equalsIgnoreCase(typeText)) {
                 return item.getValue();
             }
         }

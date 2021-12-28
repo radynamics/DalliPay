@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.six-interbank-clearing.com/de/pain.001.001.03.ch.02.xsd">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>Msg9bd3cf711e7d4edaa89fb47b2b911c69</MsgId>
+      <CreDtTm>2010-02-15T07:30:00</CreDtTm>
+      <NbOfTxs>4</NbOfTxs>
+      <CtrlSum>26000.00</CtrlSum>
+      <InitgPty>
+        <Nm>MUSTER AG</Nm>
+        <CtctDtls>
+          <Nm>CryptoIso20022Interop/radynamics software solutions</Nm>
+          <Othr>9999.1.0.4238</Othr>
+        </CtctDtls>
+      </InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>Pmta0e413e50411416280d27d8d3fca4e50</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <BtchBookg>true</BtchBookg>
+      <ReqdExctnDt>2016-12-23</ReqdExctnDt>
+      <Dbtr>
+        <Nm>MUSTER AG</Nm>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>CH5481230000001998736</IBAN>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>CHBCC</Cd>
+            </ClrSysId>
+            <MmbId>81230</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>Trxa14b850fd52e4b2d827283cd1a62e58a</InstrId>
+          <EndToEndId>E2E65e21077567d4052a1dbfebabae93989</EndToEndId>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="GBP">5000.00</InstdAmt>
+        </Amt>
+        <CdtrAgt>
+          <FinInstnId>
+            <BIC>MIDLGB22XXX</BIC>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Sherlock Holmes</Nm>
+          <PstlAdr>
+            <Ctry>GB</Ctry>
+            <AdrLine>Sample street 1</AdrLine>
+            <AdrLine>AB0C 1DE Sample town</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>GB96MIDL40271522859882</IBAN>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Strd>
+            <CdtrRefInf>
+              <Tp>
+                <CdOrPrtry>
+                  <Cd>SCOR</Cd>
+                </CdOrPrtry>
+              </Tp>
+              <Ref>RF712348231</Ref>
+            </CdtrRefInf>
+          </Strd>
+        </RmtInf>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>Trx81c2d80a60eb4f3298fe0b67b1a10ab9</InstrId>
+          <EndToEndId>E2E7cf7017fed674b90b6e563e184297734</EndToEndId>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="GBP">6000.00</InstdAmt>
+        </Amt>
+        <CdtrAgt>
+          <FinInstnId>
+            <BIC>MIDLGB22XXX</BIC>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Sherlock Holmes</Nm>
+          <PstlAdr>
+            <Ctry>GB</Ctry>
+            <AdrLine>Sample street 1</AdrLine>
+            <AdrLine>AB0C 1DE Sample town</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>40271522859882</Id>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+    <PmtInf>
+      <PmtInfId>Pmtc2f4d7b958fe4efa906a21e9055253ba</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <BtchBookg>true</BtchBookg>
+      <PmtTpInf>
+        <InstrPrty>HIGH</InstrPrty>
+      </PmtTpInf>
+      <ReqdExctnDt>2016-12-23</ReqdExctnDt>
+      <Dbtr>
+        <Nm>MUSTER AG</Nm>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>CH5481230000001998736</IBAN>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>CHBCC</Cd>
+            </ClrSysId>
+            <MmbId>81230</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>Trx6bafc40172cd4742858eebcddd786364</InstrId>
+          <EndToEndId>E2Ebe39e86378e44bf2be10791280981b88</EndToEndId>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="GBP">7000.00</InstdAmt>
+        </Amt>
+        <CdtrAgt>
+          <FinInstnId>
+            <BIC>MIDLGB22XXX</BIC>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Sherlock Holmes</Nm>
+          <PstlAdr>
+            <Ctry>GB</Ctry>
+            <AdrLine>Sample street 1</AdrLine>
+            <AdrLine>AB0C 1DE Sample town</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>GB96MIDL40271522859882</IBAN>
+          </Id>
+        </CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+    <PmtInf>
+      <PmtInfId>Pmt882326344c87421681ee27bb44eb6516</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <BtchBookg>true</BtchBookg>
+      <PmtTpInf>
+        <InstrPrty>HIGH</InstrPrty>
+      </PmtTpInf>
+      <ReqdExctnDt>2016-12-23</ReqdExctnDt>
+      <Dbtr>
+        <Nm>MUSTER AG</Nm>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>CH5481230000001998736</IBAN>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>CHBCC</Cd>
+            </ClrSysId>
+            <MmbId>81230</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </DbtrAgt>
+      <ChrgBr>CRED</ChrgBr>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>Trxdcc01c0e8e4545e0bfc18f3d22eef4e4</InstrId>
+          <EndToEndId>E2E3fb331a1a4424d08aa94dd1a64bdcafe</EndToEndId>
+        </PmtId>
+        <Amt>
+          <InstdAmt Ccy="GBP">8000.00</InstdAmt>
+        </Amt>
+        <CdtrAgt>
+          <FinInstnId>
+            <BIC>MIDLGB22XXX</BIC>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Sherlock Holmes</Nm>
+          <PstlAdr>
+            <Ctry>GB</Ctry>
+            <AdrLine>Sample street 1</AdrLine>
+            <AdrLine>AB0C 1DE Sample town</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>GB96MIDL40271522859882</IBAN>
+          </Id>
+        </CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>
