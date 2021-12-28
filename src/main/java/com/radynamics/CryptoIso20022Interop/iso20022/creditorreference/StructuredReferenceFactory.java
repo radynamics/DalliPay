@@ -2,14 +2,20 @@ package com.radynamics.CryptoIso20022Interop.iso20022.creditorreference;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.HashMap;
+
 public final class StructuredReferenceFactory {
     public static StructuredReference create(String typeText, String reference) {
         if (typeText == null) throw new IllegalArgumentException("Parameter 'typeText' cannot be null");
+        return create(getType(typeText.toLowerCase()), reference);
+    }
+
+    public static StructuredReference create(ReferenceType type, String reference) {
         if (reference == null) throw new IllegalArgumentException("Parameter 'reference' cannot be null");
         if (reference.length() == 0) throw new IllegalArgumentException("Parameter 'reference' cannot be empty");
 
-        switch (typeText.toLowerCase()) {
-            case "qrr":
+        switch (type) {
+            case SwissQrBill:
                 return new StructuredReference() {
                     @Override
                     public ReferenceType getType() {
@@ -21,7 +27,7 @@ public final class StructuredReferenceFactory {
                         return reference;
                     }
                 };
-            case "scor":
+            case Scor:
                 return new StructuredReference() {
                     @Override
                     public ReferenceType getType() {
@@ -33,7 +39,7 @@ public final class StructuredReferenceFactory {
                         return reference;
                     }
                 };
-            case "isr":
+            case Isr:
                 return new StructuredReference() {
                     @Override
                     public ReferenceType getType() {
@@ -46,7 +52,23 @@ public final class StructuredReferenceFactory {
                     }
                 };
             default:
-                throw new NotImplementedException(String.format("Structured reference %s unknown.", typeText));
+                throw new NotImplementedException(String.format("Structured reference %s unknown.", type));
         }
+    }
+
+    public static ReferenceType getType(String typeText) {
+        var map = new HashMap<String, ReferenceType>();
+        map.put("qrr", ReferenceType.SwissQrBill);
+        map.put("scor", ReferenceType.Scor);
+        map.put("isr", ReferenceType.Isr);
+        return map.get(typeText);
+    }
+
+    public static ReferenceType detectType(String ref) {
+        if (ref.toLowerCase().startsWith("RF")) {
+            return ReferenceType.Scor;
+        }
+
+        return ReferenceType.Isr;
     }
 }
