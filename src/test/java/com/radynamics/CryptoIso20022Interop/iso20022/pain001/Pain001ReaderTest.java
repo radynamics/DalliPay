@@ -114,7 +114,7 @@ public class Pain001ReaderTest {
 
         assertTransaction(transactions[0], "receiver_CH4431999123000889012", 199950, ReferenceType.Scor, "RF18539007547034");
     }
-    
+
     @Test
     public void readSwissQrBillWithoutReference() throws Exception {
         var ledger = new TestLedger();
