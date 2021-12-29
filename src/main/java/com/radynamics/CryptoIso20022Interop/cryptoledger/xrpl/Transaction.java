@@ -54,7 +54,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
 
     @Override
     public void setId(String value) {
-        this.id = id;
+        this.id = value;
     }
 
     @Override

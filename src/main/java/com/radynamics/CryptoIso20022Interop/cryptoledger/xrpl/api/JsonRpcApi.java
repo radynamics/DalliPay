@@ -87,7 +87,7 @@ public class JsonRpcApi implements TransactionSource {
         // TODO: handle ImmutableIssuedCurrencyAmount
         var amt = (XrpCurrencyAmount) p.amount();
         var trx = new Transaction(amt.value().longValue(), ledger.getNativeCcySymbol());
-        trx.setId(p.hash().toString());
+        trx.setId(p.hash().get().value());
         trx.setBooked(p.closeDateHuman().get().toLocalDateTime());
         trx.setSender(WalletConverter.from(p.account()));
         trx.setReceiver(WalletConverter.from(p.destination()));
