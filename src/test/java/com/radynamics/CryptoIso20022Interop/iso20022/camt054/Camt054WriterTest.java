@@ -32,7 +32,7 @@ public class Camt054WriterTest {
         var actual = CamtConverter.toXml(w.create(payments));
         String expected = getClass().getClassLoader().getResource("camt054/testCreate2Payments.xml").getPath();
 
-        assertThat(Input.fromFile(expected), isSimilarTo(Input.fromByteArray(actual.toByteArray())));
+        assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromFile(expected)));
     }
 
     private static TransformInstruction createTestInstructions() {
