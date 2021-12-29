@@ -10,10 +10,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -32,7 +30,7 @@ public class Camt054Writer {
         this.creationDate = LocalDateTime.now();
     }
 
-    public ByteArrayOutputStream create(Transaction[] transactions) throws JAXBException, DatatypeConfigurationException {
+    public Document create(Transaction[] transactions) throws JAXBException, DatatypeConfigurationException {
         var d = new Document();
 
         d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV04());
@@ -60,7 +58,7 @@ public class Camt054Writer {
 
             stmt.getNtry().add(createNtry(t));
         }
-        return toXml(d);
+        return d;
     }
 
     private PartyIdentification43 createMsgRcpt() {
@@ -189,15 +187,6 @@ public class Camt054Writer {
         o.getFmly().setCd("RCDT");
         o.getFmly().setSubFmlyCd("VCOM");
         return o;
-    }
-
-    private ByteArrayOutputStream toXml(Document document) throws JAXBException {
-        var ctx = JAXBContext.newInstance(Document.class);
-        var marshaller = ctx.createMarshaller();
-        var stream = new ByteArrayOutputStream();
-        marshaller.marshal(document, stream);
-
-        return stream;
     }
 
     public IdGenerator getIdGenerator() {

@@ -6,8 +6,10 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
+import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
+import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.builder.Input;
@@ -15,7 +17,7 @@ import org.xmlunit.builder.Input;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class Camt054WriterTest {
@@ -27,7 +29,7 @@ public class Camt054WriterTest {
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
-        var actual = w.create(payments);
+        var actual = CamtConverter.toXml(w.create(payments));
         String expected = getClass().getClassLoader().getResource("camt054/testCreate2Payments.xml").getPath();
 
         assertThat(Input.fromFile(expected), isSimilarTo(Input.fromByteArray(actual.toByteArray())));
@@ -85,5 +87,22 @@ public class Camt054WriterTest {
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.Scor, "RF712348231"));
 
         return t;
+    }
+
+    @Test
+    public void createTranslateToIban() throws Exception {
+        var cryptoInstruction = createTestInstructions();
+        cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87"));
+
+        var payments = createTestTransactions(cryptoInstruction.getLedger());
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        w.setIdGenerator(new FixedValueIdGenerator());
+        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        var actual = w.create(payments);
+
+        var acct = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getAcct();
+        assertNotNull(acct);
+        assertNotNull(acct.getId());
+        assertEquals("CH5800791123000889012", acct.getId().getIBAN());
     }
 }

@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -96,7 +97,7 @@ public class Main {
         var until = Date.from(period.getEnd().atZone(ZoneId.systemDefault()).toInstant());
         var payments = transformInstruction.getLedger().listPayments(wallet, period);
 
-        var s = w.create(payments);
+        var s = CamtConverter.toXml(w.create(payments));
         var outputStream = new FileOutputStream(outputFileName);
         s.writeTo(outputStream);
 
