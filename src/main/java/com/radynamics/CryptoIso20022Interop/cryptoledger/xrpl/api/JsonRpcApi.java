@@ -60,8 +60,9 @@ public class JsonRpcApi implements TransactionSource {
             if (t.transactionType().value().equalsIgnoreCase("PAYMENT")) {
                 var p = (org.xrpl.xrpl4j.model.transactions.Payment) t;
                 // TODO: handle ImmutableIssuedCurrencyAmount
-                if (p.amount() instanceof XrpCurrencyAmount) {
-                    list.add(toTransaction(p));
+                var deliveredAmount = r.metadata().get().deliveredAmount().get();
+                if (deliveredAmount instanceof XrpCurrencyAmount) {
+                    list.add(toTransaction(p, (XrpCurrencyAmount) deliveredAmount));
                 }
             }
         }
@@ -82,11 +83,10 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p) throws DecoderException, UnsupportedEncodingException {
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
         // TODO: handle IOUs
         // TODO: handle ImmutableIssuedCurrencyAmount
-        var amt = (XrpCurrencyAmount) p.amount();
-        var trx = new Transaction(amt.value().longValue(), ledger.getNativeCcySymbol());
+        var trx = new Transaction(deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
         trx.setId(p.hash().get().value());
         trx.setBooked(p.closeDateHuman().get().toLocalDateTime());
         trx.setSender(WalletConverter.from(p.account()));
