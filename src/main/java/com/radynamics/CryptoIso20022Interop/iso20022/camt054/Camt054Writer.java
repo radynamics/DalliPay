@@ -51,9 +51,13 @@ public class Camt054Writer {
 
             stmt.setAcct(new CashAccount25());
             stmt.getAcct().setId(new AccountIdentification4Choice());
-            stmt.getAcct().getId().setIBAN(transformInstruction.getIban(t.getSender(), t.getSender().getPublicKey()));
-            //stmt.getAcct().getId().setOthr(new GenericAccountIdentification1());
-            //stmt.getAcct().getId().getOthr().setId(receiver.getPublicKey());
+            var iban = transformInstruction.getIbanOrNull(t.getSender());
+            if (iban == null) {
+                stmt.getAcct().getId().setOthr(new GenericAccountIdentification1());
+                stmt.getAcct().getId().getOthr().setId(t.getSender().getPublicKey());
+            } else {
+                stmt.getAcct().getId().setIBAN(iban.getUnformatted());
+            }
             stmt.getAcct().setCcy(transformInstruction.getTargetCcy());
 
             stmt.getNtry().add(createNtry(t));
@@ -81,7 +85,8 @@ public class Camt054Writer {
         var ntry = new ReportEntry4();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
-        ntry.setNtryRef(transformInstruction.getIban(trx.getSender(), trx.getSender().getPublicKey()));
+        var iban = transformInstruction.getIbanOrNull(trx.getSender());
+        ntry.setNtryRef(iban == null ? trx.getSender().getPublicKey() : iban.getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
         var amtValue = BigDecimal.ZERO;

@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 
 import java.util.ArrayList;
 
@@ -35,13 +36,13 @@ public class TransformInstruction {
         throw new RuntimeException(String.format("No wallet found for iban %s in mapping.", account));
     }
 
-    public String getIban(Wallet wallet, String notFoundValue) {
+    public IbanAccount getIbanOrNull(Wallet wallet) {
         for (var item : accountMappings) {
             if (item.walletPublicKey.equalsIgnoreCase(wallet.getPublicKey())) {
-                return item.getAccount().getUnformatted();
+                return (IbanAccount) item.getAccount();
             }
         }
-        return notFoundValue;
+        return null;
     }
 
     public void setStaticSender(String publicKey, String secret) {
