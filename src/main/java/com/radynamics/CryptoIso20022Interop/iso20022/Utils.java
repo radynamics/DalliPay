@@ -8,13 +8,13 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 
 public class Utils {
     public static XMLGregorianCalendar toXmlDateTime(LocalDateTime value) throws DatatypeConfigurationException {
-        var gcal = GregorianCalendar.from(ZonedDateTime.of(value, ZoneId.systemDefault()));
+        var gcal = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));
         return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
     }
 
