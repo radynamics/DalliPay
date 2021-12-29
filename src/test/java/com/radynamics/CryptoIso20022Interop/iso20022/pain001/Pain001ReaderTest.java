@@ -137,6 +137,36 @@ public class Pain001ReaderTest {
         assertTransaction(transactions[0], "receiver_CH4431999123000889012", 4444000);
     }
 
+
+    @Test
+    public void readRmtInfUstrd() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        // DbtrAcct
+        ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
+        // CdtrAcct
+        ti.add(new AccountMapping(new OtherAccount("25-9034-2"), "receiver_25-9034-2"));
+        ExchangeRate[] rates = {
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger, ti, ccyConverter);
+
+        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001RmtInfUstrd.xml"));
+
+        assertNotNull(transactions);
+        assertEquals(1, transactions.length);
+
+        var t = transactions[0];
+        assertNotNull(t.getReceiver());
+        assertEquals("receiver_25-9034-2", t.getReceiver().getPublicKey());
+        assertNotNull(t.getMessages());
+        assertEquals(1, t.getMessages().length);
+        assertEquals("Rechnung Nr. 408", t.getMessages()[0]);
+        assertNotNull(t.getStructuredReferences());
+        assertEquals(0, t.getStructuredReferences().length);
+    }
+
     private void assertTransaction(Transaction t, String receiver, double amount) {
         assertTransaction(t, receiver, amount, null, null);
     }
