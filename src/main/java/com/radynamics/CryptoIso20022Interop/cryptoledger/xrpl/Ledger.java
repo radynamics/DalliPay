@@ -12,6 +12,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     private boolean isTestNet = true;
     private Network network;
 
+    public static final String ID = "xrpl";
+
     @Override
     public String getNativeCcySymbol() {
         return "XRP";
