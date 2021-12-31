@@ -8,9 +8,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.schema.generated.AccountIdentification4ChoiceCH;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.schema.generated.CreditorReferenceInformation2;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.schema.generated.Document;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.AccountIdentification4ChoiceCH;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.CreditorReferenceInformation2;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.Document;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import javax.xml.bind.JAXBContext;
