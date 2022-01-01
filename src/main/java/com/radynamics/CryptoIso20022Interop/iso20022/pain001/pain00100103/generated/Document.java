@@ -8,10 +8,7 @@
 
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -37,6 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "Document", propOrder = {
     "cstmrCdtTrfInitn"
 })
+@XmlRootElement(name="Document")
 public class Document {
 
     @XmlElement(name = "CstmrCdtTrfInitn", required = true)

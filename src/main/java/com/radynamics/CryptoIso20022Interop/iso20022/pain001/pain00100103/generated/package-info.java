@@ -5,5 +5,5 @@
 // Generiert: 2022.01.01 um 10:27:37 AM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated;

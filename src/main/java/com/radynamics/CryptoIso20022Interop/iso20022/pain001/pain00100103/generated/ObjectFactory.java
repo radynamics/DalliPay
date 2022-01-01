@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Document_QNAME = new QName("urn:iso:std:iso:20022:tech:xsd:pain.001.001.03", "Document");
+    private final static QName _Document_QNAME = new QName("", "Document");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated
@@ -576,7 +576,7 @@ public class ObjectFactory {
      * @return
      *     the new instance of {@link JAXBElement }{@code <}{@link Document }{@code >}
      */
-    @XmlElementDecl(namespace = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03", name = "Document")
+    @XmlElementDecl(namespace = "", name = "Document")
     public JAXBElement<Document> createDocument(Document value) {
         return new JAXBElement<Document>(_Document_QNAME, Document.class, null, value);
     }

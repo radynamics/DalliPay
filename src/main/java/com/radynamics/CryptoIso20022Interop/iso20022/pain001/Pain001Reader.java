@@ -8,13 +8,15 @@ import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.AccountIdentification4ChoiceCH;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.CreditorReferenceInformation2;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103ch02.generated.Document;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.AccountIdentification4Choice;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.CreditorReferenceInformation2;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.Document;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -46,19 +48,26 @@ public class Pain001Reader {
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {
-                    if (rmtInf.getStrd() != null && rmtInf.getStrd().getCdtrRefInf() != null) {
-                        var cdtrRefInf = rmtInf.getStrd().getCdtrRefInf();
-                        var typeText = getReferenceType(cdtrRefInf);
-                        var reference = cdtrRefInf.getRef();
-                        t.addStructuredReference(StructuredReferenceFactory.create(typeText, reference));
+                    if (rmtInf.getStrd() != null) {
+                        for (var strd : rmtInf.getStrd()) {
+                            var cdtrRefInf = strd.getCdtrRefInf();
+                            if (cdtrRefInf == null) {
+                                continue;
+                            }
+                            var typeText = getReferenceType(cdtrRefInf);
+                            var reference = cdtrRefInf.getRef();
+                            t.addStructuredReference(StructuredReferenceFactory.create(typeText, reference));
 
-                        for (var addtlRmtInf : rmtInf.getStrd().getAddtlRmtInf()) {
-                            t.addMessage(addtlRmtInf);
+                            for (var addtlRmtInf : strd.getAddtlRmtInf()) {
+                                t.addMessage(addtlRmtInf);
+                            }
                         }
                     }
 
-                    if (rmtInf.getUstrd() != null && rmtInf.getUstrd().length() > 0) {
-                        t.addMessage(rmtInf.getUstrd());
+                    if (rmtInf.getUstrd() != null) {
+                        for (var ustrd : rmtInf.getUstrd()) {
+                            t.addMessage(ustrd);
+                        }
                     }
                 }
 
@@ -80,13 +89,18 @@ public class Pain001Reader {
         return StructuredReferenceFactory.getType(typeText);
     }
 
-    private Account getAccount(AccountIdentification4ChoiceCH id) {
+    private Account getAccount(AccountIdentification4Choice id) {
         return id.getIBAN() != null ? new IbanAccount(id.getIBAN()) : new OtherAccount(id.getOthr().getId());
     }
 
-    private Document fromXml(InputStream input) throws JAXBException {
+    private Document fromXml(InputStream input) throws JAXBException, XMLStreamException {
+        // TODO: RST 2021-12-31 manually ensure input matches ISO version (ex "pain.001.001.03") without regional derived xsd.
+        var xif = XMLInputFactory.newFactory();
+        xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
+        var xsr = xif.createXMLStreamReader(input);
+
         var ctx = JAXBContext.newInstance(Document.class);
         var jaxbUnmarshaller = ctx.createUnmarshaller();
-        return (Document) jaxbUnmarshaller.unmarshal(input);
+        return (Document) jaxbUnmarshaller.unmarshal(xsr);
     }
 }
