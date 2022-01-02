@@ -30,9 +30,9 @@ public class Camt054WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = CamtConverter.toXml(w.create(payments));
-        String expected = getClass().getClassLoader().getResource("camt054/testCreate2Payments.xml").getPath();
+        var expected = CamtConverter.toXml(CamtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/testCreate2Payments.xml")));
 
-        assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromFile(expected)));
+        assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromByteArray(expected.toByteArray())));
     }
 
     private static TransformInstruction createTestInstructions() {
