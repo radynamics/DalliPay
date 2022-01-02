@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 
-public final class MemoConverter {
+public final class PayloadConverter {
     private static final int VERSION = 1;
 
     public static String toMemo(StructuredReference[] refs, String[] freeText) {

@@ -5,7 +5,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.MemoConverter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
@@ -92,7 +92,7 @@ public class JsonRpcApi implements TransactionSource {
         trx.setSender(WalletConverter.from(p.account()));
         trx.setReceiver(WalletConverter.from(p.destination()));
         for (MemoWrapper mw : p.memos()) {
-            var unwrappedMemo = MemoConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
+            var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
             for (var r : unwrappedMemo.structuredReferences()) {
                 trx.addStructuredReference(r);
             }
@@ -120,7 +120,7 @@ public class JsonRpcApi implements TransactionSource {
             var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
 
             var memos = new ArrayList<MemoWrapper>();
-            memos.add(Convert.toMemoWrapper(MemoConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
+            memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
 
             // Get the latest validated ledger index
             LedgerIndex validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
