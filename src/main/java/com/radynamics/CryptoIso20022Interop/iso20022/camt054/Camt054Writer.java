@@ -51,10 +51,11 @@ public class Camt054Writer {
 
             stmt.setAcct(new CashAccount25());
             stmt.getAcct().setId(new AccountIdentification4Choice());
-            var iban = transformInstruction.getIbanOrNull(t.getSender());
+            var acct = t.getReceiver();
+            var iban = transformInstruction.getIbanOrNull(acct);
             if (iban == null) {
                 stmt.getAcct().getId().setOthr(new GenericAccountIdentification1());
-                stmt.getAcct().getId().getOthr().setId(t.getSender().getPublicKey());
+                stmt.getAcct().getId().getOthr().setId(acct.getPublicKey());
             } else {
                 stmt.getAcct().getId().setIBAN(iban.getUnformatted());
             }

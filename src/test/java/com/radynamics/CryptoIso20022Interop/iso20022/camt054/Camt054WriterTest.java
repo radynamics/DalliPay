@@ -68,7 +68,7 @@ public class Camt054WriterTest {
     private static Transaction createTestTransaction2(Ledger ledger) {
         var t = ledger.createTransaction(
                 ledger.createWallet("rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4", null),
-                ledger.createWallet("rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh", null),
+                ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null),
                 50000000, ledger.getNativeCcySymbol());
         t.setId("57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11));
@@ -80,7 +80,7 @@ public class Camt054WriterTest {
     private static Transaction createTestTransactionScor(Ledger ledger) {
         var t = ledger.createTransaction(
                 ledger.createWallet("rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4", null),
-                ledger.createWallet("r9Knt1X7s4kTtmLiCTEairzAbmZoXnU8GQ", null),
+                ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null),
                 391000000, ledger.getNativeCcySymbol());
         t.setId("4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9");
         t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11));
@@ -92,7 +92,7 @@ public class Camt054WriterTest {
     @Test
     public void createTranslateToIban() throws Exception {
         var cryptoInstruction = createTestInstructions();
-        cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87"));
+        cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
 
         var payments = createTestTransactions(cryptoInstruction.getLedger());
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
