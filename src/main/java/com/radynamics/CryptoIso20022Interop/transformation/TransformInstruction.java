@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 
 import java.util.ArrayList;
 
@@ -17,6 +18,8 @@ public class TransformInstruction {
     private String senderPublicKey;
     private String senderSecret;
     private String targetCcy;
+    private DateFormat bookingDateFormat = DateFormat.DateTime;
+    private DateFormat valutaDateFormat = DateFormat.DateTime;
 
     public TransformInstruction(Ledger ledger) {
         this.ledger = ledger;
@@ -68,5 +71,21 @@ public class TransformInstruction {
 
     public void setTargetCcy(String targetCcy) {
         this.targetCcy = targetCcy;
+    }
+
+    public DateFormat getBookingDateFormat() {
+        return bookingDateFormat;
+    }
+
+    public void setBookingDateFormat(DateFormat bookingDateFormat) {
+        this.bookingDateFormat = bookingDateFormat;
+    }
+
+    public DateFormat getValutaDateFormat() {
+        return valutaDateFormat;
+    }
+
+    public void setValutaDateFormat(DateFormat valutaDateFormat) {
+        this.valutaDateFormat = valutaDateFormat;
     }
 }

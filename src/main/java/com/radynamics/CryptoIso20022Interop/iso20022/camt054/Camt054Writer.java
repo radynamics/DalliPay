@@ -24,8 +24,6 @@ public class Camt054Writer {
     private CurrencyConverter ccyConverter;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
-    private DateFormat bookingDateFormat = DateFormat.DateTime;
-    private DateFormat valutaDateFormat = DateFormat.DateTime;
 
     public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, CurrencyConverter ccyConverter) {
         this.ledger = ledger;
@@ -132,8 +130,8 @@ public class Camt054Writer {
         ntry.setSts(EntryStatus2Code.BOOK);
 
         var booked = Utils.toXmlDateTime(trx.getBooked());
-        ntry.setBookgDt(createDateAndDateTimeChoice(booked, getBookingDateFormat()));
-        ntry.setValDt(createDateAndDateTimeChoice(booked, getValutaDateFormat()));
+        ntry.setBookgDt(createDateAndDateTimeChoice(booked, transformInstruction.getBookingDateFormat()));
+        ntry.setValDt(createDateAndDateTimeChoice(booked, transformInstruction.getValutaDateFormat()));
 
         ntry.setBkTxCd(new BankTransactionCodeStructure4());
         ntry.getBkTxCd().setDomn(createDomn());
@@ -253,21 +251,5 @@ public class Camt054Writer {
 
     public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public DateFormat getBookingDateFormat() {
-        return bookingDateFormat;
-    }
-
-    public void setBookingDateFormat(DateFormat bookingDateFormat) {
-        this.bookingDateFormat = bookingDateFormat;
-    }
-
-    public DateFormat getValutaDateFormat() {
-        return valutaDateFormat;
-    }
-
-    public void setValutaDateFormat(DateFormat valutaDateFormat) {
-        this.valutaDateFormat = valutaDateFormat;
     }
 }

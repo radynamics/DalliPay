@@ -112,13 +112,13 @@ public class Camt054WriterTest {
     @EnumSource(DateFormat.class)
     public void createBookedFormat(DateFormat format) throws Exception {
         var cryptoInstruction = createTestInstructions();
+        cryptoInstruction.setBookingDateFormat(format);
+        cryptoInstruction.setValutaDateFormat(format);
 
         var payments = createTestTransactions(cryptoInstruction.getLedger());
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
-        w.setBookingDateFormat(format);
-        w.setValutaDateFormat(format);
         var actual = w.create(payments);
 
         var ntry = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().get(0);
