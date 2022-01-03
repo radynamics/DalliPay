@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
@@ -43,27 +44,45 @@ public class Camt054Writer {
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);
 
         for (var t : transactions) {
-            var stmt = new AccountNotification7();
-            d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
-            stmt.setId(idGenerator.createStmId());
-            stmt.setElctrncSeqNb(BigDecimal.valueOf(1));
-            stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
-
-            stmt.setAcct(new CashAccount25());
-            stmt.getAcct().setId(new AccountIdentification4Choice());
-            var acct = t.getReceiver();
-            var iban = transformInstruction.getIbanOrNull(acct);
-            if (iban == null) {
-                stmt.getAcct().getId().setOthr(new GenericAccountIdentification1());
-                stmt.getAcct().getId().getOthr().setId(acct.getPublicKey());
-            } else {
-                stmt.getAcct().getId().setIBAN(iban.getUnformatted());
+            var receiver = t.getReceiver();
+            var stmt = getNtfctnOrNull(d, receiver);
+            if (stmt == null) {
+                stmt = new AccountNotification7();
+                d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
+                stmt.setId(idGenerator.createStmId());
+                stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
+                stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
+                stmt.setAcct(createAcct(receiver));
             }
-            stmt.getAcct().setCcy(transformInstruction.getTargetCcy());
 
             stmt.getNtry().add(createNtry(t));
+            stmt.setElctrncSeqNb(stmt.getElctrncSeqNb().add(BigDecimal.ONE));
         }
         return d;
+    }
+
+    private AccountNotification7 getNtfctnOrNull(Document d, Wallet receiver) {
+        for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
+            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver))) {
+                return ntfctn;
+            }
+        }
+        return null;
+    }
+
+    private CashAccount25 createAcct(Wallet receiver) {
+        var acct = new CashAccount25();
+        acct.setId(new AccountIdentification4Choice());
+        var iban = transformInstruction.getIbanOrNull(receiver);
+        if (iban == null) {
+            acct.getId().setOthr(new GenericAccountIdentification1());
+            acct.getId().getOthr().setId(receiver.getPublicKey());
+        } else {
+            acct.getId().setIBAN(iban.getUnformatted());
+        }
+        acct.setCcy(transformInstruction.getTargetCcy());
+
+        return acct;
     }
 
     private PartyIdentification43 createMsgRcpt() {

@@ -29,4 +29,12 @@ public class Utils {
             throw new RuntimeException(e);
         }
     }
+
+    public static boolean bothPresent(Object first, Object second) {
+        return first != null && second != null;
+    }
+
+    public static boolean bothNull(Object first, Object second) {
+        return first == null && second == null;
+    }
 }
