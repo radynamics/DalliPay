@@ -112,8 +112,6 @@ public class Camt054Writer {
         ntry.setBookgDt(booked);
         ntry.setValDt(booked);
 
-        ntry.setAcctSvcrRef(trx.getId());
-
         ntry.setBkTxCd(new BankTransactionCodeStructure4());
         ntry.getBkTxCd().setDomn(createDomn());
 
@@ -125,7 +123,13 @@ public class Camt054Writer {
         var txDtls = new EntryTransaction4();
         dtls.getTxDtls().add(txDtls);
         txDtls.setRefs(new TransactionReferences3());
-        txDtls.getRefs().setAcctSvcrRef(trx.getId());
+        // Split due max allowed length of 35 per node (Max35Text)
+        final int MAX_LEN = 35;
+        var idPart0 = trx.getId().substring(0, MAX_LEN);
+        var idPart1 = trx.getId().substring(MAX_LEN);
+        txDtls.getRefs().setEndToEndId(idPart0);
+        txDtls.getRefs().setMsgId(idPart1);
+
         txDtls.setAmt(new ActiveOrHistoricCurrencyAndAmount());
         txDtls.getAmt().setValue(amtValue);
         txDtls.getAmt().setCcy(amtCcy);

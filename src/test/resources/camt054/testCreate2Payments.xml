@@ -44,7 +44,6 @@
                 <ValDt>
                     <DtTm>2021-02-21T09:10:11.000Z</DtTm>
                 </ValDt>
-                <AcctSvcrRef>E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA</AcctSvcrRef>
                 <BkTxCd>
                     <Domn>
                         <Cd>PMNT</Cd>
@@ -60,7 +59,8 @@
                     </Btch>
                     <TxDtls>
                         <Refs>
-                            <AcctSvcrRef>E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA</AcctSvcrRef>
+                            <MsgId>2FE1CEB95384707584A9DB3E288EA</MsgId>
+                            <EndToEndId>E43D83F7869885BFE92C29A6A7CF48F9B9B</EndToEndId>
                         </Refs>
                         <Amt Ccy="XRP">36.35</Amt>
                         <CdtDbtInd>CRDT</CdtDbtInd>
@@ -112,7 +112,6 @@
                 <ValDt>
                     <DtTm>2021-02-21T09:10:11.000Z</DtTm>
                 </ValDt>
-                <AcctSvcrRef>57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415</AcctSvcrRef>
                 <BkTxCd>
                     <Domn>
                         <Cd>PMNT</Cd>
@@ -128,7 +127,8 @@
                     </Btch>
                     <TxDtls>
                         <Refs>
-                            <AcctSvcrRef>57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415</AcctSvcrRef>
+                            <MsgId>3E3D3E9D64A3548A6C52BD7CE9415</MsgId>
+                            <EndToEndId>57237F065509B36FB3B31DA771B6AFBBF94</EndToEndId>
                         </Refs>
                         <Amt Ccy="XRP">50</Amt>
                         <CdtDbtInd>CRDT</CdtDbtInd>
@@ -180,7 +180,6 @@
                 <ValDt>
                     <DtTm>2021-12-28T11:15:11.000Z</DtTm>
                 </ValDt>
-                <AcctSvcrRef>4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9</AcctSvcrRef>
                 <BkTxCd>
                     <Domn>
                         <Cd>PMNT</Cd>
@@ -196,7 +195,8 @@
                     </Btch>
                     <TxDtls>
                         <Refs>
-                            <AcctSvcrRef>4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9</AcctSvcrRef>
+                            <MsgId>23AB86192C87B89121F4877351DD9</MsgId>
+                            <EndToEndId>4CA4105CBC1288D9C3FB5140C61097B2475</EndToEndId>
                         </Refs>
                         <Amt Ccy="XRP">391</Amt>
                         <CdtDbtInd>CRDT</CdtDbtInd>
