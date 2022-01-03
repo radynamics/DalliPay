@@ -12,6 +12,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.xmlunit.builder.Input;
 
 import java.time.LocalDateTime;
@@ -104,5 +106,35 @@ public class Camt054WriterTest {
         assertNotNull(acct);
         assertNotNull(acct.getId());
         assertEquals("CH5800791123000889012", acct.getId().getIBAN());
+    }
+
+    @ParameterizedTest
+    @EnumSource(DateFormat.class)
+    public void createBookedFormat(DateFormat format) throws Exception {
+        var cryptoInstruction = createTestInstructions();
+
+        var payments = createTestTransactions(cryptoInstruction.getLedger());
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        w.setIdGenerator(new FixedValueIdGenerator());
+        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setBookingDateFormat(format);
+        w.setValutaDateFormat(format);
+        var actual = w.create(payments);
+
+        var ntry = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().get(0);
+        assertNotNull(ntry);
+        assertNotNull(ntry.getBookgDt());
+        assertNotNull(ntry.getValDt());
+        switch (format) {
+            case Date -> {
+                assertEquals("2021-02-21T00:00:00.000Z", ntry.getBookgDt().getDt().toString());
+                assertEquals("2021-02-21T00:00:00.000Z", ntry.getValDt().getDt().toString());
+            }
+            case DateTime -> {
+                assertEquals("2021-02-21T09:10:11.000Z", ntry.getBookgDt().getDtTm().toString());
+                assertEquals("2021-02-21T09:10:11.000Z", ntry.getValDt().getDtTm().toString());
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + format);
+        }
     }
 }

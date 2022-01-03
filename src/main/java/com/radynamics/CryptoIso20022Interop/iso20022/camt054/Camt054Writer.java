@@ -10,9 +10,11 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -22,6 +24,8 @@ public class Camt054Writer {
     private CurrencyConverter ccyConverter;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
+    private DateFormat bookingDateFormat = DateFormat.DateTime;
+    private DateFormat valutaDateFormat = DateFormat.DateTime;
 
     public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, CurrencyConverter ccyConverter) {
         this.ledger = ledger;
@@ -127,10 +131,9 @@ public class Camt054Writer {
         ntry.setCdtDbtInd(CreditDebitCode.CRDT);
         ntry.setSts(EntryStatus2Code.BOOK);
 
-        var booked = new DateAndDateTimeChoice();
-        booked.setDtTm(Utils.toXmlDateTime(trx.getBooked()));
-        ntry.setBookgDt(booked);
-        ntry.setValDt(booked);
+        var booked = Utils.toXmlDateTime(trx.getBooked());
+        ntry.setBookgDt(createDateAndDateTimeChoice(booked, getBookingDateFormat()));
+        ntry.setValDt(createDateAndDateTimeChoice(booked, getValutaDateFormat()));
 
         ntry.setBkTxCd(new BankTransactionCodeStructure4());
         ntry.getBkTxCd().setDomn(createDomn());
@@ -178,6 +181,24 @@ public class Camt054Writer {
         }
 
         return ntry;
+    }
+
+    private DateAndDateTimeChoice createDateAndDateTimeChoice(XMLGregorianCalendar dt, DateFormat format) {
+        var value = (XMLGregorianCalendar) dt.clone();
+        var o = new DateAndDateTimeChoice();
+        switch (format) {
+            case Date -> {
+                value.setTime(0, 0, 0, 0);
+                o.setDt(value);
+                break;
+            }
+            case DateTime -> {
+                o.setDtTm(value);
+                break;
+            }
+            default -> throw new NotImplementedException(String.format("DateFormat %s unknown.", format));
+        }
+        return o;
     }
 
     private StructuredRemittanceInformation9 createStrd(StructuredReference[] structuredReferences, String invoiceNo) {
@@ -232,5 +253,21 @@ public class Camt054Writer {
 
     public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public DateFormat getBookingDateFormat() {
+        return bookingDateFormat;
+    }
+
+    public void setBookingDateFormat(DateFormat bookingDateFormat) {
+        this.bookingDateFormat = bookingDateFormat;
+    }
+
+    public DateFormat getValutaDateFormat() {
+        return valutaDateFormat;
+    }
+
+    public void setValutaDateFormat(DateFormat valutaDateFormat) {
+        this.valutaDateFormat = valutaDateFormat;
     }
 }
