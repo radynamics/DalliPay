@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +27,8 @@ public class Main {
     private static final DateTimeFormatter DateFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     public static void main(String[] args) {
+        initLogger();
+
         var action = getParam(args, "-a");
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
@@ -59,7 +62,13 @@ public class Main {
                     throw new RuntimeException(String.format("unknown action %s", action));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager.getLogger().error(String.format("Error during %s", action), e);
+        }
+    }
+
+    private static void initLogger() {
+        if (!System.getProperties().containsKey("log4j.configurationFile")) {
+            System.setProperty("log4j.configurationFile", Main.class.getClassLoader().getResource("config/log4j2.xml").toString());
         }
     }
 
@@ -82,7 +91,7 @@ public class Main {
 
         var r = new Pain001Reader(transformInstruction.getLedger(), transformInstruction, new CurrencyConverter(exchange.rates()));
         var payments = r.read(input);
-        System.out.println(String.format("%s payments read from pain001", payments.length));
+        LogManager.getLogger().trace(String.format("%s payments read from pain001", payments.length));
 
         transformInstruction.getLedger().send(payments);
     }
@@ -101,6 +110,6 @@ public class Main {
         var outputStream = new FileOutputStream(outputFileName);
         s.writeTo(outputStream);
 
-        System.out.println(String.format("%s written", outputFileName));
+        LogManager.getLogger().trace(String.format("%s written", outputFileName));
     }
 }
