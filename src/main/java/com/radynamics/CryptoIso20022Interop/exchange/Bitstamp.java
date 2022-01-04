@@ -13,9 +13,11 @@ public class Bitstamp implements Exchange {
     private static String[] currencyPairs = new String[]{"xrpusd", "xrpeur", "xrpgbp"};
     private ArrayList<ExchangeRate> exchangeRates = new ArrayList<>();
 
+    public static final String ID = "bitstamp";
+
     @Override
     public String getId() {
-        return "bitstamp";
+        return ID;
     }
 
     @Override

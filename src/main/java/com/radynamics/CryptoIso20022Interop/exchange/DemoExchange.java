@@ -3,9 +3,11 @@ package com.radynamics.CryptoIso20022Interop.exchange;
 public class DemoExchange implements Exchange {
     private ExchangeRate[] exchangeRates;
 
+    public static final String ID = "demo";
+
     @Override
     public String getId() {
-        return "DemoExchange";
+        return ID;
     }
 
     @Override

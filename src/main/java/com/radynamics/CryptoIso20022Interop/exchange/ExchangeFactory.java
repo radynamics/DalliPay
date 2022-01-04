@@ -5,9 +5,9 @@ import org.apache.commons.lang3.NotImplementedException;
 public final class ExchangeFactory {
     public static final Exchange create(String id) {
         switch (id.toLowerCase()) {
-            case "demo":
+            case DemoExchange.ID:
                 return new DemoExchange();
-            case "bitstamp":
+            case Bitstamp.ID:
                 return new Bitstamp();
             default:
                 throw new NotImplementedException(String.format("Exchange %s unknown.", id));
