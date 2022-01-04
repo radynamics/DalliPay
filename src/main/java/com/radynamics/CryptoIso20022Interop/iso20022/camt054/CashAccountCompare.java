@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.CashAccount25;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.CashAccount25;
 import org.apache.commons.lang3.StringUtils;
 
 public class CashAccountCompare {

@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.Document;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.Document;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;

@@ -7,7 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.schema.generated.*;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
