@@ -7,6 +7,8 @@ public final class ExchangeFactory {
         switch (id.toLowerCase()) {
             case "demo":
                 return new DemoExchange();
+            case "bitstamp":
+                return new Bitstamp();
             default:
                 throw new NotImplementedException(String.format("Exchange %s unknown.", id));
         }
