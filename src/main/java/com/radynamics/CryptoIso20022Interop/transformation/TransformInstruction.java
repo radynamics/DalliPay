@@ -36,7 +36,7 @@ public class TransformInstruction {
                 return ledger.createWallet(item.walletPublicKey, secret);
             }
         }
-        throw new RuntimeException(String.format("No wallet found for iban %s in mapping.", account));
+        throw new RuntimeException(String.format("No wallet found for iban %s in mapping.", account.getUnformatted()));
     }
 
     public IbanAccount getIbanOrNull(Wallet wallet) {
