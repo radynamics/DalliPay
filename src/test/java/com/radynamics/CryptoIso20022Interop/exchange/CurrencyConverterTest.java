@@ -41,6 +41,8 @@ public class CurrencyConverterTest {
 
     @Test
     public void convert() {
+        assertEquals(90, ccyConverter.convert(BigDecimal.valueOf(90), "CHF", "CHF"), 0);
+
         assertEquals(90, ccyConverter.convert(BigDecimal.valueOf(100), "CHF", "TEST"), 0);
         assertEquals(110, ccyConverter.convert(BigDecimal.valueOf(100), "EUR", "TEST"), 0);
         assertEquals(0.88, ccyConverter.convert(BigDecimal.valueOf(100), "JPY", "TEST"), 0);
