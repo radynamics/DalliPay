@@ -17,7 +17,13 @@ public class IbanAccountTest {
     }
 
     @Test
+    public void empty() {
+        assertEquals(IbanAccount.Empty, IbanAccount.Empty);
+    }
+
+    @Test
     public void getUnformatted() {
+        assertEquals("", IbanAccount.Empty.getUnformatted());
         assertEquals("CH9300762011623852957", new IbanAccount("CH9300762011623852957").getUnformatted());
         assertEquals("CH9300762011623852957", new IbanAccount("CH93 0076 2011 6238 5295 7").getUnformatted());
         assertEquals("FI2112345600000785", new IbanAccount("FI2112345600000785").getUnformatted());
@@ -26,6 +32,7 @@ public class IbanAccountTest {
 
     @Test
     public void getFormatted() {
+        assertEquals("", IbanAccount.Empty.getFormatted());
         assertEquals("CH93 0076 2011 6238 5295 7", new IbanAccount("CH9300762011623852957").getFormatted());
         assertEquals("CH93 0076 2011 6238 5295 7", new IbanAccount("CH93 0076 2011 6238 5295 7").getFormatted());
         assertEquals("FI21 1234 5600 0007 85", new IbanAccount("FI2112345600000785").getFormatted());
