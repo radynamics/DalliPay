@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
 
     private String id;
+    private Ledger ledger;
     private long drops;
     private String ccy;
     private LocalDateTime booked;
@@ -18,7 +20,8 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
 
-    public Transaction(long drops, String ccy) {
+    public Transaction(Ledger ledger, long drops, String ccy) {
+        this.ledger = ledger;
         this.drops = drops;
         this.ccy = ccy;
     }
@@ -89,6 +92,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    @Override
+    public Ledger getLedger() {
+        return ledger;
     }
 
     public void setSender(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet sender) {

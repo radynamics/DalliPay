@@ -86,7 +86,7 @@ public class JsonRpcApi implements TransactionSource {
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
         // TODO: handle IOUs
         // TODO: handle ImmutableIssuedCurrencyAmount
-        var trx = new Transaction(deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
+        var trx = new Transaction(ledger, deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
         trx.setId(p.hash().get().value());
         trx.setBooked(p.closeDateHuman().get().toLocalDateTime());
         trx.setSender(WalletConverter.from(p.account()));

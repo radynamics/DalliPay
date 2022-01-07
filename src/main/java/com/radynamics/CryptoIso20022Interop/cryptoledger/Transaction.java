@@ -32,4 +32,6 @@ public interface Transaction {
     String getInvoiceId();
 
     void setInvoiceId(String s);
+
+    Ledger getLedger();
 }

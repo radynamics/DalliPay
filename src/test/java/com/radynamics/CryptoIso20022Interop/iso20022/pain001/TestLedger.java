@@ -19,7 +19,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public Transaction createTransaction(Wallet sender, Wallet receiver, long amountSmallestUnit, String ccy) {
-        var t = new TestTransaction(amountSmallestUnit, ccy);
+        var t = new TestTransaction(this, amountSmallestUnit, ccy);
         t.setSender(sender);
         t.setReceiver(receiver);
         return t;

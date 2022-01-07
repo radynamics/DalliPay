@@ -21,7 +21,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public Transaction createTransaction(Wallet sender, Wallet receiver, long amountSmallestUnit, String ccy) {
-        var t = new Transaction(amountSmallestUnit, ccy);
+        var t = new Transaction(this, amountSmallestUnit, ccy);
         t.setSender(WalletConverter.from(sender));
         t.setReceiver(WalletConverter.from(receiver));
 

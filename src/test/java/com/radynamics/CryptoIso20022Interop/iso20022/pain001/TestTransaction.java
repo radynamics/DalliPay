@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -16,8 +17,10 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
+    private Ledger ledger;
 
-    public TestTransaction(long amountSmallestUnit, String ccy) {
+    public TestTransaction(Ledger ledger, long amountSmallestUnit, String ccy) {
+        this.ledger = ledger;
         this.amountSmallestUnit = amountSmallestUnit;
         this.ccy = ccy;
     }
@@ -88,6 +91,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    @Override
+    public Ledger getLedger() {
+        return ledger;
     }
 
     public void setSender(Wallet sender) {
