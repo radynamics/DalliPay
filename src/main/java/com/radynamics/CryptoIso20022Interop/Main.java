@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -8,9 +9,11 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 
+import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -45,7 +48,7 @@ public class Main {
             switch (action) {
                 case "pain001ToCrypto":
                     transformInstruction.setStaticSender(walletPublicKey, walletSecret);
-                    processPain001(new FileInputStream(inputFileName));
+                    processPain001(new FileInputStream(inputFileName), inputFileName);
                     break;
                 case "cryptoToCamt054":
                     var now = LocalDateTime.now();
@@ -85,22 +88,32 @@ public class Main {
         return args[index + 1];
     }
 
-    private static void processPain001(InputStream input) throws Exception {
+    private static void processPain001(InputStream input, String inputFileName) throws Exception {
         var exchange = transformInstruction.getExchange();
         exchange.load();
 
-        var r = new Pain001Reader(transformInstruction.getLedger(), transformInstruction, new CurrencyConverter(exchange.rates()));
+        var currencyConverter = new CurrencyConverter(exchange.rates());
+        var r = new Pain001Reader(transformInstruction.getLedger(), transformInstruction, currencyConverter);
         var payments = r.read(input);
         LogManager.getLogger().trace(String.format("%s payments read from pain001", payments.length));
 
-        transformInstruction.getLedger().send(payments);
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            FlatLightLaf.setup();
+            var frm = new MainForm(transformInstruction, currencyConverter);
+            frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frm.load(payments);
+            frm.setInput(inputFileName);
+            frm.setSize(1024, 768);
+            frm.setVisible(true);
+        });
     }
 
     private static void createCamt054(String outputFileName, Wallet wallet, DateTimeRange period) throws Exception {
         var exchange = transformInstruction.getExchange();
         exchange.load();
 
-        var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, new CurrencyConverter(exchange.rates()));
+        var currencyConverter = new CurrencyConverter(exchange.rates());
+        var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, currencyConverter);
 
         var from = Date.from(period.getStart().atZone(ZoneId.systemDefault()).toInstant());
         var until = Date.from(period.getEnd().atZone(ZoneId.systemDefault()).toInstant());

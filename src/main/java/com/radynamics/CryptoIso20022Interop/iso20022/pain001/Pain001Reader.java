@@ -36,9 +36,9 @@ public class Pain001Reader {
 
         var list = new ArrayList<Transaction>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
-            var sender = transformInstruction.getWallet(getAccount(pmtInf.getDbtrAcct().getId()));
+            var sender = transformInstruction.getWalletOrNull(getAccount(pmtInf.getDbtrAcct().getId()));
             for (var cdtTrfTxInf : pmtInf.getCdtTrfTxInf()) {
-                var receiver = transformInstruction.getWallet(getAccount(cdtTrfTxInf.getCdtrAcct().getId()));
+                var receiver = transformInstruction.getWalletOrNull(getAccount(cdtTrfTxInf.getCdtrAcct().getId()));
                 // TODO: use currency from meta data and support IOUs.
                 var ccy = ledger.getNativeCcySymbol();
                 var amountNativeCcy = ccyConverter.convert(cdtTrfTxInf.getAmt().getInstdAmt().getValue(), cdtTrfTxInf.getAmt().getInstdAmt().getCcy(), ccy);

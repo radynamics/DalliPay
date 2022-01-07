@@ -29,20 +29,30 @@ public class TransformInstruction {
         accountMappings.add(accountMapping);
     }
 
-    public Wallet getWallet(Account account) {
+    public Wallet getWalletOrNull(Account account) {
+        if (account == null) {
+            return null;
+        }
         for (var item : accountMappings) {
             if (item.getAccount().getUnformatted().equalsIgnoreCase(account.getUnformatted())) {
                 var secret = item.walletPublicKey.equals(senderPublicKey) ? senderSecret : null;
                 return ledger.createWallet(item.walletPublicKey, secret);
             }
         }
-        throw new RuntimeException(String.format("No wallet found for iban %s in mapping.", account.getUnformatted()));
+        return null;
     }
 
     public IbanAccount getIbanOrNull(Wallet wallet) {
+        return (IbanAccount) getAccountOrNull(wallet);
+    }
+
+    public Account getAccountOrNull(Wallet wallet) {
+        if (wallet == null) {
+            return null;
+        }
         for (var item : accountMappings) {
             if (item.walletPublicKey.equalsIgnoreCase(wallet.getPublicKey())) {
-                return (IbanAccount) item.getAccount();
+                return item.getAccount();
             }
         }
         return null;
