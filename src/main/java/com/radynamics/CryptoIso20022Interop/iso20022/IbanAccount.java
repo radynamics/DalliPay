@@ -5,7 +5,8 @@ public class IbanAccount implements Account {
 
     public IbanAccount(String unformatted) {
         if (unformatted == null) throw new IllegalArgumentException("Parameter 'unformatted' cannot be null");
-        this.unformatted = unformatted;
+        if (unformatted.length() == 0) throw new IllegalArgumentException("Parameter 'unformatted' cannot be empty");
+        this.unformatted = unformatted.replaceAll(" ", "");
     }
 
     @Override
