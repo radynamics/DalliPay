@@ -13,4 +13,17 @@ public class IbanAccount implements Account {
     public String getUnformatted() {
         return unformatted;
     }
+
+    public String getFormatted() {
+        final int length = unformatted.length();
+        final int lastPossibleBlock = length - 4;
+        final StringBuilder sb = new StringBuilder(length + (length - 1) / 4);
+        int i;
+        for (i = 0; i < lastPossibleBlock; i += 4) {
+            sb.append(unformatted, i, i + 4);
+            sb.append(' ');
+        }
+        sb.append(unformatted, i, length);
+        return sb.toString();
+    }
 }
