@@ -1,22 +1,30 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
-public class IbanCellRenderer extends JLabel implements TableCellRenderer {
-    public IbanCellRenderer() {
+public class AccountCellRenderer extends JLabel implements TableCellRenderer {
+    public AccountCellRenderer() {
         setOpaque(true);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        var iban = (IbanAccount) value;
-
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-        setText(iban.getFormatted());
+
+        if (value instanceof IbanAccount) {
+            var iban = (IbanAccount) value;
+            setText(iban.getFormatted());
+        } else if (value instanceof OtherAccount) {
+            var iban = (OtherAccount) value;
+            setText(iban.getUnformatted());
+        } else {
+            setText(value.toString());
+        }
         return this;
     }
 }

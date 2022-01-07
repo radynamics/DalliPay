@@ -27,7 +27,7 @@ public class PaymentTable extends JPanel {
         table = new JTable(model);
         table.setFillsViewportHeight(true);
         table.setDefaultRenderer(Status.class, new PaymentStatusCellRenderer());
-        table.setDefaultRenderer(IbanAccount.class, new IbanCellRenderer());
+        table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
 
         table.setRowHeight(30);
         initColumns();
