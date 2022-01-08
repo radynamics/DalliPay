@@ -1,13 +1,18 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Status;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 
 public class PaymentStatusCellRenderer extends JLabel implements TableCellRenderer {
+    private TableColumn objectColumn;
+
     private final static int WIDTH = 16;
     private final static int HEIGHT = 16;
 
@@ -16,17 +21,32 @@ public class PaymentStatusCellRenderer extends JLabel implements TableCellRender
     private final static FlatSVGIcon warning = new FlatSVGIcon("svg/warningDialog.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
 
-    public PaymentStatusCellRenderer() {
+    public PaymentStatusCellRenderer(TableColumn objectColumn) {
+        this.objectColumn = objectColumn;
         setOpaque(true);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         var status = (Status) value;
+        var obj = (Transaction) table.getModel().getValueAt(row, objectColumn.getModelIndex());
 
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setHorizontalAlignment(JLabel.CENTER);
         setIcon(getIconOrNull(status));
+        setToolTipText(createToolTipText(obj));
         return this;
+    }
+
+    private String createToolTipText(Transaction obj) {
+        var sb = new StringBuilder();
+        var results = new Validator().validate(obj);
+        for (var i = 0; i < results.length; i++) {
+            sb.append(String.format("- %s", results[i].getMessage()));
+            if (i < results.length - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     private static Icon getIconOrNull(Status status) {
