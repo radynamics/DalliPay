@@ -6,8 +6,10 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 import org.apache.logging.log4j.LogManager;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class MainForm extends JFrame {
     private TransformInstruction transformInstruction;
@@ -27,6 +29,12 @@ public class MainForm extends JFrame {
 
     private void setupUI() {
         setTitle("CryptoIso20022Interop");
+
+        try {
+            setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
+        } catch (IOException e) {
+            LogManager.getLogger().error(e);
+        }
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
