@@ -9,7 +9,7 @@ public class Validator {
         var list = new ArrayList<ValidationResult>();
 
         if (t.getReceiverWallet() == null) {
-            list.add(new ValidationResult(Status.Error, String.format("Receiver is missing")));
+            list.add(new ValidationResult(Status.Error, String.format("Receiver Cryptocurrency wallet is missing")));
         }
 
         if (t.getStructuredReferences().length == 0) {
