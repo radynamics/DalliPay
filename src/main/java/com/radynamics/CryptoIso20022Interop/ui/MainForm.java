@@ -96,7 +96,7 @@ public class MainForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                var lbl2 = new JLabel(transformInstruction.getExchange().getId());
+                var lbl2 = new JLabel(transformInstruction.getExchange().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);

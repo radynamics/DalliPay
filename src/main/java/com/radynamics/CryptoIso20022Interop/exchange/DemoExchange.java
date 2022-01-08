@@ -11,6 +11,11 @@ public class DemoExchange implements Exchange {
     }
 
     @Override
+    public String getDisplayText() {
+        return "Demo Exchange (fixed rates)";
+    }
+
+    @Override
     public void load() {
         exchangeRates = new ExchangeRate[3];
         exchangeRates[0] = new ExchangeRate("XRP", "USD", 0.843332);

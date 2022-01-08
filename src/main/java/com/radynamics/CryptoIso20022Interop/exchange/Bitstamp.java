@@ -21,6 +21,11 @@ public class Bitstamp implements Exchange {
     }
 
     @Override
+    public String getDisplayText() {
+        return "Bitstamp";
+    }
+
+    @Override
     public void load() {
         exchangeRates.clear();
         for (var currencyPair : currencyPairs) {
