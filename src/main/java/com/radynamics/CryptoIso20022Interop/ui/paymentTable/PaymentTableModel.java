@@ -69,7 +69,9 @@ public class PaymentTableModel extends AbstractTableModel {
             var validationResults = new Validator().validate(t);
             Object receiverAccount = t.getReceiverAccount() == null ? IbanAccount.Empty : t.getReceiverAccount();
             Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
-            list.add(new Object[]{t, validationResults, true, getHighestStatus(validationResults), receiverAccount, receiverLedger, amt, ccy, "detail..."});
+            var highestStatus = getHighestStatus(validationResults);
+            var isSelected = highestStatus != Status.Error;
+            list.add(new Object[]{t, validationResults, isSelected, highestStatus, receiverAccount, receiverLedger, amt, ccy, "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
