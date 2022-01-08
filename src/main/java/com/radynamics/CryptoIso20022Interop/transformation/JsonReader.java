@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +33,8 @@ public class JsonReader {
         var arr = json.getJSONArray("accountMapping");
         for (int i = 0; i < arr.length(); i++) {
             var obj = arr.getJSONObject(i);
-            ti.add(new AccountMapping(new IbanAccount(obj.getString("iban")), obj.getString("ledgerWallet")));
+            var account = obj.has("iban") ? new IbanAccount(obj.getString("iban")) : new OtherAccount(obj.getString("other"));
+            ti.add(new AccountMapping(account, obj.getString("ledgerWallet")));
         }
 
         return ti;
