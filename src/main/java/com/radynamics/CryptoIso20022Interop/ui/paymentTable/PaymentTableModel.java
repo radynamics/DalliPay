@@ -64,9 +64,9 @@ public class PaymentTableModel extends AbstractTableModel {
         for (var t : data) {
             var ccy = transformInstruction.getTargetCcy();
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
-            Object receiverIso20022 = t.getReceiver() == null ? IbanAccount.Empty : transformInstruction.getAccountOrNull(t.getReceiver());
-            Object receiverLedger = t.getReceiver() == null ? "" : t.getReceiver().getPublicKey();
-            list.add(new Object[]{t, true, getHighestStatus(t), receiverIso20022, receiverLedger, amt, ccy, "detail..."});
+            Object receiverAccount = t.getReceiverAccount() == null ? IbanAccount.Empty : t.getReceiverAccount();
+            Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
+            list.add(new Object[]{t, true, getHighestStatus(t), receiverAccount, receiverLedger, amt, ccy, "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);

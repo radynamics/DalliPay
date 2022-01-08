@@ -8,7 +8,7 @@ public class Validator {
     public ValidationResult[] validate(Transaction t) {
         var list = new ArrayList<ValidationResult>();
 
-        if (t.getReceiver() == null) {
+        if (t.getReceiverWallet() == null) {
             list.add(new ValidationResult(Status.Error, String.format("Receiver is missing")));
         }
 

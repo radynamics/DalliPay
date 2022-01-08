@@ -82,7 +82,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(JTable table, Transaction obj) {
-        JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-06 show more details for %s", obj.getReceiver().getPublicKey()));
+        JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-06 show more details for %s", obj.getReceiverAccount().getUnformatted()));
     }
 
     public Transaction[] selectedPayments() {

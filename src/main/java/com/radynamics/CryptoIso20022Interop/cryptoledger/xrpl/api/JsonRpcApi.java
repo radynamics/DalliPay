@@ -114,8 +114,8 @@ public class JsonRpcApi implements TransactionSource {
 
         for (var t : transactions) {
             var walletFactory = DefaultWalletFactory.getInstance();
-            var sender = walletFactory.fromSeed(t.getSender().getSecret(), network != Network.Live);
-            var receiver = Address.of(t.getReceiver().getPublicKey());
+            var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network != Network.Live);
+            var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
             var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
 

@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.LocalDateTime;
@@ -12,8 +13,10 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private long amountSmallestUnit;
     private String ccy;
     private LocalDateTime booked;
-    private Wallet sender;
-    private Wallet receiver;
+    private Wallet senderWallet;
+    private Wallet receiverWallet;
+    private Account receiverAccount;
+    private Account senderAccount;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
@@ -60,13 +63,28 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public Wallet getSender() {
-        return sender;
+    public void setSender(Account account) {
+        this.senderAccount = account;
     }
 
     @Override
-    public Wallet getReceiver() {
-        return receiver;
+    public Wallet getSenderWallet() {
+        return senderWallet;
+    }
+
+    @Override
+    public void setReceiver(Account account) {
+        this.receiverAccount = account;
+    }
+
+    @Override
+    public Account getReceiverAccount() {
+        return receiverAccount;
+    }
+
+    @Override
+    public Wallet getReceiverWallet() {
+        return receiverWallet;
     }
 
     @Override
@@ -99,11 +117,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     public void setSender(Wallet sender) {
-        this.sender = sender;
+        this.senderWallet = sender;
     }
 
     public void setReceiver(Wallet receiver) {
-        this.receiver = receiver;
+        this.receiverWallet = receiver;
     }
 
     public void setAmount(long drops) {

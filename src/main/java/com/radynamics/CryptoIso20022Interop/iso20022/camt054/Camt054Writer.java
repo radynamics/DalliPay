@@ -46,7 +46,7 @@ public class Camt054Writer {
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);
 
         for (var t : transactions) {
-            var receiver = t.getReceiver();
+            var receiver = t.getReceiverWallet();
             var stmt = getNtfctnOrNull(d, receiver);
             if (stmt == null) {
                 stmt = new AccountNotification7();
@@ -107,8 +107,8 @@ public class Camt054Writer {
         var ntry = new ReportEntry4();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
-        var iban = transformInstruction.getIbanOrNull(trx.getSender());
-        ntry.setNtryRef(iban == null ? trx.getSender().getPublicKey() : iban.getUnformatted());
+        var iban = transformInstruction.getIbanOrNull(trx.getSenderWallet());
+        ntry.setNtryRef(iban == null ? trx.getSenderWallet().getPublicKey() : iban.getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
         var amtValue = BigDecimal.ZERO;

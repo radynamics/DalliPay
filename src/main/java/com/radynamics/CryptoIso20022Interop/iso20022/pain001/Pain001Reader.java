@@ -36,15 +36,19 @@ public class Pain001Reader {
 
         var list = new ArrayList<Transaction>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
-            var sender = transformInstruction.getWalletOrNull(getAccount(pmtInf.getDbtrAcct().getId()));
+            var senderAccount = getAccount(pmtInf.getDbtrAcct().getId());
+            var senderLedger = transformInstruction.getWalletOrNull(senderAccount);
             for (var cdtTrfTxInf : pmtInf.getCdtTrfTxInf()) {
-                var receiver = transformInstruction.getWalletOrNull(getAccount(cdtTrfTxInf.getCdtrAcct().getId()));
+                var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct().getId());
+                var receiverLedger = transformInstruction.getWalletOrNull(receiverAccount);
                 // TODO: use currency from meta data and support IOUs.
                 var ccy = ledger.getNativeCcySymbol();
                 var amountNativeCcy = ccyConverter.convert(cdtTrfTxInf.getAmt().getInstdAmt().getValue(), cdtTrfTxInf.getAmt().getInstdAmt().getCcy(), ccy);
                 var amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
 
-                var t = ledger.createTransaction(sender, receiver, amountSmallestUnit, ccy);
+                var t = ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy);
+                t.setSender(senderAccount);
+                t.setReceiver(receiverAccount);
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {
