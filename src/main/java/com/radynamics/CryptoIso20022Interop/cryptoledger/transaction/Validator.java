@@ -13,9 +13,9 @@ public class Validator {
         }
 
         if (t.getStructuredReferences().length == 0) {
-            list.add(new ValidationResult(Status.Info, String.format("Remittance info is missing. Receiver won't be able to match to awaited payment exactly.")));
+            list.add(new ValidationResult(Status.Info, String.format("Remittance info is missing. Receiver won't be able to match awaited payment exactly.")));
         }
-        
+
         return list.toArray(new ValidationResult[0]);
     }
 }
