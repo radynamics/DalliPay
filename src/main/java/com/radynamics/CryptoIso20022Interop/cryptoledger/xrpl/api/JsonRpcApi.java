@@ -14,6 +14,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import okhttp3.HttpUrl;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
@@ -68,6 +69,18 @@ public class JsonRpcApi implements TransactionSource {
         }
 
         return list.toArray(new Transaction[0]);
+    }
+
+    public boolean exists(Wallet wallet) {
+        try {
+            var xrplClient = new XrplClient(createUrl());
+            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
+            var result = xrplClient.accountInfo(requestParams);
+            return result.accountData() != null;
+        } catch (JsonRpcClientErrorException e) {
+            LogManager.getLogger().error(e);
+            return false;
+        }
     }
 
     private HttpUrl createUrl() {

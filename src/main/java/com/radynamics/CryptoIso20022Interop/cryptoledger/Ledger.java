@@ -19,5 +19,7 @@ public interface Ledger {
 
     Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception;
 
+    boolean exists(Wallet wallet);
+
     void setNetwork(Network network);
 }
