@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Status;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -11,12 +12,13 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_DETAIL};
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_DETAIL};
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
 
     public static final String COL_OBJECT = "object";
+    public static final String COL_VALIDATION_RESULTS = "validationResults";
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
     public static final String COL_RECEIVER_ISO20022 = "receiverIso20022";
@@ -64,16 +66,16 @@ public class PaymentTableModel extends AbstractTableModel {
         for (var t : data) {
             var ccy = transformInstruction.getTargetCcy();
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
+            var validationResults = new Validator().validate(t);
             Object receiverAccount = t.getReceiverAccount() == null ? IbanAccount.Empty : t.getReceiverAccount();
             Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
-            list.add(new Object[]{t, true, getHighestStatus(t), receiverAccount, receiverLedger, amt, ccy, "detail..."});
+            list.add(new Object[]{t, validationResults, true, getHighestStatus(validationResults), receiverAccount, receiverLedger, amt, ccy, "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
     }
 
-    private Status getHighestStatus(Transaction t) {
-        var results = new Validator().validate(t);
+    private Status getHighestStatus(ValidationResult[] results) {
         var highest = Status.Ok;
         for (var r : results) {
             highest = r.getStatus().higherThan(highest) ? r.getStatus() : highest;

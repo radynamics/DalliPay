@@ -26,7 +26,7 @@ public class PaymentTable extends JPanel {
 
         table = new JTable(model);
         table.setFillsViewportHeight(true);
-        table.setDefaultRenderer(Status.class, new PaymentStatusCellRenderer(table.getColumn(PaymentTableModel.COL_OBJECT)));
+        table.setDefaultRenderer(Status.class, new PaymentStatusCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
 
         table.setRowHeight(30);
@@ -38,6 +38,7 @@ public class PaymentTable extends JPanel {
     private void initColumns() {
         var cb = new TableColumnBuilder(table);
         cb.forColumn(PaymentTableModel.COL_OBJECT).headerCenter().hide();
+        cb.forColumn(PaymentTableModel.COL_VALIDATION_RESULTS).headerCenter().hide();
         cb.forColumn(PaymentTableModel.COL_SELECTOR).headerValue("").fixedWidth(40);
         cb.forColumn(PaymentTableModel.COL_STATUS).headerValue("").fixedWidth(40).headerCenter();
         cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue("Receiver from Input").width(200);
