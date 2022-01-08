@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_DETAIL};
@@ -42,6 +43,10 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public String getColumnName(int col) {
         return columnNames[col];
+    }
+
+    private int getColumnIndex(String identifier) {
+        return Arrays.asList(columnNames).indexOf(identifier);
     }
 
     public Object getValueAt(int row, int col) {
@@ -88,7 +93,9 @@ public class PaymentTableModel extends AbstractTableModel {
     public Transaction[] selectedPayments() {
         var list = new ArrayList<Transaction>();
         for (var item : this.data) {
-            list.add((Transaction) item[0]);
+            if ((boolean) item[getColumnIndex(COL_SELECTOR)]) {
+                list.add((Transaction) item[0]);
+            }
         }
         return list.toArray(new Transaction[0]);
     }
