@@ -15,27 +15,32 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
     private TransformInstruction transformInstruction;
     private TableColumn objectColumn;
 
-    private static final NumberFormat df = DecimalFormat.getInstance();
+    private static final NumberFormat dfFiat = DecimalFormat.getInstance();
+    private static final NumberFormat dfCryptocurrency = DecimalFormat.getInstance();
 
     public AmountCellRenderer(TransformInstruction transformInstruction, TableColumn objectColumn) {
         this.transformInstruction = transformInstruction;
         this.objectColumn = objectColumn;
 
-        final int DIGITS = 2;
-        df.setMinimumFractionDigits(DIGITS);
-        df.setMaximumFractionDigits(DIGITS);
+        setDigits(dfFiat, 2);
+        setDigits(dfCryptocurrency, 6);
+
         setOpaque(true);
+    }
+
+    private static void setDigits(NumberFormat df, int digits) {
+        df.setMinimumFractionDigits(digits);
+        df.setMaximumFractionDigits(digits);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         var amt = (Double) value;
         var obj = (Transaction) table.getModel().getValueAt(row, objectColumn.getModelIndex());
 
-        if (StringUtils.equalsIgnoreCase(obj.getLedger().getNativeCcySymbol(), transformInstruction.getTargetCcy())) {
-            setText(amt.toString());
-        } else {
-            setText(df.format(amt));
-        }
+        var df = StringUtils.equalsIgnoreCase(obj.getLedger().getNativeCcySymbol(), transformInstruction.getTargetCcy())
+                ? dfCryptocurrency
+                : dfFiat;
+        setText(df.format(amt));
 
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
