@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
@@ -37,9 +38,23 @@ public class Pain001ReaderTest {
         assertEquals(4, transactions.length);
 
         assertTransaction(transactions[0], "010832052", "receiver_010832052", 459000, ReferenceType.Isr, "000000000000060029920346303");
+        assertAddress(transactions[0].getReceiverAddress(), new Address("Settelen AG"));
         assertTransaction(transactions[1], "010391391", "receiver_010391391", 3949750, ReferenceType.Isr, "210000000003139471430009017");
+        assertAddress(transactions[1].getReceiverAddress(), new Address("Destination AG") {{
+            setStreet("Zielstrasse 13");
+            setZip("3000");
+            setCity("Bern");
+            setCountryShort("CH");
+        }});
         assertTransaction(transactions[2], "010649858", "receiver_010649858", 2838640, ReferenceType.Isr, "030015972590806420080020801");
+        assertAddress(transactions[2].getReceiverAddress(), new Address("Swisscom (Schweiz) AG") {{
+            setStreet("Alte Tiefenaustrasse 6");
+            setCity("3050 Bern");
+        }});
         assertTransaction(transactions[3], "032233441", "receiver_032233441", 1727530, ReferenceType.Isr, "332015900002760103813712236");
+        assertAddress(transactions[3].getReceiverAddress(), new Address("Ingram Micro GmbH") {{
+            setCity("6330 Cham");
+        }});
     }
 
     @Test
@@ -167,6 +182,13 @@ public class Pain001ReaderTest {
         assertEquals("Rechnung Nr. 408", t.getMessages()[0]);
         assertNotNull(t.getStructuredReferences());
         assertEquals(0, t.getStructuredReferences().length);
+    }
+
+    private void assertAddress(Address actual, Address expected) {
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getStreet(), actual.getStreet());
+        assertEquals(expected.getZip(), actual.getZip());
+        assertEquals(expected.getCity(), actual.getCity());
     }
 
     private void assertTransaction(Transaction t, String receiverAccount, String receiverWallet, double amount) {

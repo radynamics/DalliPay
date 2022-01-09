@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
@@ -11,7 +12,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.AccountIdentification4Choice;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.CreditorReferenceInformation2;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.Document;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.PartyIdentification32;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -49,6 +52,7 @@ public class Pain001Reader {
                 var t = ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy);
                 t.setSender(senderAccount);
                 t.setReceiver(receiverAccount);
+                t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {
@@ -80,6 +84,40 @@ public class Pain001Reader {
         }
 
         return list.toArray(new Transaction[0]);
+    }
+
+    private Address getAddress(PartyIdentification32 obj) {
+        var a = new Address(obj.getNm());
+        if (obj.getPstlAdr() == null) {
+            return a;
+        }
+
+        var pstlAdr = obj.getPstlAdr();
+        var adrLines = pstlAdr.getAdrLine();
+        if (adrLines.size() == 2) {
+            a.setStreet(adrLines.get(0));
+            a.setCity(adrLines.get(1));
+            return a;
+        }
+        if (adrLines.size() == 1) {
+            a.setCity(adrLines.get(0));
+            return a;
+        }
+
+        if (!StringUtils.isAllEmpty(pstlAdr.getStrtNm())) {
+            a.setStreet(pstlAdr.getStrtNm());
+        }
+        if (!StringUtils.isAllEmpty(pstlAdr.getPstCd())) {
+            a.setZip(pstlAdr.getPstCd());
+        }
+        if (!StringUtils.isAllEmpty(pstlAdr.getTwnNm())) {
+            a.setCity(pstlAdr.getTwnNm());
+        }
+        if (!StringUtils.isAllEmpty(pstlAdr.getCtry())) {
+            a.setCountryShort(pstlAdr.getCtry());
+        }
+
+        return a;
     }
 
     private ReferenceType getReferenceType(CreditorReferenceInformation2 cdtrRefInf) {

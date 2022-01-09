@@ -51,12 +51,7 @@
           <InstdAmt Ccy="CHF">459.00</InstdAmt>
         </Amt>
         <Cdtr>
-          <Nm>Settelen AG </Nm>
-          <PstlAdr>
-            <StrtNm>Türkheimerstrasse 17</StrtNm>
-            <PstCd>4009</PstCd>
-            <TwnNm>Basel</TwnNm>
-          </PstlAdr>
+          <Nm>Settelen AG</Nm>
         </Cdtr>
         <CdtrAcct>
           <Id>
@@ -87,11 +82,12 @@
           <InstdAmt Ccy="CHF">3949.75</InstdAmt>
         </Amt>
         <Cdtr>
-          <Nm>Destination AG </Nm>
+          <Nm>Destination AG</Nm>
           <PstlAdr>
             <StrtNm>Zielstrasse 13</StrtNm>
             <PstCd>3000</PstCd>
             <TwnNm>Bern</TwnNm>
+            <Ctry>CH</Ctry>
           </PstlAdr>
         </Cdtr>
         <CdtrAcct>
@@ -123,11 +119,10 @@
           <InstdAmt Ccy="CHF">2838.64</InstdAmt>
         </Amt>
         <Cdtr>
-          <Nm>Swisscom (Schweiz) AG </Nm>
+          <Nm>Swisscom (Schweiz) AG</Nm>
           <PstlAdr>
-            <StrtNm>Alte Tiefenaustrasse 6</StrtNm>
-            <PstCd>3050</PstCd>
-            <TwnNm>Bern</TwnNm>
+            <AdrLine>Alte Tiefenaustrasse 6</AdrLine>
+            <AdrLine>3050 Bern</AdrLine>
           </PstlAdr>
         </Cdtr>
         <CdtrAcct>
@@ -183,11 +178,9 @@
           <InstdAmt Ccy="EUR">1727.53</InstdAmt>
         </Amt>
         <Cdtr>
-          <Nm>Ingram Micro GmbH </Nm>
+          <Nm>Ingram Micro GmbH</Nm>
           <PstlAdr>
-            <StrtNm>Brunnmatt 14</StrtNm>
-            <PstCd>6330</PstCd>
-            <TwnNm>Cham</TwnNm>
+            <AdrLine>6330 Cham</AdrLine>
           </PstlAdr>
         </Cdtr>
         <CdtrAcct>

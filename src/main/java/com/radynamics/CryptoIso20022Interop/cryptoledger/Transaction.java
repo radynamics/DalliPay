@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.LocalDateTime;
@@ -46,4 +47,8 @@ public interface Transaction {
     Ledger getLedger();
 
     TransmissionState getTransmission();
+
+    void setReceiverAddress(Address address);
+
+    Address getReceiverAddress();
 }
