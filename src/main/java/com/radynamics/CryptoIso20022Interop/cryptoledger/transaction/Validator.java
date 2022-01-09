@@ -11,14 +11,14 @@ public class Validator {
         var list = new ArrayList<ValidationResult>();
 
         if (t.getReceiverWallet() == null) {
-            list.add(new ValidationResult(Status.Error, String.format("Receiver Cryptocurrency wallet is missing")));
+            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver Cryptocurrency wallet is missing")));
         } else {
             var wv = new WalletValidator(t.getLedger());
             list.addAll(Arrays.asList(wv.validate(t.getReceiverWallet())));
         }
 
         if (t.getStructuredReferences().length == 0) {
-            list.add(new ValidationResult(Status.Info, String.format("Remittance info is missing. Receiver won't be able to match awaited payment exactly.")));
+            list.add(new ValidationResult(ValidationState.Info, String.format("Remittance info is missing. Receiver won't be able to match awaited payment exactly.")));
         }
 
         return list.toArray(new ValidationResult[0]);

@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Status;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -86,16 +86,16 @@ public class PaymentTableModel extends AbstractTableModel {
         return new Validator().validate(t);
     }
 
-    private Status getHighestStatus(ValidationResult[] results) {
-        var highest = Status.Ok;
+    private ValidationState getHighestStatus(ValidationResult[] results) {
+        var highest = ValidationState.Ok;
         for (var r : results) {
             highest = r.getStatus().higherThan(highest) ? r.getStatus() : highest;
         }
         return highest;
     }
 
-    private boolean isSelected(Status highestStatus) {
-        return highestStatus != Status.Error;
+    private boolean isSelected(ValidationState highestStatus) {
+        return highestStatus != ValidationState.Error;
     }
 
     public Transaction[] selectedPayments() {

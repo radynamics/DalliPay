@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Status;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class PaymentStatusCellRenderer extends JLabel implements TableCellRender
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        var status = (Status) value;
+        var status = (ValidationState) value;
         var obj = (ValidationResult[]) table.getModel().getValueAt(row, validationResultsColumn.getModelIndex());
 
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
@@ -47,7 +47,7 @@ public class PaymentStatusCellRenderer extends JLabel implements TableCellRender
         return sb.toString();
     }
 
-    private static Icon getIconOrNull(Status status) {
+    private static Icon getIconOrNull(ValidationState status) {
         switch (status) {
             case Ok -> {
                 return ok;
