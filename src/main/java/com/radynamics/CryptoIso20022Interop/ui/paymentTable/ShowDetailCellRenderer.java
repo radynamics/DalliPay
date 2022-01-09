@@ -1,12 +1,12 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.ui.Consts;
+
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 public class ShowDetailCellRenderer extends JLabel implements TableCellRenderer {
-    private static final Color accent = new Color(38, 117, 191);
-
     public ShowDetailCellRenderer() {
         setOpaque(true);
     }
@@ -15,7 +15,7 @@ public class ShowDetailCellRenderer extends JLabel implements TableCellRenderer 
         var text = (String) value;
 
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
-        setForeground(isSelected ? table.getSelectionForeground() : accent);
+        setForeground(isSelected ? table.getSelectionForeground() : Consts.ColorAccent);
         setText(text);
         return this;
     }
