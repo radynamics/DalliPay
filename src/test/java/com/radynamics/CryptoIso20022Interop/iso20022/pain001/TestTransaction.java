@@ -2,7 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -123,8 +123,8 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public Transmission getTransmission() {
-        return Transmission.Pending;
+    public TransmissionState getTransmission() {
+        return TransmissionState.Pending;
     }
 
     public void setSender(Wallet sender) {

@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -20,7 +20,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        var transmission = (Transmission) value;
+        var transmission = (TransmissionState) value;
 
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setHorizontalAlignment(JLabel.CENTER);
@@ -28,7 +28,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
         return this;
     }
 
-    private static Icon getIconOrNull(Transmission value) {
+    private static Icon getIconOrNull(TransmissionState value) {
         switch (value) {
             case Pending -> {
                 return pending;

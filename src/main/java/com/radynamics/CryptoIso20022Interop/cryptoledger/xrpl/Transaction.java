@@ -2,7 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -23,7 +23,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
-    private Transmission transmission = Transmission.Pending;
+    private TransmissionState transmission = TransmissionState.Pending;
 
     public Transaction(Ledger ledger, long drops, String ccy) {
         this.ledger = ledger;
@@ -125,7 +125,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public Transmission getTransmission() {
+    public TransmissionState getTransmission() {
         return transmission;
     }
 
@@ -141,7 +141,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         this.drops = drops;
     }
 
-    public void setTransmission(Transmission transmission) {
+    public void setTransmission(TransmissionState transmission) {
         this.transmission = transmission;
     }
 }
