@@ -9,7 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
-import com.radynamics.CryptoIso20022Interop.ui.MainForm;
+import com.radynamics.CryptoIso20022Interop.ui.SendForm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 
@@ -99,7 +99,7 @@ public class Main {
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             FlatLightLaf.setup();
-            var frm = new MainForm(transformInstruction, currencyConverter);
+            var frm = new SendForm(transformInstruction, currencyConverter);
             frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frm.load(payments);
             frm.setInput(inputFileName);

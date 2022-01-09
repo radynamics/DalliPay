@@ -11,14 +11,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-public class MainForm extends JFrame {
+public class SendForm extends JFrame {
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
 
     private PaymentTable table;
     private JTextField txtInput;
 
-    public MainForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
