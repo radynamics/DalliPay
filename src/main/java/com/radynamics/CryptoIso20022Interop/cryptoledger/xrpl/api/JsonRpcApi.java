@@ -162,6 +162,8 @@ public class JsonRpcApi implements TransactionSource {
             if (!prelimResult.result().equalsIgnoreCase("tesSUCCESS")) {
                 throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
             }
+
+            t.setId(signed.hash().value());
         }
     }
 
