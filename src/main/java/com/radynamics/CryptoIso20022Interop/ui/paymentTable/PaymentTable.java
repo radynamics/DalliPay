@@ -28,6 +28,8 @@ public class PaymentTable extends JPanel {
         table.setFillsViewportHeight(true);
         table.setDefaultRenderer(Status.class, new PaymentStatusCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
+        var lookupProvider = transformInstruction.getLedger().getLookupProvider();
+        table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(new ReceiverLedgerCellEditor(lookupProvider));
 
         table.setRowHeight(30);
         initColumns();
