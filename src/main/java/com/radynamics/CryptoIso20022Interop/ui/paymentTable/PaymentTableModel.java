@@ -8,13 +8,11 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class PaymentTableModel extends AbstractTableModel implements TableModelListener {
+public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_DETAIL};
     private Object[][] data;
     private final TransformInstruction transformInstruction;
@@ -33,8 +31,6 @@ public class PaymentTableModel extends AbstractTableModel implements TableModelL
     public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
-
-        addTableModelListener(this);
     }
 
     public int getColumnCount() {
@@ -111,19 +107,7 @@ public class PaymentTableModel extends AbstractTableModel implements TableModelL
         return list.toArray(new Transaction[0]);
     }
 
-    @Override
-    public void tableChanged(TableModelEvent e) {
-        if (e.getColumn() == getColumnIndex(COL_RECEIVER_LEDGER)) {
-            var row = e.getFirstRow();
-            var t = (Transaction) getValueAt(row, getColumnIndex(COL_OBJECT));
-
-            var newValue = (String) getValueAt(row, e.getColumn());
-            t.setReceiverWallet(t.getLedger().createWallet(newValue, null));
-            onTransactionChanged(row, t);
-        }
-    }
-
-    private void onTransactionChanged(int row, Transaction t) {
+    public void onTransactionChanged(int row, Transaction t) {
         var validationResults = validate(t);
         var highestStatus = getHighestStatus(validationResults);
 

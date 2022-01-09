@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -71,6 +72,18 @@ public class PaymentTable extends JPanel {
 
                 if (e.getClickCount() == 1) {
                     showMore(table, getSelectedRow(table));
+                }
+            }
+        });
+        new TableCellListener(table, new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                var tcl = (TableCellListener) e.getSource();
+                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
+                    var row = tcl.getRow();
+                    var t = (Transaction) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
+
+                    t.setReceiverWallet(t.getLedger().createWallet((String) tcl.getNewValue(), null));
+                    model.onTransactionChanged(row, t);
                 }
             }
         });
