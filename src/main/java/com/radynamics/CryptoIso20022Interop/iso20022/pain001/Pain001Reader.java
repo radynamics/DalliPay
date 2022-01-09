@@ -87,6 +87,10 @@ public class Pain001Reader {
     }
 
     private Address getAddress(PartyIdentification32 obj) {
+        if (obj == null) {
+            return null;
+        }
+
         var a = new Address(obj.getNm());
         if (obj.getPstlAdr() == null) {
             return a;

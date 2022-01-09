@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 
@@ -18,6 +19,11 @@ public class AddressCellRenderer extends JLabel implements TableCellRenderer {
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
 
+        if (value instanceof Account) {
+            var r = new AccountCellRenderer();
+            return r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        }
+        
         var obj = (Address) value;
         setText(af.formatSingleLine(obj));
         return this;
