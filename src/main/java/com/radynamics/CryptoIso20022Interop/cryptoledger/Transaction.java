@@ -28,6 +28,8 @@ public interface Transaction {
 
     Wallet getReceiverWallet();
 
+    void setReceiverWallet(Wallet wallet);
+
     void addStructuredReference(StructuredReference structuredReference);
 
     StructuredReference[] getStructuredReferences();

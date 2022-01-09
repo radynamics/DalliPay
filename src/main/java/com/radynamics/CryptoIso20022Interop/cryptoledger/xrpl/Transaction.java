@@ -89,6 +89,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
+    public void setReceiverWallet(Wallet wallet) {
+        setReceiver(WalletConverter.from(wallet));
+    }
+
+    @Override
     public void addStructuredReference(StructuredReference value) {
         references.add(value);
     }

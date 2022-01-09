@@ -88,6 +88,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
+    public void setReceiverWallet(Wallet wallet) {
+        setReceiver(wallet);
+    }
+
+    @Override
     public void addStructuredReference(StructuredReference value) {
         references.add(value);
     }
