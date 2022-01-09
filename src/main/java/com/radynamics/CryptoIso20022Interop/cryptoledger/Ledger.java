@@ -24,4 +24,6 @@ public interface Ledger {
     void setNetwork(Network network);
 
     WalletLookupProvider getLookupProvider();
+
+    boolean isValidPublicKey(String publicKey);
 }

@@ -71,4 +71,9 @@ public class TestLedger implements Ledger {
     public WalletLookupProvider getLookupProvider() {
         return null;
     }
+
+    @Override
+    public boolean isValidPublicKey(String publicKey) {
+        return true;
+    }
 }

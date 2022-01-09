@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.ui.Consts;
 
 import javax.swing.*;
@@ -11,6 +13,7 @@ import java.awt.event.MouseEvent;
 public class WalletField extends JPanel {
     private WalletLookupProvider lookupProvider;
     private JTextField txt;
+    private Ledger ledger;
 
     public WalletField(WalletLookupProvider lookupProvider) {
         this.lookupProvider = lookupProvider;
@@ -22,6 +25,20 @@ public class WalletField extends JPanel {
 
         {
             txt = new JTextField();
+            txt.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent input) {
+                    var text = ((JTextField) input).getText();
+                    var result = new WalletValidator(ledger).validateFormat(ledger.createWallet(text, null));
+                    if (result == null) {
+                        txt.putClientProperty("JComponent.outline", null);
+                        return true;
+                    } else {
+                        txt.putClientProperty("JComponent.outline", "error");
+                        return false;
+                    }
+                }
+            });
             var c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
             c.weightx = 1.0;
@@ -57,9 +74,14 @@ public class WalletField extends JPanel {
 
     public void setText(String value) {
         txt.setText(value);
+        txt.getInputVerifier().verify(txt);
     }
 
     public String getText() {
         return txt.getText();
+    }
+
+    public void setLedger(Ledger ledger) {
+        this.ledger = ledger;
     }
 }

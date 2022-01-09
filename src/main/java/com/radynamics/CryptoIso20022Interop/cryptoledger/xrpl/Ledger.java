@@ -5,6 +5,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
+import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
+import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 
 import java.math.BigDecimal;
@@ -75,5 +77,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public WalletLookupProvider getLookupProvider() {
         return new Bithomp(network);
+    }
+
+    @Override
+    public boolean isValidPublicKey(String publicKey) {
+        var addressCodec = new AddressCodec();
+        return addressCodec.isValidClassicAddress(Address.of(publicKey));
     }
 }
