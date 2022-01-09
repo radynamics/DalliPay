@@ -1,15 +1,15 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 
-public class PaymentStatusCellRenderer extends JLabel implements TableCellRenderer {
+public class ValidationStateCellRenderer extends JLabel implements TableCellRenderer {
     private TableColumn validationResultsColumn;
 
     private final static int WIDTH = 16;
@@ -20,7 +20,7 @@ public class PaymentStatusCellRenderer extends JLabel implements TableCellRender
     private final static FlatSVGIcon warning = new FlatSVGIcon("svg/warningDialog.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
 
-    public PaymentStatusCellRenderer(TableColumn validationResultsColumn) {
+    public ValidationStateCellRenderer(TableColumn validationResultsColumn) {
         this.validationResultsColumn = validationResultsColumn;
         setOpaque(true);
     }
