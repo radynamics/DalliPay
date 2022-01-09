@@ -22,4 +22,6 @@ public interface Ledger {
     boolean exists(Wallet wallet);
 
     void setNetwork(Network network);
+
+    WalletLookupProvider getLookupProvider();
 }

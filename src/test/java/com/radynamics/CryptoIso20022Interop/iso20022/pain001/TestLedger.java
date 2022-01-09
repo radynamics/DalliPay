@@ -1,10 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.math.BigDecimal;
@@ -61,7 +58,17 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean exists(Wallet wallet) {
+        return true;
+    }
+
+    @Override
     public void setNetwork(Network network) {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public WalletLookupProvider getLookupProvider() {
+        return null;
     }
 }
