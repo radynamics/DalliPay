@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -22,6 +23,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
+    private Transmission transmission = Transmission.Pending;
 
     public Transaction(Ledger ledger, long drops, String ccy) {
         this.ledger = ledger;
@@ -122,6 +124,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         return ledger;
     }
 
+    @Override
+    public Transmission getTransmission() {
+        return transmission;
+    }
+
     public void setSender(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet sender) {
         this.senderWallet = sender;
     }
@@ -132,5 +139,9 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
 
     public void setAmount(long drops) {
         this.drops = drops;
+    }
+
+    public void setTransmission(Transmission transmission) {
+        this.transmission = transmission;
     }
 }

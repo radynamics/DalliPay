@@ -118,10 +118,17 @@ public class MainForm extends JFrame {
             var cmd = new JButton("Send Payments");
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
+                var payments = table.selectedPayments();
                 try {
-                    transformInstruction.getLedger().send(table.selectedPayments());
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    transformInstruction.getLedger().send(payments);
+                    for (var p : payments) {
+                        table.refresh(p);
+                    }
                 } catch (Exception ex) {
                     LogManager.getLogger().error(ex);
+                } finally {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);

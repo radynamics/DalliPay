@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_DETAIL};
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
@@ -26,6 +26,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_AMOUNT = "amount";
     public static final String COL_CCY = "ccy";
+    public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
     public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
@@ -75,7 +76,7 @@ public class PaymentTableModel extends AbstractTableModel {
             Object receiverAccount = t.getReceiverAccount() == null ? IbanAccount.Empty : t.getReceiverAccount();
             Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
             var highestStatus = getHighestStatus(validationResults);
-            list.add(new Object[]{t, validationResults, isSelected(highestStatus), highestStatus, receiverAccount, receiverLedger, amt, ccy, "detail..."});
+            list.add(new Object[]{t, validationResults, isSelected(highestStatus), highestStatus, receiverAccount, receiverLedger, amt, ccy, t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
@@ -114,5 +115,6 @@ public class PaymentTableModel extends AbstractTableModel {
         setValueAt(validationResults, row, getColumnIndex(COL_VALIDATION_RESULTS));
         setValueAt(highestStatus, row, getColumnIndex(COL_STATUS));
         setValueAt(isSelected(highestStatus), row, getColumnIndex(COL_SELECTOR));
+        setValueAt(t.getTransmission(), row, getColumnIndex(COL_TRX_STATUS));
     }
 }

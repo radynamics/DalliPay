@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -43,4 +44,6 @@ public interface Transaction {
     void setInvoiceId(String s);
 
     Ledger getLedger();
+
+    Transmission getTransmission();
 }

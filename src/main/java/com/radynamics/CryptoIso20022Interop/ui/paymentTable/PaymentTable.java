@@ -2,11 +2,13 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Status;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmission;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +30,7 @@ public class PaymentTable extends JPanel {
         table = new JTable(model);
         table.setFillsViewportHeight(true);
         table.setDefaultRenderer(Status.class, new PaymentStatusCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
+        table.setDefaultRenderer(Transmission.class, new TransmissionCellRenderer());
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
@@ -53,6 +56,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new AmountCellRenderer(transformInstruction, table.getColumn(PaymentTableModel.COL_OBJECT)));
         }
         cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50);
+        cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(50);
         {
             var c = cb.forColumn(PaymentTableModel.COL_DETAIL).headerValue("").maxWidth(50).headerCenter().getColumn();
             c.setCellRenderer(new ShowDetailCellRenderer());
@@ -105,5 +109,24 @@ public class PaymentTable extends JPanel {
 
     public Transaction[] selectedPayments() {
         return model.selectedPayments();
+    }
+
+    public void refresh(Transaction t) {
+        var row = getRow(t);
+        if (row == -1) {
+            LogManager.getLogger().warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
+            return;
+        }
+        model.onTransactionChanged(row, t);
+    }
+
+    private int getRow(Transaction t) {
+        var col = table.getColumn(PaymentTableModel.COL_OBJECT).getModelIndex();
+        for (var row = 0; row < table.getModel().getRowCount(); row++) {
+            if (table.getModel().getValueAt(row, col) == t) {
+                return row;
+            }
+        }
+        return -1;
     }
 }
