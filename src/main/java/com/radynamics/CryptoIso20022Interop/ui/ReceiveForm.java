@@ -12,14 +12,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-public class SendForm extends JFrame {
+public class ReceiveForm extends JFrame {
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
 
     private PaymentTable table;
     private JTextField txtInput;
+    private String targetFileName;
 
-    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
@@ -57,7 +58,7 @@ public class SendForm extends JFrame {
         JPanel panel3 = new JPanel();
         panel3.setBorder(innerBorder);
         var panel3Layout = new SpringLayout();
-        panel3.setLayout(panel3Layout/*new FlowLayout(FlowLayout.RIGHT)*/);
+        panel3.setLayout(panel3Layout);
 
         pnlMain.add(panel0);
         pnlMain.add(panel1);
@@ -76,7 +77,7 @@ public class SendForm extends JFrame {
 
         {
             var lbl = new JLabel();
-            lbl.setText("Send Payments");
+            lbl.setText("Receive Payments");
             lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
             lbl.setOpaque(true);
             panel0.add(lbl);
@@ -85,7 +86,7 @@ public class SendForm extends JFrame {
         {
             Component anchorComponentTopLeft;
             {
-                var lbl = new JLabel("Input:");
+                var lbl = new JLabel("Source Wallet:");
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 5, SpringLayout.NORTH, panel1);
@@ -112,25 +113,19 @@ public class SendForm extends JFrame {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver);
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender);
             panel2.add(table);
         }
         {
-            var cmd = new JButton("Send Payments");
+            var cmd = new JButton("Export...");
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
-                var payments = table.selectedPayments();
-                try {
-                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    transformInstruction.getLedger().send(payments);
-                    for (var p : payments) {
-                        table.refresh(p);
-                    }
-                } catch (Exception ex) {
-                    LogManager.getLogger().error(ex);
-                } finally {
-                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                }
+                /*var s = CamtConverter.toXml(table.selectedPayments());
+                var outputStream = new FileOutputStream(targetFileName);
+                s.writeTo(outputStream);
+
+                LogManager.getLogger().trace(String.format("%s written", targetFileName));*/
+                JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-09 save as CAMT.054 file."));
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
@@ -143,5 +138,9 @@ public class SendForm extends JFrame {
 
     public void setInput(String value) {
         txtInput.setText(value);
+    }
+
+    public void setTargetFileName(String targetFileName) {
+        this.targetFileName = targetFileName;
     }
 }

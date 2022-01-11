@@ -22,11 +22,12 @@ public class PaymentTable extends JPanel {
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
 
         model = new PaymentTableModel(transformInstruction, currencyConverter);
+        model.setShowWalletOf(actor);
 
         table = new JTable(model);
         table.setFillsViewportHeight(true);
@@ -51,8 +52,14 @@ public class PaymentTable extends JPanel {
         cb.forColumn(PaymentTableModel.COL_VALIDATION_RESULTS).headerCenter().hide();
         cb.forColumn(PaymentTableModel.COL_SELECTOR).headerValue("").fixedWidth(40);
         cb.forColumn(PaymentTableModel.COL_STATUS).headerValue("").fixedWidth(40).headerCenter();
-        cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue("Receiver from Input").width(200);
-        cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue("Receiver CryptoCurrency Wallet").width(200);
+        {
+            var headerValue = model.getShowWalletOf().get("Sender for Export", "Receiver from Input");
+            cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue(headerValue).width(200);
+        }
+        {
+            var headerValue = String.format("%s CryptoCurrency Wallet", model.getShowWalletOf().get("Sender", "Receiver"));
+            cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue(headerValue).width(200);
+        }
         {
             var c = cb.forColumn(PaymentTableModel.COL_AMOUNT).headerValue("Amount").width(100).headerRigth().getColumn();
             c.setCellRenderer(new AmountCellRenderer(transformInstruction, table.getColumn(PaymentTableModel.COL_OBJECT)));
@@ -106,7 +113,8 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(JTable table, Transaction obj) {
-        JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-06 show more details for %s", obj.getReceiverAccount().getUnformatted()));
+        var account = model.getShowWalletOf().get(obj.getSenderAccount(), obj.getReceiverAccount());
+        JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
     }
 
     public Transaction[] selectedPayments() {

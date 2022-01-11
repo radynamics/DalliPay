@@ -17,6 +17,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
+    private Actor showWalletOf = Actor.Receiver;
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -73,16 +74,27 @@ public class PaymentTableModel extends AbstractTableModel {
             var ccy = transformInstruction.getTargetCcy();
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
             var validationResults = validate(t);
-            Object receiverSource = t.getReceiverAddress();
-            if (receiverSource == null) {
-                receiverSource = t.getReceiverAccount() == null ? IbanAccount.Empty : t.getReceiverAccount();
-            }
-            Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
+            Object actorAddressOrAccount = getActorAddressOrAcount(t);
+            Object actorLedger = getActorWalletText(t);
             var highestStatus = getHighestStatus(validationResults);
-            list.add(new Object[]{t, validationResults, isSelected(highestStatus), highestStatus, receiverSource, receiverLedger, amt, ccy, t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, validationResults, isSelected(highestStatus), highestStatus, actorAddressOrAccount, actorLedger, amt, ccy, t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
+    }
+
+    private Object getActorAddressOrAcount(Transaction t) {
+        Object actorAddressOrAccount = showWalletOf.get(t.getSenderAddress(), t.getReceiverAddress());
+        if (actorAddressOrAccount == null) {
+            var actorAccount = showWalletOf.get(t.getSenderAccount(), t.getReceiverAccount());
+            actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
+        }
+        return actorAddressOrAccount;
+    }
+
+    private String getActorWalletText(Transaction t) {
+        var wallet = showWalletOf.get(t.getSenderWallet(), t.getReceiverWallet());
+        return wallet == null ? "" : wallet.getPublicKey();
     }
 
     private ValidationResult[] validate(Transaction t) {
@@ -119,5 +131,13 @@ public class PaymentTableModel extends AbstractTableModel {
         setValueAt(highestStatus, row, getColumnIndex(COL_STATUS));
         setValueAt(isSelected(highestStatus), row, getColumnIndex(COL_SELECTOR));
         setValueAt(t.getTransmission(), row, getColumnIndex(COL_TRX_STATUS));
+    }
+
+    public Actor getShowWalletOf() {
+        return showWalletOf;
+    }
+
+    public void setShowWalletOf(Actor actor) {
+        this.showWalletOf = actor;
     }
 }

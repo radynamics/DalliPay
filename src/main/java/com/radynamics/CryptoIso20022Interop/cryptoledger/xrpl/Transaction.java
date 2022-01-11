@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
-
     private String id;
     private Ledger ledger;
     private long drops;
@@ -25,6 +24,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private TransmissionState transmission = TransmissionState.Pending;
+    private Address senderAddress;
     private Address receiverAddress;
 
     public Transaction(Ledger ledger, long drops, String ccy) {
@@ -65,6 +65,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     @Override
     public void setId(String value) {
         this.id = value;
+    }
+
+    @Override
+    public Account getSenderAccount() {
+        return senderAccount;
     }
 
     @Override
@@ -129,6 +134,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     @Override
     public TransmissionState getTransmission() {
         return transmission;
+    }
+
+    @Override
+    public Address getSenderAddress() {
+        return senderAddress;
     }
 
     @Override

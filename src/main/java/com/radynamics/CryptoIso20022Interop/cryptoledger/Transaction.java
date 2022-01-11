@@ -20,6 +20,8 @@ public interface Transaction {
 
     void setId(String value);
 
+    Account getSenderAccount();
+
     void setSender(Account account);
 
     Wallet getSenderWallet();
@@ -48,7 +50,10 @@ public interface Transaction {
 
     TransmissionState getTransmission();
 
+    Address getSenderAddress();
+
     void setReceiverAddress(Address address);
 
     Address getReceiverAddress();
+
 }

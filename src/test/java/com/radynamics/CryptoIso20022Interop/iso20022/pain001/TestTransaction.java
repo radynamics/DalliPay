@@ -17,12 +17,13 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private LocalDateTime booked;
     private Wallet senderWallet;
     private Wallet receiverWallet;
-    private Account receiverAccount;
     private Account senderAccount;
+    private Account receiverAccount;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private Ledger ledger;
+    private Address senderAddress;
     private Address receiverAddress;
 
     public TestTransaction(Ledger ledger, long amountSmallestUnit, String ccy) {
@@ -63,6 +64,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     @Override
     public void setId(String value) {
         this.id = id;
+    }
+
+    @Override
+    public Account getSenderAccount() {
+        return senderAccount;
     }
 
     @Override
@@ -127,6 +133,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     @Override
     public TransmissionState getTransmission() {
         return TransmissionState.Pending;
+    }
+
+    @Override
+    public Address getSenderAddress() {
+        return senderAddress;
     }
 
     @Override
