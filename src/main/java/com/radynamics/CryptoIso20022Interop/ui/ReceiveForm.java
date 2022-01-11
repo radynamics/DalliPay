@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
@@ -10,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class ReceiveForm extends JFrame {
@@ -120,15 +123,27 @@ public class ReceiveForm extends JFrame {
             var cmd = new JButton("Export...");
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
-                /*var s = CamtConverter.toXml(table.selectedPayments());
-                var outputStream = new FileOutputStream(targetFileName);
-                s.writeTo(outputStream);
-
-                LogManager.getLogger().trace(String.format("%s written", targetFileName));*/
-                JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-09 save as CAMT.054 file."));
+                exportSelected();
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
+        }
+    }
+
+    private void exportSelected() {
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, currencyConverter);
+            var s = CamtConverter.toXml(w.create(table.selectedPayments()));
+            var outputStream = new FileOutputStream(targetFileName);
+            s.writeTo(outputStream);
+
+            JOptionPane.showMessageDialog(table, String.format("Successfully exported to %s", targetFileName));
+        } catch (Exception e) {
+            LogManager.getLogger().error(e);
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
