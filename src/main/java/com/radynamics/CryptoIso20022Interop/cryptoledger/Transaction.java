@@ -22,11 +22,11 @@ public interface Transaction {
 
     Account getSenderAccount();
 
-    void setSender(Account account);
+    void setSenderAccount(Account account);
 
     Wallet getSenderWallet();
 
-    void setReceiver(Account account);
+    void setReceiverAccount(Account account);
 
     Account getReceiverAccount();
 
@@ -55,5 +55,4 @@ public interface Transaction {
     void setReceiverAddress(Address address);
 
     Address getReceiverAddress();
-
 }

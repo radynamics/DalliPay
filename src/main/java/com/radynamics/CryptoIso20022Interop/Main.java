@@ -122,12 +122,12 @@ public class Main {
             {
                 var account = transformInstruction.getAccountOrNull(p.getSenderWallet());
                 account = account == null ? new OtherAccount(p.getSenderWallet().getPublicKey()) : account;
-                p.setSender(account);
+                p.setSenderAccount(account);
             }
             {
                 var account = transformInstruction.getAccountOrNull(p.getReceiverWallet());
                 account = account == null ? new OtherAccount(p.getReceiverWallet().getPublicKey()) : account;
-                p.setReceiver(account);
+                p.setReceiverAccount(account);
             }
         }
 

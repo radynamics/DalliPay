@@ -72,7 +72,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setSender(Account account) {
+    public void setSenderAccount(Account account) {
         this.senderAccount = account;
     }
 
@@ -82,7 +82,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setReceiver(Account account) {
+    public void setReceiverAccount(Account account) {
         this.receiverAccount = account;
     }
 

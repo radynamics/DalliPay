@@ -73,7 +73,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public void setSender(Account account) {
+    public void setSenderAccount(Account account) {
         senderAccount = account;
     }
 
@@ -83,7 +83,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public void setReceiver(Account account) {
+    public void setReceiverAccount(Account account) {
         receiverAccount = account;
     }
 

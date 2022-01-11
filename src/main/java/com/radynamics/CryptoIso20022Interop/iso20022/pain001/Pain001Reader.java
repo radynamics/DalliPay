@@ -50,8 +50,8 @@ public class Pain001Reader {
                 var amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
 
                 var t = ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy);
-                t.setSender(senderAccount);
-                t.setReceiver(receiverAccount);
+                t.setSenderAccount(senderAccount);
+                t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
