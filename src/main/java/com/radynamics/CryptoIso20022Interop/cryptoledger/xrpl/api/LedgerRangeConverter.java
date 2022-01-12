@@ -52,6 +52,9 @@ public class LedgerRangeConverter {
             var estimatedOffsetSecods = fromDifference.toMillis() / (double) avgDurationPerLedger.toMillis();
             // ceil: if last found is slightly too early just take the next one.
             var estimatedOffset = UnsignedInteger.valueOf(Math.abs(Math.round(Math.ceil(estimatedOffsetSecods))));
+            if (estimatedOffset.equals(UnsignedInteger.ZERO)) {
+                break;
+            }
             var estimatedFromLedgerIndex = isTooEarly
                     ? bestMatch.ledgerIndex().get().plus(estimatedOffset)
                     : bestMatch.ledgerIndex().get().minus(estimatedOffset);
