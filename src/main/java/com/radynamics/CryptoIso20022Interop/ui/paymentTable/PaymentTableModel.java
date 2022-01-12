@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.LogManager;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public class PaymentTableModel extends AbstractTableModel {
             Object actorLedger = getActorWalletText(t);
             list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, amt, ccy, t.getTransmission(), "detail..."});
 
-            validate(t, row);
+            validateAsync(t, row);
             row++;
         }
 
@@ -104,30 +103,21 @@ public class PaymentTableModel extends AbstractTableModel {
         return wallet == null ? "" : wallet.getPublicKey();
     }
 
-    private void validate(Transaction t, int row) {
-        try {
-            validateAsync(t, row).thenAccept(result -> {
-                var rowIndex = result.left;
-                var validationResults = result.right;
-
-                setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
-                var highestStatus = getHighestStatus(validationResults);
-                setValueAt(isSelected(highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
-                setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
-            });
-        } catch (Exception e) {
-            LogManager.getLogger().error(e);
-        }
-    }
-
-    private CompletableFuture<ImmutablePair<Integer, ValidationResult[]>> validateAsync(Transaction t, int row) {
+    private void validateAsync(Transaction t, int row) {
         var completableFuture = new CompletableFuture<ImmutablePair<Integer, ValidationResult[]>>();
+        completableFuture.thenAccept(result -> {
+            var rowIndex = result.left;
+            var validationResults = result.right;
+
+            setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
+            var highestStatus = getHighestStatus(validationResults);
+            setValueAt(isSelected(highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
+            setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
+        });
 
         Executors.newCachedThreadPool().submit(() -> {
             completableFuture.complete(new ImmutablePair<>(row, new Validator().validate(t)));
         });
-
-        return completableFuture;
     }
 
     private ValidationState getHighestStatus(ValidationResult[] results) {
@@ -153,7 +143,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void onTransactionChanged(int row, Transaction t) {
-        validate(t, row);
+        validateAsync(t, row);
     }
 
     public Actor getShowWalletOf() {
