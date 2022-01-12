@@ -114,7 +114,8 @@ public class Camt054Writer {
         var amtValue = BigDecimal.ZERO;
         var amtCcy = "";
         if (trx.getCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
-            amtValue = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
+            var value = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit()).doubleValue();
+            amtValue = BigDecimal.valueOf(Math.round(value * 100000d) / 100000d);
             amtCcy = trx.getCcy();
         } else {
             var amt = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
