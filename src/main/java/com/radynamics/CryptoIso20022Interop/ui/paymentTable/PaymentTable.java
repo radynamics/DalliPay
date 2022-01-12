@@ -109,6 +109,8 @@ public class PaymentTable extends JPanel {
 
     public void load(Transaction[] data) {
         model.load(data);
+        table.revalidate();
+        table.repaint();
     }
 
     private Transaction getSelectedRow(JTable table) {

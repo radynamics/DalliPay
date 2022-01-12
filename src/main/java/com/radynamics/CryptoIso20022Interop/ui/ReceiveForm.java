@@ -232,9 +232,6 @@ public class ReceiveForm extends JFrame {
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
-
-        table.revalidate();
-        table.repaint();
     }
 
     public void setWallet(Wallet wallet) {
