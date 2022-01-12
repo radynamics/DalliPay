@@ -76,7 +76,7 @@ public class PaymentTable extends JPanel {
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    showMore(table, getSelectedRow(table));
+                    showMore(getSelectedRow(table));
                     return;
                 }
 
@@ -86,7 +86,7 @@ public class PaymentTable extends JPanel {
                 }
 
                 if (e.getClickCount() == 1) {
-                    showMore(table, getSelectedRow(table));
+                    showMore(getSelectedRow(table));
                 }
             }
         });
@@ -114,9 +114,9 @@ public class PaymentTable extends JPanel {
         return (Transaction) table.getModel().getValueAt(row, col);
     }
 
-    private void showMore(JTable table, Transaction obj) {
+    private void showMore(Transaction obj) {
         var account = model.getShowWalletOf().get(obj.getSenderAccount(), obj.getReceiverAccount());
-        JOptionPane.showMessageDialog(table, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
+        JOptionPane.showMessageDialog(this, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
     }
 
     public Transaction[] selectedPayments() {
