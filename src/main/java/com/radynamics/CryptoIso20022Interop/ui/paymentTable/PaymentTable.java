@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationS
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(ValidationState.class, new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         table.setDefaultRenderer(TransmissionState.class, new TransmissionCellRenderer());
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
+        table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
