@@ -24,11 +24,11 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
 
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
-    implementation group: 'org.xrpl', name: 'xrpl4j-address-codec', version: '2.0.0'
-    implementation group: 'org.xrpl', name: 'xrpl4j-keypairs', version: '2.0.0'
-    implementation group: 'org.xrpl', name: 'xrpl4j-model', version: '2.0.0'
-    implementation group: 'org.xrpl', name: 'xrpl4j-client', version: '2.0.0'
-    implementation group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.0.0'
+    implementation group: 'org.xrpl', name: 'xrpl4j-address-codec', version: '2.2.0'
+    implementation group: 'org.xrpl', name: 'xrpl4j-keypairs', version: '2.2.0'
+    implementation group: 'org.xrpl', name: 'xrpl4j-model', version: '2.2.0'
+    implementation group: 'org.xrpl', name: 'xrpl4j-client', version: '2.2.0'
+    implementation group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.2.0'
 
     implementation 'com.formdev:flatlaf:2.0-rc1'
     implementation 'com.formdev:flatlaf-extras:2.0-rc1'
