@@ -87,6 +87,7 @@ public class PaymentTableModel extends AbstractTableModel {
         }
 
         this.data = list.toArray(new Object[0][0]);
+        fireTableDataChanged();
     }
 
     private Object getActorAddressOrAccount(Transaction t) {
