@@ -53,7 +53,10 @@ public class PaymentTable extends JPanel {
         cb.forColumn(PaymentTableModel.COL_OBJECT).headerCenter().hide();
         cb.forColumn(PaymentTableModel.COL_VALIDATION_RESULTS).headerCenter().hide();
         cb.forColumn(PaymentTableModel.COL_SELECTOR).headerValue("").fixedWidth(40);
-        cb.forColumn(PaymentTableModel.COL_STATUS).headerValue("").fixedWidth(40).headerCenter();
+        {
+            var c = cb.forColumn(PaymentTableModel.COL_STATUS).headerValue("").fixedWidth(40).headerCenter().getColumn();
+            c.setCellRenderer(new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
+        }
         {
             var headerValue = model.getShowWalletOf().get("Sender for Export", "Receiver from Input");
             cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue(headerValue).width(200);

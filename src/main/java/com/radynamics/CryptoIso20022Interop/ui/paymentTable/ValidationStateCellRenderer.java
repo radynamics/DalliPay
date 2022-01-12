@@ -26,11 +26,18 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        var status = (ValidationState) value;
-        var obj = (ValidationResult[]) table.getModel().getValueAt(row, validationResultsColumn.getModelIndex());
-
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setHorizontalAlignment(JLabel.CENTER);
+
+        if (value == null) {
+            setText("...");
+            setToolTipText("Validating...");
+            return this;
+        }
+
+        setText(null);
+        var status = (ValidationState) value;
+        var obj = (ValidationResult[]) table.getModel().getValueAt(row, validationResultsColumn.getModelIndex());
         setIcon(getIconOrNull(status));
         setToolTipText(createToolTipText(obj));
         return this;
