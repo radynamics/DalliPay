@@ -10,12 +10,13 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 
 public class ReceiverLedgerCellEditor extends AbstractCellEditor implements TableCellEditor {
-    private final JComponent component;
+    private final WalletField component;
     private final TableColumn objectColumn;
 
-    public ReceiverLedgerCellEditor(TableColumn objectColumn, WalletLookupProvider lookupProvider) {
+    public ReceiverLedgerCellEditor(TableColumn objectColumn, WalletLookupProvider lookupProvider, boolean editable) {
         this.objectColumn = objectColumn;
         this.component = new WalletField(lookupProvider);
+        this.component.setEditable(editable);
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
@@ -28,6 +29,6 @@ public class ReceiverLedgerCellEditor extends AbstractCellEditor implements Tabl
     }
 
     public Object getCellEditorValue() {
-        return ((WalletField) component).getText();
+        return component.getText();
     }
 }

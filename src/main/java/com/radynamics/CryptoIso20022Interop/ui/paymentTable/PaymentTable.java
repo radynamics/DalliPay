@@ -39,7 +39,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
-        var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider);
+        var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Receiver);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(cellEditor);
 
         table.setRowHeight(30);
