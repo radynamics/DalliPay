@@ -27,10 +27,7 @@ import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.fees.FeeResult;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
-import org.xrpl.xrpl4j.model.transactions.Address;
-import org.xrpl.xrpl4j.model.transactions.MemoWrapper;
-import org.xrpl.xrpl4j.model.transactions.Payment;
-import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
+import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
@@ -52,14 +49,14 @@ public class JsonRpcApi implements TransactionSource {
 
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {
-            var t = r.transaction();
+            var t = r.resultTransaction().transaction();
             // TODO: all trx are fetched -> filter earlier
             if (!period.isBetween(t.closeDateHuman().get().toLocalDateTime())) {
                 continue;
             }
 
-            if (t.transactionType().value().equalsIgnoreCase("PAYMENT")) {
-                var p = (org.xrpl.xrpl4j.model.transactions.Payment) t;
+            if (t.transactionType() == TransactionType.PAYMENT) {
+                var p = (Payment) t;
                 // TODO: handle ImmutableIssuedCurrencyAmount
                 var deliveredAmount = r.metadata().get().deliveredAmount().get();
                 if (deliveredAmount instanceof XrpCurrencyAmount) {
@@ -96,7 +93,7 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+    private Transaction toTransaction(Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
         // TODO: handle IOUs
         // TODO: handle ImmutableIssuedCurrencyAmount
         var trx = new Transaction(ledger, deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
