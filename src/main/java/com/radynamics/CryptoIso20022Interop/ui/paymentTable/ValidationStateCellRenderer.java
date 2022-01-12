@@ -31,6 +31,7 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
 
         if (value == null) {
             setText("...");
+            setIcon(null);
             setToolTipText("Validating...");
             return this;
         }
