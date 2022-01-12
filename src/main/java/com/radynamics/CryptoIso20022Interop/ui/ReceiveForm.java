@@ -1,7 +1,13 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.components.DateTimePicker;
+import com.github.lgooddatepicker.components.TimePickerSettings;
+import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -14,6 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 public class ReceiveForm extends JFrame {
     private TransformInstruction transformInstruction;
@@ -21,7 +28,10 @@ public class ReceiveForm extends JFrame {
 
     private PaymentTable table;
     private JTextField txtInput;
+    private DateTimePicker dtPickerStart;
+    private DateTimePicker dtPickerEnd;
     private String targetFileName;
+    private Wallet wallet;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -73,7 +83,7 @@ public class ReceiveForm extends JFrame {
         panel0.setPreferredSize(new Dimension(500, 50));
         panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setPreferredSize(new Dimension(500, 70));
+        panel1.setPreferredSize(new Dimension(500, getNorthPad(3) + 10));
         panel2.setPreferredSize(new Dimension(500, 500));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(500, 45));
@@ -92,27 +102,59 @@ public class ReceiveForm extends JFrame {
                 var lbl = new JLabel("Source Wallet:");
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 5, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(0), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
                 txtInput = new JTextField();
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
-                panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setEditable(false);
                 panel1.add(txtInput);
             }
             {
                 var lbl = new JLabel("Exchange:");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 35, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(1), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
                 var lbl2 = new JLabel(transformInstruction.getExchange().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
+            }
+            {
+                var lbl = new JLabel("Payments between:");
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(2), SpringLayout.NORTH, panel1);
+                lbl.setOpaque(true);
+                panel1.add(lbl);
+
+                dtPickerStart = createDateTimePicker();
+                panel1Layout.putConstraint(SpringLayout.WEST, dtPickerStart, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerStart, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1.add(dtPickerStart);
+
+                var lblEnd = new JLabel("and");
+                panel1Layout.putConstraint(SpringLayout.WEST, lblEnd, 10, SpringLayout.EAST, dtPickerStart);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblEnd, getNorthPad(2), SpringLayout.NORTH, panel1);
+                lblEnd.setOpaque(true);
+                panel1.add(lblEnd);
+
+                dtPickerEnd = createDateTimePicker();
+                panel1Layout.putConstraint(SpringLayout.WEST, dtPickerEnd, 10, SpringLayout.EAST, lblEnd);
+                panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerEnd, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1.add(dtPickerEnd);
+
+                var cmd = new JButton("Refresh");
+                cmd.setPreferredSize(new Dimension(150, 35));
+                cmd.addActionListener(e -> {
+                    load();
+                });
+                panel1Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, cmd, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1.add(cmd);
             }
         }
         {
@@ -128,6 +170,25 @@ public class ReceiveForm extends JFrame {
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private DateTimePicker createDateTimePicker() {
+        var ds = new DatePickerSettings();
+        ds.setAllowEmptyDates(false);
+        var df = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
+        var stringPattern = df.toPattern();
+        ds.setFormatForDatesCommonEra(stringPattern);
+        ds.setFormatForDatesBeforeCommonEra(stringPattern.replace("yyyy", "uuuu"));
+
+        var ts = new TimePickerSettings();
+        ts.setAllowEmptyTimes(false);
+
+        return new DateTimePicker(ds, ts);
+    }
+
+    private static int getNorthPad(int line) {
+        final var lineHeight = 30;
+        return line * lineHeight;
     }
 
     private void exportSelected() {
@@ -147,15 +208,46 @@ public class ReceiveForm extends JFrame {
         }
     }
 
-    public void load(Transaction[] payments) {
-        table.load(payments);
+    public void load() {
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
+            Transaction[] payments = transformInstruction.getLedger().listPayments(wallet, period);
+
+            for (var p : payments) {
+                {
+                    var account = transformInstruction.getAccountOrNull(p.getSenderWallet());
+                    account = account == null ? new OtherAccount(p.getSenderWallet().getPublicKey()) : account;
+                    p.setSenderAccount(account);
+                }
+                {
+                    var account = transformInstruction.getAccountOrNull(p.getReceiverWallet());
+                    account = account == null ? new OtherAccount(p.getReceiverWallet().getPublicKey()) : account;
+                    p.setReceiverAccount(account);
+                }
+            }
+            table.load(payments);
+        } catch (Exception e) {
+            LogManager.getLogger().error(e);
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+
+        table.revalidate();
+        table.repaint();
     }
 
-    public void setInput(String value) {
-        txtInput.setText(value);
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
+        txtInput.setText(wallet.getPublicKey());
     }
 
     public void setTargetFileName(String targetFileName) {
         this.targetFileName = targetFileName;
+    }
+
+    public void setPeriod(DateTimeRange period) {
+        dtPickerStart.setDateTimePermissive(period.getStart());
+        dtPickerEnd.setDateTimePermissive(period.getEnd());
     }
 }

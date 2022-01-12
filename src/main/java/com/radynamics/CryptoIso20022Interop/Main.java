@@ -4,8 +4,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -17,9 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class Main {
@@ -108,36 +104,20 @@ public class Main {
         });
     }
 
-    private static void createCamt054(String outputFileName, Wallet wallet, DateTimeRange period) throws Exception {
+    private static void createCamt054(String outputFileName, Wallet wallet, DateTimeRange period) {
         var exchange = transformInstruction.getExchange();
         exchange.load();
 
         var currencyConverter = new CurrencyConverter(exchange.rates());
-        var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, currencyConverter);
-
-        var from = Date.from(period.getStart().atZone(ZoneId.systemDefault()).toInstant());
-        var until = Date.from(period.getEnd().atZone(ZoneId.systemDefault()).toInstant());
-        var payments = transformInstruction.getLedger().listPayments(wallet, period);
-        for (var p : payments) {
-            {
-                var account = transformInstruction.getAccountOrNull(p.getSenderWallet());
-                account = account == null ? new OtherAccount(p.getSenderWallet().getPublicKey()) : account;
-                p.setSenderAccount(account);
-            }
-            {
-                var account = transformInstruction.getAccountOrNull(p.getReceiverWallet());
-                account = account == null ? new OtherAccount(p.getReceiverWallet().getPublicKey()) : account;
-                p.setReceiverAccount(account);
-            }
-        }
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             FlatLightLaf.setup();
             var frm = new ReceiveForm(transformInstruction, currencyConverter);
             frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frm.load(payments);
-            frm.setInput(wallet.getPublicKey());
+            frm.setWallet(wallet);
             frm.setTargetFileName(outputFileName);
+            frm.setPeriod(period);
+            frm.load();
             frm.setSize(1024, 768);
             frm.setVisible(true);
         });
