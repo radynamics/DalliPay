@@ -37,8 +37,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class JsonRpcApi implements TransactionSource {
-    private Ledger ledger;
-    private Network network;
+    private final Ledger ledger;
+    private final Network network;
 
     public JsonRpcApi(Ledger ledger, Network network) {
         this.ledger = ledger;
