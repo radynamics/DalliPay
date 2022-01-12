@@ -74,7 +74,7 @@ public class PaymentTableModel extends AbstractTableModel {
             var ccy = transformInstruction.getTargetCcy();
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
             var validationResults = validate(t);
-            Object actorAddressOrAccount = getActorAddressOrAcount(t);
+            Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
             var highestStatus = getHighestStatus(validationResults);
             list.add(new Object[]{t, validationResults, isSelected(highestStatus), highestStatus, actorAddressOrAccount, actorLedger, amt, ccy, t.getTransmission(), "detail..."});
@@ -83,7 +83,7 @@ public class PaymentTableModel extends AbstractTableModel {
         this.data = list.toArray(new Object[0][0]);
     }
 
-    private Object getActorAddressOrAcount(Transaction t) {
+    private Object getActorAddressOrAccount(Transaction t) {
         Object actorAddressOrAccount = showWalletOf.get(t.getSenderAddress(), t.getReceiverAddress());
         if (actorAddressOrAccount == null) {
             var actorAccount = showWalletOf.get(t.getSenderAccount(), t.getReceiverAccount());
