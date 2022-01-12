@@ -1,9 +1,8 @@
-package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
+package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
-import com.radynamics.CryptoIso20022Interop.ui.Consts;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,5 +82,9 @@ public class WalletField extends JPanel {
 
     public void setLedger(Ledger ledger) {
         this.ledger = ledger;
+    }
+
+    public void setEditable(boolean b) {
+        txt.setEditable(b);
     }
 }

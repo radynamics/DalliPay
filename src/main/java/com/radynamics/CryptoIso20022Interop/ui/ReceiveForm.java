@@ -27,7 +27,7 @@ public class ReceiveForm extends JFrame {
     private CurrencyConverter currencyConverter;
 
     private PaymentTable table;
-    private JTextField txtInput;
+    private WalletField txtInput;
     private DateTimePicker dtPickerStart;
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
@@ -106,9 +106,10 @@ public class ReceiveForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new JTextField();
+                txtInput = new WalletField(transformInstruction.getLedger().getLookupProvider());
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
+                txtInput.setLedger(transformInstruction.getLedger());
                 txtInput.setEditable(false);
                 panel1.add(txtInput);
             }
