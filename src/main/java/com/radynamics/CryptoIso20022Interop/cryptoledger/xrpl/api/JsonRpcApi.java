@@ -24,7 +24,9 @@ import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
+import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
+import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.fees.FeeResult;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.transactions.*;
@@ -45,7 +47,15 @@ public class JsonRpcApi implements TransactionSource {
     @Override
     public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
         var xrplClient = new XrplClient(createUrl());
-        var result = xrplClient.accountTransactions(Address.of(wallet.getPublicKey()));
+        var c = new LedgerRangeConverter(xrplClient);
+        var ledgerRange = c.convert(period);
+
+        var params = AccountTransactionsRequestParams.builder()
+                .account(Address.of(wallet.getPublicKey()))
+                .ledgerIndexMinimum(LedgerIndexBound.of(ledgerRange.getStart().unsignedIntegerValue().intValue()))
+                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()))
+                .build();
+        var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {
