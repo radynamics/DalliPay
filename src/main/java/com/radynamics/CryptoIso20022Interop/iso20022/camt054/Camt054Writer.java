@@ -158,13 +158,21 @@ public class Camt054Writer {
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn());
 
-        var hasStrd = trx.getStructuredReferences() != null || trx.getInvoiceId() != null;
+        var structuredReferences = trx.getStructuredReferences();
+        var hasStructuredReferences = structuredReferences != null && structuredReferences.length > 0;
+        if (!hasStructuredReferences && transformInstruction.getCreditorReferenceIfMissing() != null) {
+            structuredReferences = new StructuredReference[1];
+            structuredReferences[0] = transformInstruction.getCreditorReferenceIfMissing();
+            hasStructuredReferences = true;
+        }
+
+        var hasStrd = hasStructuredReferences || trx.getInvoiceId() != null;
         if (hasStrd || trx.getMessages().length > 0) {
             txDtls.setRmtInf(new RemittanceInformation7());
         }
 
         if (hasStrd) {
-            txDtls.getRmtInf().getStrd().add(createStrd(trx.getStructuredReferences(), trx.getInvoiceId()));
+            txDtls.getRmtInf().getStrd().add(createStrd(structuredReferences, trx.getInvoiceId()));
         }
 
         var sb = new StringBuilder();

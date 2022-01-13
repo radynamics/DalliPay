@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,7 @@ public class TransformInstruction {
     private String targetCcy;
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
+    private StructuredReference creditorReferenceIfMissing;
 
     public TransformInstruction(Ledger ledger) {
         this.ledger = ledger;
@@ -97,5 +99,13 @@ public class TransformInstruction {
 
     public void setValutaDateFormat(DateFormat valutaDateFormat) {
         this.valutaDateFormat = valutaDateFormat;
+    }
+
+    public StructuredReference getCreditorReferenceIfMissing() {
+        return creditorReferenceIfMissing;
+    }
+
+    public void setCreditorReferenceIfMissing(StructuredReference creditorReferenceIfMissing) {
+        this.creditorReferenceIfMissing = creditorReferenceIfMissing;
     }
 }

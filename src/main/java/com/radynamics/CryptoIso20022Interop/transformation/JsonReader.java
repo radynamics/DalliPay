@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -29,6 +30,10 @@ public class JsonReader {
 
         ti.setBookingDateFormat(parseDateFormat(json.getString("bookingDateFormat")));
         ti.setValutaDateFormat(parseDateFormat(json.getString("valutaDateFormat")));
+        if (json.has("creditorReferenceIfMissing")) {
+            var value = json.getString("creditorReferenceIfMissing");
+            ti.setCreditorReferenceIfMissing(StructuredReferenceFactory.create(StructuredReferenceFactory.detectType(value), value));
+        }
 
         var arr = json.getJSONArray("accountMapping");
         for (int i = 0; i < arr.length(); i++) {

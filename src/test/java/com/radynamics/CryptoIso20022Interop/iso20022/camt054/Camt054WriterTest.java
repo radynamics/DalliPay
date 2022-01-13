@@ -142,4 +142,24 @@ public class Camt054WriterTest {
             default -> throw new IllegalStateException("Unexpected value: " + format);
         }
     }
+
+    @Test
+    public void createCreditorReferenceIfMissing() throws Exception {
+        var cryptoInstruction = createTestInstructions();
+        cryptoInstruction.setCreditorReferenceIfMissing(StructuredReferenceFactory.create(ReferenceType.Scor, "RF040000000000"));
+
+        var trx = createTestTransactionScor(cryptoInstruction.getLedger());
+        trx.removeStructuredReferences(0);
+
+        var t = new TransactionTranslator(cryptoInstruction);
+        var payments = t.apply(new Transaction[]{trx});
+
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        w.setIdGenerator(new FixedValueIdGenerator());
+        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        var actual = CamtConverter.toXml(w.create(payments));
+        var expected = CamtConverter.toXml(CamtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/createCreditorReferenceIfMissing.xml")));
+
+        assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromByteArray(expected.toByteArray())));
+    }
 }

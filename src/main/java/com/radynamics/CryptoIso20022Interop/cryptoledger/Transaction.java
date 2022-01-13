@@ -38,6 +38,8 @@ public interface Transaction {
 
     StructuredReference[] getStructuredReferences();
 
+    void removeStructuredReferences(int index);
+
     void addMessage(String message);
 
     String[] getMessages();

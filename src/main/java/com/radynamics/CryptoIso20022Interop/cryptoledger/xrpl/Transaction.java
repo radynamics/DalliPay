@@ -113,6 +113,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
+    public void removeStructuredReferences(int index) {
+        references.remove(index);
+    }
+
+    @Override
     public String[] getMessages() {
         return messages.toArray(new String[0]);
     }

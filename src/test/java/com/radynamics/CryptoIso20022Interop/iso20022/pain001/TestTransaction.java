@@ -112,6 +112,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
+    public void removeStructuredReferences(int index) {
+        references.remove(index);
+    }
+
+    @Override
     public String[] getMessages() {
         return messages.toArray(new String[0]);
     }
