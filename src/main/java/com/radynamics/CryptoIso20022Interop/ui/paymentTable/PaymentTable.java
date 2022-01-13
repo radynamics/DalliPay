@@ -37,8 +37,10 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         {
             var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_ISO20022));
-            column.setCellEditor(new AccountCellEditor(actor == Actor.Sender));
-            column.setCellRenderer(new AccountCellRenderer());
+            if (actor == Actor.Sender) {
+                column.setCellEditor(new AccountCellEditor(true));
+                column.setCellRenderer(new AccountCellRenderer());
+            }
         }
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
