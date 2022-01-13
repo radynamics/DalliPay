@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
@@ -112,7 +113,7 @@ public class SendForm extends JFrame {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver);
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new TransactionValidator());
             panel2.add(table);
         }
         {

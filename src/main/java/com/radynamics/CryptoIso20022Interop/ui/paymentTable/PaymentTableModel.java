@@ -3,9 +3,9 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -20,6 +20,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
+    private TransactionValidator validator;
     private Actor showWalletOf = Actor.Receiver;
 
     public static final String COL_OBJECT = "object";
@@ -33,9 +34,10 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, TransactionValidator validator) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
+        this.validator = validator;
     }
 
     public int getColumnCount() {
@@ -73,20 +75,22 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void load(Transaction[] data) {
         ArrayList<Object[]> list = new ArrayList<>();
-        int row = 0;
         for (var t : data) {
             var ccy = transformInstruction.getTargetCcy();
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
             list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, amt, ccy, t.getTransmission(), "detail..."});
-
-            validateAsync(t, row);
-            row++;
         }
 
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
+
+        int row = 0;
+        for (var t : data) {
+            validateAsync(t, row);
+            row++;
+        }
     }
 
     private Object getActorAddressOrAccount(Transaction t) {
@@ -116,7 +120,7 @@ public class PaymentTableModel extends AbstractTableModel {
         });
 
         Executors.newCachedThreadPool().submit(() -> {
-            completableFuture.complete(new ImmutablePair<>(row, new Validator().validate(t)));
+            completableFuture.complete(new ImmutablePair<>(row, validator.validate(t)));
         });
     }
 

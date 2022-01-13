@@ -4,10 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.AccountFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.Address;
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -24,11 +21,11 @@ public class PaymentTable extends JPanel {
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor) {
+    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, TransactionValidator validator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
 
-        model = new PaymentTableModel(transformInstruction, currencyConverter);
+        model = new PaymentTableModel(transformInstruction, currencyConverter, validator);
         model.setShowWalletOf(actor);
 
         table = new JTable(model);

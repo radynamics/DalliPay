@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -158,7 +159,7 @@ public class ReceiveForm extends JFrame {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender);
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, new TransactionValidator());
             panel2.add(table);
         }
         {
