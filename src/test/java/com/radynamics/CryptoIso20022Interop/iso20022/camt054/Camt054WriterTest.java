@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,7 +28,9 @@ public class Camt054WriterTest {
     public void testCreate2Payments() throws Exception {
         var cryptoInstruction = createTestInstructions();
 
-        var payments = createTestTransactions(cryptoInstruction.getLedger());
+        var t = new TransactionTranslator(cryptoInstruction);
+        var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
+
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
@@ -96,7 +99,8 @@ public class Camt054WriterTest {
         var cryptoInstruction = createTestInstructions();
         cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
 
-        var payments = createTestTransactions(cryptoInstruction.getLedger());
+        var t = new TransactionTranslator(cryptoInstruction);
+        var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
@@ -115,7 +119,8 @@ public class Camt054WriterTest {
         cryptoInstruction.setBookingDateFormat(format);
         cryptoInstruction.setValutaDateFormat(format);
 
-        var payments = createTestTransactions(cryptoInstruction.getLedger());
+        var t = new TransactionTranslator(cryptoInstruction);
+        var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));

@@ -4,12 +4,11 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
@@ -213,20 +212,9 @@ public class ReceiveForm extends JFrame {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
-            Transaction[] payments = transformInstruction.getLedger().listPayments(wallet, period);
+            var t = new TransactionTranslator(transformInstruction);
+            var payments = t.apply(transformInstruction.getLedger().listPayments(wallet, period));
 
-            for (var p : payments) {
-                {
-                    var account = transformInstruction.getAccountOrNull(p.getSenderWallet());
-                    account = account == null ? new OtherAccount(p.getSenderWallet().getPublicKey()) : account;
-                    p.setSenderAccount(account);
-                }
-                {
-                    var account = transformInstruction.getAccountOrNull(p.getReceiverWallet());
-                    account = account == null ? new OtherAccount(p.getReceiverWallet().getPublicKey()) : account;
-                    p.setReceiverAccount(account);
-                }
-            }
             table.load(payments);
         } catch (Exception e) {
             LogManager.getLogger().error(e);

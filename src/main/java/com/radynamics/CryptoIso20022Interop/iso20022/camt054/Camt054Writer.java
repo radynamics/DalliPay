@@ -107,8 +107,7 @@ public class Camt054Writer {
         var ntry = new ReportEntry4();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
-        var iban = transformInstruction.getIbanOrNull(trx.getSenderWallet());
-        ntry.setNtryRef(iban == null ? trx.getSenderWallet().getPublicKey() : iban.getUnformatted());
+        ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
         double value;
