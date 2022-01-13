@@ -199,6 +199,7 @@ public class ReceiveForm extends JFrame {
             var s = CamtConverter.toXml(w.create(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
+            outputStream.close();
 
             JOptionPane.showMessageDialog(table, String.format("Successfully exported to %s", targetFileName));
         } catch (Exception e) {
