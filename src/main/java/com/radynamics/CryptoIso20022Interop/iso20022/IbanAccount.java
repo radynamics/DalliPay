@@ -33,4 +33,36 @@ public class IbanAccount implements Account {
         sb.append(unformatted, i, length);
         return sb.toString();
     }
+
+    public static boolean isValid(String value) {
+        if (value == null) {
+            return false;
+        }
+
+        final int IBAN_MIN_SIZE = 15;
+        final int IBAN_MAX_SIZE = 34;
+        final long IBAN_MAX = 999999999;
+        final long IBAN_MODULUS = 97;
+
+        var unformatted = value.trim().replaceAll(" ", "");
+        if (unformatted.length() < IBAN_MIN_SIZE || unformatted.length() > IBAN_MAX_SIZE) {
+            return false;
+        }
+
+        var reformat = unformatted.substring(4) + unformatted.substring(0, 4);
+        long total = 0;
+        for (int i = 0; i < reformat.length(); i++) {
+            var charValue = Character.getNumericValue(reformat.charAt(i));
+            if (charValue < 0 || charValue > 35) {
+                return false;
+            }
+
+            total = (charValue > 9 ? total * 100 : total * 10) + charValue;
+            if (total > IBAN_MAX) {
+                total = (total % IBAN_MODULUS);
+            }
+        }
+
+        return (total % IBAN_MODULUS) == 1;
+    }
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class IbanAccountTest {
     @ParameterizedTest
@@ -37,5 +37,24 @@ public class IbanAccountTest {
         assertEquals("CH93 0076 2011 6238 5295 7", new IbanAccount("CH93 0076 2011 6238 5295 7").getFormatted());
         assertEquals("FI21 1234 5600 0007 85", new IbanAccount("FI2112345600000785").getFormatted());
         assertEquals("BR18 0036 0305 0000 1000 9795 493C 1", new IbanAccount("BR1800360305000010009795493C1").getFormatted());
+    }
+
+    @Test
+    public void isValid() {
+        assertTrue(IbanAccount.isValid("CH9300762011623852957"));
+        assertTrue(IbanAccount.isValid(" CH9300762011623852957"));
+        assertTrue(IbanAccount.isValid("CH9300762011623852957 "));
+        assertTrue(IbanAccount.isValid("CH 9300762011623852957"));
+        assertTrue(IbanAccount.isValid("CH93 0076 2011 6238 5295 7"));
+
+        assertFalse(IbanAccount.isValid(IbanAccount.Empty.getUnformatted()));
+        assertFalse(IbanAccount.isValid(null));
+        assertFalse(IbanAccount.isValid(""));
+        assertFalse(IbanAccount.isValid(" "));
+        assertFalse(IbanAccount.isValid("a"));
+        assertFalse(IbanAccount.isValid("CH93"));
+        assertFalse(IbanAccount.isValid("CH93 0076"));
+        assertFalse(IbanAccount.isValid("CH9300762011623852956")); // checksum invalid
+        assertFalse(IbanAccount.isValid("CH930076x011623852956")); // char invalid
     }
 }
