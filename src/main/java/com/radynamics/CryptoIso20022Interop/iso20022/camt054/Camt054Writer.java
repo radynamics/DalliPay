@@ -111,19 +111,19 @@ public class Camt054Writer {
         ntry.setNtryRef(iban == null ? trx.getSenderWallet().getPublicKey() : iban.getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
-        var amtValue = BigDecimal.ZERO;
+        double value;
         var amtCcy = "";
         if (trx.getCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
-            var value = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit()).doubleValue();
-            amtValue = BigDecimal.valueOf(Math.round(value * 100000d) / 100000d);
+            value = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit()).doubleValue();
             amtCcy = trx.getCcy();
         } else {
             var amt = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
-            var value = ccyConverter.convert(amt, trx.getCcy(), transformInstruction.getTargetCcy());
             // TODO: improve rounding (ex. JPY)
-            amtValue = BigDecimal.valueOf(Math.round(value * 100.0) / 100.0);
+            value = ccyConverter.convert(amt, trx.getCcy(), transformInstruction.getTargetCcy());
             amtCcy = transformInstruction.getTargetCcy();
         }
+        final int xsdMaxSupportedFractionDigits = 5;
+        var amtValue = AmountRounder.round(value, xsdMaxSupportedFractionDigits);
         ntry.getAmt().setValue(amtValue);
         ntry.getAmt().setCcy(amtCcy);
 
