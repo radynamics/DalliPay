@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.AccountFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
@@ -37,6 +38,11 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
+        {
+            var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_ISO20022));
+            column.setCellEditor(new AccountCellEditor(actor == Actor.Sender));
+            column.setCellRenderer(new AccountCellRenderer());
+        }
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
         var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Receiver);
@@ -96,11 +102,16 @@ public class PaymentTable extends JPanel {
         new TableCellListener(table, new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 var tcl = (TableCellListener) e.getSource();
-                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
-                    var row = tcl.getRow();
-                    var t = (Transaction) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
+                var cleanedInput = tcl.getNewValue().toString().trim();
+                var row = tcl.getRow();
+                var t = (Transaction) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
-                    t.setReceiverWallet(t.getLedger().createWallet((String) tcl.getNewValue(), null));
+                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
+                    t.setSenderAccount(AccountFactory.create(cleanedInput));
+                    model.onTransactionChanged(row, t);
+                }
+                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
+                    t.setReceiverWallet(t.getLedger().createWallet(cleanedInput, null));
                     model.onTransactionChanged(row, t);
                 }
             }

@@ -63,7 +63,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
-        return col == getColumnIndex(COL_RECEIVER_LEDGER);
+        return col == getColumnIndex(COL_RECEIVER_ISO20022) || col == getColumnIndex(COL_RECEIVER_LEDGER);
     }
 
     public void setValueAt(Object value, int row, int col) {
