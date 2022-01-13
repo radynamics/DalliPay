@@ -2,12 +2,18 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.math.BigDecimal;
 
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
+
+    @Override
+    public String getId() {
+        return "TEST_LEDGER";
+    }
 
     @Override
     public String getNativeCcySymbol() {
@@ -63,7 +69,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public void setNetwork(Network network) {
+    public void setNetwork(NetworkInfo network) {
         throw new NotImplementedException();
     }
 
@@ -75,5 +81,10 @@ public class TestLedger implements Ledger {
     @Override
     public boolean isValidPublicKey(String publicKey) {
         return true;
+    }
+
+    @Override
+    public HttpUrl getFallbackUrl(Network type) {
+        return null;
     }
 }

@@ -1,9 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -42,7 +39,7 @@ public class Camt054WriterTest {
 
     private static TransformInstruction createTestInstructions() {
         var ledger = LedgerFactory.create("xrpl");
-        ledger.setNetwork(Network.Test);
+        ledger.setNetwork(new NetworkInfo(Network.Test, null));
         var i = new TransformInstruction(ledger);
         i.setExchange(new DemoExchange());
         i.setTargetCcy(ledger.getNativeCcySymbol());

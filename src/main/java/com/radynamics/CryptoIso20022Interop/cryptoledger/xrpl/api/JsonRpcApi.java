@@ -5,15 +5,14 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.WalletConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
-import okhttp3.HttpUrl;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -37,16 +36,16 @@ import java.util.ArrayList;
 
 public class JsonRpcApi implements TransactionSource {
     private final Ledger ledger;
-    private final Network network;
+    private final NetworkInfo network;
 
-    public JsonRpcApi(Ledger ledger, Network network) {
+    public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
     }
 
     @Override
     public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
-        var xrplClient = new XrplClient(createUrl());
+        var xrplClient = new XrplClient(network.getUrl());
         var c = new LedgerRangeConverter(xrplClient);
         var ledgerRange = c.convert(period);
 
@@ -80,26 +79,13 @@ public class JsonRpcApi implements TransactionSource {
 
     public boolean exists(Wallet wallet) {
         try {
-            var xrplClient = new XrplClient(createUrl());
+            var xrplClient = new XrplClient(network.getUrl());
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
         } catch (JsonRpcClientErrorException e) {
             LogManager.getLogger().error(e);
             return false;
-        }
-    }
-
-    private HttpUrl createUrl() {
-        // TODO: hardcoded url
-        switch (network) {
-            case Live -> {
-                return HttpUrl.get("http://s1.ripple.com:51234/");
-            }
-            case Test -> {
-                return HttpUrl.get("https://s.altnet.rippletest.net:51234/");
-            }
-            default -> throw new NotImplementedException(String.format("unknown network %s", network));
         }
     }
 
@@ -127,14 +113,14 @@ public class JsonRpcApi implements TransactionSource {
 
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
         // As explained on https://xrpl.org/send-xrp.html
-        var xrplClient = new XrplClient(createUrl());
+        var xrplClient = new XrplClient(network.getUrl());
 
         var previousLastLedgerSequence = UnsignedInteger.ZERO;
         var accountSequenceOffset = UnsignedInteger.ZERO;
 
         for (var t : transactions) {
             var walletFactory = DefaultWalletFactory.getInstance();
-            var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network != Network.Live);
+            var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.getType() != Network.Live);
             var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
             var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());

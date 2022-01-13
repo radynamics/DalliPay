@@ -35,11 +35,13 @@ public class Main {
         var walletPublicKey = getParam(args, "-wallet");
         var walletSecret = getParam(args, "-walletSecret");
         var networkId = getParam(args, "-n", "test"); // live, test
+        var configFilePath = getParam(args, "-c", "config.json");
 
         try {
             var r = new JsonReader();
             transformInstruction = r.read(new FileInputStream(trainsformInstructionFileName));
-            transformInstruction.getLedger().setNetwork(NetworkConverter.from(networkId));
+            Config config = Config.load(transformInstruction.getLedger(), NetworkConverter.from(networkId), configFilePath);
+            transformInstruction.getLedger().setNetwork(config.getNetworkInfo());
 
             switch (action) {
                 case "pain001ToCrypto":

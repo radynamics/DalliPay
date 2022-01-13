@@ -1,10 +1,13 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import okhttp3.HttpUrl;
 
 import java.math.BigDecimal;
 
 public interface Ledger {
+    String getId();
+
     String getNativeCcySymbol();
 
     Transaction createTransaction(Wallet sender, Wallet receiver, long amountSmallestUnit, String ccy);
@@ -21,9 +24,11 @@ public interface Ledger {
 
     boolean exists(Wallet wallet);
 
-    void setNetwork(Network network);
+    void setNetwork(NetworkInfo network);
 
     WalletLookupProvider getLookupProvider();
 
     boolean isValidPublicKey(String publicKey);
+
+    HttpUrl getFallbackUrl(Network type);
 }
