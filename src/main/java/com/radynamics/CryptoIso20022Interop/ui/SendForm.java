@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class SendForm extends JFrame {
@@ -18,7 +20,8 @@ public class SendForm extends JFrame {
     private CurrencyConverter currencyConverter;
 
     private PaymentTable table;
-    private JTextField txtInput;
+    private FilePathField txtInput;
+    private Pain001Reader reader;
 
     public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -93,10 +96,16 @@ public class SendForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new JTextField();
+                txtInput = new FilePathField();
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
-                txtInput.setEditable(false);
+                txtInput.addChangedListener(() -> {
+                    try {
+                        load(reader.read(new FileInputStream(txtInput.getText())));
+                    } catch (Exception e) {
+                        ExceptionDialog.show(this, e);
+                    }
+                });
                 panel1.add(txtInput);
             }
             {
@@ -138,11 +147,15 @@ public class SendForm extends JFrame {
         }
     }
 
-    public void load(Transaction[] payments) {
+    private void load(Transaction[] payments) {
         table.load(payments);
     }
 
     public void setInput(String value) {
         txtInput.setText(value);
+    }
+
+    public void setReader(Pain001Reader reader) {
+        this.reader = reader;
     }
 }

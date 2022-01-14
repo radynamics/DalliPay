@@ -97,14 +97,12 @@ public class Main {
 
         var currencyConverter = new CurrencyConverter(exchange.rates());
         var r = new Pain001Reader(transformInstruction.getLedger(), transformInstruction, currencyConverter);
-        var payments = r.read(input);
-        LogManager.getLogger().trace(String.format("%s payments read from pain001", payments.length));
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             FlatLightLaf.setup();
             var frm = new SendForm(transformInstruction, currencyConverter);
             frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frm.load(payments);
+            frm.setReader(r);
             frm.setInput(inputFileName);
             frm.setSize(1024, 768);
             frm.setVisible(true);

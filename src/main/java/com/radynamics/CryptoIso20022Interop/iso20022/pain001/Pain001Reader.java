@@ -15,6 +15,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.genera
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.PartyIdentification32;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -83,6 +84,7 @@ public class Pain001Reader {
             }
         }
 
+        LogManager.getLogger().trace(String.format("%s payments read from pain001", list.size()));
         return list.toArray(new Transaction[0]);
     }
 
