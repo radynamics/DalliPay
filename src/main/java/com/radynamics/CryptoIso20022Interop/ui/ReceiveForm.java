@@ -4,6 +4,7 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
@@ -31,7 +32,6 @@ public class ReceiveForm extends JFrame {
     private DateTimePicker dtPickerStart;
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
-    private Wallet wallet;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -110,7 +110,6 @@ public class ReceiveForm extends JFrame {
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setLedger(transformInstruction.getLedger());
-                txtInput.setEditable(false);
                 panel1.add(txtInput);
             }
             {
@@ -211,10 +210,17 @@ public class ReceiveForm extends JFrame {
     }
 
     public void load() {
+        var walletPublicKey = txtInput.getText();
+        if (!transformInstruction.getLedger().isValidPublicKey(walletPublicKey)) {
+            table.load(new Transaction[0]);
+            return;
+        }
+
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction);
+            var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
             var payments = t.apply(transformInstruction.getLedger().listPayments(wallet, period));
 
             table.load(payments);
@@ -226,8 +232,7 @@ public class ReceiveForm extends JFrame {
     }
 
     public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-        txtInput.setText(wallet.getPublicKey());
+        txtInput.setText(wallet == null ? "" : wallet.getPublicKey());
     }
 
     public void setTargetFileName(String targetFileName) {

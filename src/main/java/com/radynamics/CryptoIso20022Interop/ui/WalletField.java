@@ -24,6 +24,7 @@ public class WalletField extends JPanel {
 
         {
             txt = new JTextField();
+            txt.setColumns(25);
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
@@ -77,7 +78,7 @@ public class WalletField extends JPanel {
     }
 
     public String getText() {
-        return txt.getText();
+        return txt.getText().trim();
     }
 
     public void setLedger(Ledger ledger) {

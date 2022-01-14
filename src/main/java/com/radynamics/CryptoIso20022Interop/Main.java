@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.ReceiveForm;
 import com.radynamics.CryptoIso20022Interop.ui.SendForm;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 
 import javax.swing.*;
@@ -57,7 +58,11 @@ public class Main {
                     var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
 
                     // TODO: add option to keep ledger's native currency or convert into specified currency.
-                    createCamt054(outputFileName, new Wallet(walletPublicKey), period);
+                    Wallet wallet = null;
+                    if (!StringUtils.isAllEmpty(walletPublicKey)) {
+                        wallet = new Wallet(walletPublicKey);
+                    }
+                    createCamt054(outputFileName, wallet, period);
                     break;
                 default:
                     throw new RuntimeException(String.format("unknown action %s", action));

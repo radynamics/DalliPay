@@ -45,7 +45,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return data.length;
+        return data == null ? 0 : data.length;
     }
 
     public String getColumnName(int col) {
