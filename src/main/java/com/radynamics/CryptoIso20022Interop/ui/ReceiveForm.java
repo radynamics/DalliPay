@@ -158,7 +158,7 @@ public class ReceiveForm extends JFrame {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, new TransactionValidator());
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new TransactionValidator());
             panel2.add(table);
         }
         {

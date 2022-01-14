@@ -22,7 +22,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private TransactionValidator validator;
-    private Actor showWalletOf = Actor.Receiver;
+    private Actor actor = Actor.Sender;
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -67,8 +67,8 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
-        return (showWalletOf == Actor.Sender && col == getColumnIndex(COL_RECEIVER_ISO20022))
-                || (showWalletOf == Actor.Receiver && col == getColumnIndex(COL_RECEIVER_LEDGER));
+        return (actor == Actor.Receiver && col == getColumnIndex(COL_RECEIVER_ISO20022))
+                || (actor == Actor.Sender && col == getColumnIndex(COL_RECEIVER_LEDGER));
     }
 
     public void setValueAt(Object value, int row, int col) {
@@ -97,16 +97,16 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     private Object getActorAddressOrAccount(Transaction t) {
-        Object actorAddressOrAccount = showWalletOf.get(t.getSenderAddress(), t.getReceiverAddress());
+        Object actorAddressOrAccount = actor.get(t.getReceiverAddress(), t.getSenderAddress());
         if (actorAddressOrAccount == null) {
-            var actorAccount = showWalletOf.get(t.getSenderAccount(), t.getReceiverAccount());
+            var actorAccount = actor.get(t.getReceiverAccount(), t.getSenderAccount());
             actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
         }
         return actorAddressOrAccount;
     }
 
     private String getActorWalletText(Transaction t) {
-        var wallet = showWalletOf.get(t.getSenderWallet(), t.getReceiverWallet());
+        var wallet = actor.get(t.getReceiverWallet(), t.getSenderWallet());
         return wallet == null ? "" : wallet.getPublicKey();
     }
 
@@ -153,11 +153,11 @@ public class PaymentTableModel extends AbstractTableModel {
         validateAsync(t, row);
     }
 
-    public Actor getShowWalletOf() {
-        return showWalletOf;
+    public Actor getActor() {
+        return actor;
     }
 
-    public void setShowWalletOf(Actor actor) {
-        this.showWalletOf = actor;
+    public void setActor(Actor actor) {
+        this.actor = actor;
     }
 }

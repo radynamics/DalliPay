@@ -113,7 +113,7 @@ public class SendForm extends JFrame {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new TransactionValidator());
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, new TransactionValidator());
             panel2.add(table);
         }
         {

@@ -27,7 +27,7 @@ public class PaymentTable extends JPanel {
         this.transformInstruction = transformInstruction;
 
         model = new PaymentTableModel(transformInstruction, currencyConverter, validator);
-        model.setShowWalletOf(actor);
+        model.setActor(actor);
 
         table = new JTable(model);
         table.setFillsViewportHeight(true);
@@ -39,14 +39,14 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeCellRenderer());
         {
             var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_ISO20022));
-            if (actor == Actor.Sender) {
+            if (actor == Actor.Receiver) {
                 column.setCellEditor(new AccountCellEditor(true));
                 column.setCellRenderer(new AccountCellRenderer());
             }
         }
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
-        var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Receiver);
+        var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Sender);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(cellEditor);
 
         table.setRowHeight(30);
@@ -65,17 +65,17 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         }
         {
-            var headerValue = model.getShowWalletOf().get("Sender for Export", "Receiver from Input");
+            var headerValue = model.getActor().get( "Receiver from Input", "Sender for Export");
             cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue(headerValue).width(200);
         }
         {
-            var headerValue = String.format("%s CryptoCurrency Wallet", model.getShowWalletOf().get("Sender", "Receiver"));
+            var headerValue = String.format("%s CryptoCurrency Wallet", model.getActor().get("Receiver", "Sender"));
             cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue(headerValue).width(200);
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue("Booked").width(90).getColumn();
             c.setCellRenderer(new LocalDateTimeCellRenderer());
-            if (model.getShowWalletOf() == Actor.Receiver) {
+            if (model.getActor() == Actor.Sender) {
                 cb.hide();
             }
         }
@@ -139,7 +139,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Transaction obj) {
-        var account = model.getShowWalletOf().get(obj.getSenderAccount(), obj.getReceiverAccount());
+        var account = model.getActor().get(obj.getReceiverAccount(), obj.getSenderAccount());
         JOptionPane.showMessageDialog(this, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
     }
 
