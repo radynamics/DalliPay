@@ -8,9 +8,9 @@ public class AddressFormatter {
         sb.append(a.getName());
 
         if (!StringUtils.isAllEmpty(a.getCity())) {
-            sb.append(", ");
+            sb.append(",");
             if (!StringUtils.isAllEmpty(a.getZip())) {
-                sb.append(a.getZip());
+                sb.append(String.format(" %s", a.getZip()));
             }
             sb.append(String.format(" %s", a.getCity()));
         }
