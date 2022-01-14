@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDateTime;
 
 public class PaymentTable extends JPanel {
     private final JTable table;
@@ -35,6 +36,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
+        table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeCellRenderer());
         {
             var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_ISO20022));
             if (actor == Actor.Sender) {
@@ -69,6 +71,13 @@ public class PaymentTable extends JPanel {
         {
             var headerValue = String.format("%s CryptoCurrency Wallet", model.getShowWalletOf().get("Sender", "Receiver"));
             cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue(headerValue).width(200);
+        }
+        {
+            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue("Booked").width(90).getColumn();
+            c.setCellRenderer(new LocalDateTimeCellRenderer());
+            if (model.getShowWalletOf() == Actor.Receiver) {
+                cb.hide();
+            }
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_AMOUNT).headerValue("Amount").width(100).headerRigth().getColumn();

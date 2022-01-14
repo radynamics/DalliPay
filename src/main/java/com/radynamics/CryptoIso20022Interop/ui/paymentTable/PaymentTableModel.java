@@ -16,7 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
+            COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
@@ -29,6 +30,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_STATUS = "status";
     public static final String COL_RECEIVER_ISO20022 = "receiverIso20022";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
+    public static final String COL_BOOKED = "valuta";
     public static final String COL_AMOUNT = "amount";
     public static final String COL_CCY = "ccy";
     public static final String COL_TRX_STATUS = "transmissionStatus";
@@ -81,7 +83,7 @@ public class PaymentTableModel extends AbstractTableModel {
             var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
-            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, amt, ccy, t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), amt, ccy, t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
