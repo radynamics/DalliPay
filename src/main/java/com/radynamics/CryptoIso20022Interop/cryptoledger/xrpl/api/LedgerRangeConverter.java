@@ -37,7 +37,7 @@ public class LedgerRangeConverter {
         var latestLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.CLOSED).build());
         var latestLedgerCloseTimeHuman = latestLedger.ledger().closeTimeHuman().get();
         if (dt.isAfter(latestLedgerCloseTimeHuman.toLocalDateTime())) {
-            logger.trace("%s is after last ledger -> take last ledger at %s", dt, latestLedgerCloseTimeHuman.toLocalDateTime());
+            logger.trace(String.format("%s is after last ledger -> take last ledger at %s", dt, latestLedgerCloseTimeHuman.toLocalDateTime()));
             return latestLedger;
         }
 
