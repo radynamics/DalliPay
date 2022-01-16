@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
+import java.time.LocalDateTime;
+
 public class DemoExchange implements Exchange {
     private ExchangeRate[] exchangeRates;
 
@@ -18,9 +20,9 @@ public class DemoExchange implements Exchange {
     @Override
     public void load() {
         exchangeRates = new ExchangeRate[3];
-        exchangeRates[0] = new ExchangeRate("XRP", "USD", 0.843332);
-        exchangeRates[1] = new ExchangeRate("XRP", "EUR", 0.69946);
-        exchangeRates[2] = new ExchangeRate("XRP", "CHF", 0.78825);
+        exchangeRates[0] = new ExchangeRate("XRP", "USD", 0.843332, LocalDateTime.now());
+        exchangeRates[1] = new ExchangeRate("XRP", "EUR", 0.69946, LocalDateTime.now());
+        exchangeRates[2] = new ExchangeRate("XRP", "CHF", 0.78825, LocalDateTime.now());
     }
 
     @Override

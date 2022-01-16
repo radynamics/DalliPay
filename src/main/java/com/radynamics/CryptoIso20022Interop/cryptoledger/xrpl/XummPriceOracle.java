@@ -69,7 +69,7 @@ public class XummPriceOracle implements HistoricExchangeRateSource {
         for (var r : rates) {
             sum += r;
         }
-        return new ExchangeRate(pair, sum / rates.size());
+        return new ExchangeRate(pair, sum / rates.size(), bestMatch.getBooked());
     }
 
     private Transaction getBestMatch(Transaction[] transactions, LocalDateTime pointInTime) {

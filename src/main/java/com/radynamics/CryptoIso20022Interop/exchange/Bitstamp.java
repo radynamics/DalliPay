@@ -6,8 +6,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 public class Bitstamp implements Exchange {
     private static String[] currencyPairs = new String[]{"xrpusd", "xrpeur", "xrpgbp"};
@@ -33,7 +36,8 @@ public class Bitstamp implements Exchange {
                 var json = load(currencyPair);
                 var ccyFrom = currencyPair.substring(0, 3).toUpperCase();
                 var ccyTo = currencyPair.substring(3).toUpperCase();
-                exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, json.getDouble("last")));
+                var pointInTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(json.getLong("timestamp")), TimeZone.getDefault().toZoneId());
+                exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, json.getDouble("last"), pointInTime));
             } catch (Exception e) {
                 LogManager.getLogger().error(String.format("Could not load rates for currencyPair %s", currencyPair), e);
             }
