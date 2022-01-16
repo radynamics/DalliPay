@@ -65,11 +65,10 @@ public class JsonRpcApi implements TransactionSource {
             }
 
             if (t.transactionType() == TransactionType.PAYMENT) {
-                var p = (Payment) t;
                 // TODO: handle ImmutableIssuedCurrencyAmount
                 var deliveredAmount = r.metadata().get().deliveredAmount().get();
                 if (deliveredAmount instanceof XrpCurrencyAmount) {
-                    list.add(toTransaction(p, (XrpCurrencyAmount) deliveredAmount));
+                    list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
                 }
             }
         }
@@ -89,24 +88,28 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    private Transaction toTransaction(Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
         // TODO: handle IOUs
         // TODO: handle ImmutableIssuedCurrencyAmount
         var trx = new Transaction(ledger, deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
-        trx.setId(p.hash().get().value());
-        trx.setBooked(p.closeDateHuman().get().toLocalDateTime());
-        trx.setSender(WalletConverter.from(p.account()));
-        trx.setReceiver(WalletConverter.from(p.destination()));
-        for (MemoWrapper mw : p.memos()) {
+        trx.setId(t.hash().get().value());
+        trx.setBooked(t.closeDateHuman().get().toLocalDateTime());
+        trx.setSender(WalletConverter.from(t.account()));
+        for (MemoWrapper mw : t.memos()) {
             var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
             for (var r : unwrappedMemo.structuredReferences()) {
                 trx.addStructuredReference(r);
             }
-            for (var t : unwrappedMemo.freeTexts()) {
-                trx.addMessage(t);
+            for (var ft : unwrappedMemo.freeTexts()) {
+                trx.addMessage(ft);
             }
         }
-        trx.setInvoiceId(p.invoiceId().isEmpty() ? "" : p.invoiceId().get().value());
+
+        if (t.transactionType() == TransactionType.PAYMENT) {
+            var p = (Payment) t;
+            trx.setReceiver(WalletConverter.from(p.destination()));
+            trx.setInvoiceId(p.invoiceId().isEmpty() ? "" : p.invoiceId().get().value());
+        }
 
         return trx;
     }
