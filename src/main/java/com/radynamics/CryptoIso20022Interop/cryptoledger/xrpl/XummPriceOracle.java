@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSource;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 
 import java.time.Duration;
@@ -57,7 +58,7 @@ public class XummPriceOracle implements HistoricExchangeRateSource {
         var rates = new ArrayList<Double>();
         for (var m : bestMatch.getMessages()) {
             var ratesText = m.split(";");
-            if (ratesText.length == 0) {
+            if (ratesText.length == 0 || !NumberUtils.isCreatable(ratesText[0])) {
                 continue;
             }
             rates.add(Double.valueOf(ratesText[0]));
