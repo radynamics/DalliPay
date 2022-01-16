@@ -25,4 +25,8 @@ public class CurrencyPair {
         }
         return false;
     }
+
+    public String getDisplayText() {
+        return String.format("%s/%s", getFirst(), getSecond());
+    }
 }
