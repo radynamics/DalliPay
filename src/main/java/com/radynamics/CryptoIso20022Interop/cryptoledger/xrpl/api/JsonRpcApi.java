@@ -37,16 +37,19 @@ import java.util.ArrayList;
 public class JsonRpcApi implements TransactionSource {
     private final Ledger ledger;
     private final NetworkInfo network;
+    private final XrplClient xrplClient;
+    private final LedgerRangeConverter ledgerRangeConverter;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
+        this.xrplClient = new XrplClient(network.getUrl());
+        this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
     }
 
     @Override
     public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
-        var xrplClient = new XrplClient(network.getUrl());
-        var params = createAccountTransactionsRequestParams(xrplClient, wallet, period);
+        var params = createAccountTransactionsRequestParams(wallet, period);
         var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
@@ -69,9 +72,8 @@ public class JsonRpcApi implements TransactionSource {
         return list.toArray(new Transaction[0]);
     }
 
-    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(XrplClient xrplClient, Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException {
-        var c = new LedgerRangeConverter(xrplClient);
-        var ledgerRange = c.convert(period);
+    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException {
+        var ledgerRange = ledgerRangeConverter.convert(period);
 
         return AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
@@ -81,8 +83,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public Transaction[] listTransactions(Wallet wallet, DateTimeRange period) throws Exception {
-        var xrplClient = new XrplClient(network.getUrl());
-        var params = createAccountTransactionsRequestParams(xrplClient, wallet, period);
+        var params = createAccountTransactionsRequestParams(wallet, period);
         var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
@@ -98,7 +99,6 @@ public class JsonRpcApi implements TransactionSource {
 
     public boolean exists(Wallet wallet) {
         try {
-            var xrplClient = new XrplClient(network.getUrl());
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
@@ -136,8 +136,6 @@ public class JsonRpcApi implements TransactionSource {
 
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
         // As explained on https://xrpl.org/send-xrp.html
-        var xrplClient = new XrplClient(network.getUrl());
-
         var previousLastLedgerSequence = UnsignedInteger.ZERO;
         var accountSequenceOffset = UnsignedInteger.ZERO;
 
@@ -169,7 +167,7 @@ public class JsonRpcApi implements TransactionSource {
             previousLastLedgerSequence = lastLedgerSequence;
 
             // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
-            var prepared = preparePayment(xrplClient, lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, memos);
+            var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, memos);
 
             // Idea: return prepared payment without signing to ensure this code never needs access to private key (option?)
             var signed = sign(prepared, sender);
@@ -183,7 +181,7 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    private Payment preparePayment(XrplClient xrplClient, UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
+    private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
                                    org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, XrpCurrencyAmount amount, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException {
         // Code from https://github.com/ripple/xrpl-dev-portal/blob/master/content/_code-samples/send-xrp/SendXrp.java
