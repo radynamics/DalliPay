@@ -34,6 +34,16 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+        setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
+        setHorizontalAlignment(SwingConstants.RIGHT);
+
+        if (value == null) {
+            setText("...");
+            setToolTipText("loading...");
+            return this;
+        }
+
         var amt = (Double) value;
         var obj = (Transaction) table.getModel().getValueAt(row, objectColumn.getModelIndex());
 
@@ -42,9 +52,6 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
                 : dfFiat;
         setText(df.format(amt));
 
-        setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
-        setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-        setHorizontalAlignment(SwingConstants.RIGHT);
         return this;
     }
 }

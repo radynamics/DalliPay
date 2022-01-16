@@ -4,6 +4,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -80,10 +82,9 @@ public class PaymentTableModel extends AbstractTableModel {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
             var ccy = transformInstruction.getTargetCcy();
-            var amt = currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
-            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), amt, ccy, t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), null, ccy, t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
@@ -92,6 +93,7 @@ public class PaymentTableModel extends AbstractTableModel {
         int row = 0;
         for (var t : data) {
             validateAsync(t, row);
+            loadTargetCcyAmountAsync(t, row);
             row++;
         }
     }
@@ -124,6 +126,32 @@ public class PaymentTableModel extends AbstractTableModel {
 
         Executors.newCachedThreadPool().submit(() -> {
             completableFuture.complete(new ImmutablePair<>(row, validator.validate(t)));
+        });
+    }
+
+    private void loadTargetCcyAmountAsync(Transaction t, int row) {
+        var completableFuture = new CompletableFuture<ImmutablePair<Integer, Double>>();
+        completableFuture.thenAccept(result -> {
+            var rowIndex = result.left;
+            var amt = result.right;
+
+            setValueAt(amt, rowIndex, getColumnIndex(COL_AMOUNT));
+        });
+
+        Executors.newCachedThreadPool().submit(() -> {
+            var ccy = transformInstruction.getTargetCcy();
+            var ccyPair = new CurrencyPair(t.getCcy(), ccy);
+            CurrencyConverter cc;
+            if (actor == Actor.Sender) {
+                currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
+                cc = currencyConverter;
+            } else {
+                var source = transformInstruction.getHistoricExchangeRateSource();
+                var rate = source.rateAt(ccyPair, t.getBooked());
+                cc = new CurrencyConverter(new ExchangeRate[]{rate});
+            }
+            var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
+            completableFuture.complete(new ImmutablePair<>(row, amt));
         });
     }
 
