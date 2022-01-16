@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
+import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSource;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
@@ -22,6 +23,7 @@ public class TransformInstruction {
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
     private StructuredReference creditorReferenceIfMissing;
+    private HistoricExchangeRateSource historicExchangeRateSource;
 
     public TransformInstruction(Ledger ledger) {
         this.ledger = ledger;
@@ -107,5 +109,13 @@ public class TransformInstruction {
 
     public void setCreditorReferenceIfMissing(StructuredReference creditorReferenceIfMissing) {
         this.creditorReferenceIfMissing = creditorReferenceIfMissing;
+    }
+
+    public HistoricExchangeRateSource getHistoricExchangeRateSource() {
+        return historicExchangeRateSource;
+    }
+
+    public void setHistoricExchangeRateSource(HistoricExchangeRateSource historicExchangeRateSource) {
+        this.historicExchangeRateSource = historicExchangeRateSource;
     }
 }

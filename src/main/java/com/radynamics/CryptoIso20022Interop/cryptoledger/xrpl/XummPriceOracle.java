@@ -14,13 +14,15 @@ import java.util.ArrayList;
 public class XummPriceOracle implements HistoricExchangeRateSource {
     private final Ledger ledger;
 
+    public static final String ID = "xummpriceoracle";
+
     public XummPriceOracle(Ledger ledger) {
         this.ledger = ledger;
     }
 
     @Override
     public String getId() {
-        return "xummPriceOracle";
+        return ID;
     }
 
     @Override
