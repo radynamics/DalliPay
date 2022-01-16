@@ -11,6 +11,10 @@ public class ExchangeRate {
         this.rate = rate;
     }
 
+    public ExchangeRate(CurrencyPair pair, double rate) {
+        this(pair.getFirst(), pair.getSecond(), rate);
+    }
+
     public String getCcyFrom() {
         return ccyFrom;
     }

@@ -46,14 +46,7 @@ public class JsonRpcApi implements TransactionSource {
     @Override
     public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
         var xrplClient = new XrplClient(network.getUrl());
-        var c = new LedgerRangeConverter(xrplClient);
-        var ledgerRange = c.convert(period);
-
-        var params = AccountTransactionsRequestParams.builder()
-                .account(Address.of(wallet.getPublicKey()))
-                .ledgerIndexMinimum(LedgerIndexBound.of(ledgerRange.getStart().unsignedIntegerValue().intValue()))
-                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()))
-                .build();
+        var params = createAccountTransactionsRequestParams(xrplClient, wallet, period);
         var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
@@ -71,6 +64,33 @@ public class JsonRpcApi implements TransactionSource {
                     list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
                 }
             }
+        }
+
+        return list.toArray(new Transaction[0]);
+    }
+
+    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(XrplClient xrplClient, Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException {
+        var c = new LedgerRangeConverter(xrplClient);
+        var ledgerRange = c.convert(period);
+
+        return AccountTransactionsRequestParams.builder()
+                .account(Address.of(wallet.getPublicKey()))
+                .ledgerIndexMinimum(LedgerIndexBound.of(ledgerRange.getStart().unsignedIntegerValue().intValue()))
+                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()))
+                .build();
+    }
+
+    public Transaction[] listTransactions(Wallet wallet, DateTimeRange period) throws Exception {
+        var xrplClient = new XrplClient(network.getUrl());
+        var params = createAccountTransactionsRequestParams(xrplClient, wallet, period);
+        var result = xrplClient.accountTransactions(params);
+
+        var list = new ArrayList<Transaction>();
+        for (var r : result.transactions()) {
+            var t = r.resultTransaction().transaction();
+            // TODO: handle ImmutableIssuedCurrencyAmount
+            var deliveredAmount = r.metadata().get().deliveredAmount().orElse(XrpCurrencyAmount.ofDrops(0));
+            list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
         }
 
         return list.toArray(new Transaction[0]);

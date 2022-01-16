@@ -79,6 +79,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return api.listPayments(WalletConverter.from(wallet), period);
     }
 
+    public Transaction[] listTransactions(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet wallet, DateTimeRange period) throws Exception {
+        var api = new JsonRpcApi(this, network);
+        return api.listTransactions(wallet, period);
+    }
+
     @Override
     public boolean exists(Wallet wallet) {
         var api = new JsonRpcApi(this, network);
