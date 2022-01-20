@@ -3,16 +3,14 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
+import com.radynamics.CryptoIso20022Interop.iso20022.AsyncValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
@@ -84,12 +82,7 @@ public class PaymentTableModel extends AbstractTableModel {
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
 
-        int row = 0;
-        for (var t : data) {
-            validateAsync(t, row);
-            row++;
-        }
-
+        validateAsync(data);
         Arrays.stream(amountLoader.loadAsync(data)).forEach(future -> {
             future.thenAccept(t -> setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT)));
         });
@@ -109,20 +102,18 @@ public class PaymentTableModel extends AbstractTableModel {
         return wallet == null ? "" : wallet.getPublicKey();
     }
 
-    private void validateAsync(Payment t, int row) {
-        var completableFuture = new CompletableFuture<ImmutablePair<Integer, ValidationResult[]>>();
-        completableFuture.thenAccept(result -> {
-            var rowIndex = result.left;
-            var validationResults = result.right;
+    private void validateAsync(Payment[] payments) {
+        var av = new AsyncValidator(validator);
+        Arrays.stream(av.validate(payments)).forEach(future -> {
+            future.thenAccept(result -> {
+                var rowIndex = getRowIndex(result.left);
+                var validationResults = result.right;
 
-            setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
-            var highestStatus = getHighestStatus(validationResults);
-            setValueAt(isSelected(highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
-            setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
-        });
-
-        Executors.newCachedThreadPool().submit(() -> {
-            completableFuture.complete(new ImmutablePair<>(row, validator.validate(t)));
+                setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
+                var highestStatus = getHighestStatus(validationResults);
+                setValueAt(isSelected(highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
+                setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
+            });
         });
     }
 
@@ -149,7 +140,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void onTransactionChanged(int row, Payment t) {
-        validateAsync(t, row);
+        validateAsync(new Payment[]{t});
     }
 
     public Actor getActor() {
