@@ -15,7 +15,7 @@ public class Payment {
     private Account senderAccount;
     private Account receiverAccount;
 
-    private static final int UnknownAmount = 0;
+    private static final Double UnknownAmount = Double.valueOf(0);
     private static final String UnknownCCy = "";
 
     public Payment(Transaction cryptoTrx) {
