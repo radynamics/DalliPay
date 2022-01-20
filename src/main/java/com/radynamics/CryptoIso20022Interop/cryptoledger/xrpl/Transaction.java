@@ -3,7 +3,6 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
-import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.LocalDateTime;
@@ -17,8 +16,6 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private LocalDateTime booked;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet senderWallet;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet receiverWallet;
-    private Account senderAccount;
-    private Account receiverAccount;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
@@ -65,28 +62,8 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public Account getSenderAccount() {
-        return senderAccount;
-    }
-
-    @Override
-    public void setSenderAccount(Account account) {
-        senderAccount = account;
-    }
-
-    @Override
     public Wallet getSenderWallet() {
         return senderWallet;
-    }
-
-    @Override
-    public void setReceiverAccount(Account account) {
-        receiverAccount = account;
-    }
-
-    @Override
-    public Account getReceiverAccount() {
-        return receiverAccount;
     }
 
     @Override
