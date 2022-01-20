@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import org.apache.logging.log4j.LogManager;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -13,7 +14,6 @@ public class AmountLoader {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
 
-    private ArrayList<LoadedListener> listener = new ArrayList<>();
     private Actor actor;
 
     public AmountLoader(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor) {
@@ -22,17 +22,16 @@ public class AmountLoader {
         this.actor = actor;
     }
 
-    public void loadAsync(Payment[] payments) {
+    public CompletableFuture<Payment>[] loadAsync(Payment[] payments) {
+        var list = new ArrayList<CompletableFuture<Payment>>();
         for (var t : payments) {
-            loadAsync(t);
+            list.add(loadAsync(t));
         }
+        return list.toArray((CompletableFuture<Payment>[]) Array.newInstance(CompletableFuture.class, list.size()));
     }
 
-    private void loadAsync(Payment t) {
+    private CompletableFuture<Payment> loadAsync(Payment t) {
         var completableFuture = new CompletableFuture<Payment>();
-        completableFuture.thenAccept(result -> {
-            raiseLoaded(result);
-        });
 
         Executors.newCachedThreadPool().submit(() -> {
             var ccy = transformInstruction.getTargetCcy();
@@ -57,15 +56,7 @@ public class AmountLoader {
             t.setAmount(amt, ccy);
             completableFuture.complete(t);
         });
-    }
 
-    public void addLoadedListener(LoadedListener l) {
-        listener.add(l);
-    }
-
-    private void raiseLoaded(Payment t) {
-        for (var l : listener) {
-            l.onLoaded(t);
-        }
+        return completableFuture;
     }
 }

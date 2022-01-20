@@ -3,7 +3,6 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
-import com.radynamics.CryptoIso20022Interop.exchange.LoadedListener;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
@@ -15,7 +14,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class PaymentTableModel extends AbstractTableModel implements LoadedListener {
+public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
@@ -37,7 +36,6 @@ public class PaymentTableModel extends AbstractTableModel implements LoadedListe
 
     public PaymentTableModel(AmountLoader amountLoader, PaymentValidator validator) {
         this.amountLoader = amountLoader;
-        this.amountLoader.addLoadedListener(this);
         this.validator = validator;
     }
 
@@ -91,7 +89,10 @@ public class PaymentTableModel extends AbstractTableModel implements LoadedListe
             validateAsync(t, row);
             row++;
         }
-        amountLoader.loadAsync(data);
+
+        Arrays.stream(amountLoader.loadAsync(data)).forEach(future -> {
+            future.thenAccept(t -> setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT)));
+        });
     }
 
     private Object getActorAddressOrAccount(Payment t) {
@@ -157,11 +158,6 @@ public class PaymentTableModel extends AbstractTableModel implements LoadedListe
 
     public void setActor(Actor actor) {
         this.actor = actor;
-    }
-
-    @Override
-    public void onLoaded(Payment t) {
-        setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
     }
 
     private int getRowIndex(Payment t) {
