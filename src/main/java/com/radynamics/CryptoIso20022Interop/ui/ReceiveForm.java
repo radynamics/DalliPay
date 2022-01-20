@@ -114,7 +114,7 @@ public class ReceiveForm extends JFrame {
                 panel1.add(txtInput);
             }
             {
-                var lbl = new JLabel("Exchange:");
+                var lbl = new JLabel("Exchange rates:");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(1), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
