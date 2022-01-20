@@ -110,14 +110,9 @@ public class Main {
     }
 
     private static void createCamt054(String outputFileName, Wallet wallet, DateTimeRange period) {
-        var exchange = transformInstruction.getExchange();
-        exchange.load();
-
-        var currencyConverter = new CurrencyConverter(exchange.rates());
-
         javax.swing.SwingUtilities.invokeLater(() -> {
             FlatLightLaf.setup();
-            var frm = new ReceiveForm(transformInstruction, currencyConverter);
+            var frm = new ReceiveForm(transformInstruction, new CurrencyConverter());
             frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frm.setWallet(wallet);
             frm.setTargetFileName(outputFileName);
