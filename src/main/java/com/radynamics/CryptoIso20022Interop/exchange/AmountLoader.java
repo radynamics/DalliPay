@@ -44,7 +44,6 @@ public class AmountLoader {
                 var source = transformInstruction.getHistoricExchangeRateSource();
                 var rate = source.rateAt(ccyPair, t.getBooked());
                 if (rate == null) {
-                    // TODO: 2022-01-16 RST integration into Validator and show as error to user
                     LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
                     t.setAmountUnknown();
                     completableFuture.complete(t);
