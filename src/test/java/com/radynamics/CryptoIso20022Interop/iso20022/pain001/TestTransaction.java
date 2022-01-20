@@ -4,7 +4,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
-import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.LocalDateTime;
@@ -23,8 +22,6 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private Ledger ledger;
-    private Address senderAddress;
-    private Address receiverAddress;
 
     public TestTransaction(Ledger ledger, long amountSmallestUnit, String ccy) {
         this.ledger = ledger;
@@ -138,21 +135,6 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     @Override
     public TransmissionState getTransmission() {
         return TransmissionState.Pending;
-    }
-
-    @Override
-    public Address getSenderAddress() {
-        return senderAddress;
-    }
-
-    @Override
-    public void setReceiverAddress(Address address) {
-        this.receiverAddress = address;
-    }
-
-    @Override
-    public Address getReceiverAddress() {
-        return this.receiverAddress;
     }
 
     public void setSender(Wallet sender) {

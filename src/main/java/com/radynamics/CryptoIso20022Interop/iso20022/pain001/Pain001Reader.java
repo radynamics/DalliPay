@@ -46,7 +46,7 @@ public class Pain001Reader {
                 var amountNativeCcy = ccyConverter.convert(cdtTrfTxInf.getAmt().getInstdAmt().getValue(), cdtTrfTxInf.getAmt().getInstdAmt().getCcy(), ccy);
                 var amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
 
-                var t = ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy);
+                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy));
                 t.setSenderAccount(senderAccount);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
@@ -76,7 +76,7 @@ public class Pain001Reader {
                     }
                 }
 
-                list.add(PaymentConverter.toPayment(t));
+                list.add(t);
             }
         }
 

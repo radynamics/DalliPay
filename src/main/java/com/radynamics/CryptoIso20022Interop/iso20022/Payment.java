@@ -14,6 +14,8 @@ public class Payment {
     private String ccy;
     private Account senderAccount;
     private Account receiverAccount;
+    private Address senderAddress;
+    private Address receiverAddress;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final String UnknownCCy = "";
@@ -23,11 +25,15 @@ public class Payment {
     }
 
     public Address getReceiverAddress() {
-        return cryptoTrx.getReceiverAddress();
+        return receiverAddress;
+    }
+
+    public void setReceiverAddress(Address address) {
+        this.receiverAddress = address;
     }
 
     public Address getSenderAddress() {
-        return cryptoTrx.getSenderAddress();
+        return senderAddress;
     }
 
     public Account getReceiverAccount() {
@@ -117,5 +123,13 @@ public class Payment {
 
     public Ledger getLedger() {
         return cryptoTrx.getLedger();
+    }
+
+    public void addStructuredReference(StructuredReference structuredReference) {
+        cryptoTrx.addStructuredReference(structuredReference);
+    }
+
+    public void addMessage(String message) {
+        cryptoTrx.addMessage(message);
     }
 }
