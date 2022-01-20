@@ -2,15 +2,12 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
+import com.radynamics.CryptoIso20022Interop.exchange.LoadedListener;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
-import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.LogManager;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -18,12 +15,11 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class PaymentTableModel extends AbstractTableModel {
+public class PaymentTableModel extends AbstractTableModel implements LoadedListener {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
-    private final TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
+    private final AmountLoader amountLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
 
@@ -39,9 +35,9 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, PaymentValidator validator) {
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
+    public PaymentTableModel(AmountLoader amountLoader, PaymentValidator validator) {
+        this.amountLoader = amountLoader;
+        this.amountLoader.addLoadedListener(this);
         this.validator = validator;
     }
 
@@ -82,10 +78,9 @@ public class PaymentTableModel extends AbstractTableModel {
     public void load(Payment[] data) {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
-            var ccy = transformInstruction.getTargetCcy();
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
-            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), null, ccy, t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), null, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
@@ -94,9 +89,9 @@ public class PaymentTableModel extends AbstractTableModel {
         int row = 0;
         for (var t : data) {
             validateAsync(t, row);
-            loadTargetCcyAmountAsync(t, row);
             row++;
         }
+        amountLoader.loadAsync(data);
     }
 
     private Object getActorAddressOrAccount(Payment t) {
@@ -127,38 +122,6 @@ public class PaymentTableModel extends AbstractTableModel {
 
         Executors.newCachedThreadPool().submit(() -> {
             completableFuture.complete(new ImmutablePair<>(row, validator.validate(t)));
-        });
-    }
-
-    private void loadTargetCcyAmountAsync(Payment t, int row) {
-        var completableFuture = new CompletableFuture<ImmutablePair<Integer, Double>>();
-        completableFuture.thenAccept(result -> {
-            var rowIndex = result.left;
-            var amt = result.right;
-
-            setValueAt(amt, rowIndex, getColumnIndex(COL_AMOUNT));
-        });
-
-        Executors.newCachedThreadPool().submit(() -> {
-            var ccy = transformInstruction.getTargetCcy();
-            var ccyPair = new CurrencyPair(t.getLedgerCcy(), ccy);
-            CurrencyConverter cc;
-            if (actor == Actor.Sender) {
-                currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
-                cc = currencyConverter;
-            } else {
-                var source = transformInstruction.getHistoricExchangeRateSource();
-                var rate = source.rateAt(ccyPair, t.getBooked());
-                if (rate == null) {
-                    // TODO: 2022-01-16 RST integration into Validator and show as error to user
-                    LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
-                    completableFuture.complete(new ImmutablePair<>(row, AmountCellRenderer.NoExchangeRateAvailable));
-                    return;
-                }
-                cc = new CurrencyConverter(new ExchangeRate[]{rate});
-            }
-            var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
-            completableFuture.complete(new ImmutablePair<>(row, amt));
         });
     }
 
@@ -194,5 +157,21 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void setActor(Actor actor) {
         this.actor = actor;
+    }
+
+    @Override
+    public void onLoaded(Payment t) {
+        setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
+    }
+
+    private int getRowIndex(Payment t) {
+        for (var i = 0; i < getRowCount(); i++) {
+            var obj = (Payment) getValueAt(i, getColumnIndex(COL_OBJECT));
+            if (obj.equals(t)) {
+                return i;
+            }
+        }
+
+        throw new RuntimeException(String.format("Could not find row index for %s", t.getId()));
     }
 }

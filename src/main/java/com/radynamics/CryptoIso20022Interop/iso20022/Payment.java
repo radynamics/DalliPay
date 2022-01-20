@@ -15,6 +15,9 @@ public class Payment {
     private Account senderAccount;
     private Account receiverAccount;
 
+    private static final int UnknownAmount = 0;
+    private static final String UnknownCCy = "";
+
     public Payment(Transaction cryptoTrx) {
         this.cryptoTrx = cryptoTrx;
     }
@@ -65,6 +68,14 @@ public class Payment {
 
     public String getFiatCcy() {
         return this.ccy;
+    }
+
+    public void setAmountUnknown() {
+        setAmount(UnknownAmount, UnknownCCy);
+    }
+
+    public boolean isAmountUnknown() {
+        return amount == UnknownAmount && ccy.equals(UnknownCCy);
     }
 
     public void setAmount(double value, String ccy) {

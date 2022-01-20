@@ -17,7 +17,6 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
 
     private static final NumberFormat dfFiat = DecimalFormat.getInstance();
     private static final NumberFormat dfCryptocurrency = DecimalFormat.getInstance();
-    public static final Double NoExchangeRateAvailable = Double.valueOf(-1);
 
     public AmountCellRenderer(TransformInstruction transformInstruction, TableColumn objectColumn) {
         this.transformInstruction = transformInstruction;
@@ -40,20 +39,20 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
         setHorizontalAlignment(SwingConstants.RIGHT);
         setToolTipText("");
 
-        if (value == null) {
-            setText("...");
-            setToolTipText("loading...");
-            return this;
-        }
-        if (NoExchangeRateAvailable.equals(value)) {
+        var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
+        if (obj.isAmountUnknown()) {
             setText("n/a");
             setToolTipText("Not available due no exchange rate was found at this point in time.");
             return this;
         }
 
-        var amt = (Double) value;
-        var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
+        if (value == null) {
+            setText("...");
+            setToolTipText("loading...");
+            return this;
+        }
 
+        var amt = (Double) value;
         var df = StringUtils.equalsIgnoreCase(obj.getLedger().getNativeCcySymbol(), transformInstruction.getTargetCcy())
                 ? dfCryptocurrency
                 : dfFiat;
