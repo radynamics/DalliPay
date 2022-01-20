@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -84,7 +85,10 @@ public class PaymentTable extends JPanel {
             var c = cb.forColumn(PaymentTableModel.COL_AMOUNT).headerValue("Amount").width(100).headerRigth().getColumn();
             c.setCellRenderer(new AmountCellRenderer(transformInstruction, table.getColumn(PaymentTableModel.COL_OBJECT)));
         }
-        cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50);
+        {
+            var c = cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50).getColumn();
+            c.setCellRenderer(new DefaultTableCellRenderer());
+        }
         cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(50);
         {
             var c = cb.forColumn(PaymentTableModel.COL_DETAIL).headerValue("").maxWidth(50).headerCenter().getColumn();
