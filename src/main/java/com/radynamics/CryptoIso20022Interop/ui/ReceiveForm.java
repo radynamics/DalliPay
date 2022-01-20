@@ -49,7 +49,7 @@ public class ReceiveForm extends JFrame {
         try {
             setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
         } catch (IOException e) {
-            LogManager.getLogger().error(e);
+            ExceptionDialog.show(this, e);
         }
 
         var pnlMain = new JPanel();
@@ -203,8 +203,7 @@ public class ReceiveForm extends JFrame {
 
             JOptionPane.showMessageDialog(table, String.format("Successfully exported to %s", targetFileName));
         } catch (Exception e) {
-            LogManager.getLogger().error(e);
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ExceptionDialog.show(this, e);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
@@ -226,7 +225,7 @@ public class ReceiveForm extends JFrame {
 
             table.load(payments);
         } catch (Exception e) {
-            LogManager.getLogger().error(e);
+            ExceptionDialog.show(this, e);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }

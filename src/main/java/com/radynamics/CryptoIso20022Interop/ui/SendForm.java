@@ -40,7 +40,7 @@ public class SendForm extends JFrame {
         try {
             setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
         } catch (IOException e) {
-            LogManager.getLogger().error(e);
+            ExceptionDialog.show(this, e);
         }
 
         var pnlMain = new JPanel();
