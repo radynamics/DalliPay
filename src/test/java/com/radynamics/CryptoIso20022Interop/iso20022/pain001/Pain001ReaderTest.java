@@ -11,6 +11,8 @@ import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.Assert.*;
 
 public class Pain001ReaderTest {
@@ -26,8 +28,8 @@ public class Pain001ReaderTest {
         ti.add(new AccountMapping(new OtherAccount("010649858"), "receiver_010649858"));
         ti.add(new AccountMapping(new OtherAccount("032233441"), "receiver_032233441"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
-                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
@@ -69,8 +71,8 @@ public class Pain001ReaderTest {
         ti.add(new AccountMapping(new IbanAccount("GB96MIDL40271522859882"), "receiver_GB96MIDL40271522859882"));
         ti.add(new AccountMapping(new IbanAccount("GB96MIDL40271522859882"), "receiver_GB96MIDL40271522859882"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
-                new ExchangeRate("GBP", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("GBP", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
@@ -95,7 +97,7 @@ public class Pain001ReaderTest {
         // CdtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH4431999123000889012"), "receiver_CH4431999123000889012"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
@@ -117,7 +119,7 @@ public class Pain001ReaderTest {
         // CdtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "receiver_CH4431999123000889012"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
@@ -139,7 +141,7 @@ public class Pain001ReaderTest {
         // CdtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "receiver_CH4431999123000889012"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
@@ -162,7 +164,7 @@ public class Pain001ReaderTest {
         // CdtrAcct
         ti.add(new AccountMapping(new OtherAccount("25-9034-2"), "receiver_25-9034-2"));
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1),
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
