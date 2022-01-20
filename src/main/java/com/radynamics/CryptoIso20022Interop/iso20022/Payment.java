@@ -75,7 +75,7 @@ public class Payment {
     }
 
     public boolean isAmountUnknown() {
-        return amount == UnknownAmount && ccy.equals(UnknownCCy);
+        return UnknownAmount.equals(amount) && ccy.equals(UnknownCCy);
     }
 
     public void setAmount(double value, String ccy) {
