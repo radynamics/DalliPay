@@ -7,7 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +24,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private Object[][] data;
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
-    private TransactionValidator validator;
+    private PaymentValidator validator;
     private Actor actor = Actor.Sender;
 
     public static final String COL_OBJECT = "object";
@@ -39,7 +39,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, TransactionValidator validator) {
+    public PaymentTableModel(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, PaymentValidator validator) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
         this.validator = validator;

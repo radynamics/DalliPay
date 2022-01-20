@@ -9,7 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class TransactionValidator implements com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator {
+public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
     public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));

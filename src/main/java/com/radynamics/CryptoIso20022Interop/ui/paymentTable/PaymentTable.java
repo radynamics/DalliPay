@@ -21,7 +21,7 @@ public class PaymentTable extends JPanel {
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, TransactionValidator validator) {
+    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
 
