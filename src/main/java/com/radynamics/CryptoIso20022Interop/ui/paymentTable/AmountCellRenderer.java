@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,7 +52,7 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
         }
 
         var amt = (Double) value;
-        var obj = (Transaction) table.getModel().getValueAt(row, objectColumn.getModelIndex());
+        var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
 
         var df = StringUtils.equalsIgnoreCase(obj.getLedger().getNativeCcySymbol(), transformInstruction.getTargetCcy())
                 ? dfCryptocurrency

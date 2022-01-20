@@ -4,6 +4,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
@@ -25,10 +27,10 @@ public class Camt054WriterTest {
     public void testCreate2Payments() throws Exception {
         var cryptoInstruction = createTestInstructions();
 
-        var t = new TransactionTranslator(cryptoInstruction);
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
 
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = CamtConverter.toXml(w.create(payments));
@@ -47,12 +49,12 @@ public class Camt054WriterTest {
         return i;
     }
 
-    private static Transaction[] createTestTransactions(Ledger ledger) {
+    private static Payment[] createTestTransactions(Ledger ledger) {
         var list = new ArrayList<Transaction>();
         list.add(createTestTransaction1(ledger));
         list.add(createTestTransaction2(ledger));
         list.add(createTestTransactionScor(ledger));
-        return list.toArray(new Transaction[0]);
+        return PaymentConverter.toPayment(list.toArray(new Transaction[0]));
     }
 
     private static Transaction createTestTransaction1(Ledger ledger) {
@@ -96,9 +98,9 @@ public class Camt054WriterTest {
         var cryptoInstruction = createTestInstructions();
         cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
 
-        var t = new TransactionTranslator(cryptoInstruction);
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = w.create(payments);
@@ -116,9 +118,9 @@ public class Camt054WriterTest {
         cryptoInstruction.setBookingDateFormat(format);
         cryptoInstruction.setValutaDateFormat(format);
 
-        var t = new TransactionTranslator(cryptoInstruction);
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = w.create(payments);
@@ -148,10 +150,10 @@ public class Camt054WriterTest {
         var trx = createTestTransactionScor(cryptoInstruction.getLedger());
         trx.removeStructuredReferences(0);
 
-        var t = new TransactionTranslator(cryptoInstruction);
-        var payments = t.apply(new Transaction[]{trx});
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}));
 
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchange().rates()));
+        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = CamtConverter.toXml(w.create(payments));

@@ -1,11 +1,11 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.transaction;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.util.ArrayList;
 
 public class Validator {
-    public ValidationResult[] validate(Transaction t) {
+    public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
 
         if (t.getSenderAccount() == null || t.getSenderAccount().getUnformatted().length() == 0) {

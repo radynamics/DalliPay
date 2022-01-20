@@ -1,12 +1,12 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -79,7 +79,7 @@ public class PaymentTableModel extends AbstractTableModel {
         fireTableCellUpdated(row, col);
     }
 
-    public void load(Transaction[] data) {
+    public void load(Payment[] data) {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
             var ccy = transformInstruction.getTargetCcy();
@@ -99,7 +99,7 @@ public class PaymentTableModel extends AbstractTableModel {
         }
     }
 
-    private Object getActorAddressOrAccount(Transaction t) {
+    private Object getActorAddressOrAccount(Payment t) {
         Object actorAddressOrAccount = actor.get(t.getReceiverAddress(), t.getSenderAddress());
         if (actorAddressOrAccount == null) {
             var actorAccount = actor.get(t.getReceiverAccount(), t.getSenderAccount());
@@ -108,12 +108,12 @@ public class PaymentTableModel extends AbstractTableModel {
         return actorAddressOrAccount;
     }
 
-    private String getActorWalletText(Transaction t) {
+    private String getActorWalletText(Payment t) {
         var wallet = actor.get(t.getReceiverWallet(), t.getSenderWallet());
         return wallet == null ? "" : wallet.getPublicKey();
     }
 
-    private void validateAsync(Transaction t, int row) {
+    private void validateAsync(Payment t, int row) {
         var completableFuture = new CompletableFuture<ImmutablePair<Integer, ValidationResult[]>>();
         completableFuture.thenAccept(result -> {
             var rowIndex = result.left;
@@ -130,7 +130,7 @@ public class PaymentTableModel extends AbstractTableModel {
         });
     }
 
-    private void loadTargetCcyAmountAsync(Transaction t, int row) {
+    private void loadTargetCcyAmountAsync(Payment t, int row) {
         var completableFuture = new CompletableFuture<ImmutablePair<Integer, Double>>();
         completableFuture.thenAccept(result -> {
             var rowIndex = result.left;
@@ -141,10 +141,10 @@ public class PaymentTableModel extends AbstractTableModel {
 
         Executors.newCachedThreadPool().submit(() -> {
             var ccy = transformInstruction.getTargetCcy();
-            var ccyPair = new CurrencyPair(t.getCcy(), ccy);
+            var ccyPair = new CurrencyPair(t.getLedgerCcy(), ccy);
             CurrencyConverter cc;
             if (actor == Actor.Sender) {
-                currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
+                currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
                 cc = currencyConverter;
             } else {
                 var source = transformInstruction.getHistoricExchangeRateSource();
@@ -157,7 +157,7 @@ public class PaymentTableModel extends AbstractTableModel {
                 }
                 cc = new CurrencyConverter(new ExchangeRate[]{rate});
             }
-            var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getAmountSmallestUnit()), t.getCcy(), ccy);
+            var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
             completableFuture.complete(new ImmutablePair<>(row, amt));
         });
     }
@@ -174,17 +174,17 @@ public class PaymentTableModel extends AbstractTableModel {
         return highestStatus != ValidationState.Error;
     }
 
-    public Transaction[] selectedPayments() {
-        var list = new ArrayList<Transaction>();
+    public Payment[] selectedPayments() {
+        var list = new ArrayList<Payment>();
         for (var item : this.data) {
             if ((boolean) item[getColumnIndex(COL_SELECTOR)]) {
-                list.add((Transaction) item[0]);
+                list.add((Payment) item[0]);
             }
         }
-        return list.toArray(new Transaction[0]);
+        return list.toArray(new Payment[0]);
     }
 
-    public void onTransactionChanged(int row, Transaction t) {
+    public void onTransactionChanged(int row, Payment t) {
         validateAsync(t, row);
     }
 

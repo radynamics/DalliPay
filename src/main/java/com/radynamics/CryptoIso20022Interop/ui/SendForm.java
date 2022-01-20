@@ -1,9 +1,11 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TransactionValidator;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
@@ -101,7 +103,10 @@ public class SendForm extends JFrame {
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
                 txtInput.addChangedListener(() -> {
                     try {
-                        load(reader.read(new FileInputStream(txtInput.getText())));
+                        var t = new TransactionTranslator(transformInstruction, currencyConverter);
+                        var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+
+                        load(payments);
                     } catch (Exception e) {
                         ExceptionDialog.show(this, e);
                     }
@@ -132,7 +137,7 @@ public class SendForm extends JFrame {
                 var payments = table.selectedPayments();
                 try {
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    transformInstruction.getLedger().send(payments);
+                    transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
                     for (var p : payments) {
                         table.refresh(p);
                     }
@@ -147,7 +152,7 @@ public class SendForm extends JFrame {
         }
     }
 
-    private void load(Transaction[] payments) {
+    private void load(Payment[] payments) {
         table.load(payments);
     }
 

@@ -4,9 +4,10 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.TransactionValidator;
@@ -194,7 +195,7 @@ public class ReceiveForm extends JFrame {
     private void exportSelected() {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, currencyConverter);
+            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction);
             var s = CamtConverter.toXml(w.create(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
@@ -212,16 +213,16 @@ public class ReceiveForm extends JFrame {
     public void load() {
         var walletPublicKey = txtInput.getText();
         if (!transformInstruction.getLedger().isValidPublicKey(walletPublicKey)) {
-            table.load(new Transaction[0]);
+            table.load(new Payment[0]);
             return;
         }
 
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
-            var t = new TransactionTranslator(transformInstruction);
+            var t = new TransactionTranslator(transformInstruction, currencyConverter);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
-            var payments = t.apply(transformInstruction.getLedger().listPayments(wallet, period));
+            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPayments(wallet, period)));
 
             table.load(payments);
         } catch (Exception e) {

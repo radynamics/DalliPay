@@ -1,13 +1,14 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,7 @@ public class Pain001ReaderTest {
     public void readExampleZA1() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -34,7 +36,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA1.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA1.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -63,6 +66,7 @@ public class Pain001ReaderTest {
     public void readExampleZA6Scor() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -77,7 +81,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -92,6 +97,7 @@ public class Pain001ReaderTest {
     public void readSwissQrBillWithQrReference() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -102,7 +108,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithQrReference.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithQrReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -114,6 +121,7 @@ public class Pain001ReaderTest {
     public void readSwissQrBillWithScorReference() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -124,7 +132,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithScorReference.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithScorReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -136,6 +145,7 @@ public class Pain001ReaderTest {
     public void readSwissQrBillWithoutReference() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -146,7 +156,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -159,6 +170,7 @@ public class Pain001ReaderTest {
     public void readRmtInfUstrd() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -169,7 +181,8 @@ public class Pain001ReaderTest {
         var ccyConverter = new CurrencyConverter(rates);
         var r = new Pain001Reader(ledger, ti, ccyConverter);
 
-        var transactions = r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001RmtInfUstrd.xml"));
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001RmtInfUstrd.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -193,15 +206,15 @@ public class Pain001ReaderTest {
         assertEquals(expected.getCity(), actual.getCity());
     }
 
-    private void assertTransaction(Transaction t, String receiverAccount, String receiverWallet, double amount) {
+    private void assertTransaction(Payment t, String receiverAccount, String receiverWallet, double amount) {
         assertTransaction(t, receiverAccount, receiverWallet, amount, null, null);
     }
 
-    private void assertTransaction(Transaction t, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
+    private void assertTransaction(Payment t, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
         assertNotNull(t.getSenderWallet());
         assertEquals("sender_CH5481230000001998736", t.getSenderWallet().getPublicKey());
-        assertEquals(amount, t.getAmountSmallestUnit(), 0);
-        assertEquals("TEST", t.getCcy());
+        assertEquals(amount, t.getLedgerAmountSmallestUnit(), 0);
+        assertEquals("TEST", t.getLedgerCcy());
         assertNotNull(t.getReceiverAccount());
         assertEquals(receiverAccount, t.getReceiverAccount().getUnformatted());
         assertNotNull(t.getReceiverWallet());

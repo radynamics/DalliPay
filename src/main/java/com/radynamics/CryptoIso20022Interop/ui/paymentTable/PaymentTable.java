@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -65,7 +64,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         }
         {
-            var headerValue = model.getActor().get( "Receiver from Input", "Sender for Export");
+            var headerValue = model.getActor().get("Receiver from Input", "Sender for Export");
             cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue(headerValue).width(200);
         }
         {
@@ -112,42 +111,42 @@ public class PaymentTable extends JPanel {
                 var tcl = (TableCellListener) e.getSource();
                 var cleanedInput = tcl.getNewValue().toString().trim();
                 var row = tcl.getRow();
-                var t = (Transaction) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
+                var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
                     t.setSenderAccount(AccountFactory.create(cleanedInput));
                     model.onTransactionChanged(row, t);
                 }
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
-                    t.setReceiverWallet(t.getLedger().createWallet(cleanedInput, null));
+                    t.setReceiverWallet(transformInstruction.getLedger().createWallet(cleanedInput, null));
                     model.onTransactionChanged(row, t);
                 }
             }
         });
     }
 
-    public void load(Transaction[] data) {
+    public void load(Payment[] data) {
         model.load(data);
         table.revalidate();
         table.repaint();
     }
 
-    private Transaction getSelectedRow(JTable table) {
+    private Payment getSelectedRow(JTable table) {
         var row = table.getSelectedRow();
         var col = table.getColumn(PaymentTableModel.COL_OBJECT).getModelIndex();
-        return (Transaction) table.getModel().getValueAt(row, col);
+        return (Payment) table.getModel().getValueAt(row, col);
     }
 
-    private void showMore(Transaction obj) {
+    private void showMore(Payment obj) {
         var account = model.getActor().get(obj.getReceiverAccount(), obj.getSenderAccount());
         JOptionPane.showMessageDialog(this, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
     }
 
-    public Transaction[] selectedPayments() {
+    public Payment[] selectedPayments() {
         return model.selectedPayments();
     }
 
-    public void refresh(Transaction t) {
+    public void refresh(Payment t) {
         var row = getRow(t);
         if (row == -1) {
             LogManager.getLogger().warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
@@ -156,7 +155,7 @@ public class PaymentTable extends JPanel {
         model.onTransactionChanged(row, t);
     }
 
-    private int getRow(Transaction t) {
+    private int getRow(Payment t) {
         var col = table.getColumn(PaymentTableModel.COL_OBJECT).getModelIndex();
         for (var row = 0; row < table.getModel().getRowCount(); row++) {
             if (table.getModel().getValueAt(row, col) == t) {

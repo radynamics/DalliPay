@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.ui.WalletField;
 
 import javax.swing.*;
@@ -20,7 +20,7 @@ public class ReceiverLedgerCellEditor extends AbstractCellEditor implements Tabl
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        var obj = (Transaction) table.getModel().getValueAt(row, objectColumn.getModelIndex());
+        var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
         var field = ((WalletField) component);
 
         field.setLedger(obj.getLedger());

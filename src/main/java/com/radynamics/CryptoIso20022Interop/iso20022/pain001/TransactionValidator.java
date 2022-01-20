@@ -1,16 +1,16 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TransactionValidator implements com.radynamics.CryptoIso20022Interop.iso20022.TransactionValidator {
-    public ValidationResult[] validate(Transaction t) {
+    public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
 

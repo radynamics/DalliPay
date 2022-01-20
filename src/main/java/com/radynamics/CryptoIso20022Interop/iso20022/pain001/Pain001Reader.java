@@ -1,12 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.Account;
-import com.radynamics.CryptoIso20022Interop.iso20022.Address;
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.AccountIdentification4Choice;
@@ -35,10 +31,10 @@ public class Pain001Reader {
         this.ccyConverter = ccyConverter;
     }
 
-    public Transaction[] read(InputStream pain001) throws Exception {
+    public Payment[] read(InputStream pain001) throws Exception {
         var doc = fromXml(pain001);
 
-        var list = new ArrayList<Transaction>();
+        var list = new ArrayList<Payment>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
             var senderAccount = getAccount(pmtInf.getDbtrAcct().getId());
             var senderLedger = transformInstruction.getWalletOrNull(senderAccount);
@@ -80,12 +76,12 @@ public class Pain001Reader {
                     }
                 }
 
-                list.add(t);
+                list.add(PaymentConverter.toPayment(t));
             }
         }
 
         LogManager.getLogger().trace(String.format("%s payments read from pain001", list.size()));
-        return list.toArray(new Transaction[0]);
+        return list.toArray(new Payment[0]);
     }
 
     private Address getAddress(PartyIdentification32 obj) {

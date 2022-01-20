@@ -1,10 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
@@ -21,19 +20,17 @@ import java.time.LocalDateTime;
 public class Camt054Writer {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
-    private CurrencyConverter ccyConverter;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
 
-    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, CurrencyConverter ccyConverter) {
+    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
-        this.ccyConverter = ccyConverter;
         this.idGenerator = new UUIDIdGenerator();
         this.creationDate = LocalDateTime.now();
     }
 
-    public Document create(Transaction[] transactions) throws JAXBException, DatatypeConfigurationException {
+    public Document create(Payment[] transactions) throws JAXBException, DatatypeConfigurationException {
         var d = new Document();
 
         d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV04());
@@ -103,28 +100,17 @@ public class Camt054Writer {
         return o;
     }
 
-    private ReportEntry4 createNtry(Transaction trx) throws DatatypeConfigurationException {
+    private ReportEntry4 createNtry(Payment trx) throws DatatypeConfigurationException {
         var ntry = new ReportEntry4();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
-        double value;
-        var amtCcy = "";
-        if (trx.getCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
-            value = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit()).doubleValue();
-            amtCcy = trx.getCcy();
-        } else {
-            var amt = ledger.convertToNativeCcyAmount(trx.getAmountSmallestUnit());
-            // TODO: improve rounding (ex. JPY)
-            value = ccyConverter.convert(amt, trx.getCcy(), transformInstruction.getTargetCcy());
-            amtCcy = transformInstruction.getTargetCcy();
-        }
         final int xsdMaxSupportedFractionDigits = 5;
-        var amtValue = AmountRounder.round(value, xsdMaxSupportedFractionDigits);
+        var amtValue = AmountRounder.round(trx.getAmount(), xsdMaxSupportedFractionDigits);
         ntry.getAmt().setValue(amtValue);
-        ntry.getAmt().setCcy(amtCcy);
+        ntry.getAmt().setCcy(trx.getFiatCcy());
 
         ntry.setCdtDbtInd(CreditDebitCode.CRDT);
         ntry.setSts(EntryStatus2Code.BOOK);
@@ -153,7 +139,7 @@ public class Camt054Writer {
 
         txDtls.setAmt(new ActiveOrHistoricCurrencyAndAmount());
         txDtls.getAmt().setValue(amtValue);
-        txDtls.getAmt().setCcy(amtCcy);
+        txDtls.getAmt().setCcy(trx.getFiatCcy());
         txDtls.setCdtDbtInd(CreditDebitCode.CRDT);
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn());
