@@ -120,7 +120,7 @@ public class ReceiveForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                var lbl2 = new JLabel(transformInstruction.getExchange().getDisplayText());
+                var lbl2 = new JLabel(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
