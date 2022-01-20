@@ -29,6 +29,6 @@ public class CurrencyConverter {
             }
         }
 
-        throw new RuntimeException(String.format("No exchange for %s/%s available.", sourceCcy, targetCcy));
+        throw new RuntimeException(String.format("No exchange rate for %s/%s available.", sourceCcy, targetCcy));
     }
 }
