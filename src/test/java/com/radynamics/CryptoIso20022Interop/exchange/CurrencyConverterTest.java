@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class CurrencyConverterTest {
     private final CurrencyConverter ccyConverter;
@@ -55,5 +55,17 @@ public class CurrencyConverterTest {
         assertEquals(11363.63636, ccyConverter.convert(BigDecimal.valueOf(100), "TEST", "JPY"), 0);
         assertEquals(112.50011, ccyConverter.convert(BigDecimal.valueOf(100), "TEST", "XXX"), 0);
         assertEquals(112.50000, ccyConverter.convert(BigDecimal.valueOf(100), "TEST", "XXX1"), 0);
+    }
+
+    @Test
+    public void has() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ccyConverter.has(null);
+        });
+
+        assertTrue(ccyConverter.has(new CurrencyPair("CHF", "TEST")));
+        assertTrue(ccyConverter.has(new CurrencyPair("TEST", "CHF")));
+
+        assertFalse(ccyConverter.has(new CurrencyPair("CHF", "TEST1")));
     }
 }

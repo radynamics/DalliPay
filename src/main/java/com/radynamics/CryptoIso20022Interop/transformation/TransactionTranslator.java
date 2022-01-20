@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
@@ -26,18 +27,18 @@ public class TransactionTranslator {
                 t.setReceiverAccount(account);
             }
 
-            double value;
-            var amtCcy = "";
             if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
-                value = transformInstruction.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()).doubleValue();
-                amtCcy = t.getLedgerCcy();
+                var value = transformInstruction.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()).doubleValue();
+                t.setAmount(value, t.getLedgerCcy());
             } else {
-                var amt = transformInstruction.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit());
-                // TODO: improve rounding (ex. JPY)
-                value = currencyConverter.convert(amt, t.getLedgerCcy(), transformInstruction.getTargetCcy());
-                amtCcy = transformInstruction.getTargetCcy();
+                var ccyPair = new CurrencyPair(t.getLedgerCcy(), transformInstruction.getTargetCcy());
+                if (currencyConverter.has(ccyPair)) {
+                    var amt = transformInstruction.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit());
+                    // TODO: improve rounding (ex. JPY)
+                    var value = currencyConverter.convert(amt, ccyPair);
+                    t.setAmount(value, ccyPair.getSecond());
+                }
             }
-            t.setAmount(value, amtCcy);
         }
 
         return transactions;

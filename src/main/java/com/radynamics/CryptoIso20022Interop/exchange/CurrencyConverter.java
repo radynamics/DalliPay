@@ -7,8 +7,16 @@ public class CurrencyConverter {
 
     public static final double PRECISION = 100000d;
 
+    public CurrencyConverter() {
+        this(new ExchangeRate[0]);
+    }
+
     public CurrencyConverter(ExchangeRate[] rates) {
         this.rates = rates;
+    }
+
+    public double convert(BigDecimal amount, CurrencyPair pair) {
+        return convert(amount, pair.getFirst(), pair.getSecond());
     }
 
     public double convert(BigDecimal amount, String sourceCcy, String targetCcy) {
@@ -30,5 +38,18 @@ public class CurrencyConverter {
         }
 
         throw new RuntimeException(String.format("No exchange rate for %s/%s available.", sourceCcy, targetCcy));
+    }
+
+    public boolean has(CurrencyPair pair) {
+        if (pair == null) throw new IllegalArgumentException("Parameter 'pair' cannot be null");
+
+        for (var r : rates) {
+            var matchesFrom = r.getCcyFrom().equalsIgnoreCase(pair.getFirst()) || r.getCcyFrom().equalsIgnoreCase(pair.getSecond());
+            var matchesTo = r.getCcyTo().equalsIgnoreCase(pair.getFirst()) || r.getCcyTo().equalsIgnoreCase(pair.getSecond());
+            if (matchesFrom && matchesTo) {
+                return true;
+            }
+        }
+        return false;
     }
 }
