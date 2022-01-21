@@ -16,10 +16,13 @@ public class PaymentDetailForm extends JDialog {
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
     private Component anchorComponentTopLeft;
+    private PaymentValidator validator;
 
-    public PaymentDetailForm(Payment payment) {
+    public PaymentDetailForm(Payment payment, PaymentValidator validator) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
+        if (validator == null) throw new IllegalArgumentException("Parameter 'validator' cannot be null");
         this.payment = payment;
+        this.validator = validator;
 
         setupUI();
     }
@@ -118,6 +121,17 @@ public class PaymentDetailForm extends JDialog {
                 txt.setText(sb.toString());
                 createRow(row++, "Messages:", txt, null);
             }
+            {
+                var sb = new StringBuilder();
+                for (var vr : validator.validate(payment)) {
+                    sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
+                }
+                var txt = createTextArea();
+                txt.setRows(3);
+                txt.setEnabled(false);
+                txt.setText(sb.length() == 0 ? "none" : sb.toString());
+                createRow(row++, "Issues:", txt, null);
+            }
         }
         {
             var cmd = new JButton("Close");
@@ -133,7 +147,7 @@ public class PaymentDetailForm extends JDialog {
 
     private JTextArea createTextArea() {
         var txt = new JTextArea();
-        txt.setPreferredSize(new Dimension(300, txt.getPreferredSize().height));
+        txt.setPreferredSize(new Dimension(Integer.MAX_VALUE, txt.getPreferredSize().height));
         txt.setEditable(false);
         txt.setForeground(Consts.ColorSmallInfo);
         txt.setMargin(new Insets(0, 0, 0, 0));

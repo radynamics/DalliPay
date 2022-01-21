@@ -23,10 +23,12 @@ public class PaymentTable extends JPanel {
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
+    private PaymentValidator validator;
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
+        this.validator = validator;
 
         var amountLoader = new AmountLoader(transformInstruction, currencyConverter, actor);
         model = new PaymentTableModel(amountLoader, validator);
@@ -145,9 +147,9 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var frm = new PaymentDetailForm(obj);
+        var frm = new PaymentDetailForm(obj, validator);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(600, 350);
+        frm.setSize(600, 400);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);
