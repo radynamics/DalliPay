@@ -104,9 +104,8 @@ public class PaymentDetailForm extends JDialog {
                 for (var ref : payment.getStructuredReferences()) {
                     sb.append(String.format("%s\n", ref.getUnformatted()));
                 }
-                var txt = new JTextArea(getTextOrDefault(sb));
-                txt.setPreferredSize(new Dimension(300, txt.getPreferredSize().height));
-                txt.setEnabled(false);
+                var txt = createTextArea();
+                txt.setText(sb.toString());
                 createRow(row++, "References:", txt, null);
             }
             {
@@ -114,9 +113,8 @@ public class PaymentDetailForm extends JDialog {
                 for (var m : payment.getMessages()) {
                     sb.append(String.format("%s\n", m));
                 }
-                var txt = new JTextArea(getTextOrDefault(sb));
-                txt.setPreferredSize(new Dimension(300, txt.getPreferredSize().height));
-                txt.setEnabled(false);
+                var txt = createTextArea();
+                txt.setText(sb.toString());
                 createRow(row++, "Messages:", txt, null);
             }
         }
@@ -130,6 +128,14 @@ public class PaymentDetailForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private JTextArea createTextArea() {
+        var txt = new JTextArea();
+        txt.setPreferredSize(new Dimension(300, txt.getPreferredSize().height));
+        txt.setEnabled(false);
+        txt.setMargin(new Insets(0, 0, 0, 0));
+        return txt;
     }
 
     private void close() {
