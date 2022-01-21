@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.AccountFormatter;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -16,12 +16,8 @@ public class AccountCellRenderer extends JLabel implements TableCellRenderer {
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
 
-        if (value instanceof IbanAccount) {
-            var iban = (IbanAccount) value;
-            setText(iban.getFormatted());
-        } else if (value instanceof OtherAccount) {
-            var iban = (OtherAccount) value;
-            setText(iban.getUnformatted());
+        if (value instanceof Account) {
+            setText(AccountFormatter.format((Account) value));
         } else {
             setText(value.toString());
         }
