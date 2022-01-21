@@ -99,6 +99,7 @@ public class PaymentDetailForm extends JDialog {
             }
             createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), getWalletText(payment.getSenderWallet()));
             createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), getWalletText(payment.getReceiverWallet()));
+            createRow(row++, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(payment.getBooked()));
             {
                 var sb = new StringBuilder();
                 for (var ref : payment.getStructuredReferences()) {
