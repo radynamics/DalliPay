@@ -86,9 +86,15 @@ public class PaymentDetailForm extends JDialog {
             {
                 var amtText = AmountFormatter.formatAmt(payment);
                 var amtLedgerText = Utils.createFormatLedger().format(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()));
+                var fxRateText = "unknown";
+                var fxRateAtText = "unknown";
+                if (!payment.isAmountUnknown()) {
+                    fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
+                    fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
+                }
                 anchorComponentTopLeft = createRow(row++, "Amount:",
                         String.format("%s %s", amtText, payment.getFiatCcy() == null ? "" : payment.getFiatCcy()),
-                        String.format("%s %s", amtLedgerText, payment.getLedgerCcy()));
+                        String.format("%s %s with exchange rate %s at %s", amtLedgerText, payment.getLedgerCcy(), fxRateText, fxRateAtText));
             }
             createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), getWalletText(payment.getSenderWallet()));
             createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), getWalletText(payment.getReceiverWallet()));
