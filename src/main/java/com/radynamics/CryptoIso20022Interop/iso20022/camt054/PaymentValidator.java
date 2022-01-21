@@ -4,15 +4,12 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.ui.Utils;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
-    private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
-
     public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
@@ -22,7 +19,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         if (t.isAmountUnknown()) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Amount is unknown. Mostly because no FX rate was found at %s.", df.format(t.getBooked()))));
+            list.add(new ValidationResult(ValidationState.Error, String.format("Amount is unknown. Mostly because no FX rate was found at %s.", Utils.createFormatDate().format(t.getBooked()))));
         }
 
         return list.toArray(new ValidationResult[0]);
