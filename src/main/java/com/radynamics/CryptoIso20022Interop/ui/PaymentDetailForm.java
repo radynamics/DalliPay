@@ -133,7 +133,8 @@ public class PaymentDetailForm extends JDialog {
     private JTextArea createTextArea() {
         var txt = new JTextArea();
         txt.setPreferredSize(new Dimension(300, txt.getPreferredSize().height));
-        txt.setEnabled(false);
+        txt.setEditable(false);
+        txt.setForeground(Consts.ColorSmallInfo);
         txt.setMargin(new Insets(0, 0, 0, 0));
         return txt;
     }
