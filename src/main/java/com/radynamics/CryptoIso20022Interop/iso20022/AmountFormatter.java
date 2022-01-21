@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.NumberFormat;
 
 public class AmountFormatter {
-    private static final NumberFormat dfFiat = com.radynamics.CryptoIso20022Interop.ui.Utils.createFormatFiat();
+    private static final NumberFormat dfFiat = Utils.createFormatFiat();
     private static final NumberFormat dfCryptocurrency = Utils.createFormatFiat();
 
     public static String formatAmt(Payment p) {
