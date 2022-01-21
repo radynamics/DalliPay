@@ -29,10 +29,10 @@ public class CurrencyConverter {
         }
 
         for (var r : rates) {
-            if (r.getCcyFrom().equalsIgnoreCase(sourceCcy) && r.getCcyTo().equalsIgnoreCase(targetCcy)) {
+            if (r.getPair().getFirst().equalsIgnoreCase(sourceCcy) && r.getPair().getSecond().equalsIgnoreCase(targetCcy)) {
                 return Math.round(amount.doubleValue() * r.getRate() * PRECISION) / PRECISION;
             }
-            if (r.getCcyFrom().equalsIgnoreCase(targetCcy) && r.getCcyTo().equalsIgnoreCase(sourceCcy)) {
+            if (r.getPair().getFirst().equalsIgnoreCase(targetCcy) && r.getPair().getSecond().equalsIgnoreCase(sourceCcy)) {
                 return Math.round(amount.doubleValue() / r.getRate() * PRECISION) / PRECISION;
             }
         }
@@ -44,8 +44,8 @@ public class CurrencyConverter {
         if (pair == null) throw new IllegalArgumentException("Parameter 'pair' cannot be null");
 
         for (var r : rates) {
-            var matchesFrom = r.getCcyFrom().equalsIgnoreCase(pair.getFirst()) || r.getCcyFrom().equalsIgnoreCase(pair.getSecond());
-            var matchesTo = r.getCcyTo().equalsIgnoreCase(pair.getFirst()) || r.getCcyTo().equalsIgnoreCase(pair.getSecond());
+            var matchesFrom = r.getPair().getFirst().equalsIgnoreCase(pair.getFirst()) || r.getPair().getFirst().equalsIgnoreCase(pair.getSecond());
+            var matchesTo = r.getPair().getSecond().equalsIgnoreCase(pair.getFirst()) || r.getPair().getSecond().equalsIgnoreCase(pair.getSecond());
             if (matchesFrom && matchesTo) {
                 return true;
             }
