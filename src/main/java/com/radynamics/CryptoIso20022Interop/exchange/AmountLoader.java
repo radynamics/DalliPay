@@ -42,7 +42,7 @@ public class AmountLoader {
                 cc = currencyConverter;
             } else {
                 var source = transformInstruction.getHistoricExchangeRateSource();
-                var rate = source.rateAt(ccyPair, t.getBooked());
+                var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
                 if (rate == null) {
                     LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
                     t.setAmountUnknown();

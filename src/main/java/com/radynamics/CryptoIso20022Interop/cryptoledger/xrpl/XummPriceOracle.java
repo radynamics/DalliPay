@@ -38,10 +38,6 @@ public class XummPriceOracle implements HistoricExchangeRateSource {
 
     @Override
     public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
-        if (!CurrencyPair.contains(getSupportedPairs(), pair)) {
-            return null;
-        }
-
         var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
         Transaction[] transactions = new Transaction[0];
         try {
