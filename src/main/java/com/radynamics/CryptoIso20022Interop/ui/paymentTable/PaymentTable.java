@@ -147,7 +147,7 @@ public class PaymentTable extends JPanel {
     private void showMore(Payment obj) {
         var frm = new PaymentDetailForm(obj);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(600, 500);
+        frm.setSize(600, 350);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);

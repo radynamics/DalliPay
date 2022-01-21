@@ -14,7 +14,7 @@ import java.io.IOException;
 public class PaymentDetailForm extends JDialog {
     private Payment payment;
     private SpringLayout panel1Layout;
-    private JPanel panel1;
+    private JPanel pnlContent;
     private Component anchorComponentTopLeft;
 
     public PaymentDetailForm(Payment payment) {
@@ -51,14 +51,17 @@ public class PaymentDetailForm extends JDialog {
         JPanel panel0 = new JPanel();
         panel0.setBorder(innerBorder);
         panel0.setLayout(new BoxLayout(panel0, BoxLayout.X_AXIS));
-        panel1 = new JPanel();
+        var panel1 = new JPanel();
         panel1.setBorder(innerBorder);
+        panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
         panel1Layout = new SpringLayout();
-        panel1.setLayout(panel1Layout);
+        pnlContent = new JPanel();
+        pnlContent.setLayout(panel1Layout);
         JPanel panel3 = new JPanel();
-        panel3.setBorder(innerBorder);
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
+
+        panel1.add(pnlContent);
 
         pnlMain.add(panel0);
         pnlMain.add(panel1);
@@ -66,12 +69,10 @@ public class PaymentDetailForm extends JDialog {
 
         panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel0.setPreferredSize(new Dimension(500, 50));
-        panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 350));
-        panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 350));
-        panel1.setPreferredSize(new Dimension(500, 350));
+        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
+        panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel3.setPreferredSize(new Dimension(500, 45));
+        panel3.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
 
         {
             var lbl = new JLabel();
@@ -126,6 +127,7 @@ public class PaymentDetailForm extends JDialog {
                 close();
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
+            panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
     }
@@ -169,22 +171,22 @@ public class PaymentDetailForm extends JDialog {
 
     private Component createRow(int row, String labelText, Component firstLine, String contentSecondLine) {
         var lbl = new JLabel(labelText);
-        panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(row), SpringLayout.NORTH, panel1);
+        panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
+        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(row), SpringLayout.NORTH, pnlContent);
         lbl.setOpaque(true);
-        panel1.add(lbl);
+        pnlContent.add(lbl);
 
         panel1Layout.putConstraint(SpringLayout.WEST, firstLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-        panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, getNorthPad(row), SpringLayout.NORTH, panel1);
-        panel1.add(firstLine);
+        panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, getNorthPad(row), SpringLayout.NORTH, pnlContent);
+        pnlContent.add(firstLine);
 
         if (contentSecondLine != null) {
             var lbl3 = new JLabel(contentSecondLine);
             lbl3.putClientProperty("FlatLaf.styleClass", "small");
             lbl3.setForeground(Consts.ColorSmallInfo);
             panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-            panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, getNorthPad(row) + 13, SpringLayout.NORTH, panel1);
-            panel1.add(lbl3);
+            panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, getNorthPad(row) + 13, SpringLayout.NORTH, pnlContent);
+            pnlContent.add(lbl3);
         }
 
         return lbl;
