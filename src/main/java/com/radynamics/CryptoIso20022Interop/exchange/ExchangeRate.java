@@ -17,6 +17,10 @@ public class ExchangeRate {
         this.pointInTime = pointInTime;
     }
 
+    public static ExchangeRate None(String ccy) {
+        return new ExchangeRate(new CurrencyPair(ccy, ccy), 1, LocalDateTime.now());
+    }
+
     public CurrencyPair getPair() {
         return pair;
     }

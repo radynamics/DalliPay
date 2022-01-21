@@ -28,6 +28,7 @@ public class CurrencyConverter {
             return amount.doubleValue();
         }
 
+        // TODO: improve rounding (ex. JPY)
         for (var r : rates) {
             if (r.getPair().getFirst().equalsIgnoreCase(sourceCcy) && r.getPair().getSecond().equalsIgnoreCase(targetCcy)) {
                 return Math.round(amount.doubleValue() * r.getRate() * PRECISION) / PRECISION;
@@ -41,15 +42,19 @@ public class CurrencyConverter {
     }
 
     public boolean has(CurrencyPair pair) {
+        return get(pair) != null;
+    }
+
+    public ExchangeRate get(CurrencyPair pair) {
         if (pair == null) throw new IllegalArgumentException("Parameter 'pair' cannot be null");
 
         for (var r : rates) {
             var matchesFrom = r.getPair().getFirst().equalsIgnoreCase(pair.getFirst()) || r.getPair().getFirst().equalsIgnoreCase(pair.getSecond());
             var matchesTo = r.getPair().getSecond().equalsIgnoreCase(pair.getFirst()) || r.getPair().getSecond().equalsIgnoreCase(pair.getSecond());
             if (matchesFrom && matchesTo) {
-                return true;
+                return r;
             }
         }
-        return false;
+        return null;
     }
 }

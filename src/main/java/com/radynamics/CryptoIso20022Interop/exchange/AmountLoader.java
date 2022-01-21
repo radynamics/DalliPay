@@ -52,7 +52,7 @@ public class AmountLoader {
                 cc = new CurrencyConverter(new ExchangeRate[]{rate});
             }
             var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
-            t.setAmount(amt, ccy);
+            t.setExchangeRate(cc.get(ccyPair));
             completableFuture.complete(t);
         });
 

@@ -4,21 +4,19 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.LocalDateTime;
 
 public class Payment {
     private Transaction cryptoTrx;
-    private Double amount;
-    private String ccy;
     private Account senderAccount;
     private Account receiverAccount;
     private Address senderAddress;
     private Address receiverAddress;
-
-    private static final Double UnknownAmount = Double.valueOf(0);
-    private static final String UnknownCCy = "";
+    private ExchangeRate exchangeRate;
 
     public Payment(Transaction cryptoTrx) {
         this.cryptoTrx = cryptoTrx;
@@ -69,24 +67,36 @@ public class Payment {
     }
 
     public Double getAmount() {
-        return amount;
+        if (isAmountUnknown()) {
+            return null;
+        }
+        var amt = getLedger().convertToNativeCcyAmount(getLedgerAmountSmallestUnit());
+        var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
+        return cc.convert(amt, exchangeRate.getPair());
     }
 
     public String getFiatCcy() {
-        return this.ccy;
+        if (isAmountUnknown()) {
+            return "";
+        }
+        return exchangeRate.getPair().getFirst().equals(getLedgerCcy())
+                ? exchangeRate.getPair().getSecond()
+                : exchangeRate.getPair().getFirst();
     }
 
     public void setAmountUnknown() {
-        setAmount(UnknownAmount, UnknownCCy);
+        exchangeRate = null;
     }
 
     public boolean isAmountUnknown() {
-        return UnknownAmount.equals(amount) && UnknownCCy.equals(ccy);
+        return exchangeRate == null;
     }
 
-    public void setAmount(double value, String ccy) {
-        this.amount = value;
-        this.ccy = ccy;
+    public void setExchangeRate(ExchangeRate rate) {
+        if (!rate.getPair().affects(getLedgerCcy())) {
+            throw new IllegalArgumentException(String.format("Exchange rate must affect %s.", getLedgerCcy()));
+        }
+        this.exchangeRate = rate;
     }
 
     public long getLedgerAmountSmallestUnit() {
@@ -131,5 +141,9 @@ public class Payment {
 
     public void addMessage(String message) {
         cryptoTrx.addMessage(message);
+    }
+
+    public ExchangeRate getExchangeRate() {
+        return exchangeRate;
     }
 }

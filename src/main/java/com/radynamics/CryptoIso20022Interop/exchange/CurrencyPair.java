@@ -29,4 +29,8 @@ public class CurrencyPair {
     public String getDisplayText() {
         return String.format("%s/%s", getFirst(), getSecond());
     }
+
+    public boolean affects(String ccy) {
+        return getFirst().equals(ccy) || getSecond().equals(ccy);
+    }
 }
