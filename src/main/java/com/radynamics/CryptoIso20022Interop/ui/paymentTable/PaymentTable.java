@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -144,8 +145,12 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var account = model.getActor().get(obj.getReceiverAccount(), obj.getSenderAccount());
-        JOptionPane.showMessageDialog(this, String.format("TODO: RST 2022-01-06 show more details for %s", account.getUnformatted()));
+        var frm = new PaymentDetailForm(obj);
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(600, 500);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(this);
+        frm.setVisible(true);
     }
 
     public Payment[] selectedPayments() {
