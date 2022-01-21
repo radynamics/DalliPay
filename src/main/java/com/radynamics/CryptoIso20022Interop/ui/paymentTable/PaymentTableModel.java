@@ -82,7 +82,6 @@ public class PaymentTableModel extends AbstractTableModel {
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
 
-        validateAsync(data);
         Arrays.stream(amountLoader.loadAsync(data)).forEach(future -> {
             future.thenAccept(t -> {
                 setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
