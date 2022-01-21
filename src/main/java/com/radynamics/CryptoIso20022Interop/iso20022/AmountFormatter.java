@@ -7,7 +7,7 @@ import java.text.NumberFormat;
 
 public class AmountFormatter {
     private static final NumberFormat dfFiat = Utils.createFormatFiat();
-    private static final NumberFormat dfCryptocurrency = Utils.createFormatFiat();
+    private static final NumberFormat dfCryptocurrency = Utils.createFormatLedger();
 
     public static String formatAmt(Payment p) {
         if (p.isAmountUnknown()) {
