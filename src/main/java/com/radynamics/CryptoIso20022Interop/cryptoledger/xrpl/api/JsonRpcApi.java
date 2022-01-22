@@ -32,6 +32,7 @@ import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class JsonRpcApi implements TransactionSource {
@@ -188,6 +189,7 @@ public class JsonRpcApi implements TransactionSource {
             }
 
             t.setId(signed.hash().value());
+            t.setBooked(LocalDateTime.now());
         }
     }
 
