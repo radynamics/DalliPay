@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -8,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Payment {
@@ -145,5 +147,15 @@ public class Payment {
 
     public ExchangeRate getExchangeRate() {
         return exchangeRate;
+    }
+
+    public String getDisplayText() {
+        var amount = getAmount();
+        if (amount != null) {
+            return MoneyFormatter.formatFiat(BigDecimal.valueOf(amount), getFiatCcy());
+        }
+
+        var ledgerAmount = getLedger().convertToNativeCcyAmount(cryptoTrx.getAmountSmallestUnit());
+        return MoneyFormatter.formatLedger(ledgerAmount, getLedgerCcy());
     }
 }
