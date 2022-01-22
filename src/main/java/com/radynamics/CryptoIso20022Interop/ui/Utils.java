@@ -47,4 +47,8 @@ public final class Utils {
         });
         return lbl;
     }
+
+    public static String removeEndingLineSeparator(String text) {
+        return text != null && text.endsWith("\n") ? text.substring(0, text.lastIndexOf("\n")) : text;
+    }
 }

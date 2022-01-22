@@ -131,7 +131,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var ref : payment.getStructuredReferences()) {
                     sb.append(String.format("%s\n", ref.getUnformatted()));
                 }
-                var txt = createTextArea(1, sb.toString());
+                var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(row++, "References:", txt, (String) null);
             }
             {
@@ -139,7 +139,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var m : payment.getMessages()) {
                     sb.append(String.format("%s\n", m));
                 }
-                var txt = createTextArea(1, sb.toString());
+                var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(row++, "Messages:", txt, (String) null);
             }
             {
@@ -150,7 +150,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var vr : validator.validate(payment)) {
                     sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
                 }
-                var txt = createTextArea(3, sb.length() == 0 ? "none" : sb.toString());
+                var txt = createTextArea(3, sb.length() == 0 ? "none" : Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(row++, "Issues:", txt, (String) null);
             }
         }
