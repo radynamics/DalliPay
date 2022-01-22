@@ -131,8 +131,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var ref : payment.getStructuredReferences()) {
                     sb.append(String.format("%s\n", ref.getUnformatted()));
                 }
-                var txt = createTextArea();
-                txt.setText(sb.toString());
+                var txt = createTextArea(1, sb.toString());
                 createRow(row++, "References:", txt, (String) null);
             }
             {
@@ -140,8 +139,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var m : payment.getMessages()) {
                     sb.append(String.format("%s\n", m));
                 }
-                var txt = createTextArea();
-                txt.setText(sb.toString());
+                var txt = createTextArea(1, sb.toString());
                 createRow(row++, "Messages:", txt, (String) null);
             }
             {
@@ -152,10 +150,7 @@ public class PaymentDetailForm extends JDialog {
                 for (var vr : validator.validate(payment)) {
                     sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
                 }
-                var txt = createTextArea();
-                txt.setRows(3);
-                txt.setEnabled(false);
-                txt.setText(sb.length() == 0 ? "none" : sb.toString());
+                var txt = createTextArea(3, sb.length() == 0 ? "none" : sb.toString());
                 createRow(row++, "Issues:", txt, (String) null);
             }
         }
@@ -175,13 +170,13 @@ public class PaymentDetailForm extends JDialog {
         payment.getLedger().getTransactionLookupProvider().open(payment.getId());
     }
 
-    private JTextArea createTextArea() {
-        var txt = new JTextArea();
-        txt.setPreferredSize(new Dimension(Integer.MAX_VALUE, txt.getPreferredSize().height));
+    private JScrollPane createTextArea(int rows, String text) {
+        var txt = new JTextArea(rows, 39);
+        txt.setLineWrap(true);
         txt.setEditable(false);
-        txt.setForeground(Consts.ColorSmallInfo);
-        txt.setMargin(new Insets(0, 0, 0, 0));
-        return txt;
+        txt.setText(text);
+        txt.setCaretPosition(0);
+        return new JScrollPane(txt);
     }
 
     private void close() {
