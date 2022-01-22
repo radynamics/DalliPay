@@ -13,7 +13,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
 
     private final static FlatSVGIcon pending = null;
     private final static FlatSVGIcon success = new FlatSVGIcon("svg/success.svg", WIDTH, HEIGHT);
-    private final static FlatSVGIcon error = new FlatSVGIcon("svg/error.svg", WIDTH, HEIGHT);
+    private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
 
     public TransmissionCellRenderer() {
         setOpaque(true);
