@@ -20,6 +20,8 @@ public interface Ledger {
 
     Wallet createWallet(String publicKey, String secret);
 
+    void refreshBalance(Wallet wallet);
+
     Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception;
 
     boolean exists(Wallet wallet);

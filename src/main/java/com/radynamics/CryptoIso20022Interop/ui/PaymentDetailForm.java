@@ -100,7 +100,17 @@ public class PaymentDetailForm extends JDialog {
                         String.format("%s %s", amtText, payment.getFiatCcy() == null ? "" : payment.getFiatCcy()),
                         String.format("%s %s with exchange rate %s at %s", amtLedgerText, payment.getLedgerCcy(), fxRateText, fxRateAtText));
             }
-            createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), getWalletText(payment.getSenderWallet()));
+            {
+                var secondLineText = getWalletText(payment.getSenderWallet());
+                if (payment.getSenderWallet() != null) {
+                    var amtSmallestUnit = payment.getSenderWallet().getLedgerBalanceSmallestUnit();
+                    if (amtSmallestUnit != null) {
+                        var balance = payment.getLedger().convertToNativeCcyAmount(amtSmallestUnit.longValue());
+                        secondLineText = String.format("%s (%s %s)", secondLineText, Utils.createFormatLedger().format(balance), payment.getLedgerCcy());
+                    }
+                }
+                createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), secondLineText);
+            }
             createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), getWalletText(payment.getReceiverWallet()));
             createRow(row++, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(payment.getBooked()));
             {

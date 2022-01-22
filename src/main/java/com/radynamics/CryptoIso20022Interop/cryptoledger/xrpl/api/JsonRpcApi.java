@@ -134,6 +134,16 @@ public class JsonRpcApi implements TransactionSource {
         return trx;
     }
 
+    public void refreshBalance(Wallet wallet) {
+        try {
+            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
+            var result = xrplClient.accountInfo(requestParams);
+            wallet.setLedgerBalance(result.accountData().balance().value());
+        } catch (JsonRpcClientErrorException e) {
+            LogManager.getLogger().error(e);
+        }
+    }
+
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
         // As explained on https://xrpl.org/send-xrp.html
         var previousLastLedgerSequence = UnsignedInteger.ZERO;

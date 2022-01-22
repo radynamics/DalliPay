@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
@@ -105,6 +106,8 @@ public class SendForm extends JFrame {
                     try {
                         var t = new TransactionTranslator(transformInstruction, currencyConverter);
                         var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+                        var br = new BalanceRefresher();
+                        br.refreshAllSenderWallets(payments);
 
                         load(payments);
                     } catch (Exception e) {
