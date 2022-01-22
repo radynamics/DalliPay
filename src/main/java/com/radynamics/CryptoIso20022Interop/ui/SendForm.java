@@ -153,7 +153,7 @@ public class SendForm extends JFrame {
                         table.refresh(p);
                     }
                 } catch (Exception ex) {
-                    LogManager.getLogger().error(ex);
+                    ExceptionDialog.show(this, ex);
                 } finally {
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }

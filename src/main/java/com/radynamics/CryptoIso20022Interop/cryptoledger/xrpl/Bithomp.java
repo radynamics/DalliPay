@@ -28,7 +28,7 @@ public class Bithomp implements WalletLookupProvider {
             try {
                 Desktop.getDesktop().browse(new URI(String.format("%s%s", baseUrl, walletPublicKey)));
             } catch (Exception e) {
-                LogManager.getLogger().error(e);
+                LogManager.getLogger().error(e.getMessage(), e);
             }
         } else {
             LogManager.getLogger().warn("No desktop or no browsing supported");

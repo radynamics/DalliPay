@@ -103,7 +103,7 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
         } catch (JsonRpcClientErrorException e) {
-            LogManager.getLogger().error(e);
+            LogManager.getLogger().error(e.getMessage(), e);
             return false;
         }
     }
@@ -140,7 +140,7 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             wallet.setLedgerBalance(result.accountData().balance().value());
         } catch (JsonRpcClientErrorException e) {
-            LogManager.getLogger().error(e);
+            LogManager.getLogger().error(e.getMessage(), e);
         }
     }
 

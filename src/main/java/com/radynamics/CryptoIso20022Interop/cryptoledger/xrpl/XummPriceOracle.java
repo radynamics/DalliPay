@@ -43,7 +43,7 @@ public class XummPriceOracle implements HistoricExchangeRateSource {
         try {
             transactions = ledger.listTransactions(new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx"), period);
         } catch (Exception e) {
-            LogManager.getLogger().error(e);
+            LogManager.getLogger().error(e.getMessage(), e);
         }
 
         if (transactions.length == 0) {
