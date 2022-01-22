@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private TransmissionState transmission = TransmissionState.Pending;
+    private Throwable transmissionError;
 
     public Transaction(Ledger ledger, long drops, String ccy) {
         this.ledger = ledger;
@@ -115,6 +117,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         return transmission;
     }
 
+    @Override
+    public Throwable getTransmissionError() {
+        return transmissionError;
+    }
+
     public void setSender(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet sender) {
         this.senderWallet = sender;
     }
@@ -127,7 +134,12 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         this.drops = drops;
     }
 
-    public void setTransmission(TransmissionState transmission) {
-        this.transmission = transmission;
+    public void refreshTransmission() {
+        refreshTransmission(null);
+    }
+
+    public void refreshTransmission(Throwable t) {
+        this.transmissionError = t;
+        this.transmission = StringUtils.isAllEmpty(getId()) ? TransmissionState.Error : TransmissionState.Success;
     }
 }

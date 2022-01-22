@@ -114,6 +114,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
         return TransmissionState.Pending;
     }
 
+    @Override
+    public Throwable getTransmissionError() {
+        return null;
+    }
+
     public void setSender(Wallet sender) {
         this.senderWallet = sender;
     }

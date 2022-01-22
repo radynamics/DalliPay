@@ -41,4 +41,6 @@ public interface Transaction {
     Ledger getLedger();
 
     TransmissionState getTransmission();
+
+    Throwable getTransmissionError();
 }

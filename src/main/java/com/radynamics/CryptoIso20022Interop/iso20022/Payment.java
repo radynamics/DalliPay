@@ -158,4 +158,8 @@ public class Payment {
         var ledgerAmount = getLedger().convertToNativeCcyAmount(cryptoTrx.getAmountSmallestUnit());
         return MoneyFormatter.formatLedger(ledgerAmount, getLedgerCcy());
     }
+
+    public Throwable getTransmissionError() {
+        return cryptoTrx.getTransmissionError();
+    }
 }

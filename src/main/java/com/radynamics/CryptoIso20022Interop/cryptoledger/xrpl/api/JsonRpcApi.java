@@ -147,13 +147,14 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
-        // As explained on https://xrpl.org/send-xrp.html
-        var previousLastLedgerSequence = UnsignedInteger.ZERO;
-        var accountSequenceOffset = UnsignedInteger.ZERO;
-
         var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
         for (var t : transactions) {
-            sequences = send(t, sequences);
+            try {
+                sequences = send(t, sequences);
+                ((Transaction) t).refreshTransmission();
+            } catch (Exception ex) {
+                ((Transaction) t).refreshTransmission(ex);
+            }
         }
     }
 

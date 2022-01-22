@@ -3,11 +3,9 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
@@ -45,14 +43,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
-        try {
-            var api = new JsonRpcApi(this, network);
-            api.send(transactions);
-        } finally {
-            for (var t : transactions) {
-                ((Transaction) t).setTransmission(StringUtils.isAllEmpty(t.getId()) ? TransmissionState.Error : TransmissionState.Success);
-            }
-        }
+        var api = new JsonRpcApi(this, network);
+        api.send(transactions);
     }
 
     @Override

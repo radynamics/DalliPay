@@ -146,6 +146,9 @@ public class PaymentDetailForm extends JDialog {
             }
             {
                 var sb = new StringBuilder();
+                if (payment.getTransmissionError() != null) {
+                    sb.append(String.format("%s\n", payment.getTransmissionError().getMessage()));
+                }
                 for (var vr : validator.validate(payment)) {
                     sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
                 }
