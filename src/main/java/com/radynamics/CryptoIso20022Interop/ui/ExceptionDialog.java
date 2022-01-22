@@ -7,7 +7,8 @@ import java.awt.*;
 
 public final class ExceptionDialog {
     public static void show(Component parentComponent, Exception e) {
-        LogManager.getLogger().error(e);
-        JOptionPane.showMessageDialog(parentComponent, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        var msg = e.getMessage() == null || e.getMessage().length() == 0 ? "Unknown exception occured. See error logs for details" : e.getMessage();
+        LogManager.getLogger().error(msg, e);
+        JOptionPane.showMessageDialog(parentComponent, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
