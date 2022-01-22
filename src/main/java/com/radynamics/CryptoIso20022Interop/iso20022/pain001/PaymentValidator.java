@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,9 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             list.add(new ValidationResult(ValidationState.Error, "Sender wallet is missing."));
         } else {
             list.addAll(Arrays.asList(wv.validate(t.getSenderWallet())));
+            if (StringUtils.isAllEmpty(t.getSenderWallet().getSecret())) {
+                list.add(new ValidationResult(ValidationState.Error, "Sender wallet secret (private Key) is missing."));
+            }
         }
 
         if (t.getStructuredReferences().length == 0) {
