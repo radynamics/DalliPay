@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
@@ -114,7 +115,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
                 setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
                 var highestStatus = getHighestStatus(validationResults);
-                setValueAt(isSelected(highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
+                setValueAt(isSelected(result.left, highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
                 setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
             });
         });
@@ -128,8 +129,12 @@ public class PaymentTableModel extends AbstractTableModel {
         return highest;
     }
 
-    private boolean isSelected(ValidationState highestStatus) {
-        return highestStatus != ValidationState.Error;
+    private boolean isSelected(Payment p, ValidationState highestStatus) {
+        var selected = true;
+        if (actor == Actor.Sender) {
+            selected = p.getTransmission() == TransmissionState.Pending;
+        }
+        return selected && highestStatus != ValidationState.Error;
     }
 
     public Payment[] selectedPayments() {
@@ -144,6 +149,8 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void onTransactionChanged(int row, Payment t) {
         validateAsync(new Payment[]{t});
+
+        setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));
     }
 
     public Actor getActor() {
