@@ -1,10 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import okhttp3.HttpUrl;
@@ -103,6 +101,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public WalletLookupProvider getLookupProvider() {
+        return new Bithomp(network.getType());
+    }
+
+    @Override
+    public TransactionLookupProvider getTransactionLookupProvider() {
         return new Bithomp(network.getType());
     }
 

@@ -95,6 +95,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public TransactionLookupProvider getTransactionLookupProvider() {
+        return null;
+    }
+
+    @Override
     public boolean isValidPublicKey(String publicKey) {
         return true;
     }
