@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import org.apache.logging.log4j.LogManager;
 
@@ -23,10 +24,10 @@ public class Bithomp implements WalletLookupProvider {
     }
 
     @Override
-    public void open(String walletPublicKey) {
+    public void open(Wallet wallet) {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
-                Desktop.getDesktop().browse(new URI(String.format("%s%s", baseUrl, walletPublicKey)));
+                Desktop.getDesktop().browse(new URI(String.format("%s%s", baseUrl, wallet.getPublicKey())));
             } catch (Exception e) {
                 LogManager.getLogger().error(e.getMessage(), e);
             }

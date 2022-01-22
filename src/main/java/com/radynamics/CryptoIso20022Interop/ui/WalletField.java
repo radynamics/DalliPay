@@ -69,7 +69,7 @@ public class WalletField extends JPanel {
     }
 
     private void lookup() {
-        lookupProvider.open(getText());
+        lookupProvider.open(ledger.createWallet(getText(), ""));
     }
 
     public void setText(String value) {
