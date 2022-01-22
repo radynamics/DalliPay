@@ -140,6 +140,14 @@ public class SendForm extends JFrame {
                 var payments = table.selectedPayments();
                 try {
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                    var validator = new PaymentValidator();
+                    var results = validator.validate(payments);
+                    if (results.length > 0) {
+                        ValidationResultDialog.show(this, results);
+                        return;
+                    }
+
                     transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
                     for (var p : payments) {
                         table.refresh(p);
