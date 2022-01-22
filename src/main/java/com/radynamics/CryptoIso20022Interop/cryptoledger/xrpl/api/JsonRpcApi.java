@@ -13,6 +13,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.WalletConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
@@ -150,47 +151,57 @@ public class JsonRpcApi implements TransactionSource {
         var previousLastLedgerSequence = UnsignedInteger.ZERO;
         var accountSequenceOffset = UnsignedInteger.ZERO;
 
+        var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
         for (var t : transactions) {
-            var walletFactory = DefaultWalletFactory.getInstance();
-            var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.getType() != Network.Live);
-            var receiver = Address.of(t.getReceiverWallet().getPublicKey());
-
-            var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
-
-            var memos = new ArrayList<MemoWrapper>();
-            memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
-
-            // Get the latest validated ledger index
-            LedgerIndex validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
-                    .ledgerIndex()
-                    .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
-
-            // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
-            UnsignedInteger lastLedgerSequence = UnsignedInteger.valueOf(
-                    validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue()
-            );
-
-            if (previousLastLedgerSequence == UnsignedInteger.ZERO) {
-                accountSequenceOffset = UnsignedInteger.ZERO;
-            } else {
-                accountSequenceOffset = accountSequenceOffset.plus(UnsignedInteger.ONE);
-            }
-            previousLastLedgerSequence = lastLedgerSequence;
-
-            // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
-            var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, memos);
-
-            // Idea: return prepared payment without signing to ensure this code never needs access to private key (option?)
-            var signed = sign(prepared, sender);
-
-            var prelimResult = xrplClient.submit(signed);
-            if (!prelimResult.result().equalsIgnoreCase("tesSUCCESS")) {
-                throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
-            }
-
-            t.setId(signed.hash().value());
-            t.setBooked(LocalDateTime.now());
+            sequences = send(t, sequences);
         }
+    }
+
+    private ImmutablePair<UnsignedInteger, UnsignedInteger> send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences) throws Exception {
+        var previousLastLedgerSequence = sequences.getLeft();
+        var accountSequenceOffset = sequences.getRight();
+
+        var walletFactory = DefaultWalletFactory.getInstance();
+        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.getType() != Network.Live);
+        var receiver = Address.of(t.getReceiverWallet().getPublicKey());
+
+        var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
+
+        var memos = new ArrayList<MemoWrapper>();
+        memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
+
+        // Get the latest validated ledger index
+        LedgerIndex validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
+                .ledgerIndex()
+                .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
+
+        // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
+        UnsignedInteger lastLedgerSequence = UnsignedInteger.valueOf(
+                validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue()
+        );
+
+        if (previousLastLedgerSequence == UnsignedInteger.ZERO) {
+            accountSequenceOffset = UnsignedInteger.ZERO;
+        } else {
+            accountSequenceOffset = accountSequenceOffset.plus(UnsignedInteger.ONE);
+        }
+        previousLastLedgerSequence = lastLedgerSequence;
+
+        // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
+        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, memos);
+
+        // Idea: return prepared payment without signing to ensure this code never needs access to private key (option?)
+        var signed = sign(prepared, sender);
+
+        var prelimResult = xrplClient.submit(signed);
+        if (!prelimResult.result().equalsIgnoreCase("tesSUCCESS")) {
+            throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
+        }
+
+        t.setId(signed.hash().value());
+        t.setBooked(LocalDateTime.now());
+
+        return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }
 
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
