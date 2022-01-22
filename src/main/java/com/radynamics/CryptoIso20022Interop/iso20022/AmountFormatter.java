@@ -1,8 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 
 public class AmountFormatter {
@@ -21,5 +23,11 @@ public class AmountFormatter {
                 ? dfCryptocurrency
                 : dfFiat;
         return df.format(p.getAmount());
+    }
+
+    public static String formatAmtWithCcy(Payment p) {
+        return p.isAmountUnknown() || p.getAmount() == null
+                ? formatAmt(p)
+                : MoneyFormatter.formatFiat(BigDecimal.valueOf(p.getAmount()), p.getFiatCcy());
     }
 }

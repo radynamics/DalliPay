@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 
@@ -88,17 +89,16 @@ public class PaymentDetailForm extends JDialog {
         {
             int row = 0;
             {
-                var amtText = AmountFormatter.formatAmt(payment);
-                var amtLedgerText = Utils.createFormatLedger().format(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()));
+                var amtText = AmountFormatter.formatAmtWithCcy(payment);
+                var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()), payment.getLedgerCcy());
                 var fxRateText = "unknown";
                 var fxRateAtText = "unknown";
                 if (!payment.isAmountUnknown()) {
                     fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
                     fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
                 }
-                anchorComponentTopLeft = createRow(row++, "Amount:",
-                        String.format("%s %s", amtText, payment.getFiatCcy() == null ? "" : payment.getFiatCcy()),
-                        String.format("%s %s with exchange rate %s at %s", amtLedgerText, payment.getLedgerCcy(), fxRateText, fxRateAtText));
+                anchorComponentTopLeft = createRow(row++, "Amount:", amtText,
+                        String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText));
             }
             {
                 var secondLineText = getWalletText(payment.getSenderWallet());
@@ -106,7 +106,7 @@ public class PaymentDetailForm extends JDialog {
                     var amtSmallestUnit = payment.getSenderWallet().getLedgerBalanceSmallestUnit();
                     if (amtSmallestUnit != null) {
                         var balance = payment.getLedger().convertToNativeCcyAmount(amtSmallestUnit.longValue());
-                        secondLineText = String.format("%s (%s %s)", secondLineText, Utils.createFormatLedger().format(balance), payment.getLedgerCcy());
+                        secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, payment.getLedgerCcy()));
                     }
                 }
                 createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), secondLineText);
