@@ -132,7 +132,7 @@ public class PaymentDetailForm extends JDialog {
                     sb.append(String.format("%s\n", ref.getUnformatted()));
                 }
                 var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(row++, "References:", txt, (String) null);
+                createRow(row++, "References:", txt, null);
             }
             {
                 var sb = new StringBuilder();
@@ -140,7 +140,7 @@ public class PaymentDetailForm extends JDialog {
                     sb.append(String.format("%s\n", m));
                 }
                 var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(row++, "Messages:", txt, (String) null);
+                createRow(row++, "Messages:", txt, null);
             }
             {
                 var sb = new StringBuilder();
@@ -150,8 +150,10 @@ public class PaymentDetailForm extends JDialog {
                 for (var vr : validator.validate(payment)) {
                     sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
                 }
-                var txt = createTextArea(3, sb.length() == 0 ? "none" : Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(row++, "Issues:", txt, (String) null);
+                var pnl = new JPanel();
+                pnl.setLayout(new BorderLayout());
+                pnl.add(createTextArea(3, sb.length() == 0 ? "none" : Utils.removeEndingLineSeparator(sb.toString())));
+                createRow(row++, "Issues:", pnl, null, true);
             }
         }
         {
@@ -223,14 +225,14 @@ public class PaymentDetailForm extends JDialog {
             secondLine.putClientProperty("FlatLaf.styleClass", "small");
             secondLine.setForeground(Consts.ColorSmallInfo);
         }
-        return createRow(row, labelText, firstLine, secondLine);
+        return createRow(row, labelText, firstLine, secondLine, false);
     }
 
     private Component createRow(int row, String labelText, String contentFirstLine, Component secondLine) {
-        return createRow(row, labelText, new JLabel(contentFirstLine), secondLine);
+        return createRow(row, labelText, new JLabel(contentFirstLine), secondLine, false);
     }
 
-    private Component createRow(int row, String labelText, Component firstLine, Component secondLine) {
+    private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight) {
         var lbl = new JLabel(labelText);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
         panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(row), SpringLayout.NORTH, pnlContent);
@@ -239,6 +241,10 @@ public class PaymentDetailForm extends JDialog {
 
         panel1Layout.putConstraint(SpringLayout.WEST, firstLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
         panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, getNorthPad(row), SpringLayout.NORTH, pnlContent);
+        if (growBottomRight) {
+            panel1Layout.putConstraint(SpringLayout.EAST, pnlContent, 0, SpringLayout.EAST, firstLine);
+            panel1Layout.putConstraint(SpringLayout.SOUTH, pnlContent, 0, SpringLayout.SOUTH, firstLine);
+        }
         pnlContent.add(firstLine);
 
         if (secondLine != null) {
