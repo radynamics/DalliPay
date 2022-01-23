@@ -152,7 +152,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 var pnl = new JPanel();
                 pnl.setLayout(new BorderLayout());
-                pnl.add(createTextArea(3, sb.length() == 0 ? "none" : Utils.removeEndingLineSeparator(sb.toString())));
+                pnl.add(createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString())));
                 createRow(row++, "Issues:", pnl, null, true);
             }
         }
