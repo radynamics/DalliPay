@@ -19,7 +19,9 @@ public class TransactionTranslator {
 
     public Payment[] apply(Payment[] transactions) {
         for (var t : transactions) {
-            t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
+            if (t.getSenderAccount() == null) {
+                t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
+            }
             t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
 
             if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
