@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
+import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +13,6 @@ import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class LedgerRangeConverter {
@@ -39,7 +38,7 @@ public class LedgerRangeConverter {
         var latestLedger = cache.find(dt);
         if (latestLedger == null) {
             var latestLedgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.CLOSED).build());
-            latestLedger = cache.add(toLocalDateTime(latestLedgerResult.ledger().closeTimeHuman().get()), latestLedgerResult.ledgerIndexSafe());
+            latestLedger = cache.add(DateTimeConvert.toLocal(latestLedgerResult.ledger().closeTimeHuman().get()), latestLedgerResult.ledgerIndexSafe());
         }
         if (dt.isAfter(latestLedger.getPointInTime())) {
             logger.trace(String.format("%s is after last ledger -> take last ledger at %s", dt, latestLedger.getPointInTime()));
@@ -80,7 +79,7 @@ public class LedgerRangeConverter {
         }
 
         var ledgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.of(index)).build());
-        return cache.add(toLocalDateTime(ledgerResult.ledger().closeTimeHuman().get()), ledgerResult.ledgerIndexSafe());
+        return cache.add(DateTimeConvert.toLocal(ledgerResult.ledger().closeTimeHuman().get()), ledgerResult.ledgerIndexSafe());
     }
 
     private Duration getAverageLedgerDuration(LedgerAtTime ledger) throws JsonRpcClientErrorException {
@@ -98,9 +97,5 @@ public class LedgerRangeConverter {
         var diff = ChronoUnit.SECONDS.between(closeTime, dt);
         // accept ledger within a smaller timeframe.
         return 0 < diff && diff < Duration.ofSeconds(60).getSeconds();
-    }
-
-    private LocalDateTime toLocalDateTime(ZonedDateTime dt) {
-        return dt.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
     }
 }
