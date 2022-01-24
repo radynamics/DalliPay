@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class Pain001ReaderTest {
+public class Pain00100103Test {
     @Test
     public void readExampleZA1() throws Exception {
         var ledger = new TestLedger();
