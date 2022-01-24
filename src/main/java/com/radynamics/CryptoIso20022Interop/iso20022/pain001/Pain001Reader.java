@@ -31,6 +31,7 @@ public class Pain001Reader {
         var list = new ArrayList<Payment>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
             var senderAccount = getAccount(pmtInf.getDbtrAcct().getId());
+            var senderAddress = getAddress(pmtInf.getDbtr());
             for (var cdtTrfTxInf : pmtInf.getCdtTrfTxInf()) {
                 var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct().getId());
                 var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
@@ -38,6 +39,7 @@ public class Pain001Reader {
 
                 var t = new Payment(ledger.createTransaction());
                 t.setSenderAccount(senderAccount);
+                t.setSenderAddress(senderAddress);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
                 t.setAmount(sourceAmt, sourceCcy);

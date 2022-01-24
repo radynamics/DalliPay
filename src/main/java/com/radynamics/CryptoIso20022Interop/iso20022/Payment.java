@@ -43,6 +43,10 @@ public class Payment {
         return senderAddress;
     }
 
+    public void setSenderAddress(Address senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
     public Account getReceiverAccount() {
         return receiverAccount;
     }
