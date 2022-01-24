@@ -22,7 +22,9 @@ public class TransactionTranslator {
             if (t.getSenderAccount() == null) {
                 t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
             }
-            t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
+            if (t.getReceiverAccount() == null) {
+                t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
+            }
 
             if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
                 t.setExchangeRate(ExchangeRate.None(t.getLedgerCcy()));

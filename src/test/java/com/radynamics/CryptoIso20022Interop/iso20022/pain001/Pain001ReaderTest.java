@@ -165,6 +165,26 @@ public class Pain001ReaderTest {
         assertTransaction(transactions[0], "CH5800791123000889012", "receiver_CH4431999123000889012", 4444000);
     }
 
+    @Test
+    public void readNoAccountMapping() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+        ExchangeRate[] rates = {
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger, ti, ccyConverter);
+
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
+
+        assertNotNull(transactions);
+        assertEquals(1, transactions.length);
+        assertNotNull(transactions[0].getSenderAccount());
+        assertEquals("CH5481230000001998736", transactions[0].getSenderAccount().getUnformatted());
+        assertTransaction(transactions[0], null, "CH5800791123000889012", null, 4444000, null, null);
+    }
 
     @Test
     public void readRmtInfUstrd() throws Exception {
@@ -211,14 +231,26 @@ public class Pain001ReaderTest {
     }
 
     private void assertTransaction(Payment t, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
-        assertNotNull(t.getSenderWallet());
-        assertEquals("sender_CH5481230000001998736", t.getSenderWallet().getPublicKey());
+        assertTransaction(t, "sender_CH5481230000001998736", receiverAccount, receiverWallet, amount, type, referenceUnformatted);
+    }
+
+    private void assertTransaction(Payment t, String senderWallet, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
+        if (senderWallet == null) {
+            assertNull(t.getSenderWallet());
+        } else {
+            assertNotNull(t.getSenderWallet());
+            assertEquals(senderWallet, t.getSenderWallet().getPublicKey());
+        }
         assertEquals(amount, t.getLedgerAmountSmallestUnit(), 0);
         assertEquals("TEST", t.getLedgerCcy());
         assertNotNull(t.getReceiverAccount());
         assertEquals(receiverAccount, t.getReceiverAccount().getUnformatted());
-        assertNotNull(t.getReceiverWallet());
-        assertEquals(receiverWallet, t.getReceiverWallet().getPublicKey());
+        if (receiverWallet == null) {
+            assertNull(t.getReceiverWallet());
+        } else {
+            assertNotNull(t.getReceiverWallet());
+            assertEquals(receiverWallet, t.getReceiverWallet().getPublicKey());
+        }
         assertNull(t.getId());
         assertNull(t.getInvoiceId());
         assertNotNull(t.getMessages());
