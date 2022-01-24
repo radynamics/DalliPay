@@ -1,8 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
@@ -10,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.genera
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.CreditorReferenceInformation2;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.Document;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.PartyIdentification32;
-import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 
@@ -23,13 +20,9 @@ import java.util.ArrayList;
 
 public class Pain001Reader {
     private final Ledger ledger;
-    private TransformInstruction transformInstruction;
-    private final CurrencyConverter ccyConverter;
 
-    public Pain001Reader(Ledger ledger, TransformInstruction transformInstruction, CurrencyConverter ccyConverter) {
+    public Pain001Reader(Ledger ledger) {
         this.ledger = ledger;
-        this.transformInstruction = transformInstruction;
-        this.ccyConverter = ccyConverter;
     }
 
     public Payment[] read(InputStream pain001) throws Exception {
@@ -38,17 +31,12 @@ public class Pain001Reader {
         var list = new ArrayList<Payment>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
             var senderAccount = getAccount(pmtInf.getDbtrAcct().getId());
-            var senderLedger = transformInstruction.getWalletOrNull(senderAccount);
             for (var cdtTrfTxInf : pmtInf.getCdtTrfTxInf()) {
                 var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct().getId());
-                var receiverLedger = transformInstruction.getWalletOrNull(receiverAccount);
-                // TODO: use currency from meta data and support IOUs.
-                var ledgerCcy = ledger.getNativeCcySymbol();
                 var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
                 var sourceAmt = cdtTrfTxInf.getAmt().getInstdAmt().getValue();
 
-                // TODO: 2022-01-24 refactor and remove amount from method
-                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, 0, ledgerCcy));
+                var t = new Payment(ledger.createTransaction());
                 t.setSenderAccount(senderAccount);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));

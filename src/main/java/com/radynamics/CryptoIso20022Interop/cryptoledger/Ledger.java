@@ -10,7 +10,7 @@ public interface Ledger {
 
     String getNativeCcySymbol();
 
-    Transaction createTransaction(Wallet sender, Wallet receiver, long amountSmallestUnit, String ccy);
+    Transaction createTransaction();
 
     void send(Transaction[] transactions) throws Exception;
 

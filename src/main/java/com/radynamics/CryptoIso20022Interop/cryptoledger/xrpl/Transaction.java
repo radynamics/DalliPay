@@ -74,6 +74,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
+    public void setSenderWallet(Wallet wallet) {
+        this.senderWallet = WalletConverter.from(wallet);
+    }
+
+    @Override
     public Wallet getReceiverWallet() {
         return receiverWallet;
     }

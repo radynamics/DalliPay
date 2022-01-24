@@ -22,6 +22,8 @@ public interface Transaction {
 
     Wallet getSenderWallet();
 
+    void setSenderWallet(Wallet wallet);
+
     Wallet getReceiverWallet();
 
     void setReceiverWallet(Wallet wallet);

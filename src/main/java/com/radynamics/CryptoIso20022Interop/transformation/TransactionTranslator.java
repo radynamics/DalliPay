@@ -25,6 +25,12 @@ public class TransactionTranslator {
             if (t.getReceiverAccount() == null) {
                 t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
             }
+            if (t.getSenderWallet() == null) {
+                t.setSenderWallet(transformInstruction.getWalletOrNull(t.getSenderAccount()));
+            }
+            if (t.getReceiverWallet() == null) {
+                t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
+            }
 
             if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
                 if (t.isAmountUnknown()) {

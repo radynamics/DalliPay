@@ -37,7 +37,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA1.xml")));
@@ -82,7 +82,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("GBP", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
@@ -108,7 +108,7 @@ public class Pain001ReaderTest {
         ti.add(new AccountMapping(new IbanAccount("GB96MIDL40271522859882"), "receiver_GB96MIDL40271522859882"));
         ExchangeRate[] rates = new ExchangeRate[0];
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
@@ -135,7 +135,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithQrReference.xml")));
@@ -159,7 +159,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithScorReference.xml")));
@@ -183,7 +183,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
@@ -203,7 +203,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
@@ -228,7 +228,7 @@ public class Pain001ReaderTest {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
-        var r = new Pain001Reader(ledger, ti, ccyConverter);
+        var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001RmtInfUstrd.xml")));

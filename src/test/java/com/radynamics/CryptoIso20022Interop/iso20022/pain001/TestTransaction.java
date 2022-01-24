@@ -124,8 +124,8 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
         return null;
     }
 
-    public void setSender(Wallet sender) {
-        this.senderWallet = sender;
+    public void setSenderWallet(Wallet wallet) {
+        this.senderWallet = wallet;
     }
 
     public void setReceiver(Wallet receiver) {

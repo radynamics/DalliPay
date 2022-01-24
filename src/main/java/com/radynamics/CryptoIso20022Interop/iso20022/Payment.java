@@ -169,6 +169,10 @@ public class Payment {
         return cryptoTrx.getMessages();
     }
 
+    public void setSenderWallet(Wallet wallet) {
+        cryptoTrx.setSenderWallet(wallet);
+    }
+
     public void setReceiverWallet(Wallet wallet) {
         cryptoTrx.setReceiverWallet(wallet);
     }

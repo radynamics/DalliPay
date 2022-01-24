@@ -96,7 +96,7 @@ public class Main {
         exchange.load();
 
         var currencyConverter = new CurrencyConverter(exchange.rates());
-        var r = new Pain001Reader(transformInstruction.getLedger(), transformInstruction, currencyConverter);
+        var r = new Pain001Reader(transformInstruction.getLedger());
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             FlatLightLaf.setup();
