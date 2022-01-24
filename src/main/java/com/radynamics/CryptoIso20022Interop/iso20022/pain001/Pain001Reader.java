@@ -4,7 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.AccountIdentification4Choice;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.CashAccount16;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.CreditorReferenceInformation2;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.Document;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.PartyIdentification32;
@@ -30,19 +30,28 @@ public class Pain001Reader {
 
         var list = new ArrayList<Payment>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
-            var senderAccount = getAccount(pmtInf.getDbtrAcct().getId());
+            var senderAccount = getAccount(pmtInf.getDbtrAcct());
             var senderAddress = getAddress(pmtInf.getDbtr());
             for (var cdtTrfTxInf : pmtInf.getCdtTrfTxInf()) {
-                var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct().getId());
-                var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
-                var sourceAmt = cdtTrfTxInf.getAmt().getInstdAmt().getValue();
+                var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct());
+                var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt() == null ? null : cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
+                var sourceAmt = cdtTrfTxInf.getAmt().getInstdAmt() == null ? null : cdtTrfTxInf.getAmt().getInstdAmt().getValue();
+                var eqvtAmt = cdtTrfTxInf.getAmt().getEqvtAmt();
+                if (eqvtAmt != null) {
+                    sourceCcy = eqvtAmt.getAmt() == null ? null : eqvtAmt.getAmt().getCcy();
+                    sourceAmt = eqvtAmt.getAmt() == null ? null : eqvtAmt.getAmt().getValue();
+                }
 
                 var t = new Payment(ledger.createTransaction());
                 t.setSenderAccount(senderAccount);
                 t.setSenderAddress(senderAddress);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
-                t.setAmount(sourceAmt, sourceCcy);
+                if (sourceAmt == null || sourceCcy == null) {
+                    t.setAmountUnknown();
+                } else {
+                    t.setAmount(sourceAmt, sourceCcy);
+                }
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {
@@ -126,7 +135,12 @@ public class Pain001Reader {
         return StructuredReferenceFactory.getType(typeText);
     }
 
-    private Account getAccount(AccountIdentification4Choice id) {
+    private Account getAccount(CashAccount16 acct) {
+        if (acct == null) {
+            return null;
+        }
+
+        var id = acct.getId();
         return id.getIBAN() != null ? new IbanAccount(id.getIBAN()) : new OtherAccount(id.getOthr().getId());
     }
 

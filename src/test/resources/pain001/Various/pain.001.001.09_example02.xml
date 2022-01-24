@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09 pain.001.001.09.xsd">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>Message-Id123456</MsgId>
+      <CreDtTm>2020-05-15T16:32:03.000Z</CreDtTm>
+      <NbOfTxs>3</NbOfTxs>
+      <CtrlSum>10755.88</CtrlSum>
+      <InitgPty>
+        <Nm>Schliffenbacher Josef</Nm>
+        <PstlAdr>
+          <StrtNm>Gabelsbergerstraße</StrtNm>
+          <BldgNb>1 1/3</BldgNb>
+          <PstCd>84307</PstCd>
+          <TwnNm>Eggenfelden</TwnNm>
+          <Ctry>DE</Ctry>
+        </PstlAdr>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>45454554</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>Imp-PmInf15052020-1632-1</PmtInfId>
+      <PmtMtd>CHK</PmtMtd>
+      <BtchBookg>false</BtchBookg>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>5000.00</CtrlSum>
+      <ReqdExctnDt>
+        <Dt>2020-05-15</Dt>
+      </ReqdExctnDt>
+      <Dbtr>
+        <Nm>Braun Mathias</Nm>
+        <PstlAdr>
+          <StrtNm>Oxford Road</StrtNm>
+          <BldgNb>456</BldgNb>
+          <PstCd>554554</PstCd>
+          <TwnNm>London</TwnNm>
+          <Ctry>GB</Ctry>
+        </PstlAdr>
+        <CtryOfRes>US</CtryOfRes>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>DE14740618130000033626</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>GENODEF1PFK</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Imp-EtE15052020-1632-1</EndToEndId>
+          <UETR>bc407e9c-86d4-46c0-b6d3-7ec43fc903d4</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="EUR">5000.00</InstdAmt>
+        </Amt>
+        <ChrgBr>DEBT</ChrgBr>
+        <ChqInstr>
+          <ChqTp>CCHQ</ChqTp>
+          <ChqNb>1234567890</ChqNb>
+          <DlvryMtd>
+            <Cd>CRCD</Cd>
+          </DlvryMtd>
+          <DlvrTo>
+            <Nm>Maier Michael</Nm>
+            <Adr>
+              <StrtNm>Down Street</StrtNm>
+              <BldgNb>87455</BldgNb>
+              <PstCd>4565</PstCd>
+              <Ctry>BS</Ctry>
+            </Adr>
+          </DlvrTo>
+        </ChqInstr>
+        <Cdtr>
+          <Nm>Fraunhofer Franz</Nm>
+          <PstlAdr>
+            <StrtNm>Times Quare</StrtNm>
+            <BldgNb>446578</BldgNb>
+            <PstCd>84307</PstCd>
+            <TwnNm>New York</TwnNm>
+            <Ctry>US</Ctry>
+          </PstlAdr>
+          <CtryOfRes>BS</CtryOfRes>
+        </Cdtr>
+        <InstrForCdtrAgt>
+          <Cd>PHOB</Cd>
+          <InstrInf>0046/457851</InstrInf>
+        </InstrForCdtrAgt>
+        <InstrForCdtrAgt>
+          <Cd>CHQB</Cd>
+        </InstrForCdtrAgt>
+        <RmtInf>
+          <Ustrd>Nur Scheckzahlung möglich</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+    <PmtInf>
+      <PmtInfId>Imp-PmInf15052020-1632-2</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <BtchBookg>false</BtchBookg>
+      <NbOfTxs>2</NbOfTxs>
+      <CtrlSum>5755.88</CtrlSum>
+      <ReqdExctnDt>
+        <Dt>2020-05-15</Dt>
+      </ReqdExctnDt>
+      <Dbtr>
+        <Nm>Maier Bau GmbH</Nm>
+        <PstlAdr>
+          <StrtNm>Bergstraße</StrtNm>
+          <BldgNb>35</BldgNb>
+          <PstCd>84347</PstCd>
+          <TwnNm>Pfarrkrichen</TwnNm>
+          <Ctry>DE</Ctry>
+        </PstlAdr>
+        <CtryOfRes>AT</CtryOfRes>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>DE14740618130000033626</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>GENODEF1PFK</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Imp-EtE15052020-1632-2</EndToEndId>
+          <UETR>ae663c43-6415-4448-b39f-2b139a77582d</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+          <CtgyPurp>
+            <Cd>SALA</Cd>
+          </CtgyPurp>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="EUR">4521.32</InstdAmt>
+        </Amt>
+        <ChrgBr>CRED</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <ClrSysMmbId>
+              <ClrSysId>
+                <Cd>45782</Cd>
+              </ClrSysId>
+              <MmbId>741256</MmbId>
+            </ClrSysMmbId>
+            <Nm>Jiangsu Jiangnan Rural</Nm>
+            <PstlAdr>
+              <StrtNm>Changwu Middle Road</StrtNm>
+              <BldgNb>8</BldgNb>
+              <PstCd>45664</PstCd>
+              <TwnNm>Changzhou</TwnNm>
+              <Ctry>CZ</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Changzhou Limited</Nm>
+          <PstlAdr>
+            <StrtNm>Lvcheng Road</StrtNm>
+            <BldgNb>865</BldgNb>
+            <PstCd>213169</PstCd>
+            <TwnNm>Changzhou</TwnNm>
+            <Ctry>CN</Ctry>
+          </PstlAdr>
+          <CtryOfRes>HK</CtryOfRes>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>50004564552</Id>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <Purp>
+          <Cd>PENS</Cd>
+        </Purp>
+        <RmtInf>
+          <Strd>
+            <CdtrRefInf>
+              <Tp>
+                <CdOrPrtry>
+                  <Cd>SCOR</Cd>
+                </CdOrPrtry>
+                <Issr>China</Issr>
+              </Tp>
+              <Ref>Ref 455244</Ref>
+            </CdtrRefInf>
+          </Strd>
+        </RmtInf>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Imp-EtE15052020-1632-3</EndToEndId>
+          <UETR>80adc8b2-46da-4ef7-a9f7-86790dc4e1ba</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+          <CtgyPurp>
+            <Cd>SALA</Cd>
+          </CtgyPurp>
+        </PmtTpInf>
+        <Amt>
+          <EqvtAmt>
+            <Amt Ccy="EUR">1234.56</Amt>
+            <CcyOfTrf>USD</CcyOfTrf>
+          </EqvtAmt>
+        </Amt>
+        <ChrgBr>CRED</ChrgBr>
+        <IntrmyAgt1>
+          <FinInstnId>
+            <BICFI>BYLADEM1EGF</BICFI>
+          </FinInstnId>
+        </IntrmyAgt1>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>NBOKKWKWXXX</BICFI>
+            <Nm>Sparkasse Irgendwo</Nm>
+            <PstlAdr>
+              <StrtNm>Untere Straße</StrtNm>
+              <BldgNb>7778</BldgNb>
+              <PstCd>12456</PstCd>
+              <TwnNm>Passau</TwnNm>
+              <Ctry>DE</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>Uttendorfer Willy</Nm>
+          <PstlAdr>
+            <StrtNm>Great Place</StrtNm>
+            <BldgNb>45</BldgNb>
+            <PstCd>4567</PstCd>
+            <TwnNm>Kuwait City</TwnNm>
+            <Ctry>KW</Ctry>
+          </PstlAdr>
+          <CtryOfRes>AE</CtryOfRes>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>KW81CBKU0000000000001234560101</IBAN>
+          </Id>
+        </CdtrAcct>
+        <UltmtCdtr>
+          <Nm>Hinterdupfer Alois</Nm>
+          <PstlAdr>
+            <StrtNm>Big Road</StrtNm>
+            <BldgNb>45788</BldgNb>
+            <PstCd>44565</PstCd>
+            <TwnNm>Dubai</TwnNm>
+            <Ctry>AE</Ctry>
+          </PstlAdr>
+        </UltmtCdtr>
+        <Purp>
+          <Cd>SALA</Cd>
+        </Purp>
+        <RmtInf>
+          <Ustrd>Verwendungszweck 1 Verwendungszweck2</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertNull;
 
 public class Pain00100109Test {
     @Test
-    public void read() throws Exception {
+    public void readExample01() throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
         ti.setTargetCcy(ledger.getNativeCcySymbol());
@@ -94,6 +95,91 @@ public class Pain00100109Test {
             Assertion.assertEquals(t.getReceiverAddress(), new Address("WHEEL INDUSTRY") {{
                 setCity("TR-ANKARA");
                 setCountryShort("TR");
+            }});
+        }
+    }
+
+    @Test
+    public void readExample02() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+
+        var r = new Pain001Reader(ledger);
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Various/pain.001.001.09_example02.xml")));
+
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(3, transactions.length);
+
+        {
+            var t = transactions[0];
+            Assertions.assertNull(t.getId());
+            Assertions.assertNull(t.getInvoiceId());
+            Assertions.assertNotNull(t.getMessages());
+            Assertions.assertEquals(1, t.getMessages().length);
+            Assertions.assertEquals("Nur Scheckzahlung m\u00f6glich", t.getMessages()[0]);
+            Assertions.assertEquals(0, t.getStructuredReferences().length);
+            Assertion.assertEqualsAccount(t, "DE14740618130000033626", null);
+            Assertion.assertAmtCcy(t, 5000.0, "EUR", 5000000, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), new Address("Braun Mathias") {{
+                setStreet("Oxford Road");
+                setZip("554554");
+                setCity("London");
+                setCountryShort("GB");
+            }});
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Fraunhofer Franz") {{
+                setStreet("Times Quare");
+                setZip("84307");
+                setCity("New York");
+                setCountryShort("US");
+            }});
+        }
+        {
+            var t = transactions[1];
+            Assertions.assertNull(t.getId());
+            Assertions.assertNull(t.getInvoiceId());
+            Assertions.assertNotNull(t.getMessages());
+            Assertions.assertEquals(0, t.getMessages().length);
+            Assertions.assertEquals(1, t.getStructuredReferences().length);
+            Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
+            Assertions.assertEquals("Ref 455244", t.getStructuredReferences()[0].getUnformatted());
+            Assertion.assertEqualsAccount(t, "DE14740618130000033626", "50004564552");
+            Assertion.assertAmtCcy(t, 4521.32, "EUR", 4521320, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), new Address("Maier Bau GmbH") {{
+                setStreet("Bergstra\u00DFe");
+                setZip("84347");
+                setCity("Pfarrkrichen");
+                setCountryShort("DE");
+            }});
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Changzhou Limited") {{
+                setStreet("Lvcheng Road");
+                setZip("213169");
+                setCity("Changzhou");
+                setCountryShort("CN");
+            }});
+        }
+        {
+            var t = transactions[2];
+            Assertions.assertNull(t.getId());
+            Assertions.assertNull(t.getInvoiceId());
+            Assertions.assertNotNull(t.getMessages());
+            Assertions.assertEquals(1, t.getMessages().length);
+            Assertions.assertEquals("Verwendungszweck 1 Verwendungszweck2", t.getMessages()[0]);
+            Assertions.assertEquals(0, t.getStructuredReferences().length);
+            Assertion.assertEqualsAccount(t, "DE14740618130000033626", "KW81CBKU0000000000001234560101");
+            Assertion.assertAmtCcy(t, 1234.56, "EUR", 1234560, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), new Address("Maier Bau GmbH") {{
+                setStreet("Bergstra\u00DFe");
+                setZip("84347");
+                setCity("Pfarrkrichen");
+                setCountryShort("DE");
+            }});
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Uttendorfer Willy") {{
+                setStreet("Great Place");
+                setZip("4567");
+                setCity("Kuwait City");
+                setCountryShort("KW");
             }});
         }
     }
