@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.exchange;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
-import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.Array;
@@ -10,16 +9,13 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class AmountLoader {
+public class HistoricExchangeRateLoader {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
 
-    private Actor actor;
-
-    public AmountLoader(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor) {
+    public HistoricExchangeRateLoader(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
-        this.actor = actor;
     }
 
     public CompletableFuture<Payment>[] loadAsync(Payment[] payments) {
@@ -36,23 +32,16 @@ public class AmountLoader {
         Executors.newCachedThreadPool().submit(() -> {
             var ccy = transformInstruction.getTargetCcy();
             var ccyPair = new CurrencyPair(t.getLedgerCcy(), ccy);
-            CurrencyConverter cc;
-            if (actor == Actor.Sender) {
-                // TODO: RST 2022-01-24 Refactor this class into a HistoricExchangeRateLoader
+
+            var source = transformInstruction.getHistoricExchangeRateSource();
+            var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
+            if (rate == null) {
+                LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
+                t.setAmountUnknown();
                 completableFuture.complete(t);
                 return;
-            } else {
-                var source = transformInstruction.getHistoricExchangeRateSource();
-                var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
-                if (rate == null) {
-                    LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
-                    t.setAmountUnknown();
-                    completableFuture.complete(t);
-                    return;
-                }
-                cc = new CurrencyConverter(new ExchangeRate[]{rate});
             }
-            var amt = cc.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
+            var cc = new CurrencyConverter(new ExchangeRate[]{rate});
             t.setExchangeRate(cc.get(ccyPair));
             completableFuture.complete(t);
         });

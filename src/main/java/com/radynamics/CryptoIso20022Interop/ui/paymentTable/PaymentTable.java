@@ -2,7 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
-import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
+import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -30,8 +30,8 @@ public class PaymentTable extends JPanel {
         this.transformInstruction = transformInstruction;
         this.validator = validator;
 
-        var amountLoader = new AmountLoader(transformInstruction, currencyConverter, actor);
-        model = new PaymentTableModel(amountLoader, validator);
+        var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
+        model = new PaymentTableModel(exchangeRateLoader, validator);
         model.setActor(actor);
 
         table = new JTable(model);

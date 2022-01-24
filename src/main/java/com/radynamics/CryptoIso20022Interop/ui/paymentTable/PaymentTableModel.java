@@ -3,7 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
-import com.radynamics.CryptoIso20022Interop.exchange.AmountLoader;
+import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.AsyncValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -17,7 +17,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
-    private final AmountLoader amountLoader;
+    private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
 
@@ -33,8 +33,8 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(AmountLoader amountLoader, PaymentValidator validator) {
-        this.amountLoader = amountLoader;
+    public PaymentTableModel(HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator) {
+        this.exchangeRateLoader = exchangeRateLoader;
         this.validator = validator;
     }
 
@@ -77,19 +77,24 @@ public class PaymentTableModel extends AbstractTableModel {
         for (var t : data) {
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
             Object actorLedger = getActorWalletText(t);
-            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), null, t.getFiatCcy(), t.getTransmission(), "detail..."});
+            var amount = actor == Actor.Sender ? t.getAmount() : null;
+            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
 
-        Arrays.stream(amountLoader.loadAsync(data)).forEach(future -> {
-            future.thenAccept(t -> {
-                setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
-                setValueAt(t.getFiatCcy(), getRowIndex(t), getColumnIndex(COL_CCY));
-                validateAsync(new Payment[]{t});
+        if (actor == Actor.Receiver) {
+            Arrays.stream(exchangeRateLoader.loadAsync(data)).forEach(future -> {
+                future.thenAccept(t -> {
+                    setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
+                    setValueAt(t.getFiatCcy(), getRowIndex(t), getColumnIndex(COL_CCY));
+                    validateAsync(new Payment[]{t});
+                });
             });
-        });
+        } else {
+            validateAsync(data);
+        }
     }
 
     private Object getActorAddressOrAccount(Payment t) {
