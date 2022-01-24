@@ -119,6 +119,9 @@ public class JsonRpcApi implements TransactionSource {
         trx.setBooked(DateTimeConvert.toLocal(t.closeDateHuman().get()));
         trx.setSender(WalletConverter.from(t.account()));
         for (MemoWrapper mw : t.memos()) {
+            if (!mw.memo().memoData().isPresent()) {
+                continue;
+            }
             var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
             for (var r : unwrappedMemo.structuredReferences()) {
                 trx.addStructuredReference(r);
