@@ -31,6 +31,11 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
+    public void setAmountSmallestUnit(long value) {
+        amountSmallestUnit = value;
+    }
+
+    @Override
     public long getAmountSmallestUnit() {
         return amountSmallestUnit;
     }

@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
@@ -42,14 +43,24 @@ public class Pain001Reader {
                 var receiverAccount = getAccount(cdtTrfTxInf.getCdtrAcct().getId());
                 var receiverLedger = transformInstruction.getWalletOrNull(receiverAccount);
                 // TODO: use currency from meta data and support IOUs.
-                var ccy = ledger.getNativeCcySymbol();
-                var amountNativeCcy = ccyConverter.convert(cdtTrfTxInf.getAmt().getInstdAmt().getValue(), cdtTrfTxInf.getAmt().getInstdAmt().getCcy(), ccy);
-                var amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
+                var ledgerCcy = ledger.getNativeCcySymbol();
+                var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
+                var sourceAmt = cdtTrfTxInf.getAmt().getInstdAmt().getValue();
+                var ccyPair = new CurrencyPair(ledgerCcy, sourceCcy);
+                long amountSmallestUnit = 0;
+                var hasExchangeRate = ccyConverter.has(ccyPair);
+                if (hasExchangeRate) {
+                    var amountNativeCcy = ccyConverter.convert(sourceAmt, sourceCcy, ledgerCcy);
+                    amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
+                }
 
-                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ccy));
+                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ledgerCcy));
                 t.setSenderAccount(senderAccount);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
+                if (!hasExchangeRate) {
+                    t.setAmount(sourceAmt, sourceCcy);
+                }
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {

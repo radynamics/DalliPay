@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Reference
 import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -91,6 +92,30 @@ public class Pain001ReaderTest {
         assertTransaction(transactions[1], "40271522859882", "receiver_40271522859882", 6000000);
         assertTransaction(transactions[2], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 7000000);
         assertTransaction(transactions[3], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 8000000);
+    }
+
+    @Test
+    public void readNoExchangeRate() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+        // DbtrAcct
+        ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
+        // CdtrAcct
+        ti.add(new AccountMapping(new IbanAccount("GB96MIDL40271522859882"), "receiver_GB96MIDL40271522859882"));
+        ExchangeRate[] rates = new ExchangeRate[0];
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger, ti, ccyConverter);
+
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
+
+        assertNotNull(transactions);
+        assertEquals(4, transactions.length);
+
+        assertEquals("GBP", transactions[0].getFiatCcy());
+        Assertions.assertEquals(5000, (double) transactions[0].getAmount());
+        assertTransaction(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 0, ReferenceType.Scor, "RF712348231");
     }
 
     @Test

@@ -34,6 +34,11 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
+    public void setAmountSmallestUnit(long value) {
+        drops = value;
+    }
+
+    @Override
     public long getAmountSmallestUnit() {
         return drops;
     }

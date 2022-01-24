@@ -21,6 +21,10 @@ public class ExchangeRate {
         return new ExchangeRate(new CurrencyPair(ccy, ccy), 1, LocalDateTime.now());
     }
 
+    public boolean isNone() {
+        return getPair().getFirst().equals(getPair().getSecond()) && getRate() == 1;
+    }
+
     public CurrencyPair getPair() {
         return pair;
     }

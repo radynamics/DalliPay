@@ -6,6 +6,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import java.time.LocalDateTime;
 
 public interface Transaction {
+    void setAmountSmallestUnit(long value);
+
     long getAmountSmallestUnit();
 
     String getCcy();

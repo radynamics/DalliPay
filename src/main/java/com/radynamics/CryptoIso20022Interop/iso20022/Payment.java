@@ -18,7 +18,12 @@ public class Payment {
     private Account receiverAccount;
     private Address senderAddress;
     private Address receiverAddress;
+    private Double amount = UnknownAmount;
+    private String ccy = UnknownCCy;
     private ExchangeRate exchangeRate;
+
+    private static final Double UnknownAmount = Double.valueOf(0);
+    private static final String UnknownCCy = "";
 
     public Payment(Transaction cryptoTrx) {
         this.cryptoTrx = cryptoTrx;
@@ -69,21 +74,49 @@ public class Payment {
     }
 
     public Double getAmount() {
-        if (isAmountUnknown()) {
-            return null;
+        return this.amount;
+    }
+
+    public void setAmount(BigDecimal sourceAmt, String sourceCcy) {
+        this.amount = sourceAmt.doubleValue();
+        this.ccy = sourceCcy;
+
+        refreshTransactionAmount();
+    }
+
+    private void refreshTransactionAmount() {
+        if (exchangeRate == null) {
+            cryptoTrx.setAmountSmallestUnit(0);
+        } else {
+            var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
+            var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
+            cryptoTrx.setAmountSmallestUnit(getLedger().convertToSmallestAmount(amt));
         }
+    }
+
+    private void refreshAmount() {
+        if (isAmountUnknown()) {
+            this.amount = UnknownAmount;
+            this.ccy = UnknownCCy;
+        }
+
+        // Ccy read from pain.001 without exchange rates doesn't need a calc.
+        if (!this.amount.equals(UnknownAmount) && exchangeRate.isNone()) {
+            return;
+        }
+
         var amt = getLedger().convertToNativeCcyAmount(getLedgerAmountSmallestUnit());
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
-        return cc.convert(amt, exchangeRate.getPair());
+        this.amount = cc.convert(amt, exchangeRate.getPair());
+        if (this.ccy.equals(UnknownCCy)) {
+            this.ccy = exchangeRate.getPair().getFirst().equals(getLedgerCcy())
+                    ? exchangeRate.getPair().getSecond()
+                    : exchangeRate.getPair().getFirst();
+        }
     }
 
     public String getFiatCcy() {
-        if (isAmountUnknown()) {
-            return "";
-        }
-        return exchangeRate.getPair().getFirst().equals(getLedgerCcy())
-                ? exchangeRate.getPair().getSecond()
-                : exchangeRate.getPair().getFirst();
+        return this.ccy;
     }
 
     public void setAmountUnknown() {
@@ -99,6 +132,7 @@ public class Payment {
             throw new IllegalArgumentException(String.format("Exchange rate must affect %s.", getLedgerCcy()));
         }
         this.exchangeRate = rate;
+        refreshAmount();
     }
 
     public long getLedgerAmountSmallestUnit() {
