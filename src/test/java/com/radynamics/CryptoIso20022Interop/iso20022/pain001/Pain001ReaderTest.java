@@ -12,6 +12,8 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDateTime;
 
@@ -94,11 +96,12 @@ public class Pain001ReaderTest {
         assertTransaction(transactions[3], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 8000000);
     }
 
-    @Test
-    public void readNoExchangeRate() throws Exception {
+    @ParameterizedTest
+    @CsvSource({"TEST", "USE"})
+    public void readNoExchangeRate(String targetCcy) throws Exception {
         var ledger = new TestLedger();
         var ti = new TransformInstruction(ledger);
-        ti.setTargetCcy(ledger.getNativeCcySymbol());
+        ti.setTargetCcy(targetCcy);
         // DbtrAcct
         ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
         // CdtrAcct
@@ -115,7 +118,8 @@ public class Pain001ReaderTest {
 
         assertEquals("GBP", transactions[0].getFiatCcy());
         Assertions.assertEquals(5000, (double) transactions[0].getAmount());
-        assertTransaction(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 0, ReferenceType.Scor, "RF712348231");
+        var expectedLedgerAmount = ledger.getNativeCcySymbol().equals(targetCcy) ? 5000000 : 0;
+        assertTransaction(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", expectedLedgerAmount, ReferenceType.Scor, "RF712348231");
     }
 
     @Test

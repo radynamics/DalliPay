@@ -27,11 +27,17 @@ public class TransactionTranslator {
             }
 
             if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
-                t.setExchangeRate(ExchangeRate.None(t.getLedgerCcy()));
+                if (t.isAmountUnknown()) {
+                    t.setAmount(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy());
+                    t.setExchangeRate(ExchangeRate.None(t.getLedgerCcy()));
+                } else {
+                    t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
+                }
             } else {
-                var ccyPair = new CurrencyPair(t.getLedgerCcy(), transformInstruction.getTargetCcy());
+                var ccyPair = t.isCcyUnknown()
+                        ? new CurrencyPair(t.getLedgerCcy(), transformInstruction.getTargetCcy())
+                        : t.createCcyPair();
                 if (currencyConverter.has(ccyPair)) {
-                    var amt = transformInstruction.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit());
                     t.setExchangeRate(currencyConverter.get(ccyPair));
                 }
             }

@@ -89,14 +89,19 @@ public class PaymentDetailForm extends JDialog {
             {
                 var amtText = AmountFormatter.formatAmtWithCcy(payment);
                 var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()), payment.getLedgerCcy());
-                var fxRateText = "unknown";
-                var fxRateAtText = "unknown";
-                if (!payment.isAmountUnknown()) {
-                    fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
-                    fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
+                var secondLineText = "";
+                if (payment.getExchangeRate() == null) {
+                    secondLineText = "Missing exchange rate";
+                } else {
+                    var fxRateText = "unknown";
+                    var fxRateAtText = "unknown";
+                    if (!payment.isAmountUnknown()) {
+                        fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
+                        fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
+                    }
+                    secondLineText = String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText);
                 }
-                anchorComponentTopLeft = createRow(row++, "Amount:", amtText,
-                        String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText));
+                anchorComponentTopLeft = createRow(row++, "Amount:", amtText, secondLineText);
             }
             {
                 var secondLineText = getWalletText(payment.getSenderWallet());

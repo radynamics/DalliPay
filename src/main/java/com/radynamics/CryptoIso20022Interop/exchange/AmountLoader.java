@@ -38,8 +38,9 @@ public class AmountLoader {
             var ccyPair = new CurrencyPair(t.getLedgerCcy(), ccy);
             CurrencyConverter cc;
             if (actor == Actor.Sender) {
-                currencyConverter.convert(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy(), ccy);
-                cc = currencyConverter;
+                // TODO: RST 2022-01-24 Refactor this class into a HistoricExchangeRateLoader
+                completableFuture.complete(t);
+                return;
             } else {
                 var source = transformInstruction.getHistoricExchangeRateSource();
                 var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;

@@ -18,7 +18,11 @@ public class ExchangeRate {
     }
 
     public static ExchangeRate None(String ccy) {
-        return new ExchangeRate(new CurrencyPair(ccy, ccy), 1, LocalDateTime.now());
+        return OneToOne(new CurrencyPair(ccy, ccy));
+    }
+
+    public static ExchangeRate OneToOne(CurrencyPair pair) {
+        return new ExchangeRate(pair.getFirst(), pair.getSecond(), 1, LocalDateTime.now());
     }
 
     public boolean isNone() {

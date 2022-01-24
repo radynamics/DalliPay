@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,6 +31,11 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             if (StringUtils.isAllEmpty(t.getSenderWallet().getSecret())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet secret (private Key) is missing."));
             }
+        }
+
+        if (t.getExchangeRate() == null) {
+            var pair = new CurrencyPair(t.getLedgerCcy(), t.getFiatCcy());
+            list.add(new ValidationResult(ValidationState.Error, String.format("No exchange rate for %s available.", pair.getDisplayText())));
         }
 
         if (t.getStructuredReferences().length == 0) {

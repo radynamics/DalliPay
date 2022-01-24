@@ -46,21 +46,13 @@ public class Pain001Reader {
                 var ledgerCcy = ledger.getNativeCcySymbol();
                 var sourceCcy = cdtTrfTxInf.getAmt().getInstdAmt().getCcy();
                 var sourceAmt = cdtTrfTxInf.getAmt().getInstdAmt().getValue();
-                var ccyPair = new CurrencyPair(ledgerCcy, sourceCcy);
-                long amountSmallestUnit = 0;
-                var hasExchangeRate = ccyConverter.has(ccyPair);
-                if (hasExchangeRate) {
-                    var amountNativeCcy = ccyConverter.convert(sourceAmt, sourceCcy, ledgerCcy);
-                    amountSmallestUnit = ledger.convertToSmallestAmount(amountNativeCcy);
-                }
 
-                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, amountSmallestUnit, ledgerCcy));
+                // TODO: 2022-01-24 refactor and remove amount from method
+                var t = PaymentConverter.toPayment(ledger.createTransaction(senderLedger, receiverLedger, 0, ledgerCcy));
                 t.setSenderAccount(senderAccount);
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
-                if (!hasExchangeRate) {
-                    t.setAmount(sourceAmt, sourceCcy);
-                }
+                t.setAmount(sourceAmt, sourceCcy);
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();
                 if (rmtInf != null) {

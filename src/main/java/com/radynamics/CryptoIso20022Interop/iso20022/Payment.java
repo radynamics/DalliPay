@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
@@ -24,6 +25,7 @@ public class Payment {
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final String UnknownCCy = "";
+    private boolean amountDefined;
 
     public Payment(Transaction cryptoTrx) {
         this.cryptoTrx = cryptoTrx;
@@ -80,6 +82,9 @@ public class Payment {
     public void setAmount(BigDecimal sourceAmt, String sourceCcy) {
         this.amount = sourceAmt.doubleValue();
         this.ccy = sourceCcy;
+        if (!UnknownAmount.equals(sourceAmt.doubleValue())) {
+            this.amountDefined = true;
+        }
 
         refreshTransactionAmount();
     }
@@ -108,7 +113,7 @@ public class Payment {
         var amt = getLedger().convertToNativeCcyAmount(getLedgerAmountSmallestUnit());
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
-        if (this.ccy.equals(UnknownCCy)) {
+        if (isCcyUnknown()) {
             this.ccy = exchangeRate.getPair().getFirst().equals(getLedgerCcy())
                     ? exchangeRate.getPair().getSecond()
                     : exchangeRate.getPair().getFirst();
@@ -120,19 +125,28 @@ public class Payment {
     }
 
     public void setAmountUnknown() {
-        exchangeRate = null;
+        amount = UnknownAmount;
     }
 
     public boolean isAmountUnknown() {
-        return exchangeRate == null;
+        return amount == UnknownAmount;
+    }
+
+    public boolean isCcyUnknown() {
+        return UnknownCCy.equals(ccy);
     }
 
     public void setExchangeRate(ExchangeRate rate) {
-        if (!rate.getPair().affects(getLedgerCcy())) {
-            throw new IllegalArgumentException(String.format("Exchange rate must affect %s.", getLedgerCcy()));
+        var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
+        if (bothCcyKnown && (!rate.getPair().affects(getFiatCcy()) || !rate.getPair().affects(getLedgerCcy()))) {
+            throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy()));
         }
         this.exchangeRate = rate;
-        refreshAmount();
+        if (amountDefined) {
+            refreshTransactionAmount();
+        } else {
+            refreshAmount();
+        }
     }
 
     public long getLedgerAmountSmallestUnit() {
@@ -195,5 +209,9 @@ public class Payment {
 
     public Throwable getTransmissionError() {
         return cryptoTrx.getTransmissionError();
+    }
+
+    public CurrencyPair createCcyPair() {
+        return new CurrencyPair(getLedgerCcy(), getFiatCcy());
     }
 }
