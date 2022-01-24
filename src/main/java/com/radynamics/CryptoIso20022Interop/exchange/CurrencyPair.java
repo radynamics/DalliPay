@@ -5,6 +5,10 @@ public class CurrencyPair {
     private String second;
 
     public CurrencyPair(String first, String second) {
+        if (first == null) throw new IllegalArgumentException("Parameter 'first' cannot be null");
+        if (first.length() == 0) throw new IllegalArgumentException("Parameter 'first' cannot be empty");
+        if (second == null) throw new IllegalArgumentException("Parameter 'second' cannot be null");
+        if (second.length() == 0) throw new IllegalArgumentException("Parameter 'second' cannot be empty");
         this.first = first;
         this.second = second;
     }
@@ -32,5 +36,9 @@ public class CurrencyPair {
 
     public boolean affects(String ccy) {
         return getFirst().equals(ccy) || getSecond().equals(ccy);
+    }
+
+    public CurrencyPair invert() {
+        return new CurrencyPair(getSecond(), getFirst());
     }
 }
