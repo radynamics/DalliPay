@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09 pain.001.001.09.xsd">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>Rente-Msg15052020-1014</MsgId>
+      <CreDtTm>2020-05-15T10:14:53.000Z</CreDtTm>
+      <NbOfTxs>4</NbOfTxs>
+      <CtrlSum>1150.00</CtrlSum>
+      <InitgPty>
+        <Nm>SCHLIFFENBACHER JOSEF</Nm>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>6464643781</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>Rente-PmInf15052020-1014-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>3</NbOfTxs>
+      <CtrlSum>900.00</CtrlSum>
+      <ReqdExctnDt>
+        <Dt>2020-05-16</Dt>
+      </ReqdExctnDt>
+      <Dbtr>
+        <Nm>SCHLIFFENBACHER JOSEF</Nm>
+        <PstlAdr>
+          <Ctry>DE</Ctry>
+          <AdrLine>84307 EGGENFELDEN</AdrLine>
+        </PstlAdr>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>087873890</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>DE14740618130000033626</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>GENODEF1PFK</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Rente-EtE15052020-1014-4</EndToEndId>
+          <UETR>cac1cc90-8da0-4506-ae5f-d605c5a759aa</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="USD">50.00</InstdAmt>
+        </Amt>
+        <ChrgBr>SHAR</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>RCWJCNSHXXX</BICFI>
+            <Nm>JIANGSU JIANGNAN RURAL</Nm>
+            <PstlAdr>
+              <Ctry>CN</Ctry>
+              <AdrLine>COMMERCIAL BANK CO. LTD</AdrLine>
+              <AdrLine>MIDDLE ROAD 7845</AdrLine>
+              <AdrLine>CHANGZHOU JINGSU</AdrLine>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>XDR CAHNGZHOU LIMITED</Nm>
+          <PstlAdr>
+            <Ctry>CN</Ctry>
+            <AdrLine>LVCHENG ROAD</AdrLine>
+            <AdrLine>CN-548765 CHANGZHOU</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>545445545455</Id>
+              <SchmeNm>
+                <Cd>BBAN</Cd>
+              </SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Ustrd>UEBERWEISUNG AUF DAS KONTO DES BEGU NSTIGTEN Zahlung lt. Avis</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Rente-EtE15052020-1014-5</EndToEndId>
+          <UETR>abe6f8ad-30c4-49e1-bef6-39edca2cd55d</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="USD">650.00</InstdAmt>
+        </Amt>
+        <ChrgBr>SHAR</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>NBOKKWKWXXX</BICFI>
+            <Nm>BAK OF EMIRATES</Nm>
+            <PstlAdr>
+              <Ctry>KW</Ctry>
+              <AdrLine>NIEDERLASSUNG KUWAIT</AdrLine>
+              <AdrLine>DOWN ROAD 33</AdrLine>
+              <AdrLine>45645 KUWAIT CITY</AdrLine>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>UTTENDORFER WILLY</Nm>
+          <PstlAdr>
+            <Ctry>KW</Ctry>
+            <AdrLine>GREAT PLACE</AdrLine>
+            <AdrLine>KW-45645 KUWAIT CITY</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>KW81CBKU0000000000001234560101</IBAN>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Ustrd>ZAHLUNG FUER OEL Zahlung lt. Avis</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Rente-EtE15052020-1014-3</EndToEndId>
+          <UETR>cb116bb5-ce54-4b31-9bd6-68c306000e46</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>NURG</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="USD">200.00</InstdAmt>
+        </Amt>
+        <ChrgBr>SHAR</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>RCWJCNSHXXX</BICFI>
+            <Nm>JIANGSU JIANGNAN RURAL</Nm>
+            <PstlAdr>
+              <Ctry>CN</Ctry>
+              <AdrLine>COMMERCIAL BANK CO. LTD</AdrLine>
+              <AdrLine>MIDDLE ROAD 7845</AdrLine>
+              <AdrLine>CHANGZHOU JINGSU</AdrLine>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>XDR CAHNGZHOU LIMITED</Nm>
+          <PstlAdr>
+            <Ctry>CN</Ctry>
+            <AdrLine>LVCHENG ROAD</AdrLine>
+            <AdrLine>CN-548765 CHANGZHOU</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>545445545455</Id>
+              <SchmeNm>
+                <Cd>BBAN</Cd>
+              </SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <InstrForCdtrAgt>
+          <Cd>CHQB</Cd>
+          <InstrInf>TELEFON 4566741</InstrInf>
+        </InstrForCdtrAgt>
+        <RmtInf>
+          <Ustrd>LT. AVIS VOM 17,25,2020 Zahlung lt. Avis</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+    <PmtInf>
+      <PmtInfId>Kennung-PmInf15052020-1014-6</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>250.00</CtrlSum>
+      <ReqdExctnDt>
+        <Dt>2020-05-16</Dt>
+      </ReqdExctnDt>
+      <Dbtr>
+        <Nm>SCHLIFFENBACHER JOSEF</Nm>
+        <PstlAdr>
+          <Ctry>DE</Ctry>
+          <AdrLine>84307 EGGENFELDEN</AdrLine>
+        </PstlAdr>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>087873890</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <IBAN>DE14740618130000033626</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>GENODEF1PFK</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId>
+          <EndToEndId>Rente-EtE15052020-1014-2</EndToEndId>
+          <UETR>5849b6eb-ebb9-481f-a5df-8bd2e5a73118</UETR>
+        </PmtId>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>URGP</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <Amt>
+          <InstdAmt Ccy="TRY">250.00</InstdAmt>
+        </Amt>
+        <ChrgBr>DEBT</ChrgBr>
+        <CdtrAgt>
+          <FinInstnId>
+            <BICFI>TRHBTR2AXXX</BICFI>
+            <Nm>HALKARRAGE</Nm>
+            <PstlAdr>
+              <Ctry>TR</Ctry>
+              <AdrLine>ISTANBUL</AdrLine>
+            </PstlAdr>
+          </FinInstnId>
+        </CdtrAgt>
+        <Cdtr>
+          <Nm>WHEEL INDUSTRY</Nm>
+          <PstlAdr>
+            <Ctry>TR</Ctry>
+            <AdrLine>TR-ANKARA</AdrLine>
+          </PstlAdr>
+        </Cdtr>
+        <CdtrAcct>
+          <Id>
+            <IBAN>TR330006100519786457841326</IBAN>
+          </Id>
+        </CdtrAcct>
+        <RmtInf>
+          <Ustrd>RECHNUNG 456123 VOM 25,03,2020 Zahlung lt. Avis</Ustrd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

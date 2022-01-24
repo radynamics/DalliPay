@@ -10,6 +10,7 @@ import static org.junit.Assert.assertNull;
 
 public class Assertion {
     static void assertEquals(Address actual, Address expected) {
+        Assert.assertNotNull(actual);
         Assert.assertEquals(expected.getName(), actual.getName());
         Assert.assertEquals(expected.getStreet(), actual.getStreet());
         Assert.assertEquals(expected.getZip(), actual.getZip());
@@ -53,5 +54,27 @@ public class Assertion {
             Assert.assertEquals(type, t.getStructuredReferences()[0].getType());
             Assert.assertEquals(referenceUnformatted, t.getStructuredReferences()[0].getUnformatted());
         }
+    }
+
+    public static void assertEqualsAccount(Payment p, String sender, String receiver) {
+        if (sender == null) {
+            assertNull(p.getSenderAccount());
+        } else {
+            assertNotNull(p.getSenderAccount());
+            Assert.assertEquals(sender, p.getSenderAccount().getUnformatted());
+        }
+        if (receiver == null) {
+            assertNull(p.getReceiverAccount());
+        } else {
+            assertNotNull(p.getReceiverAccount());
+            Assert.assertEquals(receiver, p.getReceiverAccount().getUnformatted());
+        }
+    }
+
+    public static void assertAmtCcy(Payment transaction, Double amt, String ccy, long ledgerAmt, String ledgerCcy) {
+        Assert.assertEquals(amt, transaction.getAmount());
+        Assert.assertEquals(ccy, transaction.getFiatCcy());
+        Assert.assertEquals(ledgerAmt, transaction.getLedgerAmountSmallestUnit());
+        Assert.assertEquals(ledgerCcy, transaction.getLedgerCcy());
     }
 }
