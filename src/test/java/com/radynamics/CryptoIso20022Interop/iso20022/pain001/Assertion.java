@@ -26,22 +26,11 @@ public class Assertion {
     }
 
     static void assertEquals(Payment t, String senderWallet, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
-        if (senderWallet == null) {
-            assertNull(t.getSenderWallet());
-        } else {
-            assertNotNull(t.getSenderWallet());
-            Assert.assertEquals(senderWallet, t.getSenderWallet().getPublicKey());
-        }
+        assertEqualsWallet(t, senderWallet, receiverWallet);
         Assert.assertEquals(amount, t.getLedgerAmountSmallestUnit(), 0);
         Assert.assertEquals("TEST", t.getLedgerCcy());
         assertNotNull(t.getReceiverAccount());
         Assert.assertEquals(receiverAccount, t.getReceiverAccount().getUnformatted());
-        if (receiverWallet == null) {
-            assertNull(t.getReceiverWallet());
-        } else {
-            assertNotNull(t.getReceiverWallet());
-            Assert.assertEquals(receiverWallet, t.getReceiverWallet().getPublicKey());
-        }
         assertNull(t.getId());
         assertNull(t.getInvoiceId());
         assertNotNull(t.getMessages());
@@ -53,6 +42,21 @@ public class Assertion {
             Assert.assertEquals(1, t.getStructuredReferences().length);
             Assert.assertEquals(type, t.getStructuredReferences()[0].getType());
             Assert.assertEquals(referenceUnformatted, t.getStructuredReferences()[0].getUnformatted());
+        }
+    }
+
+    static void assertEqualsWallet(Payment t, String sender, String receiver) {
+        if (sender == null) {
+            assertNull(t.getSenderWallet());
+        } else {
+            assertNotNull(t.getSenderWallet());
+            Assert.assertEquals(sender, t.getSenderWallet().getPublicKey());
+        }
+        if (receiver == null) {
+            assertNull(t.getReceiverWallet());
+        } else {
+            assertNotNull(t.getReceiverWallet());
+            Assert.assertEquals(receiver, t.getReceiverWallet().getPublicKey());
         }
     }
 
