@@ -28,6 +28,10 @@ public class Pain001Reader {
     public Payment[] read(InputStream pain001) throws Exception {
         var doc = fromXml(pain001);
 
+        if (doc.getCstmrCdtTrfInitn() == null) {
+            return new Payment[0];
+        }
+
         var list = new ArrayList<Payment>();
         for (var pmtInf : doc.getCstmrCdtTrfInitn().getPmtInf()) {
             var senderAccount = getAccount(pmtInf.getDbtrAcct());
