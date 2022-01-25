@@ -4,6 +4,7 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -15,7 +16,6 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
-import org.apache.logging.log4j.LogManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -44,7 +44,8 @@ public class ReceiveForm extends JFrame {
     }
 
     private void setupUI() {
-        setTitle("CryptoIso20022Interop");
+        var vc = new VersionController();
+        setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
 
         try {
             setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());

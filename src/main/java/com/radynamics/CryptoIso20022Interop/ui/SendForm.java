@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -10,7 +11,6 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
-import org.apache.logging.log4j.LogManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -36,7 +36,8 @@ public class SendForm extends JFrame {
     }
 
     private void setupUI() {
-        setTitle("CryptoIso20022Interop");
+        var vc = new VersionController();
+        setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
 
         try {
             setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());

@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.radynamics.CryptoIso20022Interop'
-version '1.0-SNAPSHOT'
+version '0.1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -41,4 +41,24 @@ dependencies {
     testImplementation group: 'org.xmlunit', name: 'xmlunit-matchers', version: '2.8.2'
     testImplementation group: 'org.xmlunit', name: 'xmlunit-core', version: '2.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+task createProperties() {
+    doLast {
+        new File("$buildDir/resources/main/version.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p.store w, null
+        }
+
+        // copy needed, otherwise the bean VersionController can't load the file at startup when running complete-app tests.
+        copy {
+            from "$buildDir/resources/main/version.properties"
+            into "bin/main/"
+        }
+    }
+}
+
+classes {
+    dependsOn createProperties
 }
