@@ -41,4 +41,9 @@ public class CurrencyPair {
     public CurrencyPair invert() {
         return new CurrencyPair(getSecond(), getFirst());
     }
+
+    public boolean sameAs(CurrencyPair other) {
+        if (other == null) return false;
+        return getFirst().equals(other.getFirst()) && getSecond().equals(other.getSecond());
+    }
 }

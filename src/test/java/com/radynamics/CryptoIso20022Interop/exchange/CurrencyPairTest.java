@@ -57,4 +57,14 @@ public class CurrencyPairTest {
         Assertions.assertEquals("USD", inverted.getFirst());
         Assertions.assertEquals("EUR", inverted.getSecond());
     }
+
+    @Test
+    public void sameAs() {
+        var pair = new CurrencyPair("EUR", "USD");
+        Assertions.assertTrue(pair.sameAs(new CurrencyPair("EUR", "USD")));
+
+        Assertions.assertFalse(pair.sameAs(null));
+        Assertions.assertFalse(pair.sameAs(new CurrencyPair("EUR", "CHF")));
+        Assertions.assertFalse(pair.sameAs(new CurrencyPair("USD", "EUR")));
+    }
 }
