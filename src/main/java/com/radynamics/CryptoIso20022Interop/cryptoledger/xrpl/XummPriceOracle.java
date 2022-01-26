@@ -3,7 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSource;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-public class XummPriceOracle implements HistoricExchangeRateSource {
+public class XummPriceOracle implements ExchangeRateProvider {
     private final Ledger ledger;
 
     public static final String ID = "xummpriceoracle";
@@ -34,6 +34,21 @@ public class XummPriceOracle implements HistoricExchangeRateSource {
     @Override
     public CurrencyPair[] getSupportedPairs() {
         return new CurrencyPair[]{new CurrencyPair("XRP", "USD")};
+    }
+
+    @Override
+    public boolean supportsRateAt() {
+        return true;
+    }
+
+    @Override
+    public void load() {
+        // do nothing
+    }
+
+    @Override
+    public ExchangeRate[] rates() {
+        return new ExchangeRate[0];
     }
 
     @Override

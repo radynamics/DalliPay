@@ -29,6 +29,18 @@ public class Bitstamp implements ExchangeRateProvider {
     }
 
     @Override
+    public CurrencyPair[] getSupportedPairs() {
+        return new CurrencyPair[]{
+                new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"), new CurrencyPair("XRP", "GBP")
+        };
+    }
+
+    @Override
+    public boolean supportsRateAt() {
+        return false;
+    }
+
+    @Override
     public void load() {
         exchangeRates.clear();
         for (var currencyPair : currencyPairs) {
@@ -69,5 +81,10 @@ public class Bitstamp implements ExchangeRateProvider {
     @Override
     public ExchangeRate[] rates() {
         return exchangeRates.toArray(new ExchangeRate[0]);
+    }
+
+    @Override
+    public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
+        return null;
     }
 }

@@ -18,6 +18,16 @@ public class DemoExchange implements ExchangeRateProvider {
     }
 
     @Override
+    public CurrencyPair[] getSupportedPairs() {
+        return new CurrencyPair[0];
+    }
+
+    @Override
+    public boolean supportsRateAt() {
+        return false;
+    }
+
+    @Override
     public void load() {
         exchangeRates = new ExchangeRate[3];
         exchangeRates[0] = new ExchangeRate("XRP", "USD", 0.843332, LocalDateTime.now());
@@ -28,5 +38,10 @@ public class DemoExchange implements ExchangeRateProvider {
     @Override
     public ExchangeRate[] rates() {
         return exchangeRates;
+    }
+
+    @Override
+    public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
+        return null;
     }
 }
