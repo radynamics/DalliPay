@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 
 import javax.imageio.ImageIO;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ExchangeRatesForm extends JDialog {
-    private final Exchange exchange;
+    private final ExchangeRateProvider exchange;
     private final ExchangeRate[] rates;
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -20,7 +20,7 @@ public class ExchangeRatesForm extends JDialog {
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
 
-    public ExchangeRatesForm(Exchange exchange, ExchangeRate[] rates) {
+    public ExchangeRatesForm(ExchangeRateProvider exchange, ExchangeRate[] rates) {
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         this.exchange = exchange;
         this.rates = rates;

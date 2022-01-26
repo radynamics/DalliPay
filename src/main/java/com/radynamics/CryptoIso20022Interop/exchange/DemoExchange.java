@@ -2,7 +2,7 @@ package com.radynamics.CryptoIso20022Interop.exchange;
 
 import java.time.LocalDateTime;
 
-public class DemoExchange implements Exchange {
+public class DemoExchange implements ExchangeRateProvider {
     private ExchangeRate[] exchangeRates;
 
     public static final String ID = "demo";

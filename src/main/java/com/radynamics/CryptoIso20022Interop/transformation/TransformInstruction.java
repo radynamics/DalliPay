@@ -2,7 +2,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.exchange.Exchange;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSource;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 // This class contains all information to convert payments from pain001 into target ledger payments.
 public class TransformInstruction {
     private Ledger ledger;
-    private Exchange exchange;
+    private ExchangeRateProvider exchange;
     private ArrayList<AccountMapping> accountMappings = new ArrayList<>();
 
     private String senderPublicKey;
@@ -71,11 +71,11 @@ public class TransformInstruction {
         return ledger;
     }
 
-    public Exchange getExchange() {
+    public ExchangeRateProvider getExchange() {
         return exchange;
     }
 
-    public void setExchange(Exchange exchange) {
+    public void setExchange(ExchangeRateProvider exchange) {
         this.exchange = exchange;
     }
 

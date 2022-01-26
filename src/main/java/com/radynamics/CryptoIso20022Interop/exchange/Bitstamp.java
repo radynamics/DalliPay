@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TimeZone;
 
-public class Bitstamp implements Exchange {
+public class Bitstamp implements ExchangeRateProvider {
     private static String[] currencyPairs = new String[]{"xrpusd", "xrpeur", "xrpgbp"};
     private ArrayList<ExchangeRate> exchangeRates = new ArrayList<>();
 

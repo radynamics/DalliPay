@@ -1,7 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
-public interface Exchange {
+public interface ExchangeRateProvider {
     String getId();
+
     String getDisplayText();
 
     void load();
