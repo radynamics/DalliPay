@@ -107,8 +107,7 @@ public class Camt054Writer {
         ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
         ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
-        final int xsdMaxSupportedFractionDigits = 5;
-        var amtValue = AmountRounder.round(trx.getAmount(), xsdMaxSupportedFractionDigits);
+        var amtValue = AmountRounder.round(trx.getAmount(), 2);
         ntry.getAmt().setValue(amtValue);
         ntry.getAmt().setCcy(trx.getFiatCcy());
 

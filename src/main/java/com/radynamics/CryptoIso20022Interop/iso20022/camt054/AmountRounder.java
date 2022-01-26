@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 public class AmountRounder {
     public static BigDecimal round(double value, int digits) {
         var v = BigDecimal.valueOf(value);
-        v = v.setScale(digits, RoundingMode.HALF_UP);
-        return v.stripTrailingZeros();
+        return v.setScale(digits, RoundingMode.HALF_UP);
     }
 }

@@ -35,7 +35,7 @@
             </Acct>
             <Ntry>
                 <NtryRef>rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4</NtryRef>
-                <Amt Ccy="XRP">391</Amt>
+                <Amt Ccy="XRP">391.00</Amt>
                 <CdtDbtInd>CRDT</CdtDbtInd>
                 <Sts>BOOK</Sts>
                 <BookgDt>
@@ -62,7 +62,7 @@
                             <MsgId>23AB86192C87B89121F4877351DD9</MsgId>
                             <EndToEndId>4CA4105CBC1288D9C3FB5140C61097B2475</EndToEndId>
                         </Refs>
-                        <Amt Ccy="XRP">391</Amt>
+                        <Amt Ccy="XRP">391.00</Amt>
                         <CdtDbtInd>CRDT</CdtDbtInd>
                         <BkTxCd>
                             <Domn>
