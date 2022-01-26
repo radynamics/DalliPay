@@ -28,6 +28,7 @@ public class Payment {
     private boolean amountDefined;
 
     public Payment(Transaction cryptoTrx) {
+        if (cryptoTrx == null) throw new IllegalArgumentException("Parameter 'cryptoTrx' cannot be null");
         this.cryptoTrx = cryptoTrx;
     }
 
@@ -83,10 +84,12 @@ public class Payment {
         return this.amount;
     }
 
-    public void setAmount(BigDecimal sourceAmt, String sourceCcy) {
-        this.amount = sourceAmt.doubleValue();
-        this.ccy = sourceCcy;
-        if (!UnknownAmount.equals(sourceAmt.doubleValue())) {
+    public void setAmount(BigDecimal amt, String ccy) {
+        if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
+        if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
+        this.amount = amt.doubleValue();
+        this.ccy = ccy;
+        if (!UnknownAmount.equals(amt.doubleValue())) {
             this.amountDefined = true;
         }
 
@@ -146,8 +149,15 @@ public class Payment {
 
     public void setExchangeRate(ExchangeRate rate) {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
-        if (bothCcyKnown && rate != null && (!rate.getPair().affects(getFiatCcy()) || !rate.getPair().affects(getLedgerCcy()))) {
-            throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy()));
+        if (rate != null) {
+            var affectsFiat = rate.getPair().affects(getFiatCcy());
+            var affectsLedger = rate.getPair().affects(getLedgerCcy());
+            if (!affectsLedger) {
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getLedgerCcy()));
+            }
+            if (bothCcyKnown && !affectsFiat) {
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy()));
+            }
         }
         this.exchangeRate = rate;
         refreshAmounts();
