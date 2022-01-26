@@ -73,6 +73,13 @@
                                 </Fmly>
                             </Domn>
                         </BkTxCd>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <Nm>xrpl</Nm>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
                         <RmtInf>
                             <Strd>
                                 <CdtrRefInf>

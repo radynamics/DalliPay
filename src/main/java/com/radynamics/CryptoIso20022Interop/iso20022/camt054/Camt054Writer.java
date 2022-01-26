@@ -144,6 +144,11 @@ public class Camt054Writer {
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn());
 
+        txDtls.setRltdAgts(new TransactionAgents3());
+        txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification5());
+        txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification8());
+        txDtls.getRltdAgts().getDbtrAgt().getFinInstnId().setNm(ledger.getId());
+
         var structuredReferences = trx.getStructuredReferences();
         var hasStructuredReferences = structuredReferences != null && structuredReferences.length > 0;
         if (!hasStructuredReferences && transformInstruction.getCreditorReferenceIfMissing() != null) {
