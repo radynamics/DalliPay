@@ -14,6 +14,6 @@ public class MoneyFormatter {
     }
 
     public static final String formatFiat(String amount, String ccy) {
-        return String.format("%s %s", Utils.createFormatFiat().format(amount), ccy);
+        return String.format("%s %s", amount, ccy);
     }
 }
