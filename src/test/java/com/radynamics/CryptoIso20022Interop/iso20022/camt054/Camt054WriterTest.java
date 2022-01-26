@@ -27,7 +27,7 @@ public class Camt054WriterTest {
     public void testCreate2Payments() throws Exception {
         var cryptoInstruction = createTestInstructions();
 
-        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().rates()));
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
 
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
@@ -98,7 +98,7 @@ public class Camt054WriterTest {
         var cryptoInstruction = createTestInstructions();
         cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
 
-        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().rates()));
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
@@ -118,7 +118,7 @@ public class Camt054WriterTest {
         cryptoInstruction.setBookingDateFormat(format);
         cryptoInstruction.setValutaDateFormat(format);
 
-        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().rates()));
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(createTestTransactions(cryptoInstruction.getLedger()));
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);
         w.setIdGenerator(new FixedValueIdGenerator());
@@ -150,7 +150,7 @@ public class Camt054WriterTest {
         var trx = createTestTransactionScor(cryptoInstruction.getLedger());
         trx.removeStructuredReferences(0);
 
-        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().rates()));
+        var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}));
 
         var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction);

@@ -47,7 +47,7 @@ public class XummPriceOracle implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate[] rates() {
+    public ExchangeRate[] latestRates() {
         return new ExchangeRate[0];
     }
 

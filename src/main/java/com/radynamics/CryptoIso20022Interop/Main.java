@@ -95,7 +95,7 @@ public class Main {
         var provider = transformInstruction.getExchangeRateProvider();
         provider.load();
 
-        var currencyConverter = new CurrencyConverter(provider.rates());
+        var currencyConverter = new CurrencyConverter(provider.latestRates());
         var r = new Pain001Reader(transformInstruction.getLedger());
 
         javax.swing.SwingUtilities.invokeLater(() -> {

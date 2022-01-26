@@ -79,7 +79,7 @@ public class Bitstamp implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate[] rates() {
+    public ExchangeRate[] latestRates() {
         return exchangeRates.toArray(new ExchangeRate[0]);
     }
 

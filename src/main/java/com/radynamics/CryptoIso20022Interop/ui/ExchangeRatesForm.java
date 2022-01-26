@@ -188,7 +188,7 @@ public class ExchangeRatesForm extends JDialog {
     private void refreshRates() {
         exchangeRateProvider.load();
         for (var i = 0; i < rates.length; i++) {
-            var r = getRateOrNull(exchangeRateProvider.rates(), rates[i].getPair());
+            var r = getRateOrNull(exchangeRateProvider.latestRates(), rates[i].getPair());
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));
             }

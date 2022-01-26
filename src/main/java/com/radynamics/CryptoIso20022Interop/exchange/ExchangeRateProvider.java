@@ -13,7 +13,7 @@ public interface ExchangeRateProvider {
 
     void load();
 
-    ExchangeRate[] rates();
+    ExchangeRate[] latestRates();
 
     ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime);
 }
