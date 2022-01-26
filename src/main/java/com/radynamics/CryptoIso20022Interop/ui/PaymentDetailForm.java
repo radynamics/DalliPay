@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 
 import javax.imageio.ImageIO;
@@ -16,6 +17,9 @@ public class PaymentDetailForm extends JDialog {
     private JPanel pnlContent;
     private Component anchorComponentTopLeft;
     private PaymentValidator validator;
+    private boolean paymentChanged;
+    private JLabel lblLedgerAmount;
+    private JLabel lblAmountText;
 
     public PaymentDetailForm(Payment payment, PaymentValidator validator) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -87,21 +91,26 @@ public class PaymentDetailForm extends JDialog {
         {
             int row = 0;
             {
-                var amtText = AmountFormatter.formatAmtWithCcy(payment);
-                var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()), payment.getLedgerCcy());
-                var secondLineText = "";
-                if (payment.getExchangeRate() == null) {
-                    secondLineText = String.format("%s, missing exchange rate", amtLedgerText);
-                } else {
-                    var fxRateText = "unknown";
-                    var fxRateAtText = "unknown";
-                    if (!payment.isAmountUnknown()) {
-                        fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
-                        fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
-                    }
-                    secondLineText = String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText);
+                var secondLine = new JPanel();
+                secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
+                lblAmountText = new JLabel();
+                lblLedgerAmount = formatSecondLineText(new JLabel());
+                refreshAmountsText();
+                secondLine.add(lblLedgerAmount);
+                {
+                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit..."));
+                    lbl.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            if (e.getClickCount() == 1) {
+                                showExchangeRateEdit();
+                            }
+                        }
+                    });
+                    lbl.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+                    secondLine.add(lbl);
                 }
-                anchorComponentTopLeft = createRow(row++, "Amount:", amtText, secondLineText);
+                anchorComponentTopLeft = createRow(row++, "Amount:", lblAmountText, secondLine, false);
             }
             {
                 var secondLineText = getWalletText(payment.getSenderWallet());
@@ -118,8 +127,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 JLabel secondLine = null;
                 if (payment.getId() != null) {
-                    secondLine = Utils.createLinkLabel(this, "show ledger transaction...");
-                    secondLine.putClientProperty("FlatLaf.styleClass", "small");
+                    secondLine = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "show ledger transaction..."));
                     secondLine.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -171,6 +179,44 @@ public class PaymentDetailForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private void refreshAmountsText() {
+        lblAmountText.setText(AmountFormatter.formatAmtWithCcy(payment));
+
+        var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()), payment.getLedgerCcy());
+        if (payment.getExchangeRate() == null) {
+            lblLedgerAmount.setText(String.format("%s, missing exchange rate", amtLedgerText));
+            return;
+        }
+
+        var fxRateText = "unknown";
+        var fxRateAtText = "unknown";
+        if (!payment.isAmountUnknown()) {
+            fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
+            fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
+        }
+        lblLedgerAmount.setText(String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText));
+    }
+
+    private void showExchangeRateEdit() {
+        var rate = payment.getExchangeRate() == null ? ExchangeRate.Undefined(payment.createCcyPair()) : payment.getExchangeRate();
+
+        var frm = new ExchangeRatesForm(null, new ExchangeRate[]{rate});
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(400, 300);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(this);
+        frm.setVisible(true);
+
+        if (!frm.isDialogAccepted()) {
+            return;
+        }
+
+        payment.setExchangeRate(rate.isUndefined() ? null : rate);
+        payment.refreshAmounts();
+        refreshAmountsText();
+        setPaymentChanged(true);
     }
 
     private void showLedgerTransaction() {
@@ -227,8 +273,7 @@ public class PaymentDetailForm extends JDialog {
         JLabel secondLine = null;
         if (contentSecondLine != null) {
             secondLine = new JLabel(contentSecondLine);
-            secondLine.putClientProperty("FlatLaf.styleClass", "small");
-            secondLine.setForeground(Consts.ColorSmallInfo);
+            formatSecondLineText(secondLine);
         }
         return createRow(row, labelText, firstLine, secondLine, false);
     }
@@ -261,8 +306,27 @@ public class PaymentDetailForm extends JDialog {
         return lbl;
     }
 
+    private JLabel formatSecondLineLinkLabel(JLabel lbl) {
+        lbl.putClientProperty("FlatLaf.styleClass", "small");
+        return lbl;
+    }
+
+    private static JLabel formatSecondLineText(JLabel lbl) {
+        lbl.putClientProperty("FlatLaf.styleClass", "small");
+        lbl.setForeground(Consts.ColorSmallInfo);
+        return lbl;
+    }
+
     private static int getNorthPad(int line) {
         final var lineHeight = 30;
         return line * lineHeight;
+    }
+
+    private void setPaymentChanged(boolean changed) {
+        this.paymentChanged = changed;
+    }
+
+    public boolean getPaymentChanged() {
+        return paymentChanged;
     }
 }

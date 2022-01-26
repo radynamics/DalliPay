@@ -2,8 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
-import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
@@ -153,6 +153,10 @@ public class PaymentTable extends JPanel {
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);
+
+        if (frm.getPaymentChanged()) {
+            refresh(obj);
+        }
     }
 
     public Payment[] selectedPayments() {

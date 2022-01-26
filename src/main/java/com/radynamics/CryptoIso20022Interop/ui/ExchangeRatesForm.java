@@ -21,7 +21,6 @@ public class ExchangeRatesForm extends JDialog {
     private boolean accepted;
 
     public ExchangeRatesForm(Exchange exchange, ExchangeRate[] rates) {
-        if (exchange == null) throw new IllegalArgumentException("Parameter 'exchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         this.exchange = exchange;
         this.rates = rates;
@@ -100,7 +99,7 @@ public class ExchangeRatesForm extends JDialog {
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.NORTH);
             }
-            {
+            if (exchange != null) {
                 var pnlLine = new JPanel();
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);

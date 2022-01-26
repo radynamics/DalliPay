@@ -104,9 +104,9 @@ public class Payment {
     }
 
     private void refreshAmount() {
-        if (isAmountUnknown()) {
+        if (exchangeRate == null) {
             this.amount = UnknownAmount;
-            this.ccy = UnknownCCy;
+            return;
         }
 
         // Ccy read from pain.001 without exchange rates doesn't need a calc.
