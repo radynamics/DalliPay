@@ -96,6 +96,7 @@ public class SendForm extends JFrame {
         }
 
         {
+            final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
                 var lbl = new JLabel("Input:");
@@ -106,7 +107,7 @@ public class SendForm extends JFrame {
                 panel1.add(lbl);
 
                 txtInput = new FilePathField();
-                panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
                 txtInput.addChangedListener(() -> {
                     try {
@@ -130,12 +131,12 @@ public class SendForm extends JFrame {
                 panel1.add(lbl);
 
                 var lbl2 = new JLabel(transformInstruction.getExchange().getDisplayText());
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
 
                 var lbl3 = Utils.createLinkLabel(this, "edit...");
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 100, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lbl2);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 35, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {
                     @Override

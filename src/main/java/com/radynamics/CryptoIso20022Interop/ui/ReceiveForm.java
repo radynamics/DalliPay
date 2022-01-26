@@ -99,6 +99,7 @@ public class ReceiveForm extends JFrame {
         }
 
         {
+            final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
                 var lbl = new JLabel("Source Wallet:");
@@ -109,7 +110,7 @@ public class ReceiveForm extends JFrame {
                 panel1.add(lbl);
 
                 txtInput = new WalletField(transformInstruction.getLedger().getLookupProvider());
-                panel1Layout.putConstraint(SpringLayout.WEST, txtInput, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setLedger(transformInstruction.getLedger());
                 panel1.add(txtInput);
@@ -122,7 +123,7 @@ public class ReceiveForm extends JFrame {
                 panel1.add(lbl);
 
                 var lbl2 = new JLabel(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
             }
@@ -134,7 +135,7 @@ public class ReceiveForm extends JFrame {
                 panel1.add(lbl);
 
                 dtPickerStart = createDateTimePicker();
-                panel1Layout.putConstraint(SpringLayout.WEST, dtPickerStart, 50, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, dtPickerStart, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerStart, getNorthPad(2), SpringLayout.NORTH, panel1);
                 panel1.add(dtPickerStart);
 
