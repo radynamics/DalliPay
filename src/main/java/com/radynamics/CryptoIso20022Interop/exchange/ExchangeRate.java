@@ -13,7 +13,7 @@ public class ExchangeRate {
 
     public ExchangeRate(CurrencyPair pair, double rate, LocalDateTime pointInTime) {
         this.pair = pair;
-        this.rate = rate;
+        setRate(rate);
         this.pointInTime = pointInTime;
     }
 
@@ -23,6 +23,14 @@ public class ExchangeRate {
 
     public static ExchangeRate OneToOne(CurrencyPair pair) {
         return new ExchangeRate(pair.getFirst(), pair.getSecond(), 1, LocalDateTime.now());
+    }
+
+    public static ExchangeRate Undefined(CurrencyPair pair) {
+        return new ExchangeRate(pair, 0, LocalDateTime.now());
+    }
+
+    public boolean isUndefined() {
+        return getRate() == 0;
     }
 
     public boolean isNone() {
@@ -35,6 +43,12 @@ public class ExchangeRate {
 
     public double getRate() {
         return rate;
+    }
+
+    public void setRate(double rate) {
+        if (rate < 0) throw new IllegalArgumentException("Parameter 'rates' cannot be less than zero");
+        this.rate = rate;
+        pointInTime = LocalDateTime.now();
     }
 
     public LocalDateTime getPointInTime() {

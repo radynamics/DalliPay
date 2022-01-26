@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
@@ -15,8 +16,11 @@ import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class SendForm extends JFrame {
     private TransformInstruction transformInstruction;
@@ -25,6 +29,7 @@ public class SendForm extends JFrame {
     private PaymentTable table;
     private FilePathField txtInput;
     private Pain001Reader reader;
+    private Payment[] payments;
 
     public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -128,6 +133,19 @@ public class SendForm extends JFrame {
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 50, SpringLayout.EAST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
+
+                var lbl3 = Utils.createLinkLabel(this, "edit...");
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 100, SpringLayout.EAST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 35, SpringLayout.NORTH, panel1);
+                lbl3.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 1) {
+                            showExchangeRateEdit();
+                        }
+                    }
+                });
+                panel1.add(lbl3);
             }
         }
         {
@@ -164,7 +182,45 @@ public class SendForm extends JFrame {
         }
     }
 
+    private void showExchangeRateEdit() {
+        var undefined = new HashMap<Payment, ExchangeRate>();
+        var uniques = new HashMap<String, ExchangeRate>();
+        for (var p : payments) {
+            var r = p.getExchangeRate();
+            if (r == null) {
+                r = ExchangeRate.Undefined(p.createCcyPair());
+                undefined.put(p, r);
+            }
+            uniques.put(r.getPair().getDisplayText(), r);
+        }
+
+        var frm = new ExchangeRatesForm(transformInstruction.getExchange(), uniques.values().toArray(new ExchangeRate[0]));
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(400, 300);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(this);
+        frm.setVisible(true);
+
+        if (!frm.isDialogAccepted()) {
+            return;
+        }
+
+        for (var item : undefined.entrySet()) {
+            item.getKey().setExchangeRate(item.getValue());
+        }
+
+        for (var p : payments) {
+            if (p.getExchangeRate() != null && p.getExchangeRate().isUndefined()) {
+                p.setExchangeRate(null);
+            }
+            p.refreshAmounts();
+        }
+
+        table.load(payments);
+    }
+
     private void load(Payment[] payments) {
+        this.payments = payments;
         table.load(payments);
     }
 

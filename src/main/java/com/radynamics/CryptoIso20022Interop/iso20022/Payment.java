@@ -142,10 +142,14 @@ public class Payment {
 
     public void setExchangeRate(ExchangeRate rate) {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
-        if (bothCcyKnown && (!rate.getPair().affects(getFiatCcy()) || !rate.getPair().affects(getLedgerCcy()))) {
+        if (bothCcyKnown && rate != null && (!rate.getPair().affects(getFiatCcy()) || !rate.getPair().affects(getLedgerCcy()))) {
             throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy()));
         }
         this.exchangeRate = rate;
+        refreshAmounts();
+    }
+
+    public void refreshAmounts() {
         if (amountDefined) {
             refreshTransactionAmount();
         } else {
