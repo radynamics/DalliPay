@@ -1,8 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ExchangeRatesForm extends JDialog {
-    private final ExchangeRateProvider exchange;
+    private final ExchangeRateProvider exchangeRateProvider;
     private final ExchangeRate[] rates;
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -20,9 +20,9 @@ public class ExchangeRatesForm extends JDialog {
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
 
-    public ExchangeRatesForm(ExchangeRateProvider exchange, ExchangeRate[] rates) {
+    public ExchangeRatesForm(ExchangeRateProvider exchangeRateProvider, ExchangeRate[] rates) {
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
-        this.exchange = exchange;
+        this.exchangeRateProvider = exchangeRateProvider;
         this.rates = rates;
 
         setupUI();
@@ -99,7 +99,7 @@ public class ExchangeRatesForm extends JDialog {
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.NORTH);
             }
-            if (exchange != null) {
+            if (exchangeRateProvider != null) {
                 var pnlLine = new JPanel();
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
@@ -117,7 +117,7 @@ public class ExchangeRatesForm extends JDialog {
                 }
                 {
                     var lbl = new JLabel();
-                    lbl.setText(String.format(" exchange rates from %s if possible", exchange.getDisplayText()));
+                    lbl.setText(String.format(" exchange rates from %s if possible", exchangeRateProvider.getDisplayText()));
                     lbl.setOpaque(true);
                     pnlLine.add(lbl);
                 }
@@ -186,9 +186,9 @@ public class ExchangeRatesForm extends JDialog {
     }
 
     private void refreshRates() {
-        exchange.load();
+        exchangeRateProvider.load();
         for (var i = 0; i < rates.length; i++) {
-            var r = getRateOrNull(exchange.rates(), rates[i].getPair());
+            var r = getRateOrNull(exchangeRateProvider.rates(), rates[i].getPair());
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));
             }

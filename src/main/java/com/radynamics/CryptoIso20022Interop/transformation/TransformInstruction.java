@@ -14,7 +14,7 @@ import java.util.ArrayList;
 // This class contains all information to convert payments from pain001 into target ledger payments.
 public class TransformInstruction {
     private Ledger ledger;
-    private ExchangeRateProvider exchange;
+    private ExchangeRateProvider exchangeRateProvider;
     private ArrayList<AccountMapping> accountMappings = new ArrayList<>();
 
     private String senderPublicKey;
@@ -71,12 +71,12 @@ public class TransformInstruction {
         return ledger;
     }
 
-    public ExchangeRateProvider getExchange() {
-        return exchange;
+    public ExchangeRateProvider getExchangeRateProvider() {
+        return exchangeRateProvider;
     }
 
-    public void setExchange(ExchangeRateProvider exchange) {
-        this.exchange = exchange;
+    public void setExchangeRateProvider(ExchangeRateProvider exchangeRateProvider) {
+        this.exchangeRateProvider = exchangeRateProvider;
     }
 
     public String getTargetCcy() {

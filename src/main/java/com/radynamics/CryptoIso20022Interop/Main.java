@@ -92,10 +92,10 @@ public class Main {
     }
 
     private static void processPain001(InputStream input, String inputFileName) throws Exception {
-        var exchange = transformInstruction.getExchange();
-        exchange.load();
+        var provider = transformInstruction.getExchangeRateProvider();
+        provider.load();
 
-        var currencyConverter = new CurrencyConverter(exchange.rates());
+        var currencyConverter = new CurrencyConverter(provider.rates());
         var r = new Pain001Reader(transformInstruction.getLedger());
 
         javax.swing.SwingUtilities.invokeLater(() -> {

@@ -130,7 +130,7 @@ public class SendForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                var lbl2 = new JLabel(transformInstruction.getExchange().getDisplayText());
+                var lbl2 = new JLabel(transformInstruction.getExchangeRateProvider().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
@@ -195,7 +195,7 @@ public class SendForm extends JFrame {
             uniques.put(r.getPair().getDisplayText(), r);
         }
 
-        var frm = new ExchangeRatesForm(transformInstruction.getExchange(), uniques.values().toArray(new ExchangeRate[0]));
+        var frm = new ExchangeRatesForm(transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]));
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(400, 300);
         frm.setModal(true);

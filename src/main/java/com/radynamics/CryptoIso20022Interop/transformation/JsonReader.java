@@ -25,7 +25,7 @@ public class JsonReader {
         // TODO: validate format
         var ledger = LedgerFactory.create(json.getString("ledger"));
         var ti = new TransformInstruction(ledger);
-        ti.setExchange(ExchangeRateProviderFactory.create(json.getString("exchange")));
+        ti.setExchangeRateProvider(ExchangeRateProviderFactory.create(json.getString("exchange")));
         ti.setHistoricExchangeRateSource(HistoricExchangeRateSourceFactory.create(ledger, json.getString("historicExchangeRateSource")));
         // If set to another currency than ledger's native currency, amounts are converted using rates provided by exchange.
         ti.setTargetCcy(json.getString("targetCcy"));
