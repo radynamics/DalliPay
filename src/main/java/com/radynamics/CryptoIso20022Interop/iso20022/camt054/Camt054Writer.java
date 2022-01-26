@@ -120,7 +120,7 @@ public class Camt054Writer {
         ntry.setValDt(createDateAndDateTimeChoice(booked, transformInstruction.getValutaDateFormat()));
 
         ntry.setBkTxCd(new BankTransactionCodeStructure4());
-        ntry.getBkTxCd().setDomn(createDomn());
+        ntry.getBkTxCd().setDomn(createDomn("VCOM"));
 
         var dtls = new EntryDetails3();
         ntry.getNtryDtls().add(dtls);
@@ -142,7 +142,7 @@ public class Camt054Writer {
         txDtls.getAmt().setCcy(trx.getFiatCcy());
         txDtls.setCdtDbtInd(CreditDebitCode.CRDT);
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
-        txDtls.getBkTxCd().setDomn(createDomn());
+        txDtls.getBkTxCd().setDomn(createDomn("AUTT"));
 
         txDtls.setRltdAgts(new TransactionAgents3());
         txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification5());
@@ -227,12 +227,12 @@ public class Camt054Writer {
         return strd;
     }
 
-    private BankTransactionCodeStructure5 createDomn() {
+    private BankTransactionCodeStructure5 createDomn(String subFmlCd) {
         var o = new BankTransactionCodeStructure5();
         o.setCd("PMNT");
         o.setFmly(new BankTransactionCodeStructure6());
         o.getFmly().setCd("RCDT");
-        o.getFmly().setSubFmlyCd("VCOM");
+        o.getFmly().setSubFmlyCd(subFmlCd);
         return o;
     }
 
