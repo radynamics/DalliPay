@@ -27,7 +27,7 @@ public class AmountFormatter {
 
     public static String formatAmtWithCcy(Payment p) {
         return p.isAmountUnknown() || p.getAmount() == null
-                ? formatAmt(p)
+                ? MoneyFormatter.formatFiat(formatAmt(p), p.getFiatCcy())
                 : MoneyFormatter.formatFiat(BigDecimal.valueOf(p.getAmount()), p.getFiatCcy());
     }
 }

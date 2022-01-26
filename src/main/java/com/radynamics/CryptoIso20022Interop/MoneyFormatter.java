@@ -10,6 +10,10 @@ public class MoneyFormatter {
     }
 
     public static final String formatFiat(BigDecimal amount, String ccy) {
+        return formatFiat(Utils.createFormatFiat().format(amount), ccy);
+    }
+
+    public static final String formatFiat(String amount, String ccy) {
         return String.format("%s %s", Utils.createFormatFiat().format(amount), ccy);
     }
 }
