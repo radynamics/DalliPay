@@ -105,6 +105,7 @@ public class Main {
             frm.setReader(r);
             frm.setInput(inputFileName);
             frm.setSize(1024, 768);
+            frm.setLocationByPlatform(true);
             frm.setVisible(true);
         });
     }
@@ -119,6 +120,7 @@ public class Main {
             frm.setPeriod(period);
             frm.load();
             frm.setSize(1024, 768);
+            frm.setLocationByPlatform(true);
             frm.setVisible(true);
         });
     }
