@@ -128,6 +128,10 @@ public class Payment {
         return this.ccy;
     }
 
+    public void setFiatCcy(String ccy) {
+        this.ccy = ccy;
+    }
+
     public void setAmountUnknown() {
         amount = UnknownAmount;
     }

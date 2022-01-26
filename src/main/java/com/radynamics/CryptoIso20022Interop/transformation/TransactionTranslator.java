@@ -45,6 +45,8 @@ public class TransactionTranslator {
                         : t.createCcyPair();
                 if (currencyConverter.has(ccyPair)) {
                     t.setExchangeRate(currencyConverter.get(ccyPair));
+                } else {
+                    t.setFiatCcy(ccyPair.getSecond());
                 }
             }
         }
