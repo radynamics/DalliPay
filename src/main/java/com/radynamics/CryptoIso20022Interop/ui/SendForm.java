@@ -20,6 +20,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class SendForm extends JFrame {
@@ -195,7 +196,7 @@ public class SendForm extends JFrame {
             uniques.put(r.getPair().getDisplayText(), r);
         }
 
-        var frm = new ExchangeRatesForm(transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]));
+        var frm = new ExchangeRatesForm(transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), LocalDateTime.now());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(400, 300);
         frm.setModal(true);

@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ExchangeRatesForm extends JDialog {
@@ -19,11 +20,15 @@ public class ExchangeRatesForm extends JDialog {
     private Component anchorComponentTopLeft;
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
+    private LocalDateTime pointInTime;
 
-    public ExchangeRatesForm(ExchangeRateProvider exchangeRateProvider, ExchangeRate[] rates) {
+    public ExchangeRatesForm(ExchangeRateProvider exchangeRateProvider, ExchangeRate[] rates, LocalDateTime pointInTime) {
+        if (exchangeRateProvider == null) throw new IllegalArgumentException("Parameter 'exchangeRateProvider' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
+        if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");
         this.exchangeRateProvider = exchangeRateProvider;
         this.rates = rates;
+        this.pointInTime = pointInTime;
 
         setupUI();
     }
@@ -99,7 +104,7 @@ public class ExchangeRatesForm extends JDialog {
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.NORTH);
             }
-            if (exchangeRateProvider != null) {
+            {
                 var pnlLine = new JPanel();
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
@@ -188,7 +193,11 @@ public class ExchangeRatesForm extends JDialog {
     private void refreshRates() {
         exchangeRateProvider.load();
         for (var i = 0; i < rates.length; i++) {
-            var r = getRateOrNull(exchangeRateProvider.latestRates(), rates[i].getPair());
+            var pair = rates[i].getPair();
+            var exchangeRates = exchangeRateProvider.supportsRateAt()
+                    ? new ExchangeRate[]{exchangeRateProvider.rateAt(pair, pointInTime)}
+                    : exchangeRateProvider.latestRates();
+            var r = getRateOrNull(exchangeRates, pair);
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));
             }

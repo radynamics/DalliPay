@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 
 import javax.imageio.ImageIO;
@@ -13,19 +14,23 @@ import java.io.IOException;
 
 public class PaymentDetailForm extends JDialog {
     private Payment payment;
+    private PaymentValidator validator;
+    private ExchangeRateProvider exchangeRateProvider;
+
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
     private Component anchorComponentTopLeft;
-    private PaymentValidator validator;
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
     private JLabel lblAmountText;
 
-    public PaymentDetailForm(Payment payment, PaymentValidator validator) {
+    public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
         if (validator == null) throw new IllegalArgumentException("Parameter 'validator' cannot be null");
+        if (exchangeRateProvider == null) throw new IllegalArgumentException("Parameter 'exchangeRateProvider' cannot be null");
         this.payment = payment;
         this.validator = validator;
+        this.exchangeRateProvider = exchangeRateProvider;
 
         setupUI();
     }
@@ -202,7 +207,7 @@ public class PaymentDetailForm extends JDialog {
     private void showExchangeRateEdit() {
         var rate = payment.getExchangeRate() == null ? ExchangeRate.Undefined(payment.createCcyPair()) : payment.getExchangeRate();
 
-        var frm = new ExchangeRatesForm(null, new ExchangeRate[]{rate});
+        var frm = new ExchangeRatesForm(exchangeRateProvider, new ExchangeRate[]{rate}, payment.getBooked());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(400, 300);
         frm.setModal(true);

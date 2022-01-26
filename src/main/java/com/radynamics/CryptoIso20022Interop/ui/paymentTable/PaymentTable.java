@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -24,11 +25,16 @@ public class PaymentTable extends JPanel {
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
     private PaymentValidator validator;
+    private ExchangeRateProvider exchangeRateProvider;
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
         this.validator = validator;
+
+        exchangeRateProvider = actor == Actor.Sender
+                ? transformInstruction.getExchangeRateProvider()
+                : transformInstruction.getHistoricExchangeRateSource();
 
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel(exchangeRateLoader, validator);
@@ -147,7 +153,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var frm = new PaymentDetailForm(obj, validator);
+        var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(650, 430);
         frm.setModal(true);
