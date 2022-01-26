@@ -13,8 +13,10 @@ public class FilePathField extends JPanel {
     private JTextField txt;
 
     private ArrayList<ChangedListener> listener = new ArrayList<>();
+    private Window owner;
 
-    public FilePathField() {
+    public FilePathField(Window owner) {
+        this.owner = owner;
         setupUI();
     }
 
@@ -63,8 +65,7 @@ public class FilePathField extends JPanel {
             add(txt, c);
         }
         {
-            var lbl = new JLabel("browse...");
-            lbl.setForeground(Consts.ColorAccent);
+            var lbl = Utils.createLinkLabel(owner, "browse...");
             lbl.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {

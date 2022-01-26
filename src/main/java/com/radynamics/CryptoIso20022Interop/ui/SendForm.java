@@ -106,7 +106,7 @@ public class SendForm extends JFrame {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new FilePathField();
+                txtInput = new FilePathField(this);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
                 txtInput.addChangedListener(() -> {
