@@ -7,6 +7,8 @@ public class ExchangeRate {
     private double rate;
     private LocalDateTime pointInTime;
 
+    public static final double UndefinedRate = 0;
+
     public ExchangeRate(String ccyFrom, String ccyTo, double rate, LocalDateTime pointInTime) {
         this(new CurrencyPair(ccyFrom, ccyTo), rate, pointInTime);
     }
@@ -26,11 +28,11 @@ public class ExchangeRate {
     }
 
     public static ExchangeRate Undefined(CurrencyPair pair) {
-        return new ExchangeRate(pair, 0, LocalDateTime.now());
+        return new ExchangeRate(pair, UndefinedRate, LocalDateTime.now());
     }
 
     public boolean isUndefined() {
-        return getRate() == 0;
+        return getRate() == UndefinedRate;
     }
 
     public boolean isNone() {

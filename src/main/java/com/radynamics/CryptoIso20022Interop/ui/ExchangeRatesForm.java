@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -169,7 +170,7 @@ public class ExchangeRatesForm extends JDialog {
             public boolean verify(JComponent input) {
                 var isValid = false;
                 try {
-                    Double.parseDouble(((JTextField) input).getText());
+                    getTxtValue(((JTextField) input));
                     isValid = true;
                 } catch (NumberFormatException ignored) {
                 }
@@ -221,8 +222,12 @@ public class ExchangeRatesForm extends JDialog {
 
     private void apply() {
         for (var i = 0; i < rates.length; i++) {
-            rates[i].setRate(Double.parseDouble(txts.get(i).getText()));
+            rates[i].setRate(getTxtValue(txts.get(i)));
         }
+    }
+
+    private static Double getTxtValue(JTextField txt) {
+        return StringUtils.isAllEmpty(txt.getText()) ? ExchangeRate.UndefinedRate : Double.parseDouble(txt.getText());
     }
 
     private void close() {
