@@ -150,6 +150,18 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
+    public String getAccountDomain(Wallet wallet) {
+        try {
+            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
+            var result = xrplClient.accountInfo(requestParams);
+            var hex = result.accountData().domain().orElse(null);
+            return hex == null ? null : Utils.hexToString(hex);
+        } catch (Exception e) {
+            LogManager.getLogger().error(e.getMessage(), e);
+            return null;
+        }
+    }
+
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
         var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
         for (var t : transactions) {

@@ -78,6 +78,10 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return api.exists(WalletConverter.from(wallet));
     }
 
+    public NetworkInfo getNetwork() {
+        return network;
+    }
+
     @Override
     public void setNetwork(NetworkInfo network) {
         this.network = network;
@@ -91,6 +95,13 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public TransactionLookupProvider getTransactionLookupProvider() {
         return new Bithomp(network.getType());
+    }
+
+    @Override
+    public WalletInfoProvider[] getInfoProvider() {
+        return new WalletInfoProvider[]{
+                new LedgerWalletInfoProvider(this)
+        };
     }
 
     @Override

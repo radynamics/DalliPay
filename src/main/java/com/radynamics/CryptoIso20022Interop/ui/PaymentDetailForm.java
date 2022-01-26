@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
@@ -11,6 +12,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class PaymentDetailForm extends JDialog {
     private Payment payment;
@@ -125,10 +129,22 @@ public class PaymentDetailForm extends JDialog {
                         var balance = payment.getLedger().convertToNativeCcyAmount(amtSmallestUnit.longValue());
                         secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, payment.getLedgerCcy()));
                     }
+
+                    var wi = getMostImportantWalletInfo(payment.getSenderWallet());
+                    if (wi != null) {
+                        secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
+                    }
                 }
                 createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), secondLineText);
             }
-            createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), getWalletText(payment.getReceiverWallet()));
+            {
+                var secondLineText = getWalletText(payment.getReceiverWallet());
+                var wi = getMostImportantWalletInfo(payment.getSenderWallet());
+                if (wi != null) {
+                    secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
+                }
+                createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), secondLineText);
+            }
             {
                 JLabel secondLine = null;
                 if (payment.getId() != null) {
@@ -184,6 +200,14 @@ public class PaymentDetailForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private WalletInfo getMostImportantWalletInfo(Wallet wallet) {
+        var list = new ArrayList<WalletInfo>();
+        for (var p : payment.getLedger().getInfoProvider()) {
+            list.addAll(Arrays.asList(p.list(wallet)));
+        }
+        return list.stream().sorted(Comparator.comparing(WalletInfo::getImportance)).findFirst().orElse(null);
     }
 
     private void refreshAmountsText() {
