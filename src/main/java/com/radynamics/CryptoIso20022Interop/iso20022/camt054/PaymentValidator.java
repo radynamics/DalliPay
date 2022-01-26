@@ -19,7 +19,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         if (t.isAmountUnknown()) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Amount is unknown. Mostly because no FX rate was found at %s.", Utils.createFormatDate().format(t.getBooked()))));
+            list.add(new ValidationResult(ValidationState.Error, String.format("Amount is unknown due no exchange rate was found at %s.", Utils.createFormatDate().format(t.getBooked()))));
         }
 
         return list.toArray(new ValidationResult[0]);
