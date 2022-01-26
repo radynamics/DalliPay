@@ -1,8 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeFactory;
-import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSource;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateSourceFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
@@ -26,7 +25,7 @@ public class JsonReader {
         // TODO: validate format
         var ledger = LedgerFactory.create(json.getString("ledger"));
         var ti = new TransformInstruction(ledger);
-        ti.setExchange(ExchangeFactory.create(json.getString("exchange")));
+        ti.setExchange(ExchangeRateProviderFactory.create(json.getString("exchange")));
         ti.setHistoricExchangeRateSource(HistoricExchangeRateSourceFactory.create(ledger, json.getString("historicExchangeRateSource")));
         // If set to another currency than ledger's native currency, amounts are converted using rates provided by exchange.
         ti.setTargetCcy(json.getString("targetCcy"));
