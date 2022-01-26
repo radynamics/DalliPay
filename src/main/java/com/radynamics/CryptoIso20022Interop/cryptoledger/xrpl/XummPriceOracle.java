@@ -83,7 +83,10 @@ public class XummPriceOracle implements ExchangeRateProvider {
         for (var r : rates) {
             sum += r;
         }
-        return new ExchangeRate(pair, sum / rates.size(), bestMatch.getBooked());
+
+        final double PRECISION = 100000d;
+        var rate = Math.round(sum / rates.size() * PRECISION) / PRECISION;
+        return new ExchangeRate(pair, rate, bestMatch.getBooked());
     }
 
     private Transaction getBestMatch(Transaction[] transactions, LocalDateTime pointInTime) {
