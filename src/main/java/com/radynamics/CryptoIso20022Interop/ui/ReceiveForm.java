@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 public class ReceiveForm extends JFrame {
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
+    private final VersionController versionController = new VersionController();
 
     private PaymentTable table;
     private WalletField txtInput;
@@ -44,8 +45,7 @@ public class ReceiveForm extends JFrame {
     }
 
     private void setupUI() {
-        var vc = new VersionController();
-        setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
+        setTitle(String.format("CryptoIso20022Interop [%s]", versionController.getVersion()));
 
         try {
             setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
@@ -197,7 +197,7 @@ public class ReceiveForm extends JFrame {
     private void exportSelected() {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction);
+            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, versionController.getVersion());
             var s = CamtConverter.toXml(w.create(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);

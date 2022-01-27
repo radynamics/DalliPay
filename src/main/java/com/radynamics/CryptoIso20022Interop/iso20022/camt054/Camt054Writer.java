@@ -20,12 +20,14 @@ import java.time.LocalDateTime;
 public class Camt054Writer {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
+    private final String productVersion;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
 
-    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction) {
+    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
+        this.productVersion = productVersion;
         this.idGenerator = new UUIDIdGenerator();
         this.creationDate = LocalDateTime.now();
     }
@@ -37,7 +39,7 @@ public class Camt054Writer {
         d.getBkToCstmrDbtCdtNtfctn().setGrpHdr(new GroupHeader58());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgId(idGenerator.createMsgId());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setCreDtTm(Utils.toXmlDateTime(creationDate));
-        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgRcpt(createMsgRcpt());
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setAddtlInf(String.format("CryptoIso20022Interop/%s", productVersion));
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgPgntn(new Pagination());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setPgNb("1");
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);
@@ -82,22 +84,6 @@ public class Camt054Writer {
         acct.setCcy(transformInstruction.getTargetCcy());
 
         return acct;
-    }
-
-    private PartyIdentification43 createMsgRcpt() {
-        // see FI_camt_054_sample.xml.xml
-        var o = new PartyIdentification43();
-
-        o.setId(new Party11Choice());
-        o.getId().setOrgId(new OrganisationIdentification8());
-
-        var othr = new GenericOrganisationIdentification1();
-        o.getId().getOrgId().getOthr().add(othr);
-        othr.setId("CryptoIso20022Interop");
-        othr.setSchmeNm(new OrganisationIdentificationSchemeName1Choice());
-        othr.getSchmeNm().setCd("CUST");
-
-        return o;
     }
 
     private ReportEntry4 createNtry(Payment trx) throws DatatypeConfigurationException {
