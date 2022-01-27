@@ -13,10 +13,16 @@ import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import java.math.BigDecimal;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
-    private boolean isTestNet = true;
+    private final WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
 
     public static final String ID = "xrpl";
+
+    public Ledger() {
+        walletInfoProvider = new WalletInfoProvider[]{
+                new CachedWalletInfoProvider(new WalletInfoProvider[]{new LedgerWalletInfoProvider(this)})
+        };
+    }
 
     @Override
     public String getId() {
@@ -99,9 +105,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public WalletInfoProvider[] getInfoProvider() {
-        return new WalletInfoProvider[]{
-                new LedgerWalletInfoProvider(this)
-        };
+        return walletInfoProvider;
     }
 
     @Override
