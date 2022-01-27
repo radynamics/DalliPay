@@ -97,6 +97,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public WalletInfoProvider[] getInfoProvider() {
+        return new WalletInfoProvider[0];
+    }
+
+    @Override
     public boolean isValidPublicKey(String publicKey) {
         return true;
     }
