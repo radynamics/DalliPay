@@ -28,6 +28,11 @@ public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    @Override
     public UnsignedLong getLedgerBalanceSmallestUnit() {
         return drops;
     }

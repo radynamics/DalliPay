@@ -7,6 +7,8 @@ public interface Wallet {
 
     String getSecret();
 
+    void setSecret(String secret);
+
     UnsignedLong getLedgerBalanceSmallestUnit();
 
     void setLedgerBalance(UnsignedLong amountSmallestUnit);

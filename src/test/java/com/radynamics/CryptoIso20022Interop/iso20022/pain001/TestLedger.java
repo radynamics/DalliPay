@@ -55,6 +55,11 @@ public class TestLedger implements Ledger {
             }
 
             @Override
+            public void setSecret(String secret) {
+                // do nothing
+            }
+
+            @Override
             public UnsignedLong getLedgerBalanceSmallestUnit() {
                 return UnsignedLong.ZERO;
             }
