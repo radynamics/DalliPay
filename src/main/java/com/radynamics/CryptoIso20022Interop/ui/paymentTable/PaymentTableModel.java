@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data;
     private final HistoricExchangeRateLoader exchangeRateLoader;
@@ -25,6 +25,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_VALIDATION_RESULTS = "validationResults";
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
+    public static final String COL_SENDER_LEDGER = "senderLedger";
     public static final String COL_RECEIVER_ISO20022 = "receiverIso20022";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_BOOKED = "valuta";
@@ -76,9 +77,10 @@ public class PaymentTableModel extends AbstractTableModel {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
-            Object actorLedger = getActorWalletText(t);
+            Object senderLedger = t.getSenderWallet() == null ? "" : t.getSenderWallet().getPublicKey();
+            Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
             var amount = actor == Actor.Sender ? t.getAmount() : null;
-            list.add(new Object[]{t, new ValidationResult[0], true, null, actorAddressOrAccount, actorLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, senderLedger, actorAddressOrAccount, receiverLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
@@ -104,11 +106,6 @@ public class PaymentTableModel extends AbstractTableModel {
             actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
         }
         return actorAddressOrAccount;
-    }
-
-    private String getActorWalletText(Payment t) {
-        var wallet = actor.get(t.getReceiverWallet(), t.getSenderWallet());
-        return wallet == null ? "" : wallet.getPublicKey();
     }
 
     private void validateAsync(Payment[] payments) {
