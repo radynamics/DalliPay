@@ -203,6 +203,9 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private WalletInfo getMostImportantWalletInfo(Wallet wallet) {
+        if (wallet == null) {
+            return null;
+        }
         var list = new ArrayList<WalletInfo>();
         for (var p : payment.getLedger().getInfoProvider()) {
             list.addAll(Arrays.asList(p.list(wallet)));
