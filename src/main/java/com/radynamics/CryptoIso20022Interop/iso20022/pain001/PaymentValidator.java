@@ -1,9 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
@@ -29,7 +27,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         } else {
             list.addAll(Arrays.asList(wv.validate(t.getSenderWallet())));
 
-            if (sameWallet(t.getSenderWallet(), t.getReceiverWallet())) {
+            if (WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
             }
         }
@@ -46,24 +44,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         return list.toArray(new ValidationResult[0]);
     }
 
-    private boolean sameWallet(Wallet first, Wallet second) {
-        if (first == null && second == null) {
-            return true;
-        }
-        if (first == null && second != null) {
-            return false;
-        }
-        if (first != null && second == null) {
-            return false;
-        }
-
-        return StringUtils.equals(first.getPublicKey(), second.getPublicKey());
-    }
-
     public ValidationResult[] validate(Payment[] payments) {
         var list = new ArrayList<ValidationResult>();
 
-        var sendingWallets = getSendingWalletsOf(payments);
+        var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
         for (var w : sendingWallets) {
             var affectedPayments = filterSendingWallet(w, payments);
             long sum = 0;
@@ -86,25 +70,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         return list.toArray(new ValidationResult[0]);
     }
 
-    private ArrayList<Wallet> getSendingWalletsOf(Payment[] payments) {
-        var list = new ArrayList<Wallet>();
-        for (var p : payments) {
-            var existing = list.stream().anyMatch(w -> isSame(p.getSenderWallet(), w));
-            if (!existing) {
-                list.add(p.getSenderWallet());
-            }
-        }
-        return list;
-    }
-
-    private boolean isSame(Wallet first, Wallet second) {
-        return first.getPublicKey().equals(second.getPublicKey());
-    }
-
     private ArrayList<Payment> filterSendingWallet(Wallet w, Payment[] payments) {
         var list = new ArrayList<Payment>();
         for (var p : payments) {
-            if (isSame(p.getSenderWallet(), w)) {
+            if (WalletCompare.isSame(p.getSenderWallet(), w)) {
                 list.add(p);
             }
         }
