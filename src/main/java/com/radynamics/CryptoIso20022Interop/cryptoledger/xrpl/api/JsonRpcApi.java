@@ -14,6 +14,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.WalletConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -180,6 +181,9 @@ public class JsonRpcApi implements TransactionSource {
 
         var walletFactory = DefaultWalletFactory.getInstance();
         var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.getType() != Network.Live);
+        if (!StringUtils.equals(sender.classicAddress().value(), t.getSenderWallet().getPublicKey())) {
+            throw new LedgerException(String.format("Secret matches for sending wallet %s but expected was %s.", sender.classicAddress().value(), t.getSenderWallet().getPublicKey()));
+        }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
         var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
