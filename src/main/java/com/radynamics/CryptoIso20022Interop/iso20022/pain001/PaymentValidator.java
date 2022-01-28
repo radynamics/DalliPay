@@ -19,13 +19,13 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
 
         var wv = new WalletValidator(t.getLedger());
         if (t.getReceiverWallet() != null) {
-            list.addAll(Arrays.asList(wv.validate(t.getReceiverWallet())));
+            list.addAll(Arrays.asList(wv.validate(t.getReceiverWallet(), "Receiver")));
         }
 
         if (t.getSenderWallet() == null) {
             list.add(new ValidationResult(ValidationState.Error, "Sender wallet is missing."));
         } else {
-            list.addAll(Arrays.asList(wv.validate(t.getSenderWallet())));
+            list.addAll(Arrays.asList(wv.validate(t.getSenderWallet(), "Sender")));
 
             if (WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));

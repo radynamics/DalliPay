@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 
 import java.util.ArrayList;
 
@@ -12,25 +12,30 @@ public class WalletValidator {
         this.ledger = ledger;
     }
 
-    public ValidationResult[] validate(Wallet wallet) {
+    public ValidationResult[] validate(Wallet wallet, String senderOrReceiver) {
         var list = new ArrayList<ValidationResult>();
 
-        var formatResult = validateFormat(wallet);
+        var formatResult = validateFormat(wallet, senderOrReceiver);
         if (formatResult != null) {
             list.add(formatResult);
             return list.toArray(new ValidationResult[0]);
         }
 
         if (!ledger.exists(wallet)) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver Cryptocurrency wallet doesn't exist.")));
+            list.add(new ValidationResult(ValidationState.Error, String.format("%s wallet doesn't exist.", senderOrReceiver)));
         }
 
         return list.toArray(new ValidationResult[0]);
     }
 
     public ValidationResult validateFormat(Wallet wallet) {
+        return validateFormat(wallet, null);
+    }
+
+    private ValidationResult validateFormat(Wallet wallet, String senderOrReceiver) {
+        var prefix = senderOrReceiver == null ? "" : String.format("%s ", senderOrReceiver);
         return ledger.isValidPublicKey(wallet.getPublicKey())
                 ? null
-                : new ValidationResult(ValidationState.Error, String.format("Receiver Cryptocurrency wallet isn't a valid address"));
+                : new ValidationResult(ValidationState.Error, String.format("%sCryptocurrency wallet isn't a valid address.", prefix));
     }
 }
