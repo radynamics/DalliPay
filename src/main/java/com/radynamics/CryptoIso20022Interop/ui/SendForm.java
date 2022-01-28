@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -12,6 +14,7 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -21,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SendForm extends JFrame {
@@ -160,7 +164,14 @@ public class SendForm extends JFrame {
             cmd.addActionListener(e -> {
                 var payments = table.selectedPayments();
                 try {
+                    if (!askForPrivateKeyIfMissing(payments)) {
+                        return;
+                    }
+
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+                    var br = new BalanceRefresher();
+                    br.refreshAllSenderWallets(payments);
 
                     var validator = new PaymentValidator();
                     var results = validator.validate(payments);
@@ -182,6 +193,29 @@ public class SendForm extends JFrame {
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private boolean askForPrivateKeyIfMissing(Payment[] payments) {
+        var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
+        var privatKeyMissing = new ArrayList<Wallet>();
+        for (var w : sendingWallets) {
+            if (StringUtils.isAllEmpty(w.getSecret())) {
+                privatKeyMissing.add(w);
+            }
+        }
+        if (privatKeyMissing.size() == 0) {
+            return true;
+        }
+
+        for (var w : privatKeyMissing) {
+            var userInput = JOptionPane.showInputDialog(this, String.format("Enter secret / private Key for %s:", w.getPublicKey()), "Enter secret", JOptionPane.QUESTION_MESSAGE);
+            if (StringUtils.isAllEmpty(userInput)) {
+                return false;
+            }
+            w.setSecret(userInput);
+        }
+
+        return true;
     }
 
     private void showExchangeRateEdit() {

@@ -64,8 +64,13 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
-        return (actor == Actor.Receiver && col == getColumnIndex(COL_RECEIVER_ISO20022))
-                || (actor == Actor.Sender && col == getColumnIndex(COL_RECEIVER_LEDGER));
+        if (actor == Actor.Receiver) {
+            return col == getColumnIndex(COL_RECEIVER_ISO20022);
+        }
+        if (actor == Actor.Sender) {
+            return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);
+        }
+        return false;
     }
 
     public void setValueAt(Object value, int row, int col) {

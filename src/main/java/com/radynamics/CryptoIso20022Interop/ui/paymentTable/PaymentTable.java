@@ -58,6 +58,7 @@ public class PaymentTable extends JPanel {
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
         var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Sender);
+        table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_SENDER_LEDGER)).setCellEditor(cellEditor);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(cellEditor);
 
         table.setRowHeight(30);
@@ -126,6 +127,10 @@ public class PaymentTable extends JPanel {
                 var row = tcl.getRow();
                 var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
+                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
+                    t.setSenderWallet(transformInstruction.getLedger().createWallet(cleanedInput, null));
+                    model.onTransactionChanged(row, t);
+                }
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
                     t.setSenderAccount(AccountFactory.create(cleanedInput));
                     model.onTransactionChanged(row, t);
