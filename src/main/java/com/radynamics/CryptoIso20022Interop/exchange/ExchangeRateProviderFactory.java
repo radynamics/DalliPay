@@ -15,6 +15,8 @@ public final class ExchangeRateProviderFactory {
                 return new DemoExchange();
             case Bitstamp.ID:
                 return new Bitstamp();
+            case Coinbase.ID:
+                return new Coinbase();
             case XummPriceOracle.ID:
                 return new XummPriceOracle((com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger) ledger);
             default:
