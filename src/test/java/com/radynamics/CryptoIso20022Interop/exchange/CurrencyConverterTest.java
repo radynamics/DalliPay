@@ -68,4 +68,27 @@ public class CurrencyConverterTest {
 
         assertFalse(ccyConverter.has(new CurrencyPair("CHF", "TEST1")));
     }
+
+    @Test
+    public void get() {
+        ExchangeRate[] rates = {
+                new ExchangeRate("TEST", "TEST", 1.0, LocalDateTime.now()),
+                new ExchangeRate("CHF", "TEST", 0.9, LocalDateTime.now()),
+                new ExchangeRate("EUR", "TEST", 1.1, LocalDateTime.now()),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ccyConverter.get(null);
+        });
+
+        for (var ccy : new String[]{"TEST", "CHF", "EUR"}) {
+            var r = ccyConverter.get(new CurrencyPair(ccy, "TEST"));
+            Assertions.assertNotNull(r);
+            Assertions.assertEquals(ccy, r.getPair().getFirst());
+            Assertions.assertEquals("TEST", r.getPair().getSecond());
+        }
+
+        Assertions.assertNull(ccyConverter.get(new CurrencyPair("USD", "TEST")));
+    }
 }

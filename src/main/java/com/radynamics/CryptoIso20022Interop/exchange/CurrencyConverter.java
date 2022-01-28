@@ -49,9 +49,9 @@ public class CurrencyConverter {
         if (pair == null) throw new IllegalArgumentException("Parameter 'pair' cannot be null");
 
         for (var r : rates) {
-            var matchesFrom = r.getPair().getFirst().equalsIgnoreCase(pair.getFirst()) || r.getPair().getFirst().equalsIgnoreCase(pair.getSecond());
-            var matchesTo = r.getPair().getSecond().equalsIgnoreCase(pair.getFirst()) || r.getPair().getSecond().equalsIgnoreCase(pair.getSecond());
-            if (matchesFrom && matchesTo) {
+            var matches = r.getPair().getFirst().equalsIgnoreCase(pair.getFirst()) && r.getPair().getSecond().equalsIgnoreCase(pair.getSecond());
+            var matchesInverted = r.getPair().getFirst().equalsIgnoreCase(pair.getSecond()) && r.getPair().getSecond().equalsIgnoreCase(pair.getFirst());
+            if (matches || matchesInverted) {
                 return r;
             }
         }
