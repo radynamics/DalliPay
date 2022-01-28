@@ -46,4 +46,9 @@ public class CurrencyPair {
         if (other == null) return false;
         return getFirst().equals(other.getFirst()) && getSecond().equals(other.getSecond());
     }
+
+    @Override
+    public String toString() {
+        return String.format("first=%s, second=%s", first, second);
+    }
 }

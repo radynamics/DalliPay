@@ -56,4 +56,9 @@ public class ExchangeRate {
     public LocalDateTime getPointInTime() {
         return pointInTime;
     }
+
+    @Override
+    public String toString() {
+        return String.format("pair=%s, rate=%s", pair, rate);
+    }
 }
