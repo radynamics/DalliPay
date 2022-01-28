@@ -28,6 +28,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             list.add(new ValidationResult(ValidationState.Error, "Sender wallet is missing."));
         } else {
             list.addAll(Arrays.asList(wv.validate(t.getSenderWallet())));
+
+            if (sameWallet(t.getSenderWallet(), t.getReceiverWallet())) {
+                list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
+            }
         }
 
         if (t.getExchangeRate() == null) {
@@ -40,6 +44,20 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         return list.toArray(new ValidationResult[0]);
+    }
+
+    private boolean sameWallet(Wallet first, Wallet second) {
+        if (first == null && second == null) {
+            return true;
+        }
+        if (first == null && second != null) {
+            return false;
+        }
+        if (first != null && second == null) {
+            return false;
+        }
+
+        return StringUtils.equals(first.getPublicKey(), second.getPublicKey());
     }
 
     public ValidationResult[] validate(Payment[] payments) {
