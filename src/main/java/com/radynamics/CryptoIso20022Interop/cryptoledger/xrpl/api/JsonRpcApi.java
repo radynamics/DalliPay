@@ -59,15 +59,17 @@ public class JsonRpcApi implements TransactionSource {
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {
             var t = r.resultTransaction().transaction();
-            if (StringUtils.equals(t.account().value(), wallet.getPublicKey())) {
-                continue;
-            }
             // TODO: all trx are fetched -> filter earlier
             if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
                 continue;
             }
 
             if (t.transactionType() == TransactionType.PAYMENT) {
+                var p = (Payment) t;
+                if (!StringUtils.equals(p.destination().value(), wallet.getPublicKey())) {
+                    continue;
+                }
+
                 // TODO: handle ImmutableIssuedCurrencyAmount
                 var deliveredAmount = r.metadata().get().deliveredAmount().get();
                 if (deliveredAmount instanceof XrpCurrencyAmount) {
