@@ -52,7 +52,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     @Override
-    public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
+    public Transaction[] listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period);
         var result = xrplClient.accountTransactions(params);
 

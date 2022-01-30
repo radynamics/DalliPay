@@ -77,7 +77,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception {
+    public Transaction[] listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         return new Transaction[0];
     }
 

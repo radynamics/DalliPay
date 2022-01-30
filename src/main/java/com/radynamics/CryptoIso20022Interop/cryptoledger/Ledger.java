@@ -22,7 +22,7 @@ public interface Ledger {
 
     void refreshBalance(Wallet wallet);
 
-    Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception;
+    Transaction[] listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception;
 
     boolean exists(Wallet wallet);
 

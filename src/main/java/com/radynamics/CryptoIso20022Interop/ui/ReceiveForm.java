@@ -223,7 +223,7 @@ public class ReceiveForm extends JFrame {
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
-            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPayments(wallet, period)));
+            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPaymentsReceived(wallet, period)));
 
             table.load(payments);
         } catch (Exception e) {

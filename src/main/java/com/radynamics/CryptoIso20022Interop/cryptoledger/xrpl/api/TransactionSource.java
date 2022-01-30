@@ -5,5 +5,5 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 
 public interface TransactionSource {
-    Transaction[] listPayments(Wallet wallet, DateTimeRange period) throws Exception;
+    Transaction[] listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception;
 }
