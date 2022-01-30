@@ -59,6 +59,9 @@ public class JsonRpcApi implements TransactionSource {
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {
             var t = r.resultTransaction().transaction();
+            if (StringUtils.equals(t.account().value(), wallet.getPublicKey())) {
+                continue;
+            }
             // TODO: all trx are fetched -> filter earlier
             if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
                 continue;
