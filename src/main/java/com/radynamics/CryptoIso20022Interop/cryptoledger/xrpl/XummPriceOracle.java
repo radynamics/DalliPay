@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -17,8 +18,9 @@ public class XummPriceOracle implements ExchangeRateProvider {
 
     public static final String ID = "xummpriceoracle";
 
-    public XummPriceOracle(Ledger ledger) {
-        this.ledger = ledger;
+    public XummPriceOracle(NetworkInfo network) {
+        ledger = new Ledger();
+        ledger.setNetwork(network);
     }
 
     @Override

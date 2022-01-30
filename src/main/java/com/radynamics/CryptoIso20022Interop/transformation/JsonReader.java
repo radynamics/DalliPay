@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
@@ -16,16 +18,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class JsonReader {
-    public TransformInstruction read(InputStream input) {
+    public TransformInstruction read(InputStream input, String configFilePath, Network network) {
         var bufferedReader = new BufferedReader(new InputStreamReader(input));
         var tokener = new JSONTokener(bufferedReader);
         var json = new JSONObject(tokener);
 
         // TODO: validate format
         var ledger = LedgerFactory.create(json.getString("ledger"));
+        Config config = Config.load(ledger, configFilePath);
+        ledger.setNetwork(config.getNetwork(network));
         var ti = new TransformInstruction(ledger);
         ti.setExchangeRateProvider(ExchangeRateProviderFactory.create(json.getString("exchange")));
-        ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), ledger));
+        ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), config.getNetwork(Network.Live)));
         // If set to another currency than ledger's native currency, amounts are converted using rates provided by exchange.
         ti.setTargetCcy(json.getString("targetCcy"));
 

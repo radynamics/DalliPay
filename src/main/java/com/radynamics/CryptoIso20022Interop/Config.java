@@ -11,18 +11,25 @@ import org.json.JSONTokener;
 import java.io.*;
 
 public class Config {
-    private NetworkInfo networkInfo;
+    private NetworkInfo live;
+    private NetworkInfo test;
 
     private Config() {
     }
 
-    public static Config load(Ledger ledger, Network type, String path) {
+    public static Config load(Ledger ledger, String path) {
         var c = new Config();
-        c.setNetworkInfo(new NetworkInfo(type, ledger.getFallbackUrl(type)));
+        c.live = load(ledger, path, Network.Live);
+        c.test = load(ledger, path, Network.Test);
+        return c;
+    }
+
+    private static NetworkInfo load(Ledger ledger, String path, Network type) {
+        var fallback = new NetworkInfo(type, ledger.getFallbackUrl(type));
 
         var file = new File(path);
         if (!file.exists()) {
-            return c;
+            return fallback;
         }
 
         JSONObject json;
@@ -31,22 +38,19 @@ public class Config {
             json = new JSONObject(new JSONTokener(bufferedReader));
         } catch (FileNotFoundException e) {
             LogManager.getLogger().error(String.format("Reading config file %s failed. Taking default values instead.", path), e);
-            return c;
+            return fallback;
         }
 
         if (!json.has(ledger.getId())) {
-            return c;
+            return fallback;
         }
 
         var n = json.getJSONObject(ledger.getId());
-        var networkInfo = getNetworkInfoOrNull(n, type);
-        if (networkInfo != null) {
-            c.setNetworkInfo(networkInfo);
-        }
-        return c;
+        var info = getNetworkInfoOrNull(n, type);
+        return info == null ? fallback : info;
     }
 
-    public static NetworkInfo getNetworkInfoOrNull(JSONObject json, Network type) {
+    private static NetworkInfo getNetworkInfoOrNull(JSONObject json, Network type) {
         if (type == Network.Live && json.has("liveUrl")) {
             return new NetworkInfo(type, HttpUrl.get(json.getString("liveUrl")));
         }
@@ -57,11 +61,15 @@ public class Config {
         return null;
     }
 
-    private void setNetworkInfo(NetworkInfo networkInfo) {
-        this.networkInfo = networkInfo;
-    }
-
-    public NetworkInfo getNetworkInfo() {
-        return networkInfo;
+    public NetworkInfo getNetwork(Network network) {
+        switch (network) {
+            case Live -> {
+                return live;
+            }
+            case Test -> {
+                return test;
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + network);
+        }
     }
 }

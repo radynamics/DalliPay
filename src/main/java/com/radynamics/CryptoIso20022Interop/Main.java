@@ -40,9 +40,7 @@ public class Main {
 
         try {
             var r = new JsonReader();
-            transformInstruction = r.read(new FileInputStream(trainsformInstructionFileName));
-            Config config = Config.load(transformInstruction.getLedger(), NetworkConverter.from(networkId), configFilePath);
-            transformInstruction.getLedger().setNetwork(config.getNetworkInfo());
+            transformInstruction = r.read(new FileInputStream(trainsformInstructionFileName), configFilePath, NetworkConverter.from(networkId));
 
             switch (action) {
                 case "pain001ToCrypto":
