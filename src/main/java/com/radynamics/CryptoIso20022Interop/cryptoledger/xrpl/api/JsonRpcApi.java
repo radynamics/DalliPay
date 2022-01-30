@@ -76,7 +76,7 @@ public class JsonRpcApi implements TransactionSource {
         return list.toArray(new Transaction[0]);
     }
 
-    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException {
+    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {
         var ledgerRange = ledgerRangeConverter.convert(period);
 
         return AccountTransactionsRequestParams.builder()

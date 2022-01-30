@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -25,10 +26,16 @@ public class LedgerRangeConverter {
         this.logger = LogManager.getLogger();
     }
 
-    public LedgerIndexRange convert(DateTimeRange period) throws JsonRpcClientErrorException {
+    public LedgerIndexRange convert(DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {
         var ledgerAtStart = findLedger(period.getStart());
         var ledgerAtEnd = findLedger(period.getEnd());
 
+        if (ledgerAtStart == null) {
+            throw new LedgerException(String.format("Could not find ledger at %s", period.getStart()));
+        }
+        if (ledgerAtEnd == null) {
+            throw new LedgerException(String.format("Could not find ledger at %s", period.getEnd()));
+        }
         logger.trace(String.format("RESULT: %s - %s", ledgerAtStart.getPointInTime(), ledgerAtEnd.getPointInTime()));
         return LedgerIndexRange.of(ledgerAtStart.getLedgerIndex(), ledgerAtEnd.getLedgerIndex());
     }
@@ -63,7 +70,12 @@ public class LedgerRangeConverter {
                     ? bestMatch.getLedgerIndex().plus(estimatedOffset)
                     : bestMatch.getLedgerIndex().minus(estimatedOffset);
 
-            bestMatch = get(estimatedFromLedgerIndex);
+            var tmp = get(estimatedFromLedgerIndex, !isTooEarly);
+            if (tmp == null) {
+                LogManager.getLogger().warn(String.format("Failed to get ledger index near %s.", estimatedFromLedgerIndex));
+                return null;
+            }
+            bestMatch = tmp;
 
             logger.trace(String.format("Iteration %s: estOffset %s -> %s", iteration, estimatedOffset, bestMatch.getPointInTime()));
             iteration++;
@@ -72,20 +84,53 @@ public class LedgerRangeConverter {
         return bestMatch;
     }
 
-    private LedgerAtTime get(LedgerIndex index) throws JsonRpcClientErrorException {
+    private LedgerAtTime get(LedgerIndex index, boolean searchEarlier) {
+        var indexCandidate = index;
+
+        final int Max = 10;
+        for (var i = 0; i < Max; i++) {
+            var candidate = get(indexCandidate);
+            if (candidate != null) {
+                return candidate;
+            }
+
+            var offset = UnsignedInteger.valueOf(100);
+            indexCandidate = searchEarlier ? indexCandidate.minus(offset) : indexCandidate.plus(offset);
+            LogManager.getLogger().trace(String.format("Ledger index %s not found, looking for %s instead", indexCandidate, indexCandidate));
+        }
+
+        return null;
+    }
+
+    private LedgerAtTime get(LedgerIndex index) {
         var ledger = cache.find(index);
         if (ledger != null) {
             return ledger;
         }
 
-        var ledgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.of(index)).build());
-        return cache.add(DateTimeConvert.toLocal(ledgerResult.ledger().closeTimeHuman().get()), ledgerResult.ledgerIndexSafe());
+        try {
+            var ledgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.of(index)).build());
+            return cache.add(DateTimeConvert.toLocal(ledgerResult.ledger().closeTimeHuman().get()), ledgerResult.ledgerIndexSafe());
+        } catch (JsonRpcClientErrorException e) {
+            if (!e.getMessage().equalsIgnoreCase("ledgerNotFound")) {
+                LogManager.getLogger().warn(e.getMessage(), e);
+            }
+            return null;
+        }
     }
 
-    private Duration getAverageLedgerDuration(LedgerAtTime ledger) throws JsonRpcClientErrorException {
-        final UnsignedInteger referenceInterval = UnsignedInteger.valueOf(1000);
+    private Duration getAverageLedgerDuration(LedgerAtTime ledger) {
+        return getAverageLedgerDuration(ledger, UnsignedInteger.valueOf(1000));
+    }
+
+    private Duration getAverageLedgerDuration(LedgerAtTime ledger, UnsignedInteger referenceInterval) {
         var referenceLedgerIndex = ledger.getLedgerIndex().minus(referenceInterval);
         var referenceEarlier = get(referenceLedgerIndex);
+        if (referenceEarlier == null) {
+            var changedReferenceInterval = referenceInterval.minus(UnsignedInteger.valueOf(100));
+            LogManager.getLogger().trace(String.format("Ledger index %s not found, changing reference interval from %s to %s.", referenceEarlier, referenceInterval, changedReferenceInterval));
+            return getAverageLedgerDuration(ledger, changedReferenceInterval);
+        }
 
         var durationSeconds = ChronoUnit.SECONDS.between(ledger.getPointInTime(), referenceEarlier.getPointInTime());
         var avgDurationPerLedger = durationSeconds / (double) referenceInterval.longValue();
