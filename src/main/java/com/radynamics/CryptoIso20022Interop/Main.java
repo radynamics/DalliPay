@@ -102,7 +102,7 @@ public class Main {
             frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frm.setReader(r);
             frm.setInput(inputFileName);
-            frm.setSize(1024, 768);
+            frm.setSize(1280, 768);
             frm.setLocationByPlatform(true);
             frm.setVisible(true);
         });
@@ -117,7 +117,7 @@ public class Main {
             frm.setTargetFileName(outputFileName);
             frm.setPeriod(period);
             frm.load();
-            frm.setSize(1024, 768);
+            frm.setSize(1280, 768);
             frm.setLocationByPlatform(true);
             frm.setVisible(true);
         });
