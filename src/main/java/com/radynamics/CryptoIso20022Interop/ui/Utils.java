@@ -51,4 +51,10 @@ public final class Utils {
     public static String removeEndingLineSeparator(String text) {
         return text != null && text.endsWith("\n") ? text.substring(0, text.lastIndexOf("\n")) : text;
     }
+
+    public static JLabel formatSecondaryInfo(JLabel lbl) {
+        lbl.putClientProperty("FlatLaf.styleClass", "small");
+        lbl.setForeground(Consts.ColorSmallInfo);
+        return lbl;
+    }
 }

@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
@@ -82,8 +83,8 @@ public class PaymentTableModel extends AbstractTableModel {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
             Object actorAddressOrAccount = getActorAddressOrAccount(t);
-            Object senderLedger = t.getSenderWallet() == null ? "" : t.getSenderWallet().getPublicKey();
-            Object receiverLedger = t.getReceiverWallet() == null ? "" : t.getReceiverWallet().getPublicKey();
+            var senderLedger = new WalletCellValue(t.getSenderWallet());
+            var receiverLedger = new WalletCellValue(t.getReceiverWallet());
             var amount = actor == Actor.Sender ? t.getAmount() : null;
             list.add(new Object[]{t, new ValidationResult[0], true, null, senderLedger, actorAddressOrAccount, receiverLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
@@ -91,6 +92,7 @@ public class PaymentTableModel extends AbstractTableModel {
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
 
+        loadWalletInfoAsync(data);
         if (actor == Actor.Receiver) {
             Arrays.stream(exchangeRateLoader.loadAsync(data)).forEach(future -> {
                 future.thenAccept(t -> {
@@ -111,6 +113,20 @@ public class PaymentTableModel extends AbstractTableModel {
             actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
         }
         return actorAddressOrAccount;
+    }
+
+    private void loadWalletInfoAsync(Payment[] payments) {
+        var l = new AsyncWalletInfoLoader();
+        Arrays.stream(l.load(payments)).forEach(future -> {
+            future.thenAccept(result -> {
+                var rowIndex = getRowIndex(result.getPayment());
+
+                var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
+                setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
+                var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
+                setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
+            });
+        });
     }
 
     private void validateAsync(Payment[] payments) {

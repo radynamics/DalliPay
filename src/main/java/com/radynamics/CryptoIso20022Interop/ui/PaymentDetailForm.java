@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
@@ -20,6 +21,7 @@ public class PaymentDetailForm extends JDialog {
     private Payment payment;
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
+    private final WalletInfoAggregator walletInfoAggregator;
 
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -35,6 +37,7 @@ public class PaymentDetailForm extends JDialog {
         this.payment = payment;
         this.validator = validator;
         this.exchangeRateProvider = exchangeRateProvider;
+        this.walletInfoAggregator = new WalletInfoAggregator(payment.getLedger().getInfoProvider());
 
         setupUI();
     }
@@ -103,7 +106,7 @@ public class PaymentDetailForm extends JDialog {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
                 lblAmountText = new JLabel();
-                lblLedgerAmount = formatSecondLineText(new JLabel());
+                lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
                 {
@@ -130,7 +133,7 @@ public class PaymentDetailForm extends JDialog {
                         secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, payment.getLedgerCcy()));
                     }
 
-                    var wi = getMostImportantWalletInfo(payment.getSenderWallet());
+                    var wi = walletInfoAggregator.getMostImportant(payment.getSenderWallet());
                     if (wi != null) {
                         secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
                     }
@@ -139,7 +142,7 @@ public class PaymentDetailForm extends JDialog {
             }
             {
                 var secondLineText = getWalletText(payment.getReceiverWallet());
-                var wi = getMostImportantWalletInfo(payment.getSenderWallet());
+                var wi = walletInfoAggregator.getMostImportant(payment.getSenderWallet());
                 if (wi != null) {
                     secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
                 }
@@ -305,7 +308,7 @@ public class PaymentDetailForm extends JDialog {
         JLabel secondLine = null;
         if (contentSecondLine != null) {
             secondLine = new JLabel(contentSecondLine);
-            formatSecondLineText(secondLine);
+            Utils.formatSecondaryInfo(secondLine);
         }
         return createRow(row, labelText, firstLine, secondLine, false);
     }
@@ -340,12 +343,6 @@ public class PaymentDetailForm extends JDialog {
 
     private JLabel formatSecondLineLinkLabel(JLabel lbl) {
         lbl.putClientProperty("FlatLaf.styleClass", "small");
-        return lbl;
-    }
-
-    private static JLabel formatSecondLineText(JLabel lbl) {
-        lbl.putClientProperty("FlatLaf.styleClass", "small");
-        lbl.setForeground(Consts.ColorSmallInfo);
         return lbl;
     }
 

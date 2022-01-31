@@ -24,7 +24,11 @@ public class ReceiverLedgerCellEditor extends AbstractCellEditor implements Tabl
         var field = ((WalletField) component);
 
         field.setLedger(obj.getLedger());
-        field.setText((String) value);
+        if (value instanceof WalletCellValue) {
+            field.setText(((WalletCellValue) value).getWallet().getPublicKey());
+        } else {
+            field.setText((String) value);
+        }
         return component;
     }
 
