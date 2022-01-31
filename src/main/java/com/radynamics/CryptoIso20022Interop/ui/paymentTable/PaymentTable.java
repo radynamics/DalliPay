@@ -57,7 +57,7 @@ public class PaymentTable extends JPanel {
         }
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
-        var cellEditor = new ReceiverLedgerCellEditor(objectColumn, lookupProvider, actor == Actor.Sender);
+        var cellEditor = new WalletCellEditor(objectColumn, lookupProvider, actor == Actor.Sender);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_SENDER_LEDGER)).setCellEditor(cellEditor);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(cellEditor);
 

@@ -9,11 +9,11 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 
-public class ReceiverLedgerCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class WalletCellEditor extends AbstractCellEditor implements TableCellEditor {
     private final WalletField component;
     private final TableColumn objectColumn;
 
-    public ReceiverLedgerCellEditor(TableColumn objectColumn, WalletLookupProvider lookupProvider, boolean editable) {
+    public WalletCellEditor(TableColumn objectColumn, WalletLookupProvider lookupProvider, boolean editable) {
         this.objectColumn = objectColumn;
         this.component = new WalletField(lookupProvider);
         this.component.setEditable(editable);
