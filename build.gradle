@@ -45,15 +45,22 @@ dependencies {
 
 task createProperties() {
     doLast {
-        new File("$buildDir/resources/main/version.properties").withWriter { w ->
-            Properties p = new Properties()
+        File propertiesFile = file('src/main/resources/version.properties')
+        Properties p = new Properties()
+        if (propertiesFile.exists()) {
+            propertiesFile.withWriter { w ->
+                p['version'] = project.version.toString()
+                p.store w, null
+            }
+        } else {
             p['version'] = project.version.toString()
+            Writer w = new FileWriter(propertiesFile, false)
             p.store w, null
         }
 
         // copy needed, otherwise the bean VersionController can't load the file at startup when running complete-app tests.
         copy {
-            from "$buildDir/resources/main/version.properties"
+            from "src/main/resources/version.properties"
             into "bin/main/"
         }
     }
