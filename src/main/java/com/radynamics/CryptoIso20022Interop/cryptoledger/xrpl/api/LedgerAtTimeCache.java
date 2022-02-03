@@ -2,12 +2,14 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class LedgerAtTimeCache {
+    final static Logger log = LogManager.getLogger(LedgerAtTimeCache.class);
     private HashMap<UnsignedInteger, LedgerAtTime> items = new HashMap<>();
 
     public LedgerAtTime add(LocalDateTime pointInTime, LedgerIndex index) {
@@ -19,7 +21,7 @@ public class LedgerAtTimeCache {
     public LedgerAtTime find(LedgerIndex index) {
         if (items.containsKey(index.unsignedIntegerValue())) {
             var item = items.get(index.unsignedIntegerValue());
-            LogManager.getLogger().trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
+            log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
             return item;
         }
         return null;
@@ -29,7 +31,7 @@ public class LedgerAtTimeCache {
         for (var e : items.entrySet()) {
             var item = e.getValue();
             if (item.getPointInTime() == dt) {
-                LogManager.getLogger().trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
+                log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
                 return item;
             }
         }

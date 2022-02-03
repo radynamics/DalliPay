@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -21,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.time.LocalDateTime;
 
 public class PaymentTable extends JPanel {
+    final static Logger log = LogManager.getLogger(PaymentTable.class);
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
@@ -181,7 +183,7 @@ public class PaymentTable extends JPanel {
     public void refresh(Payment t) {
         var row = getRow(t);
         if (row == -1) {
-            LogManager.getLogger().warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
+            log.warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
             return;
         }
         model.onTransactionChanged(row, t);

@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
@@ -17,6 +18,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
@@ -39,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class JsonRpcApi implements TransactionSource {
+    final static Logger log = LogManager.getLogger(JsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
     private final XrplClient xrplClient;
@@ -112,7 +115,7 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
         } catch (JsonRpcClientErrorException e) {
-            LogManager.getLogger().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return false;
         }
     }
@@ -152,7 +155,7 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             wallet.setLedgerBalance(result.accountData().balance().value());
         } catch (JsonRpcClientErrorException e) {
-            LogManager.getLogger().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -163,7 +166,7 @@ public class JsonRpcApi implements TransactionSource {
             var hex = result.accountData().domain().orElse(null);
             return hex == null ? null : Utils.hexToString(hex);
         } catch (Exception e) {
-            LogManager.getLogger().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }

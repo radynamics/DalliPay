@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Coinbase implements ExchangeRateProvider {
+    final static Logger log = LogManager.getLogger(Coinbase.class);
     private final String[] baseCurrencies = new String[]{"xrp"};
     private final ArrayList<ExchangeRate> exchangeRates = new ArrayList<>();
 
@@ -55,7 +57,7 @@ public class Coinbase implements ExchangeRateProvider {
                     exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, rates.getDouble(ccy), pointInTime));
                 }
             } catch (Exception e) {
-                LogManager.getLogger().error(String.format("Could not load rates for currency %s", ledgerCcy), e);
+                log.error(String.format("Could not load rates for currency %s", ledgerCcy), e);
             }
         }
     }

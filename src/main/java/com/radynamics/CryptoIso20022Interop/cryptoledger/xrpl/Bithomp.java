@@ -5,11 +5,13 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionLookupProvid
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.net.URI;
 
 public class Bithomp implements WalletLookupProvider, TransactionLookupProvider {
+    final static Logger log = LogManager.getLogger(Bithomp.class);
     private final String baseUrl;
 
     public Bithomp(Network network) {
@@ -39,10 +41,10 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
             try {
                 Desktop.getDesktop().browse(new URI(String.format("%s%s", baseUrl, value)));
             } catch (Exception e) {
-                LogManager.getLogger().error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         } else {
-            LogManager.getLogger().warn("No desktop or no browsing supported");
+            log.warn("No desktop or no browsing supported");
         }
     }
 }

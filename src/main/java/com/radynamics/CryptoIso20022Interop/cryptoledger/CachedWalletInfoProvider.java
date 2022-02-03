@@ -1,12 +1,14 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class CachedWalletInfoProvider implements WalletInfoProvider {
+    final static Logger log = LogManager.getLogger(CachedWalletInfoProvider.class);
     private final WalletInfoProvider[] providers;
     private final HashMap<String, WalletInfo[]> cache = new HashMap<>();
 
@@ -18,7 +20,7 @@ public class CachedWalletInfoProvider implements WalletInfoProvider {
     public WalletInfo[] list(Wallet wallet) {
         var key = wallet.getPublicKey();
         if (cache.containsKey(key)) {
-            LogManager.getLogger().trace(String.format("CACHE hit %s", key));
+            log.trace(String.format("CACHE hit %s", key));
             return cache.get(key);
         }
 

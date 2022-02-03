@@ -5,12 +5,15 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
 
 public class Config {
+    final static Logger log = LogManager.getLogger(Config.class);
+
     private NetworkInfo live;
     private NetworkInfo test;
 
@@ -37,7 +40,7 @@ public class Config {
             var bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
             json = new JSONObject(new JSONTokener(bufferedReader));
         } catch (FileNotFoundException e) {
-            LogManager.getLogger().error(String.format("Reading config file %s failed. Taking default values instead.", path), e);
+            log.error(String.format("Reading config file %s failed. Taking default values instead.", path), e);
             return fallback;
         }
 

@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.genera
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.pain00100103.generated.PartyIdentification32;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 public class Pain001Reader {
+    final static Logger log = LogManager.getLogger(Pain001Reader.class);
     private final Ledger ledger;
 
     public Pain001Reader(Ledger ledger) {
@@ -86,7 +88,7 @@ public class Pain001Reader {
             }
         }
 
-        LogManager.getLogger().trace(String.format("%s payments read from pain001", list.size()));
+        log.trace(String.format("%s payments read from pain001", list.size()));
         return list.toArray(new Payment[0]);
     }
 

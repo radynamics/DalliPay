@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.util.Scanner;
 import java.util.TimeZone;
 
 public class Bitstamp implements ExchangeRateProvider {
+    final static Logger log = LogManager.getLogger(Bitstamp.class);
     private static String[] currencyPairs = new String[]{"xrpusd", "xrpeur", "xrpgbp"};
     private ArrayList<ExchangeRate> exchangeRates = new ArrayList<>();
 
@@ -51,7 +54,7 @@ public class Bitstamp implements ExchangeRateProvider {
                 var pointInTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(json.getLong("timestamp")), TimeZone.getDefault().toZoneId());
                 exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, json.getDouble("last"), pointInTime));
             } catch (Exception e) {
-                LogManager.getLogger().error(String.format("Could not load rates for currencyPair %s", currencyPair), e);
+                log.error(String.format("Could not load rates for currencyPair %s", currencyPair), e);
             }
         }
     }

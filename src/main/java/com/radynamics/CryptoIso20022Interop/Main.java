@@ -12,6 +12,7 @@ import com.radynamics.CryptoIso20022Interop.ui.SendForm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.FileInputStream;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Main {
+    final static Logger log = LogManager.getLogger(Main.class);
     private static TransformInstruction transformInstruction;
 
     private static final String DATETIME_PATTERN = "yyyyMMddHHmmss";
@@ -66,7 +68,7 @@ public class Main {
                     throw new RuntimeException(String.format("unknown action %s", action));
             }
         } catch (Exception e) {
-            LogManager.getLogger().error(String.format("Error during %s", action), e);
+            log.error(String.format("Error during %s", action), e);
         }
     }
 

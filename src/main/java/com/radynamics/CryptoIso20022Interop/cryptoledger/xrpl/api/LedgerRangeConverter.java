@@ -17,13 +17,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class LedgerRangeConverter {
-    private final Logger logger;
+    final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
     private XrplClient xrplClient;
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
 
     public LedgerRangeConverter(XrplClient xrplClient) {
         this.xrplClient = xrplClient;
-        this.logger = LogManager.getLogger();
     }
 
     public LedgerIndexRange convert(DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {
@@ -36,19 +35,19 @@ public class LedgerRangeConverter {
         if (ledgerAtEnd == null) {
             throw new LedgerException(String.format("Could not find ledger at %s", period.getEnd()));
         }
-        logger.trace(String.format("RESULT: %s - %s", ledgerAtStart.getPointInTime(), ledgerAtEnd.getPointInTime()));
+        log.trace(String.format("RESULT: %s - %s", ledgerAtStart.getPointInTime(), ledgerAtEnd.getPointInTime()));
         return LedgerIndexRange.of(ledgerAtStart.getLedgerIndex(), ledgerAtEnd.getLedgerIndex());
     }
 
     private LedgerAtTime findLedger(LocalDateTime dt) throws JsonRpcClientErrorException {
-        logger.trace(String.format("Find ledger at %s", dt));
+        log.trace(String.format("Find ledger at %s", dt));
         var latestLedger = cache.find(dt);
         if (latestLedger == null) {
             var latestLedgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.CLOSED).build());
             latestLedger = cache.add(DateTimeConvert.toLocal(latestLedgerResult.ledger().closeTimeHuman().get()), latestLedgerResult.ledgerIndexSafe());
         }
         if (dt.isAfter(latestLedger.getPointInTime())) {
-            logger.trace(String.format("%s is after last ledger -> take last ledger at %s", dt, latestLedger.getPointInTime()));
+            log.trace(String.format("%s is after last ledger -> take last ledger at %s", dt, latestLedger.getPointInTime()));
             return latestLedger;
         }
 
@@ -72,12 +71,12 @@ public class LedgerRangeConverter {
 
             var tmp = get(estimatedFromLedgerIndex, !isTooEarly);
             if (tmp == null) {
-                LogManager.getLogger().warn(String.format("Failed to get ledger index near %s.", estimatedFromLedgerIndex));
+                log.warn(String.format("Failed to get ledger index near %s.", estimatedFromLedgerIndex));
                 return null;
             }
             bestMatch = tmp;
 
-            logger.trace(String.format("Iteration %s: estOffset %s -> %s", iteration, estimatedOffset, bestMatch.getPointInTime()));
+            log.trace(String.format("Iteration %s: estOffset %s -> %s", iteration, estimatedOffset, bestMatch.getPointInTime()));
             iteration++;
         }
 
@@ -96,7 +95,7 @@ public class LedgerRangeConverter {
 
             var offset = UnsignedInteger.valueOf(100);
             indexCandidate = searchEarlier ? indexCandidate.minus(offset) : indexCandidate.plus(offset);
-            LogManager.getLogger().trace(String.format("Ledger index %s not found, looking for %s instead", indexCandidate, indexCandidate));
+            log.trace(String.format("Ledger index %s not found, looking for %s instead", indexCandidate, indexCandidate));
         }
 
         return null;
@@ -113,7 +112,7 @@ public class LedgerRangeConverter {
             return cache.add(DateTimeConvert.toLocal(ledgerResult.ledger().closeTimeHuman().get()), ledgerResult.ledgerIndexSafe());
         } catch (JsonRpcClientErrorException e) {
             if (!e.getMessage().equalsIgnoreCase("ledgerNotFound")) {
-                LogManager.getLogger().warn(e.getMessage(), e);
+                log.warn(e.getMessage(), e);
             }
             return null;
         }
@@ -128,7 +127,7 @@ public class LedgerRangeConverter {
         var referenceEarlier = get(referenceLedgerIndex);
         if (referenceEarlier == null) {
             var changedReferenceInterval = referenceInterval.minus(UnsignedInteger.valueOf(100));
-            LogManager.getLogger().trace(String.format("Ledger index %s not found, changing reference interval from %s to %s.", referenceEarlier, referenceInterval, changedReferenceInterval));
+            log.trace(String.format("Ledger index %s not found, changing reference interval from %s to %s.", referenceEarlier, referenceInterval, changedReferenceInterval));
             return getAverageLedgerDuration(ledger, changedReferenceInterval);
         }
 

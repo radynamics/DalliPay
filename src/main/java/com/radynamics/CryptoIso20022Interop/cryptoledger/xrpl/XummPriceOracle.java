@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 public class XummPriceOracle implements ExchangeRateProvider {
+    final static Logger log = LogManager.getLogger(XummPriceOracle.class);
     private final Ledger ledger;
 
     public static final String ID = "xummpriceoracle";
@@ -60,7 +62,7 @@ public class XummPriceOracle implements ExchangeRateProvider {
         try {
             transactions = ledger.listTransactions(new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx"), period);
         } catch (Exception e) {
-            LogManager.getLogger().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         if (transactions.length == 0) {

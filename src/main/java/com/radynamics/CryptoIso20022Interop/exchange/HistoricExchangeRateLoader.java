@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.exchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class HistoricExchangeRateLoader {
+    final static Logger log = LogManager.getLogger(HistoricExchangeRateLoader.class);
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
 
@@ -36,7 +38,7 @@ public class HistoricExchangeRateLoader {
             var source = transformInstruction.getHistoricExchangeRateSource();
             var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
             if (rate == null) {
-                LogManager.getLogger().info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
+                log.info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
                 t.setAmountUnknown();
                 completableFuture.complete(t);
                 return;
