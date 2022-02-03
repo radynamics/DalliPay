@@ -14,7 +14,7 @@ public class VersionController {
     private final String version;
 
     public VersionController() {
-        var is = getClass().getClassLoader().getResourceAsStream("classpath:/version.properties");
+        var is = getClass().getClassLoader().getResourceAsStream("version.properties");
         if (is == null) {
             // When running unit tests, no jar is built, so we load a copy of the file that we saved during build.gradle.
             // Possibly this also is the case during debugging, therefore we save in bin/main instead of bin/test.
