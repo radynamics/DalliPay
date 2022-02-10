@@ -1,4 +1,4 @@
-package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
+package com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -6,7 +6,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.*;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
@@ -16,14 +17,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Camt054Writer implements Camt054Creator {
+public class Camt05400102Writer implements Camt054Creator {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
     private final String productVersion;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
 
-    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
+    public Camt05400102Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
         this.productVersion = productVersion;
@@ -35,8 +36,8 @@ public class Camt054Writer implements Camt054Creator {
     public Object createDocument(Payment[] transactions) throws Exception {
         var d = new Document();
 
-        d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV04());
-        d.getBkToCstmrDbtCdtNtfctn().setGrpHdr(new GroupHeader58());
+        d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV02());
+        d.getBkToCstmrDbtCdtNtfctn().setGrpHdr(new GroupHeader42());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgId(idGenerator.createMsgId());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setCreDtTm(Utils.toXmlDateTime(creationDate));
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setAddtlInf(String.format("CryptoIso20022Interop/%s", productVersion));
@@ -48,7 +49,7 @@ public class Camt054Writer implements Camt054Creator {
             var receiver = t.getReceiverWallet();
             var stmt = getNtfctnOrNull(d, receiver);
             if (stmt == null) {
-                stmt = new AccountNotification7();
+                stmt = new AccountNotification2();
                 d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
                 stmt.setId(idGenerator.createStmId());
                 stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
@@ -62,7 +63,7 @@ public class Camt054Writer implements Camt054Creator {
         return d;
     }
 
-    private AccountNotification7 getNtfctnOrNull(Document d, Wallet receiver) {
+    private AccountNotification2 getNtfctnOrNull(Document d, Wallet receiver) {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
             if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver))) {
                 return ntfctn;
@@ -71,8 +72,8 @@ public class Camt054Writer implements Camt054Creator {
         return null;
     }
 
-    private CashAccount25 createAcct(Wallet receiver) {
-        var acct = new CashAccount25();
+    private CashAccount20 createAcct(Wallet receiver) {
+        var acct = new CashAccount20();
         acct.setId(new AccountIdentification4Choice());
         var iban = transformInstruction.getIbanOrNull(receiver);
         if (iban == null) {
@@ -86,8 +87,8 @@ public class Camt054Writer implements Camt054Creator {
         return acct;
     }
 
-    private ReportEntry4 createNtry(Payment trx) throws DatatypeConfigurationException {
-        var ntry = new ReportEntry4();
+    private ReportEntry2 createNtry(Payment trx) throws DatatypeConfigurationException {
+        var ntry = new ReportEntry2();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
@@ -107,14 +108,14 @@ public class Camt054Writer implements Camt054Creator {
         ntry.setBkTxCd(new BankTransactionCodeStructure4());
         ntry.getBkTxCd().setDomn(createDomn("VCOM"));
 
-        var dtls = new EntryDetails3();
+        var dtls = new EntryDetails1();
         ntry.getNtryDtls().add(dtls);
         dtls.setBtch(new BatchInformation2());
         dtls.getBtch().setNbOfTxs(String.valueOf(1));
 
-        var txDtls = new EntryTransaction4();
+        var txDtls = new EntryTransaction2();
         dtls.getTxDtls().add(txDtls);
-        txDtls.setRefs(new TransactionReferences3());
+        txDtls.setRefs(new TransactionReferences2());
         // Split due max allowed length of 35 per node (Max35Text)
         final int MAX_LEN = 35;
         var idPart0 = trx.getId().substring(0, MAX_LEN);
@@ -122,16 +123,13 @@ public class Camt054Writer implements Camt054Creator {
         txDtls.getRefs().setEndToEndId(idPart0);
         txDtls.getRefs().setMsgId(idPart1);
 
-        txDtls.setAmt(new ActiveOrHistoricCurrencyAndAmount());
-        txDtls.getAmt().setValue(amtValue);
-        txDtls.getAmt().setCcy(trx.getFiatCcy());
-        txDtls.setCdtDbtInd(CreditDebitCode.CRDT);
+        txDtls.setAmtDtls(createAmtDtls(amtValue, trx.getFiatCcy()));
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn("AUTT"));
 
-        txDtls.setRltdAgts(new TransactionAgents3());
-        txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification5());
-        txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification8());
+        txDtls.setRltdAgts(new TransactionAgents2());
+        txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification4());
+        txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification7());
         txDtls.getRltdAgts().getDbtrAgt().getFinInstnId().setNm(ledger.getId());
 
         var structuredReferences = trx.getStructuredReferences();
@@ -144,7 +142,7 @@ public class Camt054Writer implements Camt054Creator {
 
         var hasStrd = hasStructuredReferences || trx.getInvoiceId() != null;
         if (hasStrd || trx.getMessages().length > 0) {
-            txDtls.setRmtInf(new RemittanceInformation7());
+            txDtls.setRmtInf(new RemittanceInformation5());
         }
 
         if (hasStrd) {
@@ -165,6 +163,18 @@ public class Camt054Writer implements Camt054Creator {
         return ntry;
     }
 
+    private AmountAndCurrencyExchange3 createAmtDtls(BigDecimal amt, String ccy) {
+        var amtCcy = new AmountAndCurrencyExchangeDetails3();
+        amtCcy.setAmt(new ActiveOrHistoricCurrencyAndAmount());
+        amtCcy.getAmt().setValue(amt);
+        amtCcy.getAmt().setCcy(ccy);
+
+        var o = new AmountAndCurrencyExchange3();
+        o.setInstdAmt(amtCcy);
+        o.setTxAmt(amtCcy);
+        return o;
+    }
+
     private DateAndDateTimeChoice createDateAndDateTimeChoice(XMLGregorianCalendar dt, DateFormat format) {
         var value = (XMLGregorianCalendar) dt.clone();
         var o = new DateAndDateTimeChoice();
@@ -183,11 +193,11 @@ public class Camt054Writer implements Camt054Creator {
         return o;
     }
 
-    private StructuredRemittanceInformation9 createStrd(StructuredReference[] structuredReferences, String invoiceNo) {
-        StructuredRemittanceInformation9 strd = null;
+    private StructuredRemittanceInformation7 createStrd(StructuredReference[] structuredReferences, String invoiceNo) {
+        StructuredRemittanceInformation7 strd = null;
 
         if (invoiceNo != null && invoiceNo.length() > 0) {
-            strd = new StructuredRemittanceInformation9();
+            strd = new StructuredRemittanceInformation7();
             var x = new ReferredDocumentInformation3();
             strd.getRfrdDocInf().add(x);
             x.setTp(new ReferredDocumentType2());
@@ -198,7 +208,7 @@ public class Camt054Writer implements Camt054Creator {
 
         if (structuredReferences != null && structuredReferences.length > 0) {
             if (strd == null) {
-                strd = new StructuredRemittanceInformation9();
+                strd = new StructuredRemittanceInformation7();
             }
             strd.setCdtrRefInf(new CreditorReferenceInformation2());
             for (var ref : structuredReferences) {

@@ -1,24 +1,28 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.Document;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-public final class CamtConverter {
-    public static ByteArrayOutputStream toXml(Document document) throws JAXBException {
-        var ctx = JAXBContext.newInstance(Document.class);
+public final class CamtConverter<T> {
+    private Class<T> documentClass;
+
+    public CamtConverter(Class<T> documentClass) {
+        this.documentClass = documentClass;
+    }
+
+    public <T> ByteArrayOutputStream toXml(T document) throws JAXBException {
+        var ctx = JAXBContext.newInstance(documentClass);
         var m = ctx.createMarshaller();
         var stream = new ByteArrayOutputStream();
         m.marshal(document, stream);
         return stream;
     }
 
-    public static Document toDocument(InputStream input) throws JAXBException {
-        var ctx = JAXBContext.newInstance(Document.class);
+    public <T> T toDocument(InputStream input) throws JAXBException {
+        var ctx = JAXBContext.newInstance(documentClass);
         var m = ctx.createUnmarshaller();
-        return (Document) m.unmarshal(input);
+        return (T) m.unmarshal(input);
     }
 }
