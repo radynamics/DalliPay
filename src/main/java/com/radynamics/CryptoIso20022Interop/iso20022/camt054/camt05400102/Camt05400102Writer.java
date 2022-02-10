@@ -17,7 +17,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Camt05400102Writer implements Camt054Creator {
+public class Camt05400102Writer implements Camt054Writer {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
     private final String productVersion;

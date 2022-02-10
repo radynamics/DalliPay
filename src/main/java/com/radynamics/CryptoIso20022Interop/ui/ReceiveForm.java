@@ -9,7 +9,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt05400104Writer;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.Camt05400104Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102.generated.Document;

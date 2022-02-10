@@ -6,7 +6,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.genera
 import org.apache.commons.lang3.StringUtils;
 
 public class CashAccountCompare {
-    static boolean isSame(CashAccount25 first, CashAccount25 second) {
+    public static boolean isSame(CashAccount25 first, CashAccount25 second) {
         return isSame(toCashAccount(first), toCashAccount(second));
     }
 

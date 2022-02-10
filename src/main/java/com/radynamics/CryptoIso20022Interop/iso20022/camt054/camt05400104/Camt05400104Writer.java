@@ -1,4 +1,4 @@
-package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
+package com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -16,7 +17,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Camt05400104Writer implements Camt054Creator {
+public class Camt05400104Writer implements Camt054Writer {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
     private final String productVersion;
