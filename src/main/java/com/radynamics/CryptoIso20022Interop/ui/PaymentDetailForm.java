@@ -133,19 +133,13 @@ public class PaymentDetailForm extends JDialog {
                         secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, payment.getLedgerCcy()));
                     }
 
-                    var wi = walletInfoAggregator.getMostImportant(payment.getSenderWallet());
-                    if (wi != null) {
-                        secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
-                    }
+                    secondLineText = appendMostImportantWalletInfo(secondLineText, payment.getSenderWallet());
                 }
                 createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), secondLineText);
             }
             {
                 var secondLineText = getWalletText(payment.getReceiverWallet());
-                var wi = walletInfoAggregator.getMostImportant(payment.getSenderWallet());
-                if (wi != null) {
-                    secondLineText = String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
-                }
+                secondLineText = appendMostImportantWalletInfo(secondLineText, payment.getReceiverWallet());
                 createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), secondLineText);
             }
             {
@@ -203,6 +197,14 @@ public class PaymentDetailForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private String appendMostImportantWalletInfo(String secondLineText, Wallet wallet) {
+        if (wallet == null) {
+            return secondLineText;
+        }
+        var wi = walletInfoAggregator.getMostImportant(wallet);
+        return wi == null ? secondLineText : String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
     }
 
     private WalletInfo getMostImportantWalletInfo(Wallet wallet) {
