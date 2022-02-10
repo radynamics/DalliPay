@@ -20,6 +20,10 @@ public class Config {
     private Config() {
     }
 
+    public static Config fallback(Ledger ledger) {
+        return load(ledger, null);
+    }
+
     public static Config load(Ledger ledger, String path) {
         var c = new Config();
         c.live = load(ledger, path, Network.Live);
@@ -30,8 +34,7 @@ public class Config {
     private static NetworkInfo load(Ledger ledger, String path, Network type) {
         var fallback = new NetworkInfo(type, ledger.getFallbackUrl(type));
 
-        var file = new File(path);
-        if (!file.exists()) {
+        if (path == null || !new File(path).exists()) {
             return fallback;
         }
 

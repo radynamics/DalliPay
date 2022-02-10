@@ -1,8 +1,13 @@
 package com.radynamics.CryptoIso20022Interop;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XummPriceOracle;
+import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
@@ -12,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,7 +53,11 @@ public class Main {
             Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey, walletSecret);
 
             var r = new JsonReader();
-            transformInstruction = r.read(new FileInputStream(trainsformInstructionFileName), configFilePath, NetworkConverter.from(networkId));
+            var f = new File(trainsformInstructionFileName);
+
+            transformInstruction = f.exists()
+                    ? r.read(new FileInputStream(trainsformInstructionFileName), configFilePath, NetworkConverter.from(networkId))
+                    : createDefaultTransformInstruction();
 
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLightLaf.setup();
@@ -59,17 +69,19 @@ public class Main {
                 frm.setPeriod(period);
                 frm.setReceivingWallet(wallet);
 
-                switch (action) {
-                    case "pain001ToCrypto":
-                        transformInstruction.setStaticSender(wallet.getPublicKey(), wallet.getSecret());
-                        frm.setInputFileName(inputFileName);
-                        break;
-                    case "cryptoToCamt054":
-                        // TODO: add option to keep ledger's native currency or convert into specified currency.
-                        frm.setOutputFileName(outputFileName);
-                        break;
-                    default:
-                        throw new RuntimeException(String.format("unknown action %s", action));
+                if (action != null) {
+                    switch (action) {
+                        case "pain001ToCrypto":
+                            transformInstruction.setStaticSender(wallet.getPublicKey(), wallet.getSecret());
+                            frm.setInputFileName(inputFileName);
+                            break;
+                        case "cryptoToCamt054":
+                            // TODO: add option to keep ledger's native currency or convert into specified currency.
+                            frm.setOutputFileName(outputFileName);
+                            break;
+                        default:
+                            throw new RuntimeException(String.format("unknown action %s", action));
+                    }
                 }
 
                 frm.setVisible(true);
@@ -77,6 +89,19 @@ public class Main {
         } catch (Exception e) {
             log.error(String.format("Error during %s", action), e);
         }
+    }
+
+    private static TransformInstruction createDefaultTransformInstruction() {
+        var ledger = LedgerFactory.create(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger.ID);
+
+        var config = Config.fallback(ledger);
+        ledger.setNetwork(config.getNetwork(Network.Live));
+
+        var t = new TransformInstruction(ledger);
+        t.setTargetCcy("USD");
+        t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
+        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XummPriceOracle.ID, config.getNetwork(Network.Live)));
+        return t;
     }
 
     private static void initLogger() {
