@@ -25,7 +25,8 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
 
         field.setLedger(obj.getLedger());
         if (value instanceof WalletCellValue) {
-            field.setText(((WalletCellValue) value).getWallet().getPublicKey());
+            var wallet = ((WalletCellValue) value).getWallet();
+            field.setText(wallet == null ? "" : wallet.getPublicKey());
         } else {
             field.setText((String) value);
         }
