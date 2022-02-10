@@ -14,4 +14,15 @@ public class WriterHelper {
         }
         return items;
     }
+
+    public static StringBuilder getUstrd(Payment p) {
+        var sb = new StringBuilder();
+        for (String s : p.getMessages()) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(s);
+        }
+        return sb;
+    }
 }

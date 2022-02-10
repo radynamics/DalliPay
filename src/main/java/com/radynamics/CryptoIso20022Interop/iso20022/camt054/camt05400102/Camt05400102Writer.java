@@ -142,13 +142,7 @@ public class Camt05400102Writer implements Camt054Writer {
             txDtls.getRmtInf().getStrd().add(createStrd(structuredReferences, trx.getInvoiceId()));
         }
 
-        var sb = new StringBuilder();
-        for (String s : trx.getMessages()) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append(s);
-        }
+        var sb = WriterHelper.getUstrd(trx);
         if (sb.length() > 0) {
             txDtls.getRmtInf().getUstrd().add(sb.toString());
         }
