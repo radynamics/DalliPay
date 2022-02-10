@@ -218,16 +218,8 @@ public class Camt05400102Writer implements Camt054Writer {
         return o;
     }
 
-    public IdGenerator getIdGenerator() {
-        return idGenerator;
-    }
-
     public void setIdGenerator(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
     }
 
     public void setCreationDate(LocalDateTime creationDate) {
