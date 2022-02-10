@@ -35,7 +35,7 @@ public class Camt05400104WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = camtConverter.toXml(w.createDocument(payments));
-        var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/testCreate2Payments.xml")));
+        var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/camt.054.001.04_testCreate2Payments.xml")));
 
         assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromByteArray(expected.toByteArray())));
     }
@@ -104,7 +104,7 @@ public class Camt05400104WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = camtConverter.toXml(w.createDocument(payments));
-        var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/createCreditorReferenceIfMissing.xml")));
+        var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/camt.054.001.04_createCreditorReferenceIfMissing.xml")));
 
         assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromByteArray(expected.toByteArray())));
     }
