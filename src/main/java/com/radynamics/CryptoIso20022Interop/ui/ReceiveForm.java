@@ -17,14 +17,12 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class ReceiveForm extends JFrame {
+public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
     private final VersionController versionController = new VersionController();
@@ -36,6 +34,7 @@ public class ReceiveForm extends JFrame {
     private String targetFileName;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        super(new GridLayout(1, 0));
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
@@ -45,24 +44,12 @@ public class ReceiveForm extends JFrame {
     }
 
     private void setupUI() {
-        setTitle(String.format("CryptoIso20022Interop [%s]", versionController.getVersion()));
-
-        try {
-            setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
-        } catch (IOException e) {
-            ExceptionDialog.show(this, e);
-        }
-
         var pnlMain = new JPanel();
-        pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(pnlMain);
 
         pnlMain.setLayout(new BoxLayout(pnlMain, BoxLayout.Y_AXIS));
 
-        var innerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-        JPanel panel0 = new JPanel();
-        panel0.setBorder(innerBorder);
-        panel0.setLayout(new BoxLayout(panel0, BoxLayout.X_AXIS));
+        var innerBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
         JPanel panel1 = new JPanel();
         panel1.setBorder(innerBorder);
         var panel1Layout = new SpringLayout();
@@ -75,28 +62,16 @@ public class ReceiveForm extends JFrame {
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlMain.add(panel0);
         pnlMain.add(panel1);
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel0.setPreferredSize(new Dimension(500, 50));
         panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setPreferredSize(new Dimension(500, getNorthPad(3) + 10));
+        panel1.setPreferredSize(new Dimension(500, getNorthPad(3) + 20));
         panel2.setPreferredSize(new Dimension(500, 500));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(500, 45));
-
-        {
-            var lbl = new JLabel();
-            lbl.setText("Receive Payments");
-            lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
-            lbl.setOpaque(true);
-            panel0.add(lbl);
-        }
 
         {
             final int paddingWest = 120;
@@ -244,5 +219,10 @@ public class ReceiveForm extends JFrame {
     public void setPeriod(DateTimeRange period) {
         dtPickerStart.setDateTimePermissive(period.getStart());
         dtPickerEnd.setDateTimePermissive(period.getEnd());
+    }
+
+    @Override
+    public String getTitle() {
+        return "Receive Payments";
     }
 }

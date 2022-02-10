@@ -3,12 +3,9 @@ package com.radynamics.CryptoIso20022Interop;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
-import com.radynamics.CryptoIso20022Interop.ui.ReceiveForm;
-import com.radynamics.CryptoIso20022Interop.ui.SendForm;
+import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -41,32 +37,43 @@ public class Main {
         var configFilePath = getParam(args, "-c", "config.json");
 
         try {
+            var now = LocalDateTime.now();
+            var start = now.minusDays(7);
+            var from = getParam(args, "-from", start.format(DateFormatter)); // timerange in UTC
+            var until = getParam(args, "-until", now.format(DateFormatter)); // timerange in UTC
+            // TODO: validate format
+            var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
+
+            Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey, walletSecret);
+
             var r = new JsonReader();
             transformInstruction = r.read(new FileInputStream(trainsformInstructionFileName), configFilePath, NetworkConverter.from(networkId));
 
-            switch (action) {
-                case "pain001ToCrypto":
-                    transformInstruction.setStaticSender(walletPublicKey, walletSecret);
-                    processPain001(new FileInputStream(inputFileName), inputFileName);
-                    break;
-                case "cryptoToCamt054":
-                    var now = LocalDateTime.now();
-                    var start = now.minusDays(7);
-                    var from = getParam(args, "-from", start.format(DateFormatter)); // timerange in UTC
-                    var until = getParam(args, "-until", now.format(DateFormatter)); // timerange in UTC
-                    // TODO: validate format
-                    var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                FlatLightLaf.setup();
 
-                    // TODO: add option to keep ledger's native currency or convert into specified currency.
-                    Wallet wallet = null;
-                    if (!StringUtils.isAllEmpty(walletPublicKey)) {
-                        wallet = new Wallet(walletPublicKey);
-                    }
-                    createCamt054(outputFileName, wallet, period);
-                    break;
-                default:
-                    throw new RuntimeException(String.format("unknown action %s", action));
-            }
+                var frm = new MainForm(transformInstruction);
+                frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frm.setSize(1280, 768);
+                frm.setLocationByPlatform(true);
+                frm.setPeriod(period);
+                frm.setReceivingWallet(wallet);
+
+                switch (action) {
+                    case "pain001ToCrypto":
+                        transformInstruction.setStaticSender(wallet.getPublicKey(), wallet.getSecret());
+                        frm.setInputFileName(inputFileName);
+                        break;
+                    case "cryptoToCamt054":
+                        // TODO: add option to keep ledger's native currency or convert into specified currency.
+                        frm.setOutputFileName(outputFileName);
+                        break;
+                    default:
+                        throw new RuntimeException(String.format("unknown action %s", action));
+                }
+
+                frm.setVisible(true);
+            });
         } catch (Exception e) {
             log.error(String.format("Error during %s", action), e);
         }
@@ -89,39 +96,5 @@ public class Main {
             return defaultValue;
         }
         return args[index + 1];
-    }
-
-    private static void processPain001(InputStream input, String inputFileName) throws Exception {
-        var provider = transformInstruction.getExchangeRateProvider();
-        provider.load();
-
-        var currencyConverter = new CurrencyConverter(provider.latestRates());
-        var r = new Pain001Reader(transformInstruction.getLedger());
-
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup();
-            var frm = new SendForm(transformInstruction, currencyConverter);
-            frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frm.setReader(r);
-            frm.setInput(inputFileName);
-            frm.setSize(1280, 768);
-            frm.setLocationByPlatform(true);
-            frm.setVisible(true);
-        });
-    }
-
-    private static void createCamt054(String outputFileName, Wallet wallet, DateTimeRange period) {
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup();
-            var frm = new ReceiveForm(transformInstruction, new CurrencyConverter());
-            frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frm.setWallet(wallet);
-            frm.setTargetFileName(outputFileName);
-            frm.setPeriod(period);
-            frm.load();
-            frm.setSize(1280, 768);
-            frm.setLocationByPlatform(true);
-            frm.setVisible(true);
-        });
     }
 }

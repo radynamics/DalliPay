@@ -57,4 +57,9 @@ public final class Utils {
         lbl.setForeground(Consts.ColorSmallInfo);
         return lbl;
     }
+
+    public static ImageIcon getScaled(String resourceName, int w, int h) {
+        var icon = new ImageIcon(ClassLoader.getSystemResource(resourceName));
+        return new ImageIcon(icon.getImage().getScaledInstance(w, h, Image.SCALE_DEFAULT));
+    }
 }

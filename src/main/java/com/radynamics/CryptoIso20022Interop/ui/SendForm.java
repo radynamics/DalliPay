@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -16,18 +15,17 @@ import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SendForm extends JFrame {
+public class SendForm extends JPanel implements MainFormPane {
+    private final Window owner;
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
 
@@ -36,9 +34,12 @@ public class SendForm extends JFrame {
     private Pain001Reader reader;
     private Payment[] payments;
 
-    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public SendForm(Window owner, TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        super(new GridLayout(1, 0));
+        if (owner == null) throw new IllegalArgumentException("Parameter 'owner' cannot be null");
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
+        this.owner = owner;
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
 
@@ -46,25 +47,12 @@ public class SendForm extends JFrame {
     }
 
     private void setupUI() {
-        var vc = new VersionController();
-        setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
-
-        try {
-            setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
-        } catch (IOException e) {
-            ExceptionDialog.show(this, e);
-        }
-
         var pnlMain = new JPanel();
-        pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(pnlMain);
 
         pnlMain.setLayout(new BoxLayout(pnlMain, BoxLayout.Y_AXIS));
 
-        var innerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-        JPanel panel0 = new JPanel();
-        panel0.setBorder(innerBorder);
-        panel0.setLayout(new BoxLayout(panel0, BoxLayout.X_AXIS));
+        var innerBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
         JPanel panel1 = new JPanel();
         panel1.setBorder(innerBorder);
         var panel1Layout = new SpringLayout();
@@ -77,14 +65,10 @@ public class SendForm extends JFrame {
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout/*new FlowLayout(FlowLayout.RIGHT)*/);
 
-        pnlMain.add(panel0);
         pnlMain.add(panel1);
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panel0.setPreferredSize(new Dimension(500, 50));
         panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel1.setPreferredSize(new Dimension(500, 70));
@@ -93,27 +77,19 @@ public class SendForm extends JFrame {
         panel3.setPreferredSize(new Dimension(500, 45));
 
         {
-            var lbl = new JLabel();
-            lbl.setText("Send Payments");
-            lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
-            lbl.setOpaque(true);
-            panel0.add(lbl);
-        }
-
-        {
             final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
                 var lbl = new JLabel("Input:");
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 5, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 0, SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new FilePathField(this);
+                txtInput = new FilePathField(owner);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
-                panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 5, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 0, SpringLayout.NORTH, panel1);
                 txtInput.addChangedListener(() -> {
                     try {
                         var t = new TransactionTranslator(transformInstruction, currencyConverter);
@@ -131,18 +107,18 @@ public class SendForm extends JFrame {
             {
                 var lbl = new JLabel("Exchange rates:");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 35, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 30, SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
                 var lbl2 = new JLabel(transformInstruction.getExchangeRateProvider().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 35, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 30, SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
 
-                var lbl3 = Utils.createLinkLabel(this, "edit...");
+                var lbl3 = Utils.createLinkLabel(owner, "edit...");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lbl2);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 35, SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 30, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -266,5 +242,10 @@ public class SendForm extends JFrame {
 
     public void setReader(Pain001Reader reader) {
         this.reader = reader;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Send Payments";
     }
 }
