@@ -184,7 +184,7 @@ public class Camt05400104Writer implements Camt054Writer {
             x.setNb(invoiceNo);
         }
 
-        if (structuredReferences != null && structuredReferences.length > 0) {
+        if (structuredReferences.length > 0) {
             if (strd == null) {
                 strd = new StructuredRemittanceInformation9();
             }
