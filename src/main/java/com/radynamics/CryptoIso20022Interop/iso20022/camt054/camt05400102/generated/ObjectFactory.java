@@ -896,7 +896,6 @@ public class ObjectFactory {
      * @return
      *     the new instance of {@link JAXBElement }{@code <}{@link Document }{@code >}
      */
-    @XmlElementDecl(namespace = "urn:iso:std:iso:20022:tech:xsd:camt.054.001.02", name = "Document")
     public JAXBElement<Document> createDocument(Document value) {
         return new JAXBElement<Document>(_Document_QNAME, Document.class, null, value);
     }
