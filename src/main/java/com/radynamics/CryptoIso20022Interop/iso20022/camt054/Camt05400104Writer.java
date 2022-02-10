@@ -16,14 +16,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Camt054Writer implements Camt054Creator {
+public class Camt05400104Writer implements Camt054Creator {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
     private final String productVersion;
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
 
-    public Camt054Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
+    public Camt05400104Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
         this.productVersion = productVersion;

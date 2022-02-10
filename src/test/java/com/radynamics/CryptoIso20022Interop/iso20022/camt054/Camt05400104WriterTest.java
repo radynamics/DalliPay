@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
-public class Camt054WriterTest {
+public class Camt05400104WriterTest {
     private static final CamtConverter camtConverter = new CamtConverter(Document.class);
     private static final String ProductVersion = "0.1.2-SNAPSHOT";
 
@@ -30,7 +30,7 @@ public class Camt054WriterTest {
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
 
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = camtConverter.toXml(w.createDocument(payments));
@@ -46,7 +46,7 @@ public class Camt054WriterTest {
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = (Document) w.createDocument(payments);
@@ -66,7 +66,7 @@ public class Camt054WriterTest {
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = (Document) w.createDocument(payments);
@@ -99,7 +99,7 @@ public class Camt054WriterTest {
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}));
 
-        var w = new Camt054Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
         var actual = camtConverter.toXml(w.createDocument(payments));

@@ -9,7 +9,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt054Writer;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.Camt05400104Writer;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102.generated.Document;
@@ -173,7 +173,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private void exportSelected() {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var w = new Camt054Writer(transformInstruction.getLedger(), transformInstruction, versionController.getVersion());
+            var w = new Camt05400104Writer(transformInstruction.getLedger(), transformInstruction, versionController.getVersion());
             var camtConverter = new CamtConverter(Document.class);
             var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
