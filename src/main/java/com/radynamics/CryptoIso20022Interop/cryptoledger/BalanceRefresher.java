@@ -21,6 +21,9 @@ public class BalanceRefresher {
             }
 
             p.getLedger().refreshBalance(wallet);
+            if (wallet.getLedgerBalanceSmallestUnit() == null) {
+                continue;
+            }
             refreshed.put(wallet.getPublicKey(), wallet.getLedgerBalanceSmallestUnit());
         }
     }
