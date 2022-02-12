@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
-    private Object[][] data;
+    private Object[][] data = new Object[0][];
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;

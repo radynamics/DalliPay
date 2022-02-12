@@ -32,7 +32,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private PaymentTable table;
     private FilePathField txtInput;
     private Pain001Reader reader;
-    private Payment[] payments;
+    private Payment[] payments = new Payment[0];
 
     public SendForm(Window owner, TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -232,6 +232,7 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void load(Payment[] payments) {
+        if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
         table.load(payments);
     }
