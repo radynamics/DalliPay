@@ -14,6 +14,7 @@ public class FilePathField extends JPanel {
 
     private ArrayList<ChangedListener> listener = new ArrayList<>();
     private Window owner;
+    private boolean validateExists;
 
     public FilePathField(Window owner) {
         this.owner = owner;
@@ -29,6 +30,10 @@ public class FilePathField extends JPanel {
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
+                    if (!validateExists) {
+                        return true;
+                    }
+
                     var text = ((JTextField) input).getText().trim();
                     var file = new File(text);
                     if (file.exists()) {
@@ -114,5 +119,9 @@ public class FilePathField extends JPanel {
 
     public String getText() {
         return txt.getText().trim();
+    }
+
+    public void setValidateExists(boolean validateExists) {
+        this.validateExists = validateExists;
     }
 }

@@ -9,19 +9,22 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.Camt05400104Writer;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExport;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExportFactory;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.PaymentValidator;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102.generated.Document;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
@@ -33,6 +36,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private DateTimePicker dtPickerStart;
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
+    private CamtExport camtExport;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -40,6 +44,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
+        this.camtExport = CamtExportFactory.create(CamtFormat.Camt05400104, this.transformInstruction, versionController);
 
         setupUI();
     }
@@ -172,9 +177,13 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void exportSelected() {
         try {
+            if (!showExportForm()) {
+                return;
+            }
+
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var w = new Camt05400104Writer(transformInstruction.getLedger(), transformInstruction, versionController.getVersion());
-            var camtConverter = new CamtConverter(Document.class);
+            var w = camtExport.getWriter();
+            var camtConverter = camtExport.getConverter();
             var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
@@ -186,6 +195,32 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
+    }
+
+    private boolean showExportForm() {
+        if (StringUtils.isAllEmpty(targetFileName)) {
+            var df = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
+            targetFileName = String.format("%s_%s.xml", LocalDateTime.now().format(df), txtInput.getText());
+        }
+
+        var frm = new ReceiveExportForm();
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(600, 300);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(this);
+        frm.setOutputFile(targetFileName);
+        frm.setVisible(true);
+        if (!frm.isDialogAccepted()) {
+            return false;
+        }
+        if (frm.getOutputFile().length() == 0) {
+            JOptionPane.showMessageDialog(this, "Please enter an export file path to export received payments.");
+            return false;
+        }
+
+        targetFileName = frm.getOutputFile();
+        camtExport = CamtExportFactory.create(frm.getExportFormat(), transformInstruction, versionController);
+        return true;
     }
 
     public void load() {
