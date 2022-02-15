@@ -140,14 +140,18 @@ public class SendForm extends JPanel implements MainFormPane {
             cmd.addActionListener(e -> {
                 var payments = table.selectedPayments();
                 try {
+                    var br = new BalanceRefresher();
+                    br.refreshAllSenderWallets(payments);
+
+                    if (!showConfirmationForm(payments)) {
+                        return;
+                    }
+
                     if (!askForPrivateKeyIfMissing(payments)) {
                         return;
                     }
 
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                    var br = new BalanceRefresher();
-                    br.refreshAllSenderWallets(payments);
 
                     var validator = new PaymentValidator();
                     var results = validator.validate(payments);
@@ -229,6 +233,19 @@ public class SendForm extends JPanel implements MainFormPane {
         }
 
         table.load(payments);
+    }
+
+    private boolean showConfirmationForm(Payment[] payments) {
+        var frm = new SendConfirmationForm(payments);
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(600, 300);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(this);
+        frm.setVisible(true);
+        if (!frm.isDialogAccepted()) {
+            return false;
+        }
+        return true;
     }
 
     private void load(Payment[] payments) {

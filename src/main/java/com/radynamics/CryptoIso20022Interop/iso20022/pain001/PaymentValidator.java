@@ -1,7 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
@@ -49,12 +52,8 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
 
         var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
         for (var w : sendingWallets) {
-            var affectedPayments = filterSendingWallet(w, payments);
-            long sum = 0;
-            for (var p : affectedPayments) {
-                sum += p.getLedgerAmountSmallestUnit();
-            }
-
+            var affectedPayments = PaymentUtils.fromSender(w, payments);
+            var sum = PaymentUtils.sumSmallestLedgerUnit(affectedPayments);
             if (sum > w.getLedgerBalanceSmallestUnit().longValue()) {
                 Ledger l = affectedPayments.get(0).getLedger();
                 var sumNativeText = MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(sum), l.getNativeCcySymbol());
@@ -68,15 +67,5 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         return list.toArray(new ValidationResult[0]);
-    }
-
-    private ArrayList<Payment> filterSendingWallet(Wallet w, Payment[] payments) {
-        var list = new ArrayList<Payment>();
-        for (var p : payments) {
-            if (WalletCompare.isSame(p.getSenderWallet(), w)) {
-                list.add(p);
-            }
-        }
-        return list;
     }
 }
