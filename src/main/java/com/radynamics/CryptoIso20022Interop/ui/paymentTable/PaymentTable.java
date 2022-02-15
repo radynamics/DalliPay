@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class PaymentTable extends JPanel {
     final static Logger log = LogManager.getLogger(PaymentTable.class);
@@ -28,6 +29,7 @@ public class PaymentTable extends JPanel {
     private TransformInstruction transformInstruction;
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
+    private ArrayList<ProgressListener> listener = new ArrayList<>();
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
@@ -41,6 +43,7 @@ public class PaymentTable extends JPanel {
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel(exchangeRateLoader, validator);
         model.setActor(actor);
+        model.addProgressListener(progress -> raiseProgress(progress));
 
         table = new JTable(model);
         table.setFillsViewportHeight(true);
@@ -197,5 +200,15 @@ public class PaymentTable extends JPanel {
             }
         }
         return -1;
+    }
+
+    public void addProgressListener(ProgressListener l) {
+        listener.add(l);
+    }
+
+    private void raiseProgress(Progress progress) {
+        for (var l : listener) {
+            l.onProgress(progress);
+        }
     }
 }

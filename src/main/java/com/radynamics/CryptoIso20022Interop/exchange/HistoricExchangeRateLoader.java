@@ -28,7 +28,7 @@ public class HistoricExchangeRateLoader {
         return list.toArray((CompletableFuture<Payment>[]) Array.newInstance(CompletableFuture.class, list.size()));
     }
 
-    private CompletableFuture<Payment> loadAsync(Payment t) {
+    public CompletableFuture<Payment> loadAsync(Payment t) {
         var completableFuture = new CompletableFuture<Payment>();
 
         Executors.newCachedThreadPool().submit(() -> {

@@ -13,6 +13,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
@@ -21,6 +24,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
+    private ArrayList<ProgressListener> listener = new ArrayList<>();
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -92,18 +96,53 @@ public class PaymentTableModel extends AbstractTableModel {
         this.data = list.toArray(new Object[0][0]);
         fireTableDataChanged();
 
-        loadWalletInfoAsync(data);
+        loadAsync(data);
+    }
+
+    private void loadAsync(Payment[] data) {
+        var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
+        for (var p : data) {
+            var future = loadAsync(p);
+            future.thenAccept((result) -> {
+                queue.remove(future);
+                var total = data.length;
+                var loaded = total - queue.size();
+                raiseProgress(new Progress(loaded, total));
+            });
+            queue.add(future);
+        }
+    }
+
+    private CompletableFuture<Payment> loadAsync(Payment p) {
+        var l = new AsyncWalletInfoLoader();
+        var loadWalletInfo = l.load(p).thenAccept(result -> {
+            var rowIndex = getRowIndex(result.getPayment());
+
+            var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
+            setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
+            var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
+            setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
+        });
+        var loadExchangeRate = new CompletableFuture<Void>();
         if (actor == Actor.Receiver) {
-            Arrays.stream(exchangeRateLoader.loadAsync(data)).forEach(future -> {
-                future.thenAccept(t -> {
-                    setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
-                    setValueAt(t.getFiatCcy(), getRowIndex(t), getColumnIndex(COL_CCY));
-                    validateAsync(new Payment[]{t});
-                });
+            loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> {
+                setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
+                setValueAt(t.getFiatCcy(), getRowIndex(t), getColumnIndex(COL_CCY));
             });
         } else {
-            validateAsync(data);
+            loadExchangeRate.complete(null);
         }
+
+        var future = new CompletableFuture<Payment>();
+        var finalLoadExchangeRate = loadExchangeRate;
+        Executors.newCachedThreadPool().submit(() -> {
+            CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
+            // Validation can start after loadExchangeRate completed.
+            validateAsync(p).thenAccept((result) -> {
+                future.complete(p);
+            });
+        });
+        return future;
     }
 
     private Object getActorAddressOrAccount(Payment t) {
@@ -115,32 +154,16 @@ public class PaymentTableModel extends AbstractTableModel {
         return actorAddressOrAccount;
     }
 
-    private void loadWalletInfoAsync(Payment[] payments) {
-        var l = new AsyncWalletInfoLoader();
-        Arrays.stream(l.load(payments)).forEach(future -> {
-            future.thenAccept(result -> {
-                var rowIndex = getRowIndex(result.getPayment());
-
-                var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
-                setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
-                var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
-                setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
-            });
-        });
-    }
-
-    private void validateAsync(Payment[] payments) {
+    private CompletableFuture<Void> validateAsync(Payment payment) {
         var av = new AsyncValidator(validator);
-        Arrays.stream(av.validate(payments)).forEach(future -> {
-            future.thenAccept(result -> {
-                var rowIndex = getRowIndex(result.left);
-                var validationResults = result.right;
+        return av.validate(payment).thenAccept(result -> {
+            var rowIndex = getRowIndex(result.left);
+            var validationResults = result.right;
 
-                setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
-                var highestStatus = getHighestStatus(validationResults);
-                setValueAt(isSelected(result.left, highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
-                setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
-            });
+            setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
+            var highestStatus = getHighestStatus(validationResults);
+            setValueAt(isSelected(result.left, highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
+            setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
         });
     }
 
@@ -171,7 +194,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void onTransactionChanged(int row, Payment t) {
-        validateAsync(new Payment[]{t});
+        validateAsync(t);
 
         setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));
     }
@@ -193,5 +216,15 @@ public class PaymentTableModel extends AbstractTableModel {
         }
 
         throw new RuntimeException(String.format("Could not find row index for %s", t.getId()));
+    }
+
+    public void addProgressListener(ProgressListener l) {
+        listener.add(l);
+    }
+
+    private void raiseProgress(Progress progress) {
+        for (var l : listener) {
+            l.onProgress(progress);
+        }
     }
 }

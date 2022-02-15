@@ -23,7 +23,7 @@ public class AsyncValidator {
         return list.toArray((CompletableFuture<ImmutablePair<Payment, ValidationResult[]>>[]) Array.newInstance(CompletableFuture.class, list.size()));
     }
 
-    private CompletableFuture<ImmutablePair<Payment, ValidationResult[]>> validate(Payment t) {
+    public CompletableFuture<ImmutablePair<Payment, ValidationResult[]>> validate(Payment t) {
         var completableFuture = new CompletableFuture<ImmutablePair<Payment, ValidationResult[]>>();
 
         Executors.newCachedThreadPool().submit(() -> {

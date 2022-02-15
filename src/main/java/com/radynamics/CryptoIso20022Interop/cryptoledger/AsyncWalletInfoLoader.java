@@ -16,7 +16,7 @@ public class AsyncWalletInfoLoader {
         return list.toArray((CompletableFuture<PaymentWalletInfo>[]) Array.newInstance(CompletableFuture.class, list.size()));
     }
 
-    private CompletableFuture<PaymentWalletInfo> load(Payment p) {
+    public CompletableFuture<PaymentWalletInfo> load(Payment p) {
         var completableFuture = new CompletableFuture<PaymentWalletInfo>();
 
         Executors.newCachedThreadPool().submit(() -> {

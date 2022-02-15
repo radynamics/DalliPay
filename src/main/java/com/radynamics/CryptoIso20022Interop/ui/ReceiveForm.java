@@ -37,6 +37,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
     private CamtExport camtExport;
+    private JButton cmdExport;
+    private JLabel lblLoading;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -143,16 +145,30 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
         {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator());
+            table.addProgressListener(progress -> {
+                if (progress.getCount() == progress.getTotal()) {
+                    lblLoading.setText("");
+                    cmdExport.setEnabled(true);
+                } else {
+                    lblLoading.setText(String.format("Loaded %s / %s...", progress.getCount(), progress.getTotal()));
+                }
+            });
             panel2.add(table);
         }
         {
-            var cmd = new JButton("Export...");
-            cmd.setPreferredSize(new Dimension(150, 35));
-            cmd.addActionListener(e -> {
+            cmdExport = new JButton("Export...");
+            cmdExport.setPreferredSize(new Dimension(150, 35));
+            cmdExport.addActionListener(e -> {
                 exportSelected();
             });
-            panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
-            panel3.add(cmd);
+            panel3Layout.putConstraint(SpringLayout.EAST, cmdExport, 0, SpringLayout.EAST, panel3);
+            panel3.add(cmdExport);
+
+            lblLoading = new JLabel();
+            panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblLoading, 0, SpringLayout.VERTICAL_CENTER, cmdExport);
+            panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
+            lblLoading.setOpaque(true);
+            panel3.add(lblLoading);
         }
     }
 
@@ -232,6 +248,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            cmdExport.setEnabled(false);
+            lblLoading.setText("Loading, please wait...");
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
