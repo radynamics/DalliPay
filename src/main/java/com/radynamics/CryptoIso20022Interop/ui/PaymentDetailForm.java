@@ -1,21 +1,18 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-import com.radynamics.CryptoIso20022Interop.iso20022.*;
+import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 public class PaymentDetailForm extends JDialog {
     private Payment payment;
@@ -125,22 +122,22 @@ public class PaymentDetailForm extends JDialog {
                 anchorComponentTopLeft = createRow(row++, "Amount:", lblAmountText, secondLine, false);
             }
             {
-                var secondLineText = getWalletText(payment.getSenderWallet());
-                if (payment.getSenderWallet() != null) {
-                    var amtSmallestUnit = payment.getSenderWallet().getLedgerBalanceSmallestUnit();
-                    if (amtSmallestUnit != null) {
-                        var balance = payment.getLedger().convertToNativeCcyAmount(amtSmallestUnit.longValue());
-                        secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, payment.getLedgerCcy()));
-                    }
-
-                    secondLineText = appendMostImportantWalletInfo(secondLineText, payment.getSenderWallet());
-                }
-                createRow(row++, "Sender:", getActorText(payment.getSenderAccount(), payment.getSenderAddress()), secondLineText);
+                var lbl = new WalletLabel();
+                lbl.setWallet(payment.getSenderWallet())
+                        .setLedger(payment.getLedger())
+                        .setAccount(payment.getSenderAccount())
+                        .setAddress(payment.getSenderAddress())
+                        .setWalletInfoAggregator(walletInfoAggregator);
+                createRow(row++, "Sender:", lbl, null, false);
             }
             {
-                var secondLineText = getWalletText(payment.getReceiverWallet());
-                secondLineText = appendMostImportantWalletInfo(secondLineText, payment.getReceiverWallet());
-                createRow(row++, "Receiver:", getActorText(payment.getReceiverAccount(), payment.getReceiverAddress()), secondLineText);
+                var lbl = new WalletLabel();
+                lbl.setWallet(payment.getReceiverWallet())
+                        .setLedger(payment.getLedger())
+                        .setAccount(payment.getReceiverAccount())
+                        .setAddress(payment.getReceiverAddress())
+                        .setWalletInfoAggregator(walletInfoAggregator);
+                createRow(row++, "Receiver:", lbl, null, false);
             }
             {
                 JLabel secondLine = null;
@@ -199,25 +196,6 @@ public class PaymentDetailForm extends JDialog {
         }
     }
 
-    private String appendMostImportantWalletInfo(String secondLineText, Wallet wallet) {
-        if (wallet == null) {
-            return secondLineText;
-        }
-        var wi = walletInfoAggregator.getMostImportant(wallet);
-        return wi == null ? secondLineText : String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
-    }
-
-    private WalletInfo getMostImportantWalletInfo(Wallet wallet) {
-        if (wallet == null) {
-            return null;
-        }
-        var list = new ArrayList<WalletInfo>();
-        for (var p : payment.getLedger().getInfoProvider()) {
-            list.addAll(Arrays.asList(p.list(wallet)));
-        }
-        return list.stream().sorted(Comparator.comparing(WalletInfo::getImportance)).findFirst().orElse(null);
-    }
-
     private void refreshAmountsText() {
         lblAmountText.setText(AmountFormatter.formatAmtWithCcy(payment));
 
@@ -271,39 +249,6 @@ public class PaymentDetailForm extends JDialog {
 
     private void close() {
         dispose();
-    }
-
-    private String getTextOrDefault(StringBuilder sb) {
-        return sb.length() == 0 ? "none" : sb.toString();
-    }
-
-    private String getWalletText(Wallet wallet) {
-        return wallet == null ? "Missing Wallet" : wallet.getPublicKey();
-    }
-
-    private String getActorText(Account account, Address address) {
-        var sb = new StringBuilder();
-
-        if (address != null) {
-            sb.append(AddressFormatter.formatSingleLine(address));
-        }
-
-        if (account == null) {
-            return sb.toString();
-        }
-
-        var template = sb.length() == 0 ? "%s" : " (%s)";
-        sb.append(String.format(template, AccountFormatter.format(account)));
-
-        return sb.toString();
-    }
-
-    private Component createRow(int row, String labelText, String contentFirstLine) {
-        return createRow(row, labelText, contentFirstLine, (String) null);
-    }
-
-    private Component createRow(int row, String labelText, String contentFirstLine, String contentSecondLine) {
-        return createRow(row, labelText, new JLabel(contentFirstLine), contentSecondLine);
     }
 
     private Component createRow(int row, String labelText, Component firstLine, String contentSecondLine) {
