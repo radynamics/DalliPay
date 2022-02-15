@@ -204,7 +204,7 @@ public class SendConfirmationForm extends JDialog {
                 countdown--;
                 if (countdown < 0) {
                     cmdSend.setText("Send");
-                    // Ensure user doesn't uses outdated exchange rates (ex. let UI open for an hour).
+                    // Ensure user doesn't use outdated exchange rates (ex. let UI open for an hour).
                     cmdSend.setEnabled(false);
                     scheduler.shutdown();
                 }
