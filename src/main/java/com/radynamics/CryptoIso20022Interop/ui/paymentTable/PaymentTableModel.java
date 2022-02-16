@@ -69,6 +69,10 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
+        if (col == getColumnIndex(COL_SELECTOR)) {
+            var validationResults = (ValidationResult[]) getValueAt(row, getColumnIndex(COL_VALIDATION_RESULTS));
+            return isSelectable(getHighestStatus(validationResults));
+        }
         if (actor == Actor.Receiver) {
             return col == getColumnIndex(COL_RECEIVER_ISO20022);
         }
@@ -180,7 +184,11 @@ public class PaymentTableModel extends AbstractTableModel {
         if (actor == Actor.Sender) {
             selected = p.getTransmission() == TransmissionState.Pending;
         }
-        return selected && highestStatus != ValidationState.Error;
+        return selected && isSelectable(highestStatus);
+    }
+
+    private boolean isSelectable(ValidationState highestStatus) {
+        return highestStatus != ValidationState.Error;
     }
 
     public Payment[] selectedPayments() {
