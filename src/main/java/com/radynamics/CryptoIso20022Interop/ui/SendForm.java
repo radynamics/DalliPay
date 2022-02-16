@@ -137,41 +137,43 @@ public class SendForm extends JPanel implements MainFormPane {
         {
             var cmd = new JButton("Send Payments");
             cmd.setPreferredSize(new Dimension(150, 35));
-            cmd.addActionListener(e -> {
-                var payments = table.selectedPayments();
-                try {
-                    var br = new BalanceRefresher();
-                    br.refreshAllSenderWallets(payments);
-
-                    if (!showConfirmationForm(payments)) {
-                        return;
-                    }
-
-                    if (!askForPrivateKeyIfMissing(payments)) {
-                        return;
-                    }
-
-                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                    var validator = new PaymentValidator();
-                    var results = validator.validate(payments);
-                    if (results.length > 0) {
-                        ValidationResultDialog.show(this, results);
-                        return;
-                    }
-
-                    transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
-                    for (var p : payments) {
-                        table.refresh(p);
-                    }
-                } catch (Exception ex) {
-                    ExceptionDialog.show(this, ex);
-                } finally {
-                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                }
-            });
+            cmd.addActionListener(e -> sendPayments());
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
+        }
+    }
+
+    private void sendPayments() {
+        var payments = table.selectedPayments();
+        try {
+            var br = new BalanceRefresher();
+            br.refreshAllSenderWallets(payments);
+
+            if (!showConfirmationForm(payments)) {
+                return;
+            }
+
+            if (!askForPrivateKeyIfMissing(payments)) {
+                return;
+            }
+
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+            var validator = new PaymentValidator();
+            var results = validator.validate(payments);
+            if (results.length > 0) {
+                ValidationResultDialog.show(this, results);
+                return;
+            }
+
+            transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
+            for (var p : payments) {
+                table.refresh(p);
+            }
+        } catch (Exception ex) {
+            ExceptionDialog.show(this, ex);
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
