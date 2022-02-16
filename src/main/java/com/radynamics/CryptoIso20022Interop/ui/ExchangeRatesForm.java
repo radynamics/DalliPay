@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import org.apache.commons.lang3.StringUtils;
@@ -198,20 +197,11 @@ public class ExchangeRatesForm extends JDialog {
             var exchangeRates = exchangeRateProvider.supportsRateAt()
                     ? new ExchangeRate[]{exchangeRateProvider.rateAt(pair, pointInTime)}
                     : exchangeRateProvider.latestRates();
-            var r = getRateOrNull(exchangeRates, pair);
+            var r = ExchangeRate.getOrNull(exchangeRates, pair);
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));
             }
         }
-    }
-
-    private ExchangeRate getRateOrNull(ExchangeRate[] rates, CurrencyPair pair) {
-        for (var r : rates) {
-            if (r.getPair().sameAs(pair)) {
-                return r;
-            }
-        }
-        return null;
     }
 
     private void onOk() {

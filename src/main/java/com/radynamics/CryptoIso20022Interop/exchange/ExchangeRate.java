@@ -31,6 +31,16 @@ public class ExchangeRate {
         return new ExchangeRate(pair, UndefinedRate, LocalDateTime.now());
     }
 
+    public static ExchangeRate getOrNull(ExchangeRate[] rates, CurrencyPair pair) {
+        if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
+        for (var r : rates) {
+            if (r.getPair().sameAs(pair)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
     public boolean isUndefined() {
         return getRate() == UndefinedRate;
     }

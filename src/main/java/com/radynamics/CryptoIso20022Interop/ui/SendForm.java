@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.AmountRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -146,8 +147,16 @@ public class SendForm extends JPanel implements MainFormPane {
     private void sendPayments() {
         var payments = table.selectedPayments();
         try {
-            var br = new BalanceRefresher();
-            br.refreshAllSenderWallets(payments);
+            try {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                var br = new BalanceRefresher();
+                br.refreshAllSenderWallets(payments);
+
+                var ar = new AmountRefresher(payments);
+                ar.refresh(transformInstruction.getExchangeRateProvider());
+            } finally {
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            }
 
             if (!showConfirmationForm(payments)) {
                 return;
@@ -227,12 +236,8 @@ public class SendForm extends JPanel implements MainFormPane {
             item.getKey().setExchangeRate(item.getValue());
         }
 
-        for (var p : payments) {
-            if (p.getExchangeRate() != null && p.getExchangeRate().isUndefined()) {
-                p.setExchangeRate(null);
-            }
-            p.refreshAmounts();
-        }
+        var ar = new AmountRefresher(payments);
+        ar.refresh();
 
         table.load(payments);
     }
