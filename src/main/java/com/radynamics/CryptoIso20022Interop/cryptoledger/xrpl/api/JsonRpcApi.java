@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
@@ -114,6 +113,17 @@ public class JsonRpcApi implements TransactionSource {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
+        } catch (JsonRpcClientErrorException e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean requiresDestinationTag(Wallet wallet) {
+        try {
+            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
+            var result = xrplClient.accountInfo(requestParams);
+            return result.accountData().flags().lsfRequireDestTag();
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return false;

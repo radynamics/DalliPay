@@ -84,6 +84,12 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return api.exists(WalletConverter.from(wallet));
     }
 
+    @Override
+    public boolean requiresDestinationTag(Wallet wallet) {
+        var api = new JsonRpcApi(this, network);
+        return api.requiresDestinationTag(WalletConverter.from(wallet));
+    }
+
     public NetworkInfo getNetwork() {
         return network;
     }

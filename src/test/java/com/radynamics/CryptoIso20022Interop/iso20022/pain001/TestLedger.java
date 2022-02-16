@@ -87,6 +87,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean requiresDestinationTag(Wallet wallet) {
+        return false;
+    }
+
+    @Override
     public void setNetwork(NetworkInfo network) {
         throw new NotImplementedException();
     }

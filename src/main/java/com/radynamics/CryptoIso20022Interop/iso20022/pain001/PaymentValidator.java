@@ -23,6 +23,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         var wv = new WalletValidator(t.getLedger());
         if (t.getReceiverWallet() != null) {
             list.addAll(Arrays.asList(wv.validate(t.getReceiverWallet(), "Receiver")));
+
+            if (t.getLedger().requiresDestinationTag(t.getReceiverWallet())) {
+                list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
+            }
         }
 
         if (t.getSenderWallet() == null) {
