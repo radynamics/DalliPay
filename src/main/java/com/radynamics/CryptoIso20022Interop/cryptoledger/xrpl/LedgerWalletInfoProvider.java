@@ -15,6 +15,9 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
     }
 
     public WalletInfo[] list(com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet wallet) {
+        if (!ledger.isValidPublicKey(wallet.getPublicKey())) {
+            return new WalletInfo[0];
+        }
         var api = new JsonRpcApi(ledger, ledger.getNetwork());
 
         var list = new ArrayList<WalletInfo>();
