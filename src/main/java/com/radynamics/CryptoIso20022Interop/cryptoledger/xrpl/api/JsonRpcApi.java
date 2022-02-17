@@ -4,15 +4,12 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeSuggestion;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.WalletConverter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
@@ -125,16 +122,13 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    public FeeSuggestion latestFee() {
+    public FeeInfo latestFee() {
         try {
-            var feeDrops = xrplClient.fee().drops();
-            var low = feeDrops.openLedgerFee().value().longValue();
-            var high = feeDrops.medianFee().value().longValue();
-            var medium = (low + high) / 2;
-            return new FeeSuggestion(low, medium, high);
+            var fees = xrplClient.fee().drops();
+            return new FeeInfo(fees.minimumFee().value().longValue(), fees.openLedgerFee().value().longValue(), fees.medianFee().value().longValue());
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
-            return FeeSuggestion.None();
+            return null;
         }
     }
 

@@ -59,7 +59,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public FeeSuggestion getFeeSuggestion() {
         var api = new JsonRpcApi(this, network);
-        return api.latestFee();
+        var fees = api.latestFee();
+        return fees == null ? FeeSuggestion.None() : fees.createSuggestion();
     }
 
     @Override
