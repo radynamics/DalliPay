@@ -104,6 +104,11 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     private void loadAsync(Payment[] data) {
+        if (data.length == 0) {
+            raiseProgress(new Progress(0, 0));
+            return;
+        }
+
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : data) {
             var future = loadAsync(p);
