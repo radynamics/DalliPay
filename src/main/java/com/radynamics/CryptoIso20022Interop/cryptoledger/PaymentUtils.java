@@ -93,7 +93,7 @@ public class PaymentUtils {
             var amt = l.convertToNativeCcyAmount(fee.getValue());
 
             var r = ExchangeRate.getOrNull(provider.latestRates(), new CurrencyPair(l.getNativeCcySymbol(), fiatCcy));
-            fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.longValue() * r.getRate();
+            fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.doubleValue() * r.getRate();
 
             sb.append(MoneyFormatter.formatLedger(amt, l.getNativeCcySymbol()));
             if (i + 1 < fees.size()) {
