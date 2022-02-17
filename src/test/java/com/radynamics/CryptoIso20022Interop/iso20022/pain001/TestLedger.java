@@ -42,8 +42,8 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public long getLatestFeeSmallestUnit() {
-        return 10;
+    public FeeSuggestion getFeeSuggestion() {
+        return new FeeSuggestion(5, 10, 15);
     }
 
     @Override

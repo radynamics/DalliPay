@@ -1,10 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -13,9 +10,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +26,7 @@ public class SendConfirmationForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean accepted;
     private JButton cmdSend;
+    private JLabel lblFee;
 
     public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider) {
         this.payments = payments;
@@ -146,10 +142,24 @@ public class SendConfirmationForm extends JDialog {
             panel2Layout.putConstraint(SpringLayout.NORTH, lblFeeText, 0, SpringLayout.NORTH, pnlFeeContent);
             pnlFeeContent.add(lblFeeText);
 
-            var lblFee = new JLabel(PaymentUtils.totalFeesText(payments, provider));
+            lblFee = new JLabel();
+            refreshTotalFee();
             panel2Layout.putConstraint(SpringLayout.WEST, lblFee, 10, SpringLayout.EAST, lblFeeText);
             panel2Layout.putConstraint(SpringLayout.NORTH, lblFee, 0, SpringLayout.NORTH, pnlFeeContent);
             pnlFeeContent.add(lblFee);
+
+            var lbl3 = Utils.createLinkLabel(this, "edit...");
+            panel2Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblFee);
+            panel2Layout.putConstraint(SpringLayout.NORTH, lbl3, 0, SpringLayout.NORTH, pnlFeeContent);
+            lbl3.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 1) {
+                        showFeeEdit();
+                    }
+                }
+            });
+            pnlFeeContent.add(lbl3);
         }
         {
             var pnl = new JPanel();
@@ -171,6 +181,10 @@ public class SendConfirmationForm extends JDialog {
         }
 
         startTimeoutCountdown();
+    }
+
+    private void refreshTotalFee() {
+        lblFee.setText(PaymentUtils.totalFeesText(payments, provider));
     }
 
     private Component createRow(int row, Wallet sendingWallet, Account senderAccount, Address senderAddress, ArrayList<Payment> payments) {
@@ -216,6 +230,65 @@ public class SendConfirmationForm extends JDialog {
             }
         }
         return null;
+    }
+
+    private void showFeeEdit() {
+        var ledger = PaymentUtils.distinctLedgers(payments);
+        for (var l : ledger) {
+            showFeeEdit(l);
+        }
+    }
+
+    private void showFeeEdit(Ledger l) {
+        var fees = l.getFeeSuggestion();
+
+        var group = new ButtonGroup();
+        var rdoLow = new JRadioButton(String.format("Low (%s)", formatLedgerAmount(l, fees.getLow())));
+        group.add(rdoLow);
+        var rdoMedium = new JRadioButton(String.format("Medium (%s)", formatLedgerAmount(l, fees.getMedium())));
+        group.add(rdoMedium);
+        var rdoHigh = new JRadioButton(String.format("High (%s)", formatLedgerAmount(l, fees.getHigh())));
+        group.add(rdoHigh);
+
+        rdoMedium.setSelected(true);
+
+        var pnl = new JPanel();
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+        pnl.add(rdoLow);
+        pnl.add(rdoMedium);
+        pnl.add(rdoHigh);
+
+        var optionPane = new JOptionPane();
+        optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
+        var ret = JOptionPane.showOptionDialog(this, pnl, "Fee per transaction",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"OK", "Cancel"}, "OK");
+        if (ret != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        var affectedPayments = new ArrayList<Payment>();
+        for (var p : payments) {
+            if (p.getLedger().getId().equals(l.getId())) {
+                affectedPayments.add(p);
+            }
+        }
+
+        var fr = new FeeRefresher(affectedPayments.toArray(new Payment[0]));
+        if (rdoLow.isSelected()) {
+            fr.refresh(fees.getLow());
+        }
+        if (rdoMedium.isSelected()) {
+            fr.refresh(fees.getMedium());
+        }
+        if (rdoHigh.isSelected()) {
+            fr.refresh(fees.getHigh());
+        }
+
+        refreshTotalFee();
+    }
+
+    private String formatLedgerAmount(Ledger l, Long amtSmallestUnit) {
+        return MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(amtSmallestUnit), l.getNativeCcySymbol());
     }
 
     private void startTimeoutCountdown() {

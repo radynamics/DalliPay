@@ -24,6 +24,17 @@ public class PaymentUtils {
         return list;
     }
 
+    public static Ledger[] distinctLedgers(Payment[] payments) {
+        var list = new ArrayList<Ledger>();
+        for (var p : payments) {
+            var existing = list.stream().anyMatch(l -> p.getLedger().getId().equals(l.getId()));
+            if (!existing) {
+                list.add(p.getLedger());
+            }
+        }
+        return list.toArray(list.toArray(new Ledger[0]));
+    }
+
     public static ArrayList<Payment> fromSender(Wallet w, Payment[] payments) {
         var list = new ArrayList<Payment>();
         for (var p : payments) {

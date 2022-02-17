@@ -18,7 +18,7 @@ public interface Ledger {
 
     long convertToSmallestAmount(double amountNativeCcy);
 
-    long getLatestFeeSmallestUnit();
+    FeeSuggestion getFeeSuggestion();
 
     Wallet createWallet(String publicKey, String secret);
 

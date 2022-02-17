@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeSuggestion;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
@@ -124,12 +125,16 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    public long latestFee() {
+    public FeeSuggestion latestFee() {
         try {
-            return xrplClient.fee().drops().openLedgerFee().value().longValue();
+            var feeDrops = xrplClient.fee().drops();
+            var low = feeDrops.openLedgerFee().value().longValue();
+            var high = feeDrops.medianFee().value().longValue();
+            var medium = (low + high) / 2;
+            return new FeeSuggestion(low, medium, high);
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
-            return 0;
+            return FeeSuggestion.None();
         }
     }
 
