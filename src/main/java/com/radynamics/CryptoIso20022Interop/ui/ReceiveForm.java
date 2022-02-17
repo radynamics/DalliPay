@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExport;
@@ -39,6 +40,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private CamtExport camtExport;
     private JButton cmdExport;
     private JLabel lblLoading;
+    private JComboBox<String> cboTargetCcy;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -99,14 +101,25 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(txtInput);
             }
             {
-                var lbl = new JLabel("Exchange rates:");
+                var lbl = new JLabel("Target currency:");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(1), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
+                cboTargetCcy = new JComboBox<>();
+                fillTargetCcy();
+                panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
+                panel1.add(cboTargetCcy);
+
+                var lbl3 = new JLabel(" using exchange rates from ");
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 0, SpringLayout.EAST, cboTargetCcy);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, getNorthPad(1), SpringLayout.NORTH, panel1);
+                panel1.add(lbl3);
+
                 var lbl2 = new JLabel(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 0, SpringLayout.EAST, lbl3);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lbl2);
             }
@@ -169,6 +182,16 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
+        }
+    }
+
+    private void fillTargetCcy() {
+        var ccys = new String[]{"USD", "EUR"};
+        for (var ccy : ccys) {
+            cboTargetCcy.addItem(ccy);
+            if (ccy.equalsIgnoreCase(transformInstruction.getTargetCcy())) {
+                cboTargetCcy.setSelectedItem(ccy);
+            }
         }
     }
 
@@ -246,12 +269,22 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
+        var targetCcy = cboTargetCcy.getSelectedItem().toString();
+        var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy);
+        var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
+        if (!CurrencyPair.contains(supportedPairs, ccyPair)) {
+            JOptionPane.showMessageDialog(this,
+                    String.format("%s does not support exchange rates for %s", transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
+                    "Currency not supported", JOptionPane.INFORMATION_MESSAGE);
+        }
+
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             cmdExport.setEnabled(false);
             lblLoading.setText("Loading, please wait...");
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
+            t.setTargetCcy(targetCcy);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
             var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPaymentsReceived(wallet, period)));
 

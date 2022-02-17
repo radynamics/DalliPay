@@ -11,10 +11,12 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 public class TransactionTranslator {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
+    private String targetCcy;
 
     public TransactionTranslator(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
+        this.targetCcy = transformInstruction.getTargetCcy();
     }
 
     public Payment[] apply(Payment[] transactions) {
@@ -32,7 +34,7 @@ public class TransactionTranslator {
                 t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
             }
 
-            if (t.getLedgerCcy().equalsIgnoreCase(transformInstruction.getTargetCcy())) {
+            if (t.getLedgerCcy().equalsIgnoreCase(targetCcy)) {
                 if (t.isAmountUnknown()) {
                     t.setAmount(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy());
                     t.setExchangeRate(ExchangeRate.None(t.getLedgerCcy()));
@@ -41,7 +43,7 @@ public class TransactionTranslator {
                 }
             } else {
                 var ccyPair = t.isCcyUnknown()
-                        ? new CurrencyPair(t.getLedgerCcy(), transformInstruction.getTargetCcy())
+                        ? new CurrencyPair(t.getLedgerCcy(), targetCcy)
                         : t.createCcyPair();
                 if (currencyConverter.has(ccyPair)) {
                     t.setExchangeRate(currencyConverter.get(ccyPair));
@@ -60,5 +62,9 @@ public class TransactionTranslator {
         }
         var account = transformInstruction.getAccountOrNull(wallet);
         return account == null ? new OtherAccount(wallet.getPublicKey()) : account;
+    }
+
+    public void setTargetCcy(String targetCcy) {
+        this.targetCcy = targetCcy;
     }
 }

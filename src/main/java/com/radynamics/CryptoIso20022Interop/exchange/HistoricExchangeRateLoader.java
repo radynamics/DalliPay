@@ -32,8 +32,7 @@ public class HistoricExchangeRateLoader {
         var completableFuture = new CompletableFuture<Payment>();
 
         Executors.newCachedThreadPool().submit(() -> {
-            var ccy = transformInstruction.getTargetCcy();
-            var ccyPair = new CurrencyPair(t.getLedgerCcy(), ccy);
+            var ccyPair = t.createCcyPair();
 
             var source = transformInstruction.getHistoricExchangeRateSource();
             var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
