@@ -33,6 +33,11 @@ public class HistoricExchangeRateLoader {
 
         Executors.newCachedThreadPool().submit(() -> {
             var ccyPair = t.createCcyPair();
+            if (ccyPair.isOneToOne()) {
+                t.setExchangeRate(ExchangeRate.OneToOne(ccyPair));
+                completableFuture.complete(t);
+                return;
+            }
 
             var source = transformInstruction.getHistoricExchangeRateSource();
             var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;

@@ -186,7 +186,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void fillTargetCcy() {
-        var ccys = new String[]{"USD", "EUR", "JPY"};
+        var ccys = new String[]{"USD", "EUR", "JPY", "XRP"};
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
             if (ccy.equalsIgnoreCase(transformInstruction.getTargetCcy())) {
@@ -272,7 +272,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         var targetCcy = cboTargetCcy.getSelectedItem().toString();
         var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy);
         var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
-        if (!CurrencyPair.contains(supportedPairs, ccyPair)) {
+        if (!ccyPair.isOneToOne() && !CurrencyPair.contains(supportedPairs, ccyPair)) {
             JOptionPane.showMessageDialog(this,
                     String.format("%s does not support exchange rates for %s", transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
                     "Currency not supported", JOptionPane.INFORMATION_MESSAGE);

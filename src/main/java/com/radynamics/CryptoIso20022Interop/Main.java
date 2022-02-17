@@ -76,7 +76,6 @@ public class Main {
                             frm.setInputFileName(inputFileName);
                             break;
                         case "cryptoToCamt054":
-                            // TODO: add option to keep ledger's native currency or convert into specified currency.
                             frm.setOutputFileName(outputFileName);
                             break;
                         default:
