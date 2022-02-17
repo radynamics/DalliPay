@@ -42,6 +42,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public long getLatestFeeSmallestUnit() {
+        return 10;
+    }
+
+    @Override
     public Wallet createWallet(String publicKey, String secret) {
         return new Wallet() {
             @Override

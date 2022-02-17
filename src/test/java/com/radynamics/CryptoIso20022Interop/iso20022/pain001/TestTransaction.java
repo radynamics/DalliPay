@@ -19,6 +19,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private Ledger ledger;
+    private long fee = 10;
 
     public TestTransaction(Ledger ledger, long amountSmallestUnit, String ccy) {
         this.ledger = ledger;
@@ -122,6 +123,16 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     @Override
     public Throwable getTransmissionError() {
         return null;
+    }
+
+    @Override
+    public long getFeeSmallestUnit() {
+        return fee;
+    }
+
+    @Override
+    public void setFeeSmallestUnit(long value) {
+        fee = value;
     }
 
     public void setSenderWallet(Wallet wallet) {

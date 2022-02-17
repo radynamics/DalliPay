@@ -47,4 +47,8 @@ public interface Transaction {
     TransmissionState getTransmission();
 
     Throwable getTransmissionError();
+
+    long getFeeSmallestUnit();
+
+    void setFeeSmallestUnit(long value);
 }

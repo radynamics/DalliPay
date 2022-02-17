@@ -22,6 +22,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private String invoiceId;
     private TransmissionState transmission = TransmissionState.Pending;
     private Throwable transmissionError;
+    private long feeDrops;
 
     public Transaction(Ledger ledger, long drops, String ccy) {
         this.ledger = ledger;
@@ -132,6 +133,16 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         return transmissionError;
     }
 
+    @Override
+    public long getFeeSmallestUnit() {
+        return feeDrops;
+    }
+
+    @Override
+    public void setFeeSmallestUnit(long value) {
+        feeDrops = value;
+    }
+
     public void setSender(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet sender) {
         this.senderWallet = sender;
     }
@@ -151,5 +162,9 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     public void refreshTransmission(Throwable t) {
         this.transmissionError = t;
         this.transmission = StringUtils.isAllEmpty(getId()) ? TransmissionState.Error : TransmissionState.Success;
+    }
+
+    public void setFeeDrops(long feeDrops) {
+        this.feeDrops = feeDrops;
     }
 }

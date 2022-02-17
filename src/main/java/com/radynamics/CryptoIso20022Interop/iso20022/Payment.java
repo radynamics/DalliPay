@@ -223,6 +223,14 @@ public class Payment {
         return exchangeRate;
     }
 
+    public long getFeeSmallestUnit() {
+        return cryptoTrx.getFeeSmallestUnit();
+    }
+
+    public void setFeeSmallestUnit(long value) {
+        cryptoTrx.setFeeSmallestUnit(value);
+    }
+
     public String getDisplayText() {
         var amount = getAmount();
         if (amount != null) {

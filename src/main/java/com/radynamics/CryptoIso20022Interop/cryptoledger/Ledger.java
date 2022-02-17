@@ -18,6 +18,8 @@ public interface Ledger {
 
     long convertToSmallestAmount(double amountNativeCcy);
 
+    long getLatestFeeSmallestUnit();
+
     Wallet createWallet(String publicKey, String secret);
 
     void refreshBalance(Wallet wallet);

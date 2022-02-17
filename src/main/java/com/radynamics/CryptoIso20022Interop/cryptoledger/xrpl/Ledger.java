@@ -57,6 +57,12 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public long getLatestFeeSmallestUnit() {
+        var api = new JsonRpcApi(this, network);
+        return api.latestFee();
+    }
+
+    @Override
     public Wallet createWallet(String publicKey, String secret) {
         return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet(publicKey, secret);
     }

@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SendConfirmationForm extends JDialog {
     private final Payment[] payments;
+    private final ExchangeRateProvider provider;
 
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -30,8 +32,9 @@ public class SendConfirmationForm extends JDialog {
     private boolean accepted;
     private JButton cmdSend;
 
-    public SendConfirmationForm(Payment[] payments) {
+    public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider) {
         this.payments = payments;
+        this.provider = provider;
         setupUI();
     }
 
@@ -75,22 +78,33 @@ public class SendConfirmationForm extends JDialog {
         panel1Layout = new SpringLayout();
         pnlContent = new JPanel();
         pnlContent.setLayout(panel1Layout);
+        var panel2 = new JPanel();
+        panel2.setBorder(innerBorder);
+        panel2.setLayout(new BoxLayout(panel2, BoxLayout.X_AXIS));
+        var panel2Layout = new SpringLayout();
+        var pnlFeeContent = new JPanel();
+        pnlFeeContent.setLayout(panel2Layout);
+        panel2.add(pnlFeeContent);
         JPanel panel3 = new JPanel();
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 100));
+        pnlContent.setPreferredSize(new Dimension(100, 70));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
 
         pnlMain.add(panel0);
         pnlMain.add(panel1);
+        pnlMain.add(panel2);
         pnlMain.add(panel3);
 
         panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 60));
         panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 60));
+        panel2.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
+        panel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        panel2.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -125,6 +139,17 @@ public class SendConfirmationForm extends JDialog {
                 var created = createRow(row++, w, getSenderAccount(payments), getSenderAddress(payments), payments);
                 anchorComponentTopLeft = anchorComponentTopLeft == null ? created : anchorComponentTopLeft;
             }
+        }
+        {
+            var lblFeeText = new JLabel("Total expected Transaction fee");
+            panel2Layout.putConstraint(SpringLayout.WEST, lblFeeText, 0, SpringLayout.WEST, pnlFeeContent);
+            panel2Layout.putConstraint(SpringLayout.NORTH, lblFeeText, 0, SpringLayout.NORTH, pnlFeeContent);
+            pnlFeeContent.add(lblFeeText);
+
+            var lblFee = new JLabel(PaymentUtils.totalFeesText(payments, provider));
+            panel2Layout.putConstraint(SpringLayout.WEST, lblFee, 10, SpringLayout.EAST, lblFeeText);
+            panel2Layout.putConstraint(SpringLayout.NORTH, lblFee, 0, SpringLayout.NORTH, pnlFeeContent);
+            pnlFeeContent.add(lblFee);
         }
         {
             var pnl = new JPanel();

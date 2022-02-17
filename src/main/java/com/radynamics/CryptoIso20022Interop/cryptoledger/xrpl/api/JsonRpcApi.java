@@ -30,7 +30,6 @@ import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
 import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
-import org.xrpl.xrpl4j.model.client.fees.FeeResult;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
@@ -122,6 +121,15 @@ public class JsonRpcApi implements TransactionSource {
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return false;
+        }
+    }
+
+    public long latestFee() {
+        try {
+            return xrplClient.fee().drops().openLedgerFee().value().longValue();
+        } catch (JsonRpcClientErrorException e) {
+            log.error(e.getMessage(), e);
+            return 0;
         }
     }
 
@@ -232,8 +240,10 @@ public class JsonRpcApi implements TransactionSource {
         }
         previousLastLedgerSequence = lastLedgerSequence;
 
+        var fee = XrpCurrencyAmount.ofDrops(t.getFeeSmallestUnit());
+
         // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
-        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, memos);
+        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, fee, memos);
 
         // Idea: return prepared payment without signing to ensure this code never needs access to private key (option?)
         var signed = sign(prepared, sender);
@@ -250,7 +260,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, XrpCurrencyAmount amount, Iterable<? extends MemoWrapper> memos)
+                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, XrpCurrencyAmount amount, XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException {
         // Code from https://github.com/ripple/xrpl-dev-portal/blob/master/content/_code-samples/send-xrp/SendXrp.java
 
@@ -265,10 +275,6 @@ public class JsonRpcApi implements TransactionSource {
         sequence = sequence.plus(accountSequenceOffset);
         System.out.println("AccSequence: " + sequence);
 
-        // Request current fee information from rippled
-        FeeResult feeResult = xrplClient.fee();
-        XrpCurrencyAmount openLedgerFee = feeResult.drops().openLedgerFee();
-
         // Construct a Payment
         Payment payment = Payment.builder()
                 .account(sender.classicAddress())
@@ -277,7 +283,7 @@ public class JsonRpcApi implements TransactionSource {
                 // TODO: implement TAG
                 .destination(receiver)
                 .sequence(sequence)
-                .fee(openLedgerFee)
+                .fee(fee)
                 .signingPublicKey(sender.publicKey())
                 .lastLedgerSequence(lastLedgerSequence)
                 .build();

@@ -1,6 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.math.BigDecimal;
@@ -10,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PaymentUtils {
-    public static final ArrayList<Wallet> distinctSendingWallets(Payment[] payments) {
+    public static ArrayList<Wallet> distinctSendingWallets(Payment[] payments) {
         var list = new ArrayList<Wallet>();
         for (var p : payments) {
             var existing = list.stream().anyMatch(w -> WalletCompare.isSame(p.getSenderWallet(), w));
@@ -57,9 +60,49 @@ public class PaymentUtils {
         var map = new HashMap<String, Double>();
         for (var p : payments) {
             if (!map.containsKey(p.getFiatCcy())) {
-                map.put(p.getFiatCcy(), Double.valueOf(0));
+                map.put(p.getFiatCcy(), (double) 0);
             }
             map.put(p.getFiatCcy(), map.get(p.getFiatCcy()) + p.getAmount());
+        }
+        return map;
+    }
+
+    public static String totalFeesText(Payment[] payments, ExchangeRateProvider provider) {
+        if (payments.length == 0) {
+            return "";
+        }
+
+        var sb = new StringBuilder();
+        var i = 0;
+        var fees = totalFees(payments);
+        Double fiatSum = (double) 0;
+        var fiatCcy = payments[0].getFiatCcy();
+        for (var fee : fees.entrySet()) {
+            var l = fee.getKey();
+            var amt = l.convertToNativeCcyAmount(fee.getValue());
+
+            var r = ExchangeRate.getOrNull(provider.latestRates(), new CurrencyPair(l.getNativeCcySymbol(), fiatCcy));
+            fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.longValue() * r.getRate();
+
+            sb.append(MoneyFormatter.formatLedger(amt, l.getNativeCcySymbol()));
+            if (i + 1 < fees.size()) {
+                sb.append(", ");
+            }
+            i++;
+        }
+
+        return fiatSum == null
+                ? sb.toString()
+                : String.format("%s (%s)", MoneyFormatter.formatFiat(BigDecimal.valueOf(fiatSum), fiatCcy), sb);
+    }
+
+    public static Map<Ledger, Long> totalFees(Payment[] payments) {
+        var map = new HashMap<Ledger, Long>();
+        for (var p : payments) {
+            if (!map.containsKey(p.getLedger())) {
+                map.put(p.getLedger(), 0L);
+            }
+            map.put(p.getLedger(), map.get(p.getLedger()) + p.getFeeSmallestUnit());
         }
         return map;
     }
