@@ -67,4 +67,14 @@ public class CurrencyPairTest {
         Assertions.assertFalse(pair.sameAs(new CurrencyPair("EUR", "CHF")));
         Assertions.assertFalse(pair.sameAs(new CurrencyPair("USD", "EUR")));
     }
+
+    @Test
+    public void isOneToOne() {
+        Assertions.assertTrue(new CurrencyPair("EUR", "EUR").isOneToOne());
+
+        Assertions.assertFalse(new CurrencyPair("EUR", "Eur").isOneToOne());
+        Assertions.assertFalse(new CurrencyPair("Eur", "EUR").isOneToOne());
+        Assertions.assertFalse(new CurrencyPair("EUR", "EUR ").isOneToOne());
+        Assertions.assertFalse(new CurrencyPair("EUR", " EUR").isOneToOne());
+    }
 }

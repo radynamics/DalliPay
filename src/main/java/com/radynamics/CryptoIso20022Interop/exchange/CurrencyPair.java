@@ -47,6 +47,10 @@ public class CurrencyPair {
         return getFirst().equals(other.getFirst()) && getSecond().equals(other.getSecond());
     }
 
+    public boolean isOneToOne() {
+        return getFirst().equals(getSecond());
+    }
+
     @Override
     public String toString() {
         return String.format("first=%s, second=%s", first, second);
