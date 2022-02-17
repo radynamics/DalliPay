@@ -186,7 +186,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void fillTargetCcy() {
-        var ccys = new String[]{"USD", "EUR"};
+        var ccys = new String[]{"USD", "EUR", "JPY"};
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
             if (ccy.equalsIgnoreCase(transformInstruction.getTargetCcy())) {

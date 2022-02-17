@@ -13,16 +13,22 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class XummPriceOracle implements ExchangeRateProvider {
     final static Logger log = LogManager.getLogger(XummPriceOracle.class);
     private final Ledger ledger;
+    private final HashMap<String, IssuedCurrency> issuedCurrencies;
 
     public static final String ID = "xummpriceoracle";
 
     public XummPriceOracle(NetworkInfo network) {
         ledger = new Ledger();
         ledger.setNetwork(network);
+
+        issuedCurrencies = new HashMap<>();
+        issuedCurrencies.put("USD", new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
+        issuedCurrencies.put("JPY", new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
     }
 
     @Override
@@ -37,7 +43,11 @@ public class XummPriceOracle implements ExchangeRateProvider {
 
     @Override
     public CurrencyPair[] getSupportedPairs() {
-        return new CurrencyPair[]{new CurrencyPair("XRP", "USD")};
+        var list = new ArrayList<CurrencyPair>();
+        for (var kvp : issuedCurrencies.entrySet()) {
+            list.add(kvp.getValue().pair);
+        }
+        return list.toArray(list.toArray(new CurrencyPair[0]));
     }
 
     @Override
@@ -58,9 +68,11 @@ public class XummPriceOracle implements ExchangeRateProvider {
     @Override
     public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
         var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
+        var targetCcy = pair.getFirst().equals("XRP") ? pair.getSecond() : pair.getFirst();
+        var issuedCcy = issuedCurrencies.get(targetCcy);
         Transaction[] transactions = new Transaction[0];
         try {
-            transactions = ledger.listTransactions(new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx"), period);
+            transactions = ledger.listTrustlineTransactions(issuedCcy.receiver, period, issuedCcy.issuer, targetCcy);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -106,5 +118,22 @@ public class XummPriceOracle implements ExchangeRateProvider {
         }
 
         return best;
+    }
+
+    private class IssuedCurrency {
+        public final CurrencyPair pair;
+        public final Wallet issuer;
+        public final Wallet receiver;
+
+        public IssuedCurrency(CurrencyPair pair, Wallet issuer, Wallet receiver) {
+            this.pair = pair;
+            this.issuer = issuer;
+            this.receiver = receiver;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("{%s}", pair);
+        }
     }
 }

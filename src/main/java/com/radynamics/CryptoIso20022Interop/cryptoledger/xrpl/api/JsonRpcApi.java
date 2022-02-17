@@ -93,14 +93,20 @@ public class JsonRpcApi implements TransactionSource {
                 .build();
     }
 
-    public Transaction[] listTransactions(Wallet wallet, DateTimeRange period) throws Exception {
+    public Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period);
         var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {
             var t = r.resultTransaction().transaction();
-            // TODO: handle ImmutableIssuedCurrencyAmount
+            if (!(t instanceof ImmutableTrustSet)) {
+                continue;
+            }
+            var trustSet = (ImmutableTrustSet) t;
+            if (!trustSet.limitAmount().issuer().value().equals(ccyIssuer.getPublicKey()) || !trustSet.limitAmount().currency().equalsIgnoreCase(ccy)) {
+                continue;
+            }
             var deliveredAmount = r.metadata().get().deliveredAmount().orElse(XrpCurrencyAmount.ofDrops(0));
             list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
         }
