@@ -87,7 +87,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
-                var lbl = new JLabel("Source Wallet:");
+                var lbl = new JLabel("Receiver Wallet:");
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(0), SpringLayout.NORTH, panel1);
