@@ -242,21 +242,25 @@ public class SendConfirmationForm extends JDialog {
     private void showFeeEdit(Ledger l) {
         var fees = l.getFeeSuggestion();
 
+        var pnl = new JPanel();
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+        pnl.setMinimumSize(new Dimension(Integer.MAX_VALUE, 80));
+        pnl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        pnl.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
+
         var group = new ButtonGroup();
-        var rdoLow = new JRadioButton(String.format("Low (%s)", formatLedgerAmount(l, fees.getLow())));
+        var rdoLow = new JRadioButton("Low");
         group.add(rdoLow);
-        var rdoMedium = new JRadioButton(String.format("Medium (%s)", formatLedgerAmount(l, fees.getMedium())));
+        var rdoMedium = new JRadioButton("Medium");
         group.add(rdoMedium);
-        var rdoHigh = new JRadioButton(String.format("High (%s)", formatLedgerAmount(l, fees.getHigh())));
+        var rdoHigh = new JRadioButton("High");
         group.add(rdoHigh);
 
         rdoMedium.setSelected(true);
 
-        var pnl = new JPanel();
-        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
-        pnl.add(rdoLow);
-        pnl.add(rdoMedium);
-        pnl.add(rdoHigh);
+        pnl.add(createFeeRow(l, rdoLow, fees.getLow()));
+        pnl.add(createFeeRow(l, rdoMedium, fees.getMedium()));
+        pnl.add(createFeeRow(l, rdoHigh, fees.getHigh()));
 
         var optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
@@ -285,6 +289,21 @@ public class SendConfirmationForm extends JDialog {
         }
 
         refreshTotalFee();
+    }
+
+    private Component createFeeRow(Ledger l, JRadioButton rdo, long fee) {
+        var pnl = new JPanel();
+        var layout = new SpringLayout();
+        pnl.setLayout(layout);
+
+        pnl.add(rdo);
+        layout.putConstraint(SpringLayout.WEST, rdo, 0, SpringLayout.WEST, pnl);
+
+        var lblFee = new JLabel(formatLedgerAmount(l, fee));
+        pnl.add(lblFee);
+        layout.putConstraint(SpringLayout.EAST, lblFee, 0, SpringLayout.EAST, pnl);
+
+        return pnl;
     }
 
     private String formatLedgerAmount(Ledger l, Long amtSmallestUnit) {
