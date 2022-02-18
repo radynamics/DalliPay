@@ -235,11 +235,11 @@ public class SendConfirmationForm extends JDialog {
     private void showFeeEdit() {
         var ledger = PaymentUtils.distinctLedgers(payments);
         for (var l : ledger) {
-            showFeeEdit(l);
+            showFeeEdit(l, payments.length == 0 ? null : payments[0].getFeeSmallestUnit());
         }
     }
 
-    private void showFeeEdit(Ledger l) {
+    private void showFeeEdit(Ledger l, Long currentFee) {
         var fees = l.getFeeSuggestion();
 
         var pnl = new JPanel();
@@ -256,7 +256,9 @@ public class SendConfirmationForm extends JDialog {
         var rdoHigh = new JRadioButton("High");
         group.add(rdoHigh);
 
-        rdoMedium.setSelected(true);
+        rdoLow.setSelected(currentFee == null || fees.getLow() == currentFee);
+        rdoMedium.setSelected(fees.getMedium() == currentFee);
+        rdoHigh.setSelected(fees.getHigh() == currentFee);
 
         pnl.add(createFeeRow(l, rdoLow, fees.getLow()));
         pnl.add(createFeeRow(l, rdoMedium, fees.getMedium()));
