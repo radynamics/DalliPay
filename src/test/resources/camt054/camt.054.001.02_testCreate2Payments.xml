@@ -51,14 +51,6 @@
                             <MsgId>2FE1CEB95384707584A9DB3E288EA</MsgId>
                             <EndToEndId>E43D83F7869885BFE92C29A6A7CF48F9B9B</EndToEndId>
                         </Refs>
-                        <AmtDtls>
-                            <InstdAmt>
-                                <Amt Ccy="XRP">36.35</Amt>
-                            </InstdAmt>
-                            <TxAmt>
-                                <Amt Ccy="XRP">36.35</Amt>
-                            </TxAmt>
-                        </AmtDtls>
                         <BkTxCd>
                             <Domn>
                                 <Cd>PMNT</Cd>
@@ -119,14 +111,6 @@
                             <MsgId>3E3D3E9D64A3548A6C52BD7CE9415</MsgId>
                             <EndToEndId>57237F065509B36FB3B31DA771B6AFBBF94</EndToEndId>
                         </Refs>
-                        <AmtDtls>
-                            <InstdAmt>
-                                <Amt Ccy="XRP">50.00</Amt>
-                            </InstdAmt>
-                            <TxAmt>
-                                <Amt Ccy="XRP">50.00</Amt>
-                            </TxAmt>
-                        </AmtDtls>
                         <BkTxCd>
                             <Domn>
                                 <Cd>PMNT</Cd>
@@ -187,14 +171,6 @@
                             <MsgId>23AB86192C87B89121F4877351DD9</MsgId>
                             <EndToEndId>4CA4105CBC1288D9C3FB5140C61097B2475</EndToEndId>
                         </Refs>
-                        <AmtDtls>
-                            <InstdAmt>
-                                <Amt Ccy="XRP">391.00</Amt>
-                            </InstdAmt>
-                            <TxAmt>
-                                <Amt Ccy="XRP">391.00</Amt>
-                            </TxAmt>
-                        </AmtDtls>
                         <BkTxCd>
                             <Domn>
                                 <Cd>PMNT</Cd>

@@ -92,11 +92,14 @@ public class Camt05400104Writer implements Camt054Writer {
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
-        ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
-        var amtValue = AmountRounder.round(trx.getAmount(), 2);
-        ntry.getAmt().setValue(amtValue);
-        ntry.getAmt().setCcy(trx.getFiatCcy());
+        var amt = new ActiveOrHistoricCurrencyAndAmount();
+        amt.setValue(AmountRounder.round(trx.getAmount(), 2));
+        amt.setCcy(trx.getFiatCcy());
+
+        ntry.setAmt(amt);
+        var amtDtls = trx.createCcyPair().isOneToOne() ? null : createAmtDtls(trx);
+        ntry.setAmtDtls(amtDtls);
 
         ntry.setCdtDbtInd(CreditDebitCode.CRDT);
         ntry.setSts(EntryStatus2Code.BOOK);
@@ -123,9 +126,8 @@ public class Camt05400104Writer implements Camt054Writer {
         txDtls.getRefs().setEndToEndId(idPart0);
         txDtls.getRefs().setMsgId(idPart1);
 
-        txDtls.setAmt(new ActiveOrHistoricCurrencyAndAmount());
-        txDtls.getAmt().setValue(amtValue);
-        txDtls.getAmt().setCcy(trx.getFiatCcy());
+        txDtls.setAmt(amt);
+        txDtls.setAmtDtls(amtDtls);
         txDtls.setCdtDbtInd(CreditDebitCode.CRDT);
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn("AUTT"));
@@ -151,6 +153,23 @@ public class Camt05400104Writer implements Camt054Writer {
         }
 
         return ntry;
+    }
+
+    private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {
+        var amtLedgerCcy = new ActiveOrHistoricCurrencyAndAmount();
+        amtLedgerCcy.setValue(AmountRounder.round(trx.getLedger().convertToNativeCcyAmount(trx.getLedgerAmountSmallestUnit()).doubleValue(), 4));
+        amtLedgerCcy.setCcy(trx.getLedgerCcy());
+
+        var ccyXchg = new CurrencyExchange5();
+        ccyXchg.setSrcCcy(trx.getLedgerCcy());
+        ccyXchg.setTrgtCcy(trx.getFiatCcy());
+        ccyXchg.setXchgRate(BigDecimal.valueOf(trx.getExchangeRate().getRate()));
+
+        var o = new AmountAndCurrencyExchange3();
+        o.setTxAmt(new AmountAndCurrencyExchangeDetails3());
+        o.getTxAmt().setAmt(amtLedgerCcy);
+        o.getTxAmt().setCcyXchg(ccyXchg);
+        return o;
     }
 
     private DateAndDateTimeChoice createDateAndDateTimeChoice(XMLGregorianCalendar dt, DateFormat format) {

@@ -92,11 +92,14 @@ public class Camt05400102Writer implements Camt054Writer {
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
-        ntry.setAmt(new ActiveOrHistoricCurrencyAndAmount());
 
-        var amtValue = AmountRounder.round(trx.getAmount(), 2);
-        ntry.getAmt().setValue(amtValue);
-        ntry.getAmt().setCcy(trx.getFiatCcy());
+        var amt = new ActiveOrHistoricCurrencyAndAmount();
+        amt.setValue(AmountRounder.round(trx.getAmount(), 2));
+        amt.setCcy(trx.getFiatCcy());
+
+        ntry.setAmt(amt);
+        var amtDtls = trx.createCcyPair().isOneToOne() ? null : createAmtDtls(trx);
+        ntry.setAmtDtls(amtDtls);
 
         ntry.setCdtDbtInd(CreditDebitCode.CRDT);
         ntry.setSts(EntryStatus2Code.BOOK);
@@ -123,7 +126,7 @@ public class Camt05400102Writer implements Camt054Writer {
         txDtls.getRefs().setEndToEndId(idPart0);
         txDtls.getRefs().setMsgId(idPart1);
 
-        txDtls.setAmtDtls(createAmtDtls(amtValue, trx.getFiatCcy()));
+        txDtls.setAmtDtls(amtDtls);
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn("AUTT"));
 
@@ -150,15 +153,20 @@ public class Camt05400102Writer implements Camt054Writer {
         return ntry;
     }
 
-    private AmountAndCurrencyExchange3 createAmtDtls(BigDecimal amt, String ccy) {
-        var amtCcy = new AmountAndCurrencyExchangeDetails3();
-        amtCcy.setAmt(new ActiveOrHistoricCurrencyAndAmount());
-        amtCcy.getAmt().setValue(amt);
-        amtCcy.getAmt().setCcy(ccy);
+    private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {
+        var amtLedgerCcy = new ActiveOrHistoricCurrencyAndAmount();
+        amtLedgerCcy.setValue(AmountRounder.round(trx.getLedger().convertToNativeCcyAmount(trx.getLedgerAmountSmallestUnit()).doubleValue(), 4));
+        amtLedgerCcy.setCcy(trx.getLedgerCcy());
+
+        var ccyXchg = new CurrencyExchange5();
+        ccyXchg.setSrcCcy(trx.getLedgerCcy());
+        ccyXchg.setTrgtCcy(trx.getFiatCcy());
+        ccyXchg.setXchgRate(BigDecimal.valueOf(trx.getExchangeRate().getRate()));
 
         var o = new AmountAndCurrencyExchange3();
-        o.setInstdAmt(amtCcy);
-        o.setTxAmt(amtCcy);
+        o.setTxAmt(new AmountAndCurrencyExchangeDetails3());
+        o.getTxAmt().setAmt(amtLedgerCcy);
+        o.getTxAmt().setCcyXchg(ccyXchg);
         return o;
     }
 
