@@ -16,7 +16,9 @@ public class TestFactory {
         var ledger = LedgerFactory.create("xrpl");
         ledger.setNetwork(new NetworkInfo(Network.Test, null));
         var i = new TransformInstruction(ledger);
-        i.setExchangeRateProvider(new DemoExchange());
+        var exchange = new DemoExchange();
+        exchange.load();
+        i.setExchangeRateProvider(exchange);
         i.setTargetCcy(ledger.getNativeCcySymbol());
 
         return i;
