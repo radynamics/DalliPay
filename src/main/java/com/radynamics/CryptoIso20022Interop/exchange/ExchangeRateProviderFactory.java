@@ -1,7 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XummPriceOracle;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import org.apache.commons.lang3.NotImplementedException;
 
 public final class ExchangeRateProviderFactory {
@@ -17,8 +17,8 @@ public final class ExchangeRateProviderFactory {
                 return new Bitstamp();
             case Coinbase.ID:
                 return new Coinbase();
-            case XummPriceOracle.ID:
-                return new XummPriceOracle(network);
+            case XrplPriceOracle.ID:
+                return new XrplPriceOracle(network);
             default:
                 throw new NotImplementedException(String.format("Exchange %s unknown.", id));
         }

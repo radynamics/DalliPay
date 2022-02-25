@@ -15,14 +15,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class XummPriceOracle implements ExchangeRateProvider {
-    final static Logger log = LogManager.getLogger(XummPriceOracle.class);
+public class XrplPriceOracle implements ExchangeRateProvider {
+    final static Logger log = LogManager.getLogger(XrplPriceOracle.class);
     private final Ledger ledger;
     private final HashMap<String, IssuedCurrency> issuedCurrencies;
 
-    public static final String ID = "xummpriceoracle";
+    public static final String ID = "xrplpriceoracle";
 
-    public XummPriceOracle(NetworkInfo network) {
+    public XrplPriceOracle(NetworkInfo network) {
         ledger = new Ledger();
         ledger.setNetwork(network);
 
@@ -38,7 +38,7 @@ public class XummPriceOracle implements ExchangeRateProvider {
 
     @Override
     public String getDisplayText() {
-        return "XUMM Price Oracle";
+        return "XRPL Price Oracle";
     }
 
     @Override

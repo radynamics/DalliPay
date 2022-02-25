@@ -5,7 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XummPriceOracle;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
@@ -99,7 +99,7 @@ public class Main {
         var t = new TransformInstruction(ledger);
         t.setTargetCcy("USD");
         t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
-        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XummPriceOracle.ID, config.getNetwork(Network.Live)));
+        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
         return t;
     }
 
