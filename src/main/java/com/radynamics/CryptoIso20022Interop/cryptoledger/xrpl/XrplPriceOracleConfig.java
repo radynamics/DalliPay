@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
-import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,9 +17,7 @@ public class XrplPriceOracleConfig {
     private final HashSet<IssuedCurrency> issuedCurrencies = new HashSet<>();
 
     public void load() {
-        try (var db = Database.connect()) {
-            if (db == null) return;
-            var repo = new ConfigRepo(db);
+        try (var repo = new ConfigRepo()) {
             var json = new JSONObject(repo.single("xrplPriceOracleConfig"));
 
             issuedCurrencies.clear();

@@ -30,19 +30,15 @@ public class Database {
             return conn;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            close(conn);
-            return null;
-        }
-    }
-
-    private static void close(Connection conn) {
-        try {
-            if (conn != null) {
-                conn.rollback();
-                conn.close();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                    conn.close();
+                }
+            } catch (SQLException e2) {
+                log.error(e2.getMessage(), e2);
             }
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
