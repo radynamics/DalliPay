@@ -18,6 +18,7 @@ public class XrplPriceOracleConfig {
         tmp.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
 
         var instances = fromJson(toJson(tmp));
+        issuedCurrencies.clear();
         issuedCurrencies.addAll(Arrays.asList(instances));
     }
 
