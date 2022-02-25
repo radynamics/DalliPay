@@ -1,6 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
+import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -10,16 +14,20 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class XrplPriceOracleConfig {
+    final static Logger log = LogManager.getLogger(XrplPriceOracleConfig.class);
     private final HashSet<IssuedCurrency> issuedCurrencies = new HashSet<>();
 
     public void load() {
-        var tmp = new HashSet<IssuedCurrency>();
-        tmp.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
-        tmp.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
+        try (var db = Database.connect()) {
+            if (db == null) return;
+            var repo = new ConfigRepo(db);
+            var json = new JSONObject(repo.single("xrplPriceOracleConfig"));
 
-        var instances = fromJson(toJson(tmp));
-        issuedCurrencies.clear();
-        issuedCurrencies.addAll(Arrays.asList(instances));
+            issuedCurrencies.clear();
+            issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private JSONObject toJson(Collection<IssuedCurrency> ccys) {

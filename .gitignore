@@ -6,3 +6,4 @@
 /logs
 /src/main/resources/version.properties
 /bin/main/version.properties
+/cryptoIso20022Interop.db
