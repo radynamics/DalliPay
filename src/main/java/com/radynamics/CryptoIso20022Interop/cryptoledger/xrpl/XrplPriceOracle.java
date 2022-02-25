@@ -45,7 +45,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     public CurrencyPair[] getSupportedPairs() {
         var list = new ArrayList<CurrencyPair>();
         for (var kvp : issuedCurrencies.entrySet()) {
-            list.add(kvp.getValue().pair);
+            list.add(kvp.getValue().getPair());
         }
         return list.toArray(list.toArray(new CurrencyPair[0]));
     }
@@ -72,7 +72,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         var issuedCcy = issuedCurrencies.get(targetCcy);
         Transaction[] transactions = new Transaction[0];
         try {
-            transactions = ledger.listTrustlineTransactions(issuedCcy.receiver, period, issuedCcy.issuer, targetCcy);
+            transactions = ledger.listTrustlineTransactions(issuedCcy.getReceiver(), period, issuedCcy.getIssuer(), targetCcy);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -118,22 +118,5 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         }
 
         return best;
-    }
-
-    private class IssuedCurrency {
-        public final CurrencyPair pair;
-        public final Wallet issuer;
-        public final Wallet receiver;
-
-        public IssuedCurrency(CurrencyPair pair, Wallet issuer, Wallet receiver) {
-            this.pair = pair;
-            this.issuer = issuer;
-            this.receiver = receiver;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("{%s}", pair);
-        }
     }
 }
