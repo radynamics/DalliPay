@@ -18,17 +18,13 @@ import java.util.HashMap;
 public class XrplPriceOracle implements ExchangeRateProvider {
     final static Logger log = LogManager.getLogger(XrplPriceOracle.class);
     private final Ledger ledger;
-    private final HashMap<String, IssuedCurrency> issuedCurrencies;
+    private final HashMap<String, IssuedCurrency> issuedCurrencies = new HashMap<>();
 
     public static final String ID = "xrplpriceoracle";
 
     public XrplPriceOracle(NetworkInfo network) {
         ledger = new Ledger();
         ledger.setNetwork(network);
-
-        issuedCurrencies = new HashMap<>();
-        issuedCurrencies.put("USD", new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
-        issuedCurrencies.put("JPY", new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
     }
 
     @Override
@@ -53,6 +49,18 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     @Override
     public boolean supportsRateAt() {
         return true;
+    }
+
+    @Override
+    public void init() {
+        issuedCurrencies.clear();
+
+        var config = new XrplPriceOracleConfig();
+        config.load();
+        for (var o : config.issuedCurrencies()) {
+            var nonLedgerCcy = o.getPair().getFirst().equals(ledger.getNativeCcySymbol()) ? o.getPair().getSecond() : o.getPair().getFirst();
+            issuedCurrencies.put(nonLedgerCcy, o);
+        }
     }
 
     @Override

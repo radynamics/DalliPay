@@ -11,6 +11,8 @@ public interface ExchangeRateProvider {
 
     boolean supportsRateAt();
 
+    void init();
+
     void load();
 
     ExchangeRate[] latestRates();

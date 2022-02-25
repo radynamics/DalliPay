@@ -44,6 +44,11 @@ public class Bitstamp implements ExchangeRateProvider {
     }
 
     @Override
+    public void init() {
+        // do nothing
+    }
+
+    @Override
     public void load() {
         exchangeRates.clear();
         for (var currencyPair : currencyPairs) {

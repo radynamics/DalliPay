@@ -99,7 +99,9 @@ public class Main {
         var t = new TransformInstruction(ledger);
         t.setTargetCcy("USD");
         t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
+        t.getExchangeRateProvider().init();
         t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
+        t.getHistoricExchangeRateSource().init();
         return t;
     }
 

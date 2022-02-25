@@ -43,6 +43,11 @@ public class Coinbase implements ExchangeRateProvider {
     }
 
     @Override
+    public void init() {
+        // do nothing
+    }
+
+    @Override
     public void load() {
         exchangeRates.clear();
         for (var ledgerCcy : baseCurrencies) {

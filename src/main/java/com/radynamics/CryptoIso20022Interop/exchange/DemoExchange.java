@@ -28,6 +28,11 @@ public class DemoExchange implements ExchangeRateProvider {
     }
 
     @Override
+    public void init() {
+        // do nothing
+    }
+
+    @Override
     public void load() {
         exchangeRates = new ExchangeRate[3];
         exchangeRates[0] = new ExchangeRate("XRP", "USD", 0.843332, LocalDateTime.now());
