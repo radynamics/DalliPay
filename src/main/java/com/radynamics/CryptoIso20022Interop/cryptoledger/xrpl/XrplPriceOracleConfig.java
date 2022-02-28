@@ -39,7 +39,7 @@ public class XrplPriceOracleConfig {
             k.put("first", ccy.getPair().getFirst());
             k.put("second", ccy.getPair().getSecond());
             k.put("issuer", ccy.getIssuer().getPublicKey());
-            k.put("receiver", ccy.getIssuer().getPublicKey());
+            k.put("receiver", ccy.getReceiver().getPublicKey());
         }
 
         return o;
