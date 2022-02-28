@@ -40,7 +40,7 @@ public class DbMigration {
 
     private void migrateTo1() throws SQLException {
         insertConfig("dbVersion", "0");
-        insertConfig("xrplPriceOracleConfig", "{\"ccyPairs\":[{\"receiver\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"first\":\"XRP\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"second\":\"USD\"},{\"receiver\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"first\":\"XRP\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"second\":\"JPY\"}],\"version\":1}");
+        insertConfig("xrplPriceOracleConfig", "{\"version\":1,\"ccyPairs\":[{\"first\":\"XRP\",\"second\":\"USD\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"receiver\":\"rXUMMaPpZqPutoRszR29jtC8amWq3APkx\"},{\"first\":\"XRP\",\"second\":\"JPY\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"receiver\":\"rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg\"}]}");
     }
 
     private void insertConfig(String key, String value) throws SQLException {
