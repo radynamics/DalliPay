@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.XrplPriceOracleEdit;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.IssuedCurrency;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 
@@ -37,6 +38,13 @@ public class XrplPriceOracleEditor extends JPanel {
             pnl.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
             pnl.add(Box.createHorizontalGlue());
             {
+                var cmd = new JButton("default");
+                cmd.setPreferredSize(new Dimension(90, 21));
+                cmd.addActionListener(e -> onDefault());
+                pnl.add(cmd);
+            }
+            pnl.add(Box.createRigidArea(new Dimension(5, 0)));
+            {
                 var cmd = new JButton("-");
                 cmd.setPreferredSize(new Dimension(21, 21));
                 cmd.addActionListener(e -> onRemove());
@@ -50,6 +58,10 @@ public class XrplPriceOracleEditor extends JPanel {
                 pnl.add(cmd);
             }
         }
+    }
+
+    private void onDefault() {
+        load(XrplPriceOracleConfig.defaults());
     }
 
     private void onAdd() {

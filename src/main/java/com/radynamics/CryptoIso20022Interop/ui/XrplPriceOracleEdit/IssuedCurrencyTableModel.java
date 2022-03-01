@@ -18,6 +18,7 @@ public class IssuedCurrencyTableModel extends AbstractTableModel {
 
     public void load(List<Record> data) {
         list = data;
+        fireTableDataChanged();
     }
 
     public int getColumnCount() {
