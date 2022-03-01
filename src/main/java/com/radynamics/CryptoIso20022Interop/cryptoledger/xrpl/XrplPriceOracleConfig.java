@@ -7,10 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 
 public class XrplPriceOracleConfig {
     final static Logger log = LogManager.getLogger(XrplPriceOracleConfig.class);
@@ -24,6 +21,15 @@ public class XrplPriceOracleConfig {
             issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    public void save() throws Exception {
+        try (var repo = new ConfigRepo()) {
+            repo.saveOrUpdate("xrplPriceOracleConfig", toJson(issuedCurrencies).toString());
+            repo.getConnection().commit();
+        } catch (Exception e) {
+            throw e;
         }
     }
 
@@ -60,5 +66,10 @@ public class XrplPriceOracleConfig {
 
     public IssuedCurrency[] issuedCurrencies() {
         return issuedCurrencies.toArray(new IssuedCurrency[0]);
+    }
+
+    public void set(List<IssuedCurrency> issuedCurrencies) {
+        this.issuedCurrencies.clear();
+        this.issuedCurrencies.addAll(issuedCurrencies);
     }
 }

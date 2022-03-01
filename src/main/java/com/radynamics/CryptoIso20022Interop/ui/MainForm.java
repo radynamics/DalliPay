@@ -19,6 +19,7 @@ public class MainForm extends JFrame {
     private final TransformInstruction transformInstruction;
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
+    private OptionsForm optionsPanel;
 
     public MainForm(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -104,8 +105,13 @@ public class MainForm extends JFrame {
                     tabbedPane.setEnabledAt(2, false);
                 }
                 {
-                    tabbedPane.addTab("Options", new JPanel());
-                    tabbedPane.setEnabledAt(3, false);
+                    optionsPanel = new OptionsForm();
+                    optionsPanel.addChangedListener(() -> {
+                        transformInstruction.getHistoricExchangeRateSource().init();
+                    });
+                    optionsPanel.setBorder(mainContentBorder);
+                    tabbedPane.addTab("Options", optionsPanel);
+                    optionsPanel.load();
                 }
             }
         }

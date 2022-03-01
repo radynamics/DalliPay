@@ -25,4 +25,19 @@ public class ConfigRepo implements AutoCloseable {
 
         return Database.singleString(ps.executeQuery(), "value");
     }
+
+    public void saveOrUpdate(String key, String value) throws Exception {
+        String sql = "INSERT OR REPLACE INTO config (id, key, value) \n"
+                + "	    VALUES ((SELECT id FROM config WHERE key = ?), ?, ?);";
+        var ps = conn.prepareStatement(sql);
+        ps.setString(1, key);
+        ps.setString(2, key);
+        ps.setString(3, value);
+
+        ps.executeUpdate();
+    }
+
+    public Connection getConnection(){
+        return conn;
+    }
 }
