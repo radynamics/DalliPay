@@ -27,18 +27,15 @@ public class PaymentTable extends JPanel {
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
+    private final Actor actor;
     private PaymentValidator validator;
-    private ExchangeRateProvider exchangeRateProvider;
     private ArrayList<ProgressListener> listener = new ArrayList<>();
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
+        this.actor = actor;
         this.validator = validator;
-
-        exchangeRateProvider = actor == Actor.Sender
-                ? transformInstruction.getExchangeRateProvider()
-                : transformInstruction.getHistoricExchangeRateSource();
 
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel(exchangeRateLoader, validator);
@@ -167,7 +164,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider);
+        var frm = new PaymentDetailForm(obj, validator, getExchangeRateProvider());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(650, 430);
         frm.setModal(true);
@@ -177,6 +174,12 @@ public class PaymentTable extends JPanel {
         if (frm.getPaymentChanged()) {
             refresh(obj);
         }
+    }
+
+    private ExchangeRateProvider getExchangeRateProvider() {
+        return actor == Actor.Sender
+                ? transformInstruction.getExchangeRateProvider()
+                : transformInstruction.getHistoricExchangeRateSource();
     }
 
     public Payment[] selectedPayments() {

@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ExchangeRatesForm extends JDialog {
-    private final ExchangeRateProvider exchangeRateProvider;
+    private ExchangeRateProvider selectedExchange;
     private final ExchangeRate[] rates;
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -21,12 +22,13 @@ public class ExchangeRatesForm extends JDialog {
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
     private LocalDateTime pointInTime;
+    private JComboBox<ExchangeRateProvider> cboExchange;
 
-    public ExchangeRatesForm(ExchangeRateProvider exchangeRateProvider, ExchangeRate[] rates, LocalDateTime pointInTime) {
-        if (exchangeRateProvider == null) throw new IllegalArgumentException("Parameter 'exchangeRateProvider' cannot be null");
+    public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, LocalDateTime pointInTime) {
+        if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");
-        this.exchangeRateProvider = exchangeRateProvider;
+        this.selectedExchange = selectedExchange;
         this.rates = rates;
         this.pointInTime = pointInTime;
 
@@ -121,9 +123,28 @@ public class ExchangeRatesForm extends JDialog {
                     pnlLine.add(lbl);
                 }
                 {
-                    var lbl = new JLabel();
-                    lbl.setText(String.format(" exchange rates from %s if possible", exchangeRateProvider.getDisplayText()));
-                    lbl.setOpaque(true);
+                    var lbl = new JLabel(" exchange rates from ");
+                    pnlLine.add(lbl);
+                }
+                {
+                    cboExchange = new JComboBox<>();
+                    setAllowChangeExchange(false);
+                    cboExchange.setRenderer(new ExchangeRateProviderCellRenderer());
+                    for (var exchange : ExchangeRateProviderFactory.allExchanges()) {
+                        cboExchange.addItem(exchange);
+                        if (exchange.getId().equals(selectedExchange.getId())) {
+                            cboExchange.setSelectedItem(exchange);
+                        }
+                    }
+                    cboExchange.addItemListener(e -> {
+                        if (e.getStateChange() == ItemEvent.SELECTED) {
+                            onSelectedExchangeChanged((ExchangeRateProvider) e.getItem());
+                        }
+                    });
+                    pnlLine.add(cboExchange);
+                }
+                {
+                    var lbl = new JLabel(" if possible");
                     pnlLine.add(lbl);
                 }
             }
@@ -154,6 +175,11 @@ public class ExchangeRatesForm extends JDialog {
                 pnl.add(cmd);
             }
         }
+    }
+
+    private void onSelectedExchangeChanged(ExchangeRateProvider exchange) {
+        selectedExchange = exchange;
+        refreshRates();
     }
 
     private Component createRow(int row, ExchangeRate rate) {
@@ -191,12 +217,12 @@ public class ExchangeRatesForm extends JDialog {
     }
 
     private void refreshRates() {
-        exchangeRateProvider.load();
+        selectedExchange.load();
         for (var i = 0; i < rates.length; i++) {
             var pair = rates[i].getPair();
-            var exchangeRates = exchangeRateProvider.supportsRateAt()
-                    ? new ExchangeRate[]{exchangeRateProvider.rateAt(pair, pointInTime)}
-                    : exchangeRateProvider.latestRates();
+            var exchangeRates = selectedExchange.supportsRateAt()
+                    ? new ExchangeRate[]{selectedExchange.rateAt(pair, pointInTime)}
+                    : selectedExchange.latestRates();
             var r = ExchangeRate.getOrNull(exchangeRates, pair);
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));
@@ -235,5 +261,13 @@ public class ExchangeRatesForm extends JDialog {
 
     public boolean isDialogAccepted() {
         return accepted;
+    }
+
+    public ExchangeRateProvider getSelectedExchange() {
+        return selectedExchange;
+    }
+
+    public void setAllowChangeExchange(boolean allowed) {
+        cboExchange.setEnabled(allowed);
     }
 }

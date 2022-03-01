@@ -4,6 +4,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.ArrayList;
+
 public final class ExchangeRateProviderFactory {
     public static final ExchangeRateProvider create(String id) {
         return create(id, null);
@@ -22,5 +24,12 @@ public final class ExchangeRateProviderFactory {
             default:
                 throw new NotImplementedException(String.format("Exchange %s unknown.", id));
         }
+    }
+
+    public static ExchangeRateProvider[] allExchanges() {
+        var list = new ArrayList<ExchangeRateProvider>();
+        list.add(create(Bitstamp.ID));
+        list.add(create(Coinbase.ID));
+        return list.toArray(new ExchangeRateProvider[0]);
     }
 }

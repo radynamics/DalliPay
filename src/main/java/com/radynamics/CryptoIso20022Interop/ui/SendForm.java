@@ -27,6 +27,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
 
+    private JLabel lblExchange;
     private PaymentTable table;
     private FilePathField txtInput;
     private Pain001Reader reader;
@@ -109,13 +110,14 @@ public class SendForm extends JPanel implements MainFormPane {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                var lbl2 = new JLabel(transformInstruction.getExchangeRateProvider().getDisplayText());
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, 30, SpringLayout.NORTH, panel1);
-                panel1.add(lbl2);
+                lblExchange = new JLabel();
+                refreshExchange();
+                panel1Layout.putConstraint(SpringLayout.WEST, lblExchange, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblExchange, 30, SpringLayout.NORTH, panel1);
+                panel1.add(lblExchange);
 
                 var lbl3 = Utils.createLinkLabel(owner, "edit...");
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lbl2);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblExchange);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 30, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {
                     @Override
@@ -208,6 +210,10 @@ public class SendForm extends JPanel implements MainFormPane {
         return true;
     }
 
+    private void refreshExchange() {
+        lblExchange.setText(transformInstruction.getExchangeRateProvider().getDisplayText());
+    }
+
     private void showExchangeRateEdit() {
         var undefined = new HashMap<Payment, ExchangeRate>();
         var uniques = new HashMap<String, ExchangeRate>();
@@ -221,6 +227,7 @@ public class SendForm extends JPanel implements MainFormPane {
         }
 
         var frm = new ExchangeRatesForm(transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), LocalDateTime.now());
+        frm.setAllowChangeExchange(true);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(400, 300);
         frm.setModal(true);
@@ -231,6 +238,8 @@ public class SendForm extends JPanel implements MainFormPane {
             return;
         }
 
+        transformInstruction.setExchangeRateProvider(frm.getSelectedExchange());
+        refreshExchange();
         for (var item : undefined.entrySet()) {
             item.getKey().setExchangeRate(item.getValue());
         }
