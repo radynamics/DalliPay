@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class Database {
     final static Logger log = LogManager.getLogger(Database.class);
@@ -51,14 +52,14 @@ public class Database {
         conn.createStatement().execute(sql);
     }
 
-    static String singleString(ResultSet rs, String column) throws Exception {
+    public static Optional<String> singleString(ResultSet rs, String column) throws Exception {
         if (!rs.next()) {
-            throw new DbException("No record found");
+            return Optional.empty();
         }
         var value = rs.getString("value");
         if (rs.next()) {
             throw new DbException(String.format("More than one record found for %s in %s", value, column));
         }
-        return value;
+        return Optional.of(value);
     }
 }

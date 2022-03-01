@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -239,6 +240,12 @@ public class SendForm extends JPanel implements MainFormPane {
         }
 
         transformInstruction.setExchangeRateProvider(frm.getSelectedExchange());
+        try (var repo = new ConfigRepo()) {
+            repo.saveOrUpdate("exchangeRateProvider", transformInstruction.getExchangeRateProvider().getId());
+            repo.getConnection().commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         refreshExchange();
         for (var item : undefined.entrySet()) {
             item.getKey().setExchangeRate(item.getValue());

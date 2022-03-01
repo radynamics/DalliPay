@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
 import java.sql.Connection;
+import java.util.Optional;
 
 public class ConfigRepo implements AutoCloseable {
     private final Connection conn;
@@ -19,7 +20,7 @@ public class ConfigRepo implements AutoCloseable {
         conn.close();
     }
 
-    public String single(String key) throws Exception {
+    public Optional<String> single(String key) throws Exception {
         var ps = conn.prepareStatement("SELECT value FROM config WHERE key = ?");
         ps.setString(1, key);
 
@@ -37,7 +38,7 @@ public class ConfigRepo implements AutoCloseable {
         ps.executeUpdate();
     }
 
-    public Connection getConnection(){
+    public Connection getConnection() {
         return conn;
     }
 }

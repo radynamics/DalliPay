@@ -3,6 +3,9 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
+import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
@@ -10,6 +13,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -18,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class JsonReader {
+    final static Logger log = LogManager.getLogger(JsonReader.class);
+
     public TransformInstruction read(InputStream input, String configFilePath, Network network) {
         var bufferedReader = new BufferedReader(new InputStreamReader(input));
         var tokener = new JSONTokener(bufferedReader);
@@ -28,7 +35,7 @@ public class JsonReader {
         Config config = Config.load(ledger, configFilePath);
         ledger.setNetwork(config.getNetwork(network));
         var ti = new TransformInstruction(ledger);
-        ti.setExchangeRateProvider(ExchangeRateProviderFactory.create(json.getString("exchange")));
+        ti.setExchangeRateProvider(getExchangeRateProvider());
         ti.getExchangeRateProvider().init();
         ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), config.getNetwork(Network.Live)));
         ti.getHistoricExchangeRateSource().init();
@@ -50,6 +57,17 @@ public class JsonReader {
         }
 
         return ti;
+    }
+
+    private ExchangeRateProvider getExchangeRateProvider() {
+        String id = null;
+        try (var repo = new ConfigRepo()) {
+            id = repo.single("exchangeRateProvider").orElse(Coinbase.ID);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return ExchangeRateProviderFactory.create(id);
     }
 
     private DateFormat parseDateFormat(String value) {

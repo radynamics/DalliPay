@@ -15,7 +15,7 @@ public class XrplPriceOracleConfig {
 
     public void load() {
         try (var repo = new ConfigRepo()) {
-            var json = new JSONObject(repo.single("xrplPriceOracleConfig"));
+            var json = new JSONObject(repo.single("xrplPriceOracleConfig").orElseThrow());
 
             issuedCurrencies.clear();
             issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
