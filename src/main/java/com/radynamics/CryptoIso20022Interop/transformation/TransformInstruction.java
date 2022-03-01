@@ -18,7 +18,7 @@ public class TransformInstruction {
 
     private String senderPublicKey;
     private String senderSecret;
-    private String targetCcy;
+    private String targetCcy = "USD";
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
     private StructuredReference creditorReferenceIfMissing;
@@ -83,6 +83,8 @@ public class TransformInstruction {
     }
 
     public void setTargetCcy(String targetCcy) {
+        if (targetCcy == null) throw new IllegalArgumentException("Parameter 'targetCcy' cannot be null");
+        // If set to another currency than ledger's native currency, amounts are converted using rates provided by exchange.
         this.targetCcy = targetCcy;
     }
 

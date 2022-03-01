@@ -6,6 +6,7 @@ import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -108,6 +110,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 cboTargetCcy = new JComboBox<>();
+                cboTargetCcy.addItemListener(e -> {
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        onSelectedTargetCcyChanged((String) e.getItem());
+                    }
+                });
                 fillTargetCcy();
                 panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
@@ -185,11 +192,29 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
     }
 
+    private void onSelectedTargetCcyChanged(String ccy) {
+        try (var repo = new ConfigRepo()) {
+            repo.saveOrUpdate("targetCcy", ccy);
+            repo.getConnection().commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+
+        transformInstruction.setTargetCcy(ccy);
+    }
+
     private void fillTargetCcy() {
+        String selectedCcy = null;
+        try (var repo = new ConfigRepo()) {
+            selectedCcy = repo.single("targetCcy").orElse(transformInstruction.getTargetCcy());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+
         var ccys = new String[]{"USD", "EUR", "JPY", "XRP"};
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
-            if (ccy.equalsIgnoreCase(transformInstruction.getTargetCcy())) {
+            if (ccy.equalsIgnoreCase(selectedCcy)) {
                 cboTargetCcy.setSelectedItem(ccy);
             }
         }

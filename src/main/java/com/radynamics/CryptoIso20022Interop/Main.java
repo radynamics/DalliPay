@@ -97,7 +97,6 @@ public class Main {
         ledger.setNetwork(config.getNetwork(Network.Live));
 
         var t = new TransformInstruction(ledger);
-        t.setTargetCcy("USD");
         t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
         t.getExchangeRateProvider().init();
         t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));

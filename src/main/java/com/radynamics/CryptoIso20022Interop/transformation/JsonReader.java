@@ -39,8 +39,6 @@ public class JsonReader {
         ti.getExchangeRateProvider().init();
         ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), config.getNetwork(Network.Live)));
         ti.getHistoricExchangeRateSource().init();
-        // If set to another currency than ledger's native currency, amounts are converted using rates provided by exchange.
-        ti.setTargetCcy(json.getString("targetCcy"));
 
         ti.setBookingDateFormat(parseDateFormat(json.getString("bookingDateFormat")));
         ti.setValutaDateFormat(parseDateFormat(json.getString("valutaDateFormat")));
