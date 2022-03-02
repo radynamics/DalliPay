@@ -22,9 +22,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
 
         var wv = new WalletValidator(t.getLedger());
         if (t.getReceiverWallet() != null) {
-            list.addAll(Arrays.asList(wv.validate(t.getReceiverWallet(), "Receiver")));
+            var walletValidations = wv.validate(t.getReceiverWallet(), "Receiver");
+            list.addAll(Arrays.asList(walletValidations));
 
-            if (t.getLedger().requiresDestinationTag(t.getReceiverWallet())) {
+            if (walletValidations.length == 0 && t.getLedger().requiresDestinationTag(t.getReceiverWallet())) {
                 list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
             }
         }
@@ -32,9 +33,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         if (t.getSenderWallet() == null) {
             list.add(new ValidationResult(ValidationState.Error, "Sender wallet is missing."));
         } else {
-            list.addAll(Arrays.asList(wv.validate(t.getSenderWallet(), "Sender")));
+            var walletValidations = wv.validate(t.getSenderWallet(), "Sender");
+            list.addAll(Arrays.asList(walletValidations));
 
-            if (WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
+            if (walletValidations.length == 0 && WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
             }
         }
