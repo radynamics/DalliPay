@@ -3,6 +3,8 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
@@ -26,13 +28,13 @@ public class JsonReader {
         var json = new JSONObject(tokener);
 
         // TODO: validate format
-        var ledger = LedgerFactory.create(json.getString("ledger"));
+        var ledger = LedgerFactory.create(Ledger.ID);
         Config config = Config.load(ledger, configFilePath);
         ledger.setNetwork(config.getNetwork(network));
         var ti = new TransformInstruction(ledger);
         ti.setExchangeRateProvider(getExchangeRateProvider());
         ti.getExchangeRateProvider().init();
-        ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), config.getNetwork(Network.Live)));
+        ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
         ti.getHistoricExchangeRateSource().init();
 
         var arr = json.getJSONArray("accountMapping");
