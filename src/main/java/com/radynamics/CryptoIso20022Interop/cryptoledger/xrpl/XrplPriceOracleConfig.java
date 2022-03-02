@@ -15,22 +15,30 @@ public class XrplPriceOracleConfig {
 
     public void load() {
         try (var repo = new ConfigRepo()) {
-            var json = new JSONObject(repo.single("xrplPriceOracleConfig").orElseThrow());
-
-            issuedCurrencies.clear();
-            issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
+            load(repo);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    public void load(ConfigRepo repo) throws Exception {
+        var json = new JSONObject(repo.single("xrplPriceOracleConfig").orElseThrow());
+
+        issuedCurrencies.clear();
+        issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
+    }
+
     public void save() throws Exception {
         try (var repo = new ConfigRepo()) {
-            repo.saveOrUpdate("xrplPriceOracleConfig", toJson(issuedCurrencies).toString());
+            save(repo);
             repo.getConnection().commit();
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    public void save(ConfigRepo repo) throws Exception {
+        repo.saveOrUpdate("xrplPriceOracleConfig", toJson(issuedCurrencies).toString());
     }
 
     private JSONObject toJson(Collection<IssuedCurrency> ccys) {
