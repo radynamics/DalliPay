@@ -35,6 +35,11 @@ public class ReceiverPane extends JPanel {
                 top += 140;
             }
             {
+                var lbl = addRowLabel(top, "Export");
+                lbl.putClientProperty("FlatLaf.styleClass", "h3");
+                top += 40;
+            }
+            {
                 addRowLabel(top, "Booking date format:");
                 cboBookingFormat = createCboDateFormat();
                 addRowContent(top, cboBookingFormat);
@@ -63,12 +68,13 @@ public class ReceiverPane extends JPanel {
         add(component);
     }
 
-    private void addRowLabel(int top, String text) {
+    private JLabel addRowLabel(int top, String text) {
         var lbl = new JLabel(text);
         contentLayout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, this);
         contentLayout.putConstraint(SpringLayout.NORTH, lbl, top, SpringLayout.NORTH, this);
         lbl.setOpaque(true);
         add(lbl);
+        return lbl;
     }
 
     private JComboBox<DateFormat> createCboDateFormat() {
