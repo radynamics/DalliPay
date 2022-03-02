@@ -250,6 +250,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             try (var repo = new ConfigRepo()) {
                 w.getTransformInstruction().setBookingDateFormat(repo.getBookingDateFormat());
                 w.getTransformInstruction().setValutaDateFormat(repo.getValutaDateFormat());
+                w.getTransformInstruction().setCreditorReferenceIfMissing(repo.getCreditorReferenceIfMissing());
             }
             var camtConverter = camtExport.getConverter();
             var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));

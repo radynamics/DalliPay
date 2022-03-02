@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -35,11 +34,6 @@ public class JsonReader {
         ti.getExchangeRateProvider().init();
         ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(json.getString("historicExchangeRateSource"), config.getNetwork(Network.Live)));
         ti.getHistoricExchangeRateSource().init();
-
-        if (json.has("creditorReferenceIfMissing")) {
-            var value = json.getString("creditorReferenceIfMissing");
-            ti.setCreditorReferenceIfMissing(StructuredReferenceFactory.create(StructuredReferenceFactory.detectType(value), value));
-        }
 
         var arr = json.getJSONArray("accountMapping");
         for (int i = 0; i < arr.length(); i++) {

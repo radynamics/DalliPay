@@ -19,6 +19,7 @@ public class ReceiverPane extends JPanel {
     private final SpringLayout contentLayout;
     private final JComboBox<DateFormat> cboBookingFormat;
     private final JComboBox<DateFormat> cboValutaFormat;
+    private final JTextField txtCreditorReference;
 
     public ReceiverPane() {
         setPreferredSize(new Dimension(1000, 400));
@@ -45,11 +46,18 @@ public class ReceiverPane extends JPanel {
                 addRowContent(top, cboValutaFormat);
                 top += 30;
             }
+            {
+                addRowLabel(top, "Creditor reference if empty:");
+                txtCreditorReference = new JTextField();
+                txtCreditorReference.setPreferredSize(new Dimension(160, 24));
+                addRowContent(top, txtCreditorReference);
+                top += 30;
+            }
         }
     }
 
     private void addRowContent(int top, Component component) {
-        final int paddingWest = 120;
+        final int paddingWest = 150;
         contentLayout.putConstraint(SpringLayout.WEST, component, paddingWest, SpringLayout.WEST, this);
         contentLayout.putConstraint(SpringLayout.NORTH, component, top, SpringLayout.NORTH, this);
         add(component);
@@ -78,6 +86,7 @@ public class ReceiverPane extends JPanel {
             xrplPriceOracleConfig.save(repo);
             repo.setBookingDateFormat((DateFormat) cboBookingFormat.getSelectedItem());
             repo.setValutaDateFormat((DateFormat) cboValutaFormat.getSelectedItem());
+            repo.setCreditorReferenceIfMissing(txtCreditorReference.getText());
 
             repo.commit();
         }
@@ -90,6 +99,8 @@ public class ReceiverPane extends JPanel {
 
             cboBookingFormat.setSelectedItem(repo.getBookingDateFormat());
             cboValutaFormat.setSelectedItem(repo.getValutaDateFormat());
+            var referenceNo = repo.getCreditorReferenceIfMissing();
+            txtCreditorReference.setText(referenceNo == null ? "" : referenceNo.getUnformatted());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

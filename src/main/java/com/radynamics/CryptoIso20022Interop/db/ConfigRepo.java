@@ -4,6 +4,8 @@ import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
+import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -65,6 +67,15 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setTargetCcy(String value) throws Exception {
         saveOrUpdate("targetCcy", value);
+    }
+
+    public StructuredReference getCreditorReferenceIfMissing() throws Exception {
+        var value = single("creditorReferenceIfMissing").orElse("");
+        return value.length() == 0 ? null : StructuredReferenceFactory.create(StructuredReferenceFactory.detectType(value), value);
+    }
+
+    public void setCreditorReferenceIfMissing(String value) throws Exception {
+        saveOrUpdate("creditorReferenceIfMissing", value);
     }
 
     private Optional<String> single(String key) throws Exception {
