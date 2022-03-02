@@ -1,4 +1,4 @@
-package com.radynamics.CryptoIso20022Interop.ui.XrplPriceOracleEdit;
+package com.radynamics.CryptoIso20022Interop.ui.options.XrplPriceOracleEdit;
 
 import org.apache.commons.lang3.StringUtils;
 
