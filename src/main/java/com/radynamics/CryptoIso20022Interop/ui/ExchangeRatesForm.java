@@ -190,6 +190,7 @@ public class ExchangeRatesForm extends JDialog {
         pnlContent.add(lbl);
 
         var txt = new JTextField(String.valueOf(rate.getRate()));
+        txt.setPreferredSize(new Dimension(160, 24));
         txt.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
