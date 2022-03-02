@@ -22,10 +22,8 @@ public class XrplPriceOracleConfig {
     }
 
     public void load(ConfigRepo repo) throws Exception {
-        var json = new JSONObject(repo.single("xrplPriceOracleConfig").orElseThrow());
-
         issuedCurrencies.clear();
-        issuedCurrencies.addAll(Arrays.asList(fromJson(json)));
+        issuedCurrencies.addAll(Arrays.asList(fromJson(repo.getXrplPriceOracleConfig())));
     }
 
     public void save() throws Exception {
@@ -38,7 +36,7 @@ public class XrplPriceOracleConfig {
     }
 
     public void save(ConfigRepo repo) throws Exception {
-        repo.saveOrUpdate("xrplPriceOracleConfig", toJson(issuedCurrencies).toString());
+        repo.setXrplPriceOracleConfig(toJson(issuedCurrencies));
     }
 
     private JSONObject toJson(Collection<IssuedCurrency> ccys) {

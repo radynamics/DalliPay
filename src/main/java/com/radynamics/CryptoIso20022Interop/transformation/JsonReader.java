@@ -4,7 +4,6 @@ import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
-import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -55,7 +54,7 @@ public class JsonReader {
     private ExchangeRateProvider getExchangeRateProvider() {
         String id = null;
         try (var repo = new ConfigRepo()) {
-            id = repo.single("exchangeRateProvider").orElse(Coinbase.ID);
+            id = repo.getExchangeRateProvider();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -194,7 +194,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void onSelectedTargetCcyChanged(String ccy) {
         try (var repo = new ConfigRepo()) {
-            repo.saveOrUpdate("targetCcy", ccy);
+            repo.setTargetCcy(ccy);
             repo.getConnection().commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
@@ -206,7 +206,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private void fillTargetCcy() {
         String selectedCcy = null;
         try (var repo = new ConfigRepo()) {
-            selectedCcy = repo.single("targetCcy").orElse(transformInstruction.getTargetCcy());
+            selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
