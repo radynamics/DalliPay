@@ -195,7 +195,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private void onSelectedTargetCcyChanged(String ccy) {
         try (var repo = new ConfigRepo()) {
             repo.setTargetCcy(ccy);
-            repo.getConnection().commit();
+            repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }

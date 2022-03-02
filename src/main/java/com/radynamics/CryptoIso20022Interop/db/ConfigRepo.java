@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
 import org.json.JSONObject;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class ConfigRepo implements AutoCloseable {
@@ -84,7 +85,7 @@ public class ConfigRepo implements AutoCloseable {
         ps.executeUpdate();
     }
 
-    public Connection getConnection() {
-        return conn;
+    public void commit() throws SQLException {
+        conn.commit();
     }
 }

@@ -29,7 +29,7 @@ public class XrplPriceOracleConfig {
     public void save() throws Exception {
         try (var repo = new ConfigRepo()) {
             save(repo);
-            repo.getConnection().commit();
+            repo.commit();
         } catch (Exception e) {
             throw e;
         }

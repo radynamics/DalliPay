@@ -242,7 +242,7 @@ public class SendForm extends JPanel implements MainFormPane {
         transformInstruction.setExchangeRateProvider(frm.getSelectedExchange());
         try (var repo = new ConfigRepo()) {
             repo.setExchangeRateProvider(transformInstruction.getExchangeRateProvider());
-            repo.getConnection().commit();
+            repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }

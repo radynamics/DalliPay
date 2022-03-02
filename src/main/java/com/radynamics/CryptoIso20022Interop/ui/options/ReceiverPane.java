@@ -79,7 +79,7 @@ public class ReceiverPane extends JPanel {
             repo.setBookingDateFormat((DateFormat) cboBookingFormat.getSelectedItem());
             repo.setValutaDateFormat((DateFormat) cboValutaFormat.getSelectedItem());
 
-            repo.getConnection().commit();
+            repo.commit();
         }
     }
 
