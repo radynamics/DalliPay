@@ -247,8 +247,13 @@ public class SendForm extends JPanel implements MainFormPane {
             ExceptionDialog.show(this, e);
         }
         refreshExchange();
-        for (var item : undefined.entrySet()) {
-            item.getKey().setExchangeRate(item.getValue());
+        for (var ccyPairItem : uniques.entrySet()) {
+            for (var item : undefined.entrySet()) {
+                var p = item.getKey();
+                if (ccyPairItem.getKey().equals(p.createCcyPair().getDisplayText())) {
+                    p.setExchangeRate(ccyPairItem.getValue());
+                }
+            }
         }
 
         var ar = new AmountRefresher(payments);
