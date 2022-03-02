@@ -24,12 +24,12 @@ public class TestFactory {
         return i;
     }
 
-    public static Payment[] createTransactions(Ledger ledger) {
+    public static Payment[] createTransactions(Ledger ledger, String targetCcy) {
         var list = new ArrayList<Transaction>();
         list.add(createTransaction1(ledger));
         list.add(createTransaction2(ledger));
         list.add(createTransactionScor(ledger));
-        return PaymentConverter.toPayment(list.toArray(new Transaction[0]));
+        return PaymentConverter.toPayment(list.toArray(new Transaction[0]), targetCcy);
     }
 
     private static Transaction createTransaction1(Ledger ledger) {

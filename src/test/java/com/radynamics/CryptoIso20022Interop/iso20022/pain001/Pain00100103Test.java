@@ -101,6 +101,33 @@ public class Pain00100103Test {
         Assertion.assertEquals(transactions[3], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 8000000);
     }
 
+
+    @ParameterizedTest
+    @CsvSource({"1", "2"})
+    public void readDifferentExchangeRates(double rate) throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger);
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+        // DbtrAcct
+        ti.add(new AccountMapping(new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736"));
+        // CdtrAcct
+        ti.add(new AccountMapping(new IbanAccount("GB96MIDL40271522859882"), "receiver_GB96MIDL40271522859882"));
+        ExchangeRate[] rates = {
+                new ExchangeRate("GBP", ledger.getNativeCcySymbol(), rate, LocalDateTime.now()),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger);
+
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
+
+        assertNotNull(transactions);
+        assertEquals(4, transactions.length);
+
+        Assertion.assertEquals(transactions[0], rates[0]);
+        Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 5000000 / rate, ReferenceType.Scor, "RF712348231");
+    }
+
     @ParameterizedTest
     @CsvSource({"TEST", "USE"})
     public void readNoExchangeRate(String targetCcy) throws Exception {
@@ -123,7 +150,8 @@ public class Pain00100103Test {
 
         assertEquals("GBP", transactions[0].getFiatCcy());
         Assertions.assertEquals(5000, (double) transactions[0].getAmount());
-        var expectedLedgerAmount = ledger.getNativeCcySymbol().equals(targetCcy) ? 5000000 : 0;
+        Assertion.assertEquals(transactions[0], null);
+        var expectedLedgerAmount = 0;
         Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", expectedLedgerAmount, ReferenceType.Scor, "RF712348231");
     }
 

@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
@@ -80,5 +81,18 @@ public class Assertion {
         Assert.assertEquals(ccy, transaction.getFiatCcy());
         Assert.assertEquals(ledgerAmt, transaction.getLedgerAmountSmallestUnit());
         Assert.assertEquals(ledgerCcy, transaction.getLedgerCcy());
+    }
+
+    public static void assertEquals(Payment transaction, ExchangeRate expected) {
+        var actual = transaction.getExchangeRate();
+        if (expected == null) {
+            Assert.assertNull(actual);
+        } else {
+            Assert.assertNotNull(actual);
+            Assert.assertEquals(actual.getPair().getFirst(), expected.getPair().getFirst());
+            Assert.assertEquals(actual.getPair().getSecond(), expected.getPair().getSecond());
+            Assert.assertEquals(actual.getRate(), expected.getRate(), 0);
+            Assert.assertEquals(actual.getPointInTime(), expected.getPointInTime());
+        }
     }
 }

@@ -31,7 +31,7 @@ public class Camt05400102WriterTest {
         cryptoInstruction.setTargetCcy(targetCcy);
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
+        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), targetCcy));
 
         var w = new Camt05400102Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());

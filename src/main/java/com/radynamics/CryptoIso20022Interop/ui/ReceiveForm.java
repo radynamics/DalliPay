@@ -311,7 +311,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             t.setTargetCcy(targetCcy);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
-            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPaymentsReceived(wallet, period)));
+            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPaymentsReceived(wallet, period), targetCcy));
 
             table.load(payments);
         } catch (Exception e) {

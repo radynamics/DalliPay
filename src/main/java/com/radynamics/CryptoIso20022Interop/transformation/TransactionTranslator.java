@@ -16,7 +16,6 @@ public class TransactionTranslator {
     public TransactionTranslator(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
-        this.targetCcy = transformInstruction.getTargetCcy();
     }
 
     public Payment[] apply(Payment[] transactions) {
@@ -34,6 +33,7 @@ public class TransactionTranslator {
                 t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
             }
 
+            var targetCcy = getTargetCcy(t);
             if (t.getLedgerCcy().equalsIgnoreCase(targetCcy)) {
                 if (t.isAmountUnknown()) {
                     t.setAmount(t.getLedger().convertToNativeCcyAmount(t.getLedgerAmountSmallestUnit()), t.getLedgerCcy());
@@ -54,6 +54,14 @@ public class TransactionTranslator {
         }
 
         return transactions;
+    }
+
+    private String getTargetCcy(Payment t) {
+        if (targetCcy != null) {
+            return targetCcy;
+        }
+
+        return t.getFiatCcy();
     }
 
     private Account getAccountOrNull(Wallet wallet) {

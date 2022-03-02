@@ -9,6 +9,8 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -19,8 +21,12 @@ public class Pain00100109Test {
         var ti = new TransformInstruction(ledger);
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
+        ExchangeRate[] rates = {
+                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("TRY", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+        };
         var r = new Pain001Reader(ledger);
-        var tt = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Various/pain.001.001.09_example01.xml")));
 
         Assertions.assertNotNull(transactions);
@@ -105,8 +111,11 @@ public class Pain00100109Test {
         var ti = new TransformInstruction(ledger);
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
+        ExchangeRate[] rates = {
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+        };
         var r = new Pain001Reader(ledger);
-        var tt = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
         var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Various/pain.001.001.09_example02.xml")));
 
         Assertions.assertNotNull(transactions);

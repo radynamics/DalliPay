@@ -28,16 +28,18 @@ public class Camt05400104WriterTest {
     public void testCreate2PaymentsLedgerCcy() throws Exception {
         testCreate2Payments("XRP", "camt054/camt.054.001.04_testCreate2Payments.xml");
     }
+
     @Test
     public void testCreate2PaymentsUsd() throws Exception {
         testCreate2Payments("USD", "camt054/camt.054.001.04_testCreate2Payments.USD.xml");
     }
+
     private void testCreate2Payments(String targetCcy, String expectationResourceName) throws Exception {
         var cryptoInstruction = TestFactory.createTransformInstruction();
         cryptoInstruction.setTargetCcy(targetCcy);
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
+        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), targetCcy));
 
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
@@ -54,7 +56,7 @@ public class Camt05400104WriterTest {
         cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
+        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
@@ -74,7 +76,7 @@ public class Camt05400104WriterTest {
         cryptoInstruction.setValutaDateFormat(format);
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger()));
+        var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
@@ -106,7 +108,7 @@ public class Camt05400104WriterTest {
         trx.removeStructuredReferences(0);
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}));
+        var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}, "XRP"));
 
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
