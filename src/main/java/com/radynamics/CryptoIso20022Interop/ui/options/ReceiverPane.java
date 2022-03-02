@@ -3,7 +3,6 @@ package com.radynamics.CryptoIso20022Interop.ui.options;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
 import com.radynamics.CryptoIso20022Interop.ui.XrplPriceOracleEdit.XrplPriceOracleEditor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,8 +76,8 @@ public class ReceiverPane extends JPanel {
 
         try (var repo = new ConfigRepo()) {
             xrplPriceOracleConfig.save(repo);
-            repo.saveOrUpdate("bookingFormat", DateFormatHelper.toKey((DateFormat) cboBookingFormat.getSelectedItem()));
-            repo.saveOrUpdate("valutaFormat", DateFormatHelper.toKey((DateFormat) cboValutaFormat.getSelectedItem()));
+            repo.setBookingDateFormat((DateFormat) cboBookingFormat.getSelectedItem());
+            repo.setValutaDateFormat((DateFormat) cboValutaFormat.getSelectedItem());
 
             repo.getConnection().commit();
         }

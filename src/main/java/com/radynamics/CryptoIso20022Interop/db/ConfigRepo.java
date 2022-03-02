@@ -27,8 +27,16 @@ public class ConfigRepo implements AutoCloseable {
         return DateFormatHelper.toType(single("bookingFormat").orElse(DateFormatHelper.toKey(DateFormat.DateTime)));
     }
 
+    public void setBookingDateFormat(DateFormat value) throws Exception {
+        saveOrUpdate("bookingFormat", DateFormatHelper.toKey(value));
+    }
+
     public DateFormat getValutaDateFormat() throws Exception {
         return DateFormatHelper.toType(single("valutaFormat").orElse(DateFormatHelper.toKey(DateFormat.DateTime)));
+    }
+
+    public void setValutaDateFormat(DateFormat value) throws Exception {
+        saveOrUpdate("valutaFormat", DateFormatHelper.toKey(value));
     }
 
     public Optional<String> single(String key) throws Exception {
