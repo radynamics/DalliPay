@@ -1,5 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
+
 import java.sql.Connection;
 import java.util.Optional;
 
@@ -18,6 +21,14 @@ public class ConfigRepo implements AutoCloseable {
     @Override
     public void close() throws Exception {
         conn.close();
+    }
+
+    public DateFormat getBookingDateFormat() throws Exception {
+        return DateFormatHelper.toType(single("bookingFormat").orElse(DateFormatHelper.toKey(DateFormat.DateTime)));
+    }
+
+    public DateFormat getValutaDateFormat() throws Exception {
+        return DateFormatHelper.toType(single("valutaFormat").orElse(DateFormatHelper.toKey(DateFormat.DateTime)));
     }
 
     public Optional<String> single(String key) throws Exception {

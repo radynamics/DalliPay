@@ -247,6 +247,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var w = camtExport.getWriter();
+            try (var repo = new ConfigRepo()) {
+                w.getTransformInstruction().setBookingDateFormat(repo.getBookingDateFormat());
+                w.getTransformInstruction().setValutaDateFormat(repo.getValutaDateFormat());
+            }
             var camtConverter = camtExport.getConverter();
             var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);

@@ -89,9 +89,8 @@ public class ReceiverPane extends JPanel {
             xrplPriceOracleConfig.load(repo);
             xrplPriceOracleEditor.load(Arrays.asList(xrplPriceOracleConfig.issuedCurrencies()));
 
-            var defaultValue = DateFormatHelper.toKey(DateFormat.DateTime);
-            cboBookingFormat.setSelectedItem(DateFormatHelper.toType(repo.single("bookingFormat").orElse(defaultValue)));
-            cboValutaFormat.setSelectedItem(DateFormatHelper.toType(repo.single("valutaFormat").orElse(defaultValue)));
+            cboBookingFormat.setSelectedItem(repo.getBookingDateFormat());
+            cboValutaFormat.setSelectedItem(repo.getValutaDateFormat());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

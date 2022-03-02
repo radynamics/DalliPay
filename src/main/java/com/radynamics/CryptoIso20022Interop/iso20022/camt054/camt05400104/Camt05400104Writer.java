@@ -63,6 +63,11 @@ public class Camt05400104Writer implements Camt054Writer {
         return d;
     }
 
+    @Override
+    public TransformInstruction getTransformInstruction() {
+        return transformInstruction;
+    }
+
     private AccountNotification7 getNtfctnOrNull(Document d, Wallet receiver) {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
             if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver))) {
