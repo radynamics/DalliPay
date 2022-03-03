@@ -133,62 +133,65 @@ public class PaymentTable extends JPanel {
         });
         new TableCellListener(table, new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                var tcl = (TableCellListener) e.getSource();
-                var cleanedInput = tcl.getNewValue().toString().trim();
-                var row = tcl.getRow();
-                var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
-
-                var editedActor = tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)
-                        ? Actor.Sender : Actor.Receiver;
-                AccountMapping mapping = new AccountMapping(t.getLedger().getId());
-                var a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
-                var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
-                mapping.setAccount(a);
-                mapping.setWallet(w);
-                try (var repo = new AccountMappingRepo()) {
-                    mapping = repo.single(t.getLedger().getId(), a, w).orElse(mapping);
-                } catch (Exception ex) {
-                    ExceptionDialog.show(table, ex);
-                }
-
-                var changed = false;
-                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
-                    var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
-                    t.setSenderWallet(wallet);
-                    mapping.setWallet(wallet);
-                    changed = true;
-                }
-                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
-                    var account = AccountFactory.create(cleanedInput);
-                    t.setSenderAccount(account);
-                    mapping.setAccount(account);
-                    changed = true;
-                }
-                if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
-                    var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
-                    t.setReceiverWallet(wallet);
-                    mapping.setWallet(wallet);
-                    changed = true;
-                }
-
-                if (!changed) {
-                    return;
-                }
-
-                try (var repo = new AccountMappingRepo()) {
-                    if (mapping.allPresent()) {
-                        repo.saveOrUpdate(mapping);
-                    } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
-                        // Interpret "" as removal. During creation values are maybe not yet defined.
-                        repo.delete(mapping);
-                    }
-                    repo.commit();
-                } catch (Exception ex) {
-                    ExceptionDialog.show(table, ex);
-                }
-                model.onTransactionChanged(row, t);
+                onCellEdited((TableCellListener) e.getSource());
             }
         });
+    }
+
+    private void onCellEdited(TableCellListener tcl) {
+        var cleanedInput = tcl.getNewValue().toString().trim();
+        var row = tcl.getRow();
+        var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
+
+        var editedActor = tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)
+                ? Actor.Sender : Actor.Receiver;
+        AccountMapping mapping = new AccountMapping(t.getLedger().getId());
+        var a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
+        var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
+        mapping.setAccount(a);
+        mapping.setWallet(w);
+        try (var repo = new AccountMappingRepo()) {
+            mapping = repo.single(t.getLedger().getId(), a, w).orElse(mapping);
+        } catch (Exception ex) {
+            ExceptionDialog.show(table, ex);
+        }
+
+        var changed = false;
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
+            var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
+            t.setSenderWallet(wallet);
+            mapping.setWallet(wallet);
+            changed = true;
+        }
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
+            var account = AccountFactory.create(cleanedInput);
+            t.setSenderAccount(account);
+            mapping.setAccount(account);
+            changed = true;
+        }
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
+            var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
+            t.setReceiverWallet(wallet);
+            mapping.setWallet(wallet);
+            changed = true;
+        }
+
+        if (!changed) {
+            return;
+        }
+
+        try (var repo = new AccountMappingRepo()) {
+            if (mapping.allPresent()) {
+                repo.saveOrUpdate(mapping);
+            } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
+                // Interpret "" as removal. During creation values are maybe not yet defined.
+                repo.delete(mapping);
+            }
+            repo.commit();
+        } catch (Exception ex) {
+            ExceptionDialog.show(table, ex);
+        }
+        model.onTransactionChanged(row, t);
     }
 
     public void load(Payment[] data) {
