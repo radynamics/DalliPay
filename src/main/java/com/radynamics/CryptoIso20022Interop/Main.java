@@ -1,15 +1,11 @@
 package com.radynamics.CryptoIso20022Interop;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
-import com.radynamics.CryptoIso20022Interop.transformation.JsonReader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -37,7 +32,6 @@ public class Main {
         var action = getParam(args, "-a");
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
-        var trainsformInstructionFileName = getParam(args, "-ti", "transforminstruction.json");
         var walletPublicKey = getParam(args, "-wallet");
         var walletSecret = getParam(args, "-walletSecret");
         var networkId = getParam(args, "-n", "test"); // live, test
@@ -53,12 +47,11 @@ public class Main {
 
             Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey, walletSecret);
 
-            var r = new JsonReader();
-            var f = new File(trainsformInstructionFileName);
+            var f = new File(configFilePath);
 
-            transformInstruction = f.exists()
-                    ? r.read(new FileInputStream(trainsformInstructionFileName), configFilePath, NetworkConverter.from(networkId))
-                    : createDefaultTransformInstruction();
+            var ledger = LedgerFactory.create(LedgerId.Xrpl);
+            var config = f.exists() ? Config.load(ledger, configFilePath) : Config.fallback(ledger);
+            transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
 
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLightLaf.setup();
@@ -91,11 +84,8 @@ public class Main {
         }
     }
 
-    private static TransformInstruction createDefaultTransformInstruction() {
-        var ledger = LedgerFactory.create(LedgerId.Xrpl);
-
-        var config = Config.fallback(ledger);
-        ledger.setNetwork(config.getNetwork(Network.Live));
+    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, Network network) {
+        ledger.setNetwork(config.getNetwork(network));
 
         var t = new TransformInstruction(ledger);
         t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
