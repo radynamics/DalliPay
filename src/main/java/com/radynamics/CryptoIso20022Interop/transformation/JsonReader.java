@@ -2,8 +2,8 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -28,7 +28,7 @@ public class JsonReader {
         var json = new JSONObject(tokener);
 
         // TODO: validate format
-        var ledger = LedgerFactory.create(Ledger.ID);
+        var ledger = LedgerFactory.create(LedgerId.Xrpl);
         Config config = Config.load(ledger, configFilePath);
         ledger.setNetwork(config.getNetwork(network));
         var ti = new TransformInstruction(ledger);

@@ -27,7 +27,7 @@ public class PaymentUtils {
     public static Ledger[] distinctLedgers(Payment[] payments) {
         var list = new ArrayList<Ledger>();
         for (var p : payments) {
-            var existing = list.stream().anyMatch(l -> p.getLedger().getId().equals(l.getId()));
+            var existing = list.stream().anyMatch(l -> p.getLedger().getId().textId().equals(l.getId().textId()));
             if (!existing) {
                 list.add(p.getLedger());
             }

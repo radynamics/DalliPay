@@ -6,7 +6,7 @@ import okhttp3.HttpUrl;
 import java.math.BigDecimal;
 
 public interface Ledger {
-    String getId();
+    LedgerId getId();
 
     String getNativeCcySymbol();
 

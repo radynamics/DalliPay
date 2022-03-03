@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
@@ -91,7 +92,7 @@ public class Main {
     }
 
     private static TransformInstruction createDefaultTransformInstruction() {
-        var ledger = LedgerFactory.create(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger.ID);
+        var ledger = LedgerFactory.create(LedgerId.Xrpl);
 
         var config = Config.fallback(ledger);
         ledger.setNetwork(config.getNetwork(Network.Live));

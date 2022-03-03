@@ -38,6 +38,6 @@ public class FeeRefresher {
     }
 
     private static final String createKey(Payment p) {
-        return p.getLedger().getId();
+        return p.getLedger().getId().textId();
     }
 }

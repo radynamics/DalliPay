@@ -47,11 +47,11 @@ public class Config {
             return fallback;
         }
 
-        if (!json.has(ledger.getId())) {
+        if (!json.has(ledger.getId().textId())) {
             return fallback;
         }
 
-        var n = json.getJSONObject(ledger.getId());
+        var n = json.getJSONObject(ledger.getId().textId());
         var info = getNetworkInfoOrNull(n, type);
         return info == null ? fallback : info;
     }

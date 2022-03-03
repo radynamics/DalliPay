@@ -16,8 +16,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     private final WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
 
-    public static final String ID = "xrpl";
-
     public Ledger() {
         walletInfoProvider = new WalletInfoProvider[]{
                 new CachedWalletInfoProvider(new WalletInfoProvider[]{new LedgerWalletInfoProvider(this)})
@@ -25,8 +23,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public String getId() {
-        return ID;
+    public LedgerId getId() {
+        return LedgerId.Xrpl;
     }
 
     @Override

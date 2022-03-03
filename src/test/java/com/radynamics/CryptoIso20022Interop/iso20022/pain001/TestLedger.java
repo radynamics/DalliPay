@@ -12,8 +12,8 @@ public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
 
     @Override
-    public String getId() {
-        return "TEST_LEDGER";
+    public LedgerId getId() {
+        return null;
     }
 
     @Override

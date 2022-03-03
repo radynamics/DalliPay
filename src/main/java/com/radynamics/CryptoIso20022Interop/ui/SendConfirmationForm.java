@@ -274,7 +274,7 @@ public class SendConfirmationForm extends JDialog {
 
         var affectedPayments = new ArrayList<Payment>();
         for (var p : payments) {
-            if (p.getLedger().getId().equals(l.getId())) {
+            if (p.getLedger().getId().textId().equals(l.getId().textId())) {
                 affectedPayments.add(p);
             }
         }
