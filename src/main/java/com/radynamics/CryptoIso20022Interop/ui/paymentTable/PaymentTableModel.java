@@ -90,14 +90,16 @@ public class PaymentTableModel extends AbstractTableModel {
     public void load(Payment[] data) {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
-            Object actorAddressOrAccount = getActorAddressOrAccount(t);
-            var senderLedger = new WalletCellValue(t.getSenderWallet());
-            var receiverLedger = new WalletCellValue(t.getReceiverWallet());
             var amount = actor == Actor.Sender ? t.getAmount() : null;
-            list.add(new Object[]{t, new ValidationResult[0], true, null, senderLedger, actorAddressOrAccount, receiverLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, null, null, null, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
+        var row = 0;
+        for (var t : data) {
+            setAccountAndWallet(t, row);
+            row++;
+        }
         fireTableDataChanged();
 
         loadAsync(data);
@@ -207,9 +209,16 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void onTransactionChanged(Payment t) {
+        setAccountAndWallet(t, getRowIndex(t));
         validateAsync(t);
 
         setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));
+    }
+
+    private void setAccountAndWallet(Payment t, int row) {
+        setValueAt(new WalletCellValue(t.getSenderWallet()), row, getColumnIndex(COL_SENDER_LEDGER));
+        setValueAt(getActorAddressOrAccount(t), row, getColumnIndex(COL_RECEIVER_ISO20022));
+        setValueAt(new WalletCellValue(t.getReceiverWallet()), row, getColumnIndex(COL_RECEIVER_LEDGER));
     }
 
     public Actor getActor() {

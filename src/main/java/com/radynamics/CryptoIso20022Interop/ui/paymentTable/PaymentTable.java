@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
@@ -31,6 +33,7 @@ public class PaymentTable extends JPanel {
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
     private final Actor actor;
+    private Payment[] data = new Payment[0];
     private PaymentValidator validator;
     private ArrayList<ProgressListener> listener = new ArrayList<>();
 
@@ -158,21 +161,18 @@ public class PaymentTable extends JPanel {
 
         var changed = false;
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
-            var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
-            t.setSenderWallet(wallet);
-            mapping.setWallet(wallet);
+            mapping.setWallet(createWalletOrNull(cleanedInput));
+            PaymentUtils.apply(t, mapping);
             changed = true;
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
-            var account = AccountFactory.create(cleanedInput);
-            t.setSenderAccount(account);
-            mapping.setAccount(account);
+            mapping.setAccount(createAccountOrNull(cleanedInput));
+            PaymentUtils.apply(t, mapping);
             changed = true;
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
-            var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
-            t.setReceiverWallet(wallet);
-            mapping.setWallet(wallet);
+            mapping.setWallet(createWalletOrNull(cleanedInput));
+            PaymentUtils.apply(t, mapping);
             changed = true;
         }
 
@@ -191,10 +191,25 @@ public class PaymentTable extends JPanel {
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
-        model.onTransactionChanged(t);
+
+        // Also update other affected payments using same mapping
+        for (var p : data) {
+            if (PaymentUtils.apply(p, mapping)) {
+                model.onTransactionChanged(p);
+            }
+        }
+    }
+
+    private Wallet createWalletOrNull(String text) {
+        return StringUtils.isEmpty(text) ? null : transformInstruction.getLedger().createWallet(text, null);
+    }
+
+    private Account createAccountOrNull(String text) {
+        return StringUtils.isEmpty(text) ? null : AccountFactory.create(text);
     }
 
     public void load(Payment[] data) {
+        this.data = data;
         model.load(data);
         table.revalidate();
         table.repaint();
