@@ -206,7 +206,7 @@ public class PaymentTableModel extends AbstractTableModel {
         return list.toArray(new Payment[0]);
     }
 
-    public void onTransactionChanged(int row, Payment t) {
+    public void onTransactionChanged(Payment t) {
         validateAsync(t);
 
         setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));

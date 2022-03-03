@@ -191,7 +191,7 @@ public class PaymentTable extends JPanel {
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
-        model.onTransactionChanged(row, t);
+        model.onTransactionChanged(t);
     }
 
     public void load(Payment[] data) {
@@ -235,7 +235,7 @@ public class PaymentTable extends JPanel {
             log.warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
             return;
         }
-        model.onTransactionChanged(row, t);
+        model.onTransactionChanged(t);
     }
 
     private int getRow(Payment t) {
