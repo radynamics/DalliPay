@@ -65,6 +65,8 @@ public class AccountMapping {
 
     @Override
     public String toString() {
-        return String.format("%s: %s -> %s", getId(), account.getUnformatted(), wallet.getPublicKey());
+        return String.format("%s: %s -> %s", getId(),
+                account == null ? "<null" : account.getUnformatted(),
+                wallet == null ? "<null>" : wallet.getPublicKey());
     }
 }
