@@ -3,10 +3,7 @@ package com.radynamics.CryptoIso20022Interop.db;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Optional;
 
 public class Database {
@@ -44,11 +41,19 @@ public class Database {
     }
 
     private static void createTables(Connection conn) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS config (\n"
+        var sql = "CREATE TABLE IF NOT EXISTS config (\n"
                 + "	    id integer PRIMARY KEY AUTOINCREMENT,\n"
                 + "	    key text NOT NULL UNIQUE,\n"
                 + "	    value text NOT NULL\n"
                 + "   );";
+        conn.createStatement().execute(sql);
+
+        sql = "CREATE TABLE IF NOT EXISTS accountmapping (\n"
+                + "	   id integer PRIMARY KEY AUTOINCREMENT,\n"
+                + "	   ledgerId integer NOT NULL,\n"
+                + "	   bankAccount text NOT NULL,\n"
+                + "	   walletPublicKey text NOT NULL\n"
+                + ");";
         conn.createStatement().execute(sql);
     }
 
@@ -61,5 +66,12 @@ public class Database {
             throw new DbException(String.format("More than one record found for %s in %s", value, column));
         }
         return Optional.of(value);
+    }
+
+    public static void executeUpdate(PreparedStatement ps, int expectedRowsAffected) throws SQLException {
+        var affected = ps.executeUpdate();
+        if (affected != expectedRowsAffected) {
+            throw new SQLException(String.format("%s rows affected but expected %s", affected, expectedRowsAffected));
+        }
     }
 }

@@ -8,8 +8,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -36,13 +34,6 @@ public class JsonReader {
         ti.getExchangeRateProvider().init();
         ti.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
         ti.getHistoricExchangeRateSource().init();
-
-        var arr = json.getJSONArray("accountMapping");
-        for (int i = 0; i < arr.length(); i++) {
-            var obj = arr.getJSONObject(i);
-            var account = obj.has("iban") ? new IbanAccount(obj.getString("iban")) : new OtherAccount(obj.getString("other"));
-            ti.add(new AccountMapping(account, obj.getString("ledgerWallet")));
-        }
 
         return ti;
     }

@@ -2,11 +2,14 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
+import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
+import com.radynamics.CryptoIso20022Interop.db.AccountMappingRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import com.radynamics.CryptoIso20022Interop.ui.ExceptionDialog;
 import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -135,18 +138,55 @@ public class PaymentTable extends JPanel {
                 var row = tcl.getRow();
                 var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
+                var editedActor = tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)
+                        ? Actor.Sender : Actor.Receiver;
+                AccountMapping mapping = new AccountMapping(t.getLedger().getId());
+                var a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
+                var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
+                mapping.setAccount(a);
+                mapping.setWallet(w);
+                try (var repo = new AccountMappingRepo()) {
+                    mapping = repo.single(t.getLedger().getId(), a, w).orElse(mapping);
+                } catch (Exception ex) {
+                    ExceptionDialog.show(table, ex);
+                }
+
+                var changed = false;
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
-                    t.setSenderWallet(transformInstruction.getLedger().createWallet(cleanedInput, null));
-                    model.onTransactionChanged(row, t);
+                    var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
+                    t.setSenderWallet(wallet);
+                    mapping.setWallet(wallet);
+                    changed = true;
                 }
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
-                    t.setSenderAccount(AccountFactory.create(cleanedInput));
-                    model.onTransactionChanged(row, t);
+                    var account = AccountFactory.create(cleanedInput);
+                    t.setSenderAccount(account);
+                    mapping.setAccount(account);
+                    changed = true;
                 }
                 if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
-                    t.setReceiverWallet(transformInstruction.getLedger().createWallet(cleanedInput, null));
-                    model.onTransactionChanged(row, t);
+                    var wallet = transformInstruction.getLedger().createWallet(cleanedInput, null);
+                    t.setReceiverWallet(wallet);
+                    mapping.setWallet(wallet);
+                    changed = true;
                 }
+
+                if (!changed) {
+                    return;
+                }
+
+                try (var repo = new AccountMappingRepo()) {
+                    if (mapping.allPresent()) {
+                        repo.saveOrUpdate(mapping);
+                    } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
+                        // Interpret "" as removal. During creation values are maybe not yet defined.
+                        repo.delete(mapping);
+                    }
+                    repo.commit();
+                } catch (Exception ex) {
+                    ExceptionDialog.show(table, ex);
+                }
+                model.onTransactionChanged(row, t);
             }
         });
     }
