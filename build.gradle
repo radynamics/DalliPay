@@ -30,8 +30,8 @@ dependencies {
     compile group: 'org.xrpl', name: 'xrpl4j-client', version: '2.2.0'
     compile group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.2.0'
 
-    compile 'com.formdev:flatlaf:2.0-rc1'
-    compile 'com.formdev:flatlaf-extras:2.0-rc1'
+    compile 'com.formdev:flatlaf:2.0.2'
+    compile 'com.formdev:flatlaf-extras:2.0.2'
     compile 'com.formdev:svgSalamander:1.1.3'
     compile 'com.github.lgooddatepicker:LGoodDatePicker:11.2.1'
 
