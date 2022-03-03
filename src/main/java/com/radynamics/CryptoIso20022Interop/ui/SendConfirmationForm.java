@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class SendConfirmationForm extends JDialog {
     private final Payment[] payments;
     private final ExchangeRateProvider provider;
+    private int totalPaymentCount;
 
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -28,9 +30,10 @@ public class SendConfirmationForm extends JDialog {
     private JButton cmdSend;
     private JLabel lblFee;
 
-    public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider) {
+    public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount) {
         this.payments = payments;
         this.provider = provider;
+        this.totalPaymentCount = totalPaymentCount;
         setupUI();
     }
 
@@ -95,9 +98,9 @@ public class SendConfirmationForm extends JDialog {
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 60));
-        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 60));
+        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 80));
+        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
         panel2.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel2.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -114,13 +117,31 @@ public class SendConfirmationForm extends JDialog {
                 lbl.setText(getTitle());
                 lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
                 lbl.setOpaque(true);
-                pnl.add(lbl, BorderLayout.NORTH);
+                pnl.add(lbl, BorderLayout.PAGE_START);
             }
             {
                 var lbl = new JLabel();
                 lbl.setText("Please review following summary before sending. Sent payments cannot be reversed.");
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.WEST);
+            }
+            {
+                if (payments.length != totalPaymentCount) {
+                    var pnlInfo = new JPanel();
+                    pnlInfo.setLayout(new BoxLayout(pnlInfo, BoxLayout.X_AXIS));
+                    pnl.add(pnlInfo, BorderLayout.PAGE_END);
+                    {
+                        var lbl = new JLabel();
+                        lbl.setIcon(new FlatSVGIcon("svg/informationDialog.svg", 16, 16));
+                        pnlInfo.add(lbl);
+                    }
+                    pnlInfo.add(Box.createRigidArea(new Dimension(5, 0)));
+                    {
+                        var lbl = new JLabel(String.format("Selected %s payments of %s available.", payments.length, totalPaymentCount));
+                        lbl.setOpaque(true);
+                        pnlInfo.add(lbl);
+                    }
+                }
             }
         }
 

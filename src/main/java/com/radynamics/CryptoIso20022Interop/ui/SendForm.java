@@ -263,7 +263,7 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private boolean showConfirmationForm(Payment[] payments) {
-        var frm = new SendConfirmationForm(payments, transformInstruction.getExchangeRateProvider());
+        var frm = new SendConfirmationForm(payments, transformInstruction.getExchangeRateProvider(), this.payments.length);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 300);
         frm.setModal(true);
