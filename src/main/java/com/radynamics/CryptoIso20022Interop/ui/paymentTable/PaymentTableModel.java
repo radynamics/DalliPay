@@ -25,6 +25,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
     private ArrayList<ProgressListener> listener = new ArrayList<>();
+    private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -90,16 +91,14 @@ public class PaymentTableModel extends AbstractTableModel {
     public void load(Payment[] data) {
         ArrayList<Object[]> list = new ArrayList<>();
         for (var t : data) {
+            Object actorAddressOrAccount = getActorAddressOrAccount(t);
+            var senderLedger = new WalletCellValue(t.getSenderWallet());
+            var receiverLedger = new WalletCellValue(t.getReceiverWallet());
             var amount = actor == Actor.Sender ? t.getAmount() : null;
-            list.add(new Object[]{t, new ValidationResult[0], true, null, null, null, null, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
+            list.add(new Object[]{t, new ValidationResult[0], true, null, senderLedger, actorAddressOrAccount, receiverLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
         }
 
         this.data = list.toArray(new Object[0][0]);
-        var row = 0;
-        for (var t : data) {
-            setAccountAndWallet(t, row);
-            row++;
-        }
         fireTableDataChanged();
 
         loadAsync(data);
@@ -125,15 +124,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     private CompletableFuture<Payment> loadAsync(Payment p) {
-        var l = new AsyncWalletInfoLoader();
-        var loadWalletInfo = l.load(p).thenAccept(result -> {
-            var rowIndex = getRowIndex(result.getPayment());
-
-            var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
-            setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
-            var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
-            setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
-        });
+        var loadWalletInfo = loadWalletInfoAsync(p);
         var loadExchangeRate = new CompletableFuture<Void>();
         if (actor == Actor.Receiver) {
             loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> {
@@ -154,6 +145,17 @@ public class PaymentTableModel extends AbstractTableModel {
             });
         });
         return future;
+    }
+
+    private CompletableFuture<Void> loadWalletInfoAsync(Payment p) {
+        return walletInfoLoader.load(p).thenAccept(result -> {
+            var rowIndex = getRowIndex(result.getPayment());
+
+            var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
+            setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
+            var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
+            setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
+        });
     }
 
     private Object getActorAddressOrAccount(Payment t) {
@@ -208,17 +210,18 @@ public class PaymentTableModel extends AbstractTableModel {
         return list.toArray(new Payment[0]);
     }
 
+    public void onAccountOrWalletsChanged(Payment t) {
+        setValueAt(getActorAddressOrAccount(t), getRowIndex(t), getColumnIndex(COL_RECEIVER_ISO20022));
+
+        Executors.newCachedThreadPool().submit(() -> {
+            loadWalletInfoAsync(t).thenAccept((result) -> onTransactionChanged(t));
+        });
+    }
+
     public void onTransactionChanged(Payment t) {
-        setAccountAndWallet(t, getRowIndex(t));
         validateAsync(t);
 
         setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));
-    }
-
-    private void setAccountAndWallet(Payment t, int row) {
-        setValueAt(new WalletCellValue(t.getSenderWallet()), row, getColumnIndex(COL_SENDER_LEDGER));
-        setValueAt(getActorAddressOrAccount(t), row, getColumnIndex(COL_RECEIVER_ISO20022));
-        setValueAt(new WalletCellValue(t.getReceiverWallet()), row, getColumnIndex(COL_RECEIVER_LEDGER));
     }
 
     public Actor getActor() {

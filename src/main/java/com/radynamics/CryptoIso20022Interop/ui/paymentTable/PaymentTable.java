@@ -195,7 +195,7 @@ public class PaymentTable extends JPanel {
         // Also update other affected payments using same mapping
         for (var p : data) {
             if (PaymentUtils.apply(p, mapping)) {
-                model.onTransactionChanged(p);
+                model.onAccountOrWalletsChanged(p);
             }
         }
     }
