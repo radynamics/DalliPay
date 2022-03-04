@@ -148,7 +148,10 @@ public class PaymentTable extends JPanel {
 
         var editedActor = getEditedActor(tcl.getColumn());
         AccountMapping mapping = new AccountMapping(t.getLedger().getId());
-        var a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
+        // While processing received payments user is able to change "Sender for Export" multiple times and therefor oldValue ca be a String.
+        var a = tcl.getOldValue() instanceof Account
+                ? (Account) tcl.getOldValue()
+                : createAccountOrNull((String) tcl.getOldValue());
         var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
         mapping.setAccount(a);
         mapping.setWallet(w);
