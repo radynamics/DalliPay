@@ -146,8 +146,7 @@ public class PaymentTable extends JPanel {
         var row = tcl.getRow();
         var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
-        var editedActor = tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)
-                ? Actor.Sender : Actor.Receiver;
+        var editedActor = getEditedActor(tcl.getColumn());
         AccountMapping mapping = new AccountMapping(t.getLedger().getId());
         var a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
         var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
@@ -198,6 +197,18 @@ public class PaymentTable extends JPanel {
                 model.onAccountOrWalletsChanged(p);
             }
         }
+    }
+
+    private Actor getEditedActor(int col) {
+        if (col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
+            return Actor.Sender;
+        }
+        // While processing received payments user is able to change "Sender for Export".
+        if (col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022) && actor == Actor.Receiver) {
+            return Actor.Sender;
+        }
+
+        return Actor.Receiver;
     }
 
     private Wallet createWalletOrNull(String text) {
