@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ISO20022, COL_RECEIVER_LEDGER,
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_ACTOR_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Object[][] data = new Object[0][];
     private final HistoricExchangeRateLoader exchangeRateLoader;
@@ -32,7 +32,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
     public static final String COL_SENDER_LEDGER = "senderLedger";
-    public static final String COL_RECEIVER_ISO20022 = "receiverIso20022";
+    public static final String COL_ACTOR_ISO20022 = "actorIso20022";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_BOOKED = "valuta";
     public static final String COL_AMOUNT = "amount";
@@ -75,7 +75,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return isSelectable(getHighestStatus(validationResults));
         }
         if (actor == Actor.Receiver) {
-            return col == getColumnIndex(COL_RECEIVER_ISO20022);
+            return col == getColumnIndex(COL_ACTOR_ISO20022);
         }
         if (actor == Actor.Sender) {
             return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);
@@ -211,7 +211,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void onAccountOrWalletsChanged(Payment t) {
-        setValueAt(getActorAddressOrAccount(t), getRowIndex(t), getColumnIndex(COL_RECEIVER_ISO20022));
+        setValueAt(getActorAddressOrAccount(t), getRowIndex(t), getColumnIndex(COL_ACTOR_ISO20022));
 
         Executors.newCachedThreadPool().submit(() -> {
             loadWalletInfoAsync(t).thenAccept((result) -> onTransactionChanged(t));

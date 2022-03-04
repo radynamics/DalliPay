@@ -57,7 +57,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeCellRenderer());
         {
-            var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_ISO20022));
+            var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_ACTOR_ISO20022));
             if (actor == Actor.Receiver) {
                 column.setCellEditor(new AccountCellEditor(true));
                 column.setCellRenderer(new AccountCellRenderer());
@@ -90,7 +90,7 @@ public class PaymentTable extends JPanel {
         }
         {
             var headerValue = model.getActor().get("Receiver from Input", "Sender for Export");
-            cb.forColumn(PaymentTableModel.COL_RECEIVER_ISO20022).headerValue(headerValue).width(200);
+            cb.forColumn(PaymentTableModel.COL_ACTOR_ISO20022).headerValue(headerValue).width(200);
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue("Receiver Wallet").width(200).getColumn();
@@ -165,7 +165,7 @@ public class PaymentTable extends JPanel {
             PaymentUtils.apply(t, mapping);
             changed = true;
         }
-        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ISO20022)) {
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022)) {
             mapping.setAccount(createAccountOrNull(cleanedInput));
             PaymentUtils.apply(t, mapping);
             changed = true;
