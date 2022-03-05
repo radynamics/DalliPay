@@ -1,11 +1,14 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
+import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import java.time.LocalDateTime;
@@ -15,7 +18,7 @@ public class TestFactory {
     public static TransformInstruction createTransformInstruction() {
         var ledger = LedgerFactory.create("xrpl");
         ledger.setNetwork(new NetworkInfo(Network.Test, null));
-        var i = new TransformInstruction(ledger);
+        var i = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
         exchange.load();
         i.setExchangeRateProvider(exchange);
@@ -66,5 +69,12 @@ public class TestFactory {
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.Scor, "RF712348231"));
 
         return t;
+    }
+
+    public static void addAccountMapping(TransformInstruction ti, Account account, String walletPublicKey) {
+        var mapping = new AccountMapping(ti.getLedger().getId());
+        mapping.setAccount(account);
+        mapping.setWallet(ti.getLedger().createWallet(walletPublicKey, ""));
+        ti.getAccountMappingSource().add(mapping);
     }
 }

@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.db.AccountMappingRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -11,15 +10,13 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-
 // This class contains all information to convert payments from pain001 into target ledger payments.
 public class TransformInstruction {
     final static Logger log = LogManager.getLogger(TransformInstruction.class);
 
     private Ledger ledger;
+    private final AccountMappingSource accountMappingSource;
     private ExchangeRateProvider exchangeRateProvider;
-    private ArrayList<AccountMapping> accountMappings = new ArrayList<>();
 
     private String senderPublicKey;
     private String senderSecret;
@@ -29,30 +26,21 @@ public class TransformInstruction {
     private StructuredReference creditorReferenceIfMissing;
     private ExchangeRateProvider historicExchangeRateSource;
 
-    public TransformInstruction(Ledger ledger) {
+    public TransformInstruction(Ledger ledger, AccountMappingSource accountMappingSource) {
         this.ledger = ledger;
-    }
-
-    public void add(AccountMapping accountMapping) {
-        accountMappings.add(accountMapping);
+        this.accountMappingSource = accountMappingSource;
     }
 
     public Wallet getWalletOrNull(Account account) {
         if (account == null) {
             return null;
         }
-        try (var repo = new AccountMappingRepo()) {
-            var found = repo.list(ledger.getId(), account);
-            if (found.length == 0) {
-                return null;
-            }
-            var wallet = found[0].getWallet();
-            wallet.setSecret(wallet.getPublicKey().equals(senderPublicKey) ? senderSecret : null);
-            return wallet;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        var wallet = accountMappingSource.getWalletOrNull(account);
+        if (wallet == null) {
             return null;
         }
+        wallet.setSecret(wallet.getPublicKey().equals(senderPublicKey) ? senderSecret : null);
+        return wallet;
     }
 
     public IbanAccount getIbanOrNull(Wallet wallet) {
@@ -60,16 +48,7 @@ public class TransformInstruction {
     }
 
     public Account getAccountOrNull(Wallet wallet) {
-        if (wallet == null) {
-            return null;
-        }
-        try (var repo = new AccountMappingRepo()) {
-            var found = repo.list(ledger.getId(), wallet);
-            return found.length == 0 ? null : found[0].getAccount();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
+        return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet);
     }
 
     public void setStaticSender(String publicKey, String secret) {
@@ -129,5 +108,9 @@ public class TransformInstruction {
 
     public void setHistoricExchangeRateSource(ExchangeRateProvider historicExchangeRateSource) {
         this.historicExchangeRateSource = historicExchangeRateSource;
+    }
+
+    public AccountMappingSource getAccountMappingSource() {
+        return this.accountMappingSource;
     }
 }

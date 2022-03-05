@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
+import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +19,7 @@ public class Pain00100109Test {
     @Test
     public void readExample01() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger);
+        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -108,7 +109,7 @@ public class Pain00100109Test {
     @Test
     public void readExample02() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger);
+        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {

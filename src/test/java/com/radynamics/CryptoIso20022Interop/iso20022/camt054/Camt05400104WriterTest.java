@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.Camt05
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.Document;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
-import com.radynamics.CryptoIso20022Interop.transformation.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,7 +52,7 @@ public class Camt05400104WriterTest {
     @Test
     public void createTranslateToIban() throws Exception {
         var cryptoInstruction = TestFactory.createTransformInstruction();
-        cryptoInstruction.add(new AccountMapping(new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY"));
+        TestFactory.addAccountMapping(cryptoInstruction, new IbanAccount("CH5800791123000889012"), "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY");
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
