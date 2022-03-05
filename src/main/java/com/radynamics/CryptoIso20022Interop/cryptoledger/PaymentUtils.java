@@ -1,13 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import com.radynamics.CryptoIso20022Interop.ui.paymentTable.ChangedValue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -119,55 +116,5 @@ public class PaymentUtils {
             map.put(p.getLedger(), map.get(p.getLedger()) + p.getFeeSmallestUnit());
         }
         return map;
-    }
-
-    public static boolean apply(Payment p, AccountMapping mapping, ChangedValue changedValue) {
-        switch (changedValue) {
-            case SenderAccount -> {
-                if (PaymentUtils.affected(mapping, p.getSenderWallet())) {
-                    p.setSenderAccount(mapping.getAccount());
-                    return true;
-                }
-                return false;
-            }
-            case SenderWallet -> {
-                if (PaymentUtils.affected(mapping, p.getSenderAccount())) {
-                    p.setSenderWallet(mapping.getWallet());
-                    return true;
-                }
-                return false;
-            }
-            case ReceiverAccount -> {
-                if (PaymentUtils.affected(mapping, p.getReceiverWallet())) {
-                    p.setReceiverAccount(mapping.getAccount());
-                    return true;
-                }
-                return false;
-            }
-            case ReceiverWallet -> {
-                if (PaymentUtils.affected(mapping, p.getReceiverAccount())) {
-                    p.setReceiverWallet(mapping.getWallet());
-                    return true;
-                }
-                return false;
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + changedValue);
-        }
-    }
-
-    private static boolean affected(AccountMapping mapping, Account account) {
-        if (mapping.getAccount() == null || account == null) {
-            return false;
-        }
-
-        return account.getUnformatted().equals(mapping.getAccount().getUnformatted());
-    }
-
-    private static boolean affected(AccountMapping mapping, Wallet wallet) {
-        if (mapping.getWallet() == null || wallet == null) {
-            return false;
-        }
-
-        return wallet.getPublicKey().equals(mapping.getWallet().getPublicKey());
     }
 }

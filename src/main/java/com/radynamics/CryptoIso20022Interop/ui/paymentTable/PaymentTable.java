@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
@@ -170,22 +169,17 @@ public class PaymentTable extends JPanel {
             mapping.setWallet(createWalletOrNull(cleanedInput));
             if (mapping.getWallet() == null) {
                 t.setSenderWallet(null);
-            } else {
-                PaymentUtils.apply(t, mapping, changedValue);
             }
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022)) {
             changedValue = editedActor == Actor.Sender ? ChangedValue.SenderAccount : ChangedValue.ReceiverAccount;
             mapping.setAccount((Account) tcl.getNewValue());
-            PaymentUtils.apply(t, mapping, changedValue);
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
             changedValue = ChangedValue.ReceiverWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
             if (mapping.getWallet() == null) {
                 t.setReceiverWallet(null);
-            } else {
-                PaymentUtils.apply(t, mapping, changedValue);
             }
         }
 
@@ -212,9 +206,10 @@ public class PaymentTable extends JPanel {
             ExceptionDialog.show(table, ex);
         }
 
-        // Also update other affected payments using same mapping
+        // Update all affected payments
+        var mi = new MappingInfo(mapping, changedValue);
         for (var p : data) {
-            if (PaymentUtils.apply(p, mapping, changedValue)) {
+            if (mi.apply(p)) {
                 model.onAccountOrWalletsChanged(p);
             }
         }
