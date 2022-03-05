@@ -206,6 +206,13 @@ public class SendForm extends JPanel implements MainFormPane {
                 return false;
             }
             w.setSecret(userInput);
+
+            // Apply value to same but not equal instances.
+            for (var p : payments) {
+                if (WalletCompare.isSame(p.getSenderWallet(), w)) {
+                    p.getSenderWallet().setSecret(w.getSecret());
+                }
+            }
         }
 
         return true;
