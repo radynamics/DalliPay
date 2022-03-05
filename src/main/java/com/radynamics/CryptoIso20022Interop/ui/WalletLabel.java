@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.AccountFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 
@@ -62,12 +63,15 @@ public class WalletLabel extends JPanel {
             sb.append(AddressFormatter.formatSingleLine(address));
         }
 
-        if (account == null) {
+        if (account == null && sb.length() > 0) {
             return sb.toString();
         }
 
+        var accountText = account == null || StringUtils.isEmpty(account.getUnformatted())
+                ? "Missing Account"
+                : AccountFormatter.format(account);
         var template = sb.length() == 0 ? "%s" : " (%s)";
-        sb.append(String.format(template, AccountFormatter.format(account)));
+        sb.append(String.format(template, accountText));
 
         return sb.toString();
     }
