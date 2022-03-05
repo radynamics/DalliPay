@@ -14,7 +14,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
 
-        if (t.getSenderAccount().getUnformatted().equalsIgnoreCase(t.getSenderWallet().getPublicKey())) {
+        if (t.getSenderAccount() != null && t.getSenderAccount().getUnformatted().equalsIgnoreCase(t.getSenderWallet().getPublicKey())) {
             list.add(new ValidationResult(ValidationState.Info, String.format("No Account/IBAN defined for this CryptoCurrency Wallet and therefore Wallet address is exported.")));
         }
 
