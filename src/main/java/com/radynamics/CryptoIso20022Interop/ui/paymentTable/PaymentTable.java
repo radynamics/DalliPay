@@ -167,9 +167,6 @@ public class PaymentTable extends JPanel {
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
             changedValue = ChangedValue.SenderWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
-            if (mapping.getWallet() == null) {
-                t.setSenderWallet(null);
-            }
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022)) {
             changedValue = editedActor == Actor.Sender ? ChangedValue.SenderAccount : ChangedValue.ReceiverAccount;
@@ -178,9 +175,6 @@ public class PaymentTable extends JPanel {
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
             changedValue = ChangedValue.ReceiverWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
-            if (mapping.getWallet() == null) {
-                t.setReceiverWallet(null);
-            }
         }
 
         if (changedValue == null) {
