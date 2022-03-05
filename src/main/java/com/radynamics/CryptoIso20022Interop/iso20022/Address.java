@@ -46,4 +46,9 @@ public class Address {
     public void setCountryShort(String countryShort) {
         this.countryShort = countryShort;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s, %s", name, city);
+    }
 }

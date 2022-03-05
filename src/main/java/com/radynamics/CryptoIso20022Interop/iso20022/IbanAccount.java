@@ -65,4 +65,9 @@ public class IbanAccount implements Account {
 
         return (total % IBAN_MODULUS) == 1;
     }
+
+    @Override
+    public String toString() {
+        return unformatted;
+    }
 }

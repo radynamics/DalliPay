@@ -40,4 +40,9 @@ public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger
     public void setLedgerBalance(UnsignedLong amountSmallestUnit) {
         this.drops = amountSmallestUnit;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s, %s", publicKey, secret);
+    }
 }

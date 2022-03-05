@@ -12,4 +12,9 @@ public class OtherAccount implements Account {
     public String getUnformatted() {
         return unformatted;
     }
+
+    @Override
+    public String toString() {
+        return unformatted;
+    }
 }
