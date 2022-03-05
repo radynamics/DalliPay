@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.ui.paymentTable.ChangedValue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -120,24 +121,38 @@ public class PaymentUtils {
         return map;
     }
 
-    public static boolean apply(Payment p, AccountMapping mapping) {
-        if (PaymentUtils.affected(mapping, p.getSenderAccount())) {
-            p.setSenderWallet(mapping.getWallet());
-            if (PaymentUtils.affected(mapping, p.getSenderWallet())) {
-                p.setSenderAccount(mapping.getAccount());
+    public static boolean apply(Payment p, AccountMapping mapping, ChangedValue changedValue) {
+        switch (changedValue) {
+            case SenderAccount -> {
+                if (PaymentUtils.affected(mapping, p.getSenderWallet())) {
+                    p.setSenderAccount(mapping.getAccount());
+                    return true;
+                }
+                return false;
             }
-            return true;
-        }
-
-        if (PaymentUtils.affected(mapping, p.getReceiverAccount())) {
-            p.setReceiverWallet(mapping.getWallet());
-            if (PaymentUtils.affected(mapping, p.getReceiverWallet())) {
-                p.setReceiverAccount(mapping.getAccount());
+            case SenderWallet -> {
+                if (PaymentUtils.affected(mapping, p.getSenderAccount())) {
+                    p.setSenderWallet(mapping.getWallet());
+                    return true;
+                }
+                return false;
             }
-            return true;
+            case ReceiverAccount -> {
+                if (PaymentUtils.affected(mapping, p.getReceiverWallet())) {
+                    p.setReceiverAccount(mapping.getAccount());
+                    return true;
+                }
+                return false;
+            }
+            case ReceiverWallet -> {
+                if (PaymentUtils.affected(mapping, p.getReceiverAccount())) {
+                    p.setReceiverWallet(mapping.getWallet());
+                    return true;
+                }
+                return false;
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + changedValue);
         }
-
-        return false;
     }
 
     private static boolean affected(AccountMapping mapping, Account account) {

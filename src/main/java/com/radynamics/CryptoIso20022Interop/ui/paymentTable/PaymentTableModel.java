@@ -5,10 +5,9 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Transmissio
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
-import com.radynamics.CryptoIso20022Interop.iso20022.AsyncValidator;
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
-import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
+import com.radynamics.CryptoIso20022Interop.iso20022.*;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.concurrent.Executors;
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_ACTOR_ISO20022, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
-    private Object[][] data = new Object[0][];
+    private Record[] data;
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
@@ -62,7 +61,74 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        return data[row][col];
+        var item = data[row];
+        if (getColumnIndex(COL_OBJECT) == col) {
+            return item.payment;
+        } else if (getColumnIndex(COL_VALIDATION_RESULTS) == col) {
+            return item.validationResults;
+        } else if (getColumnIndex(COL_SELECTOR) == col) {
+            return item.selected;
+        } else if (getColumnIndex(COL_STATUS) == col) {
+            return item.status;
+        } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
+            return item.getSenderLedger();
+        } else if (getColumnIndex(COL_ACTOR_ISO20022) == col) {
+            return item.getActorAddressOrAccount(actor);
+        } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
+            return item.getReceiverLedger();
+        } else if (getColumnIndex(COL_BOOKED) == col) {
+            return item.payment.getBooked();
+        } else if (getColumnIndex(COL_AMOUNT) == col) {
+            return item.getAmount(actor);
+        } else if (getColumnIndex(COL_CCY) == col) {
+            return item.payment.getFiatCcy();
+        } else if (getColumnIndex(COL_TRX_STATUS) == col) {
+            return item.payment.getTransmission();
+        } else if (getColumnIndex(COL_DETAIL) == col) {
+            return "detail...";
+        }
+        return null;
+    }
+
+    public void setValueAt(Object value, int row, int col) {
+        var item = data[row];
+        if (getColumnIndex(COL_VALIDATION_RESULTS) == col) {
+            item.validationResults = (ValidationResult[]) value;
+        } else if (getColumnIndex(COL_SELECTOR) == col) {
+            item.selected = (boolean) value;
+        } else if (getColumnIndex(COL_STATUS) == col) {
+            item.status = (ValidationState) value;
+        } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
+            if (value instanceof WalletCellValue) {
+                item.setSenderLedger((WalletCellValue) value);
+            } else {
+                item.setSenderLedger((String) value);
+            }
+        } else if (getColumnIndex(COL_ACTOR_ISO20022) == col) {
+            switch (actor) {
+                case Sender -> item.payment.setReceiverAccount(createAccountOrNull((String) value));
+                // While processing received payments user is able to change "Sender for Export".
+                case Receiver -> item.payment.setSenderAccount(createAccountOrNull((String) value));
+                default -> throw new IllegalStateException("Unexpected value: " + actor);
+            }
+        } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
+            if (value instanceof WalletCellValue) {
+                item.setReceiverLedger((WalletCellValue) value);
+            } else {
+                item.setReceiverLedger((String) value);
+            }
+        } else if (getColumnIndex(COL_AMOUNT) == col) {
+            item.setAmount((Double) value);
+        } else if (getColumnIndex(COL_CCY) == col) {
+            item.payment.setFiatCcy((String) value);
+        } else {
+            throw new NotImplementedException(String.format("Setting value for column %s is not implemented", col));
+        }
+        fireTableCellUpdated(row, col);
+    }
+
+    private Account createAccountOrNull(String text) {
+        return StringUtils.isEmpty(text) ? null : AccountFactory.create(text);
     }
 
     public Class getColumnClass(int c) {
@@ -83,28 +149,14 @@ public class PaymentTableModel extends AbstractTableModel {
         return false;
     }
 
-    public void setValueAt(Object value, int row, int col) {
-        data[row][col] = value;
-        fireTableCellUpdated(row, col);
-    }
-
-    public void load(Payment[] data) {
-        ArrayList<Object[]> list = new ArrayList<>();
-        for (var t : data) {
-            Object actorAddressOrAccount = getActorAddressOrAccount(t);
-            var senderLedger = new WalletCellValue(t.getSenderWallet());
-            var receiverLedger = new WalletCellValue(t.getReceiverWallet());
-            var amount = actor == Actor.Sender ? t.getAmount() : null;
-            list.add(new Object[]{t, new ValidationResult[0], true, null, senderLedger, actorAddressOrAccount, receiverLedger, t.getBooked(), amount, t.getFiatCcy(), t.getTransmission(), "detail..."});
-        }
-
-        this.data = list.toArray(new Object[0][0]);
+    public void load(Record[] data) {
+        this.data = data;
         fireTableDataChanged();
 
-        loadAsync(data);
+        loadAsync();
     }
 
-    private void loadAsync(Payment[] data) {
+    private void loadAsync() {
         if (data.length == 0) {
             raiseProgress(new Progress(0, 0));
             return;
@@ -112,7 +164,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : data) {
-            var future = loadAsync(p);
+            var future = loadAsync(p.payment);
             future.thenAccept((result) -> {
                 queue.remove(future);
                 var total = data.length;
@@ -158,15 +210,6 @@ public class PaymentTableModel extends AbstractTableModel {
         });
     }
 
-    private Object getActorAddressOrAccount(Payment t) {
-        Object actorAddressOrAccount = actor.get(t.getReceiverAddress(), t.getSenderAddress());
-        if (actorAddressOrAccount == null) {
-            var actorAccount = actor.get(t.getReceiverAccount(), t.getSenderAccount());
-            actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
-        }
-        return actorAddressOrAccount;
-    }
-
     private CompletableFuture<Void> validateAsync(Payment payment) {
         var av = new AsyncValidator(validator);
         return av.validate(payment).thenAccept(result -> {
@@ -203,25 +246,24 @@ public class PaymentTableModel extends AbstractTableModel {
     public Payment[] selectedPayments() {
         var list = new ArrayList<Payment>();
         for (var item : this.data) {
-            if ((boolean) item[getColumnIndex(COL_SELECTOR)]) {
-                list.add((Payment) item[0]);
+            if (item.selected) {
+                list.add(item.payment);
             }
         }
         return list.toArray(new Payment[0]);
     }
 
     public void onAccountOrWalletsChanged(Payment t) {
-        setValueAt(getActorAddressOrAccount(t), getRowIndex(t), getColumnIndex(COL_ACTOR_ISO20022));
-
         Executors.newCachedThreadPool().submit(() -> {
             loadWalletInfoAsync(t).thenAccept((result) -> onTransactionChanged(t));
         });
     }
 
     public void onTransactionChanged(Payment t) {
-        validateAsync(t);
+        int row = getRowIndex(t);
+        fireTableRowsUpdated(row, row);
 
-        setValueAt(t.getTransmission(), getRowIndex(t), getColumnIndex(COL_TRX_STATUS));
+        validateAsync(t);
     }
 
     public Actor getActor() {

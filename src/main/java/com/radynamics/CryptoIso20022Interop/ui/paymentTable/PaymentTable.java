@@ -151,12 +151,9 @@ public class PaymentTable extends JPanel {
         Account a = null;
         if (tcl.getOldValue() instanceof Account) {
             a = (Account) tcl.getOldValue();
-        } else if (tcl.getOldValue() instanceof String) {
-            // While processing received payments user is able to change "Sender for Export" multiple times and therefore oldValue ca be a String.
-            a = createAccountOrNull((String) tcl.getOldValue());
         } else if (tcl.getOldValue() instanceof WalletCellValue) {
             // While sending payments user is able to change "Receiver from Input". Account is not changeable.
-            a = t.getReceiverAccount();
+            a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
         }
         var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
         mapping.setAccount(a);
@@ -167,30 +164,45 @@ public class PaymentTable extends JPanel {
             ExceptionDialog.show(table, ex);
         }
 
-        var changed = false;
+        ChangedValue changedValue = null;
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
+            changedValue = ChangedValue.SenderWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
-            PaymentUtils.apply(t, mapping);
-            changed = true;
+            if (mapping.getWallet() == null) {
+                t.setSenderWallet(null);
+            } else {
+                PaymentUtils.apply(t, mapping, changedValue);
+            }
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022)) {
-            mapping.setAccount(createAccountOrNull(cleanedInput));
-            PaymentUtils.apply(t, mapping);
-            changed = true;
+            changedValue = editedActor == Actor.Sender ? ChangedValue.SenderAccount : ChangedValue.ReceiverAccount;
+            mapping.setAccount((Account) tcl.getNewValue());
+            PaymentUtils.apply(t, mapping, changedValue);
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
+            changedValue = ChangedValue.ReceiverWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
-            PaymentUtils.apply(t, mapping);
-            changed = true;
+            if (mapping.getWallet() == null) {
+                t.setReceiverWallet(null);
+            } else {
+                PaymentUtils.apply(t, mapping, changedValue);
+            }
         }
 
-        if (!changed) {
+        if (changedValue == null) {
             return;
         }
 
         try (var repo = new AccountMappingRepo()) {
             if (mapping.allPresent()) {
-                repo.saveOrUpdate(mapping);
+                // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
+                if (mapping.bothSame()) {
+                    if (mapping.isPersisted()) {
+                        repo.delete(mapping);
+                    }
+                } else {
+                    repo.saveOrUpdate(mapping);
+                }
             } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
                 // Interpret "" as removal. During creation values are maybe not yet defined.
                 repo.delete(mapping);
@@ -202,7 +214,7 @@ public class PaymentTable extends JPanel {
 
         // Also update other affected payments using same mapping
         for (var p : data) {
-            if (PaymentUtils.apply(p, mapping)) {
+            if (PaymentUtils.apply(p, mapping, changedValue)) {
                 model.onAccountOrWalletsChanged(p);
             }
         }
@@ -224,15 +236,19 @@ public class PaymentTable extends JPanel {
         return StringUtils.isEmpty(text) ? null : transformInstruction.getLedger().createWallet(text, null);
     }
 
-    private Account createAccountOrNull(String text) {
-        return StringUtils.isEmpty(text) ? null : AccountFactory.create(text);
-    }
-
     public void load(Payment[] data) {
         this.data = data;
-        model.load(data);
+        model.load(toRecords(data));
         table.revalidate();
         table.repaint();
+    }
+
+    private Record[] toRecords(Payment[] data) {
+        var list = new ArrayList<Record>();
+        for (var o : data) {
+            list.add(new Record(o));
+        }
+        return list.toArray(new Record[0]);
     }
 
     private Payment getSelectedRow(JTable table) {

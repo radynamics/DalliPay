@@ -63,6 +63,10 @@ public class AccountMapping {
         return getId() != 0;
     }
 
+    public boolean bothSame() {
+        return allPresent() && StringUtils.equals(getAccount().getUnformatted(), getWallet().getPublicKey());
+    }
+
     @Override
     public String toString() {
         return String.format("%s: %s -> %s", getId(),
