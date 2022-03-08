@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -76,6 +77,24 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setCreditorReferenceIfMissing(String value) throws Exception {
         saveOrUpdate("creditorReferenceIfMissing", value);
+    }
+
+    public File getDefaultInputDirectory() throws Exception {
+        var value = single("inputDirectory").orElse("");
+        return value.length() == 0 ? null : new File(value);
+    }
+
+    public void setDefaultInputDirectory(File value) throws Exception {
+        saveOrUpdate("inputDirectory", value == null ? "" : value.getAbsolutePath());
+    }
+
+    public File getDefaultOutputDirectory() throws Exception {
+        var value = single("outputDirectory").orElse("");
+        return value.length() == 0 ? null : new File(value);
+    }
+
+    public void setDefaultOutputDirectory(File value) throws Exception {
+        saveOrUpdate("outputDirectory", value == null ? "" : value.getAbsolutePath());
     }
 
     private Optional<String> single(String key) throws Exception {

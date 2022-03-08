@@ -15,6 +15,7 @@ public class FilePathField extends JPanel {
     private ArrayList<ChangedListener> listener = new ArrayList<>();
     private Window owner;
     private boolean validateExists;
+    private File currentDirectory;
 
     public FilePathField(Window owner) {
         this.owner = owner;
@@ -48,6 +49,10 @@ public class FilePathField extends JPanel {
             txt.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
+                    var file = new File(txt.getText().trim());
+                    if (file.exists()) {
+                        currentDirectory = file.getParentFile();
+                    }
                     raiseChanged();
                 }
 
@@ -94,7 +99,11 @@ public class FilePathField extends JPanel {
         var xmlFilter = new FileTypeFilter(".xml", "ISO 20022 Payment files");
         fc.addChoosableFileFilter(xmlFilter);
         fc.setFileFilter(xmlFilter);
-        fc.setCurrentDirectory(new File(getText()));
+        if (getText().length() > 0) {
+            fc.setCurrentDirectory(new File(getText()).getParentFile());
+        } else if (currentDirectory != null) {
+            fc.setCurrentDirectory(currentDirectory);
+        }
         int option = fc.showOpenDialog(this);
         if (option != JFileChooser.APPROVE_OPTION) {
             return;
@@ -123,5 +132,13 @@ public class FilePathField extends JPanel {
 
     public void setValidateExists(boolean validateExists) {
         this.validateExists = validateExists;
+    }
+
+    public File getCurrentDirectory() {
+        return this.currentDirectory;
+    }
+
+    public void setCurrentDirectory(File currentDirectory) {
+        this.currentDirectory = currentDirectory;
     }
 }

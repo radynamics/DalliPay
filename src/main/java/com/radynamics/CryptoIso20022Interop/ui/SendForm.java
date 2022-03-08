@@ -88,6 +88,11 @@ public class SendForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 txtInput = new FilePathField(owner);
+                try (var repo = new ConfigRepo()) {
+                    txtInput.setCurrentDirectory(repo.getDefaultInputDirectory());
+                } catch (Exception e) {
+                    ExceptionDialog.show(this, e);
+                }
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 0, SpringLayout.NORTH, panel1);
                 txtInput.addChangedListener(() -> {
@@ -98,6 +103,13 @@ public class SendForm extends JPanel implements MainFormPane {
                         br.refreshAllSenderWallets(payments);
 
                         load(payments);
+
+                        try (var repo = new ConfigRepo()) {
+                            repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
+                            repo.commit();
+                        } catch (Exception e) {
+                            ExceptionDialog.show(this, e);
+                        }
                     } catch (Exception e) {
                         ExceptionDialog.show(this, e);
                     }

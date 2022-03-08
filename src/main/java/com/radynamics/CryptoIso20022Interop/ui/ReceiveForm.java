@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -268,8 +269,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private boolean showExportForm() {
         if (StringUtils.isAllEmpty(targetFileName)) {
-            var df = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
-            targetFileName = String.format("%s_%s.xml", LocalDateTime.now().format(df), txtInput.getText());
+            targetFileName = createTargetFile().getAbsolutePath();
         }
 
         var frm = new ReceiveExportForm();
@@ -288,8 +288,28 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
 
         targetFileName = frm.getOutputFile();
+        try (var repo = new ConfigRepo()) {
+            repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         camtExport = CamtExportFactory.create(frm.getExportFormat(), transformInstruction, versionController);
         return true;
+    }
+
+    private File createTargetFile() {
+        var dir = new File(System.getProperty("user.dir"));
+        try (var repo = new ConfigRepo()) {
+            var defaultDir = repo.getDefaultOutputDirectory();
+            dir = defaultDir == null ? dir : defaultDir;
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+
+        var df = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
+        var fileName = String.format("%s_%s.xml", LocalDateTime.now().format(df), txtInput.getText());
+        return new File(dir, fileName);
     }
 
     public void load() {
