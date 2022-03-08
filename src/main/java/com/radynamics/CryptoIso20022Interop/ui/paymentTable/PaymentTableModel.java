@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_ACTOR_ISO20022, COL_RECEIVER_LEDGER,
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Record[] data;
     private final HistoricExchangeRateLoader exchangeRateLoader;
@@ -31,7 +31,8 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
     public static final String COL_SENDER_LEDGER = "senderLedger";
-    public static final String COL_ACTOR_ISO20022 = "actorIso20022";
+    public static final String COL_SENDER_ACCOUNT = "senderAccount";
+    public static final String COL_RECEIVER_ACCOUNT = "receiverAccount";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_BOOKED = "valuta";
     public static final String COL_AMOUNT = "amount";
@@ -72,8 +73,10 @@ public class PaymentTableModel extends AbstractTableModel {
             return item.status;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
             return item.getSenderLedger();
-        } else if (getColumnIndex(COL_ACTOR_ISO20022) == col) {
-            return item.getActorAddressOrAccount(actor);
+        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
+            return item.getActorAddressOrAccount(Actor.Sender);
+        } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
+            return item.getActorAddressOrAccount(Actor.Receiver);
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
             return item.getReceiverLedger();
         } else if (getColumnIndex(COL_BOOKED) == col) {
@@ -104,13 +107,10 @@ public class PaymentTableModel extends AbstractTableModel {
             } else {
                 item.setSenderLedger((String) value);
             }
-        } else if (getColumnIndex(COL_ACTOR_ISO20022) == col) {
-            switch (actor) {
-                case Sender -> item.payment.setReceiverAccount(createAccountOrNull((String) value));
-                // While processing received payments user is able to change "Sender for Export".
-                case Receiver -> item.payment.setSenderAccount(createAccountOrNull((String) value));
-                default -> throw new IllegalStateException("Unexpected value: " + actor);
-            }
+        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
+            item.payment.setSenderAccount(createAccountOrNull((String) value));
+        } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
+            item.payment.setReceiverAccount(createAccountOrNull((String) value));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
             if (value instanceof WalletCellValue) {
                 item.setReceiverLedger((WalletCellValue) value);
@@ -141,7 +141,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return isSelectable(getHighestStatus(validationResults));
         }
         if (actor == Actor.Receiver) {
-            return col == getColumnIndex(COL_ACTOR_ISO20022);
+            return col == getColumnIndex(COL_SENDER_ACCOUNT);
         }
         if (actor == Actor.Sender) {
             return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);

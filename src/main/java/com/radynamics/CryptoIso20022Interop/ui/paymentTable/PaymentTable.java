@@ -55,13 +55,6 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeCellRenderer());
-        {
-            var column = table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_ACTOR_ISO20022));
-            if (actor == Actor.Receiver) {
-                column.setCellEditor(new AccountCellEditor(true));
-                column.setCellRenderer(new AccountCellRenderer());
-            }
-        }
         var lookupProvider = transformInstruction.getLedger().getLookupProvider();
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
         var cellEditor = new WalletCellEditor(objectColumn, lookupProvider, actor == Actor.Sender);
@@ -88,8 +81,20 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var headerValue = model.getActor().get("Receiver from Input", "Sender for Export");
-            cb.forColumn(PaymentTableModel.COL_ACTOR_ISO20022).headerValue(headerValue).width(200);
+            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue("Sender for Export").width(200).getColumn();
+            c.setCellEditor(new AccountCellEditor(true));
+            c.setCellRenderer(new AccountCellRenderer());
+            if (actor == Actor.Sender) {
+                cb.hide();
+            }
+        }
+        {
+            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue("Receiver from Input").width(200).getColumn();
+            c.setCellEditor(new AccountCellEditor(true));
+            c.setCellRenderer(new AccountCellRenderer());
+            if (actor == Actor.Receiver) {
+                cb.hide();
+            }
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue("Receiver Wallet").width(200).getColumn();
@@ -168,8 +173,12 @@ public class PaymentTable extends JPanel {
             changedValue = ChangedValue.SenderWallet;
             mapping.setWallet(createWalletOrNull(cleanedInput));
         }
-        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022)) {
-            changedValue = editedActor == Actor.Sender ? ChangedValue.SenderAccount : ChangedValue.ReceiverAccount;
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
+            changedValue = ChangedValue.SenderAccount;
+            mapping.setAccount((Account) tcl.getNewValue());
+        }
+        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ACCOUNT)) {
+            changedValue = ChangedValue.ReceiverAccount;
             mapping.setAccount((Account) tcl.getNewValue());
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
@@ -210,11 +219,8 @@ public class PaymentTable extends JPanel {
     }
 
     private Actor getEditedActor(int col) {
-        if (col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
-            return Actor.Sender;
-        }
-        // While processing received payments user is able to change "Sender for Export".
-        if (col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_ACTOR_ISO20022) && actor == Actor.Receiver) {
+        if (col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)
+                || col == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
             return Actor.Sender;
         }
 

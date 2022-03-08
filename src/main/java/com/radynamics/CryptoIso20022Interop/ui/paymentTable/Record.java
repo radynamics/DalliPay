@@ -48,9 +48,9 @@ public class Record {
     }
 
     public Object getActorAddressOrAccount(Actor actor) {
-        Object actorAddressOrAccount = actor.get(payment.getReceiverAddress(), payment.getSenderAddress());
+        Object actorAddressOrAccount = actor.get(payment.getSenderAddress(), payment.getReceiverAddress());
         if (actorAddressOrAccount == null) {
-            var actorAccount = actor.get(payment.getReceiverAccount(), payment.getSenderAccount());
+            var actorAccount = actor.get(payment.getSenderAccount(), payment.getReceiverAccount());
             actorAddressOrAccount = actorAccount == null ? IbanAccount.Empty : actorAccount;
         }
         return actorAddressOrAccount;
