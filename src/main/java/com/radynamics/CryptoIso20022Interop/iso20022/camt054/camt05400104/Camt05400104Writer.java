@@ -2,10 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.iso20022.IdGenerator;
-import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import com.radynamics.CryptoIso20022Interop.iso20022.UUIDIdGenerator;
-import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
+import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
@@ -80,12 +77,18 @@ public class Camt05400104Writer implements Camt054Writer {
     private CashAccount25 createAcct(Wallet receiver) {
         var acct = new CashAccount25();
         acct.setId(new AccountIdentification4Choice());
-        var iban = transformInstruction.getIbanOrNull(receiver);
-        if (iban == null) {
+        var account = transformInstruction.getAccountOrNull(receiver);
+        if (account == null) {
             acct.getId().setOthr(new GenericAccountIdentification1());
             acct.getId().getOthr().setId(receiver.getPublicKey());
         } else {
-            acct.getId().setIBAN(iban.getUnformatted());
+            if (account instanceof IbanAccount) {
+                var iban = (IbanAccount) account;
+                acct.getId().setIBAN(iban.getUnformatted());
+            } else {
+                acct.getId().setOthr(new GenericAccountIdentification1());
+                acct.getId().getOthr().setId(account.getUnformatted());
+            }
         }
         acct.setCcy(transformInstruction.getTargetCcy());
 

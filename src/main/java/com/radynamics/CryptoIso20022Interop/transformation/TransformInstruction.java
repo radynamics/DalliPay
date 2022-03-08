@@ -4,7 +4,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
-import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import org.apache.logging.log4j.LogManager;
@@ -41,10 +40,6 @@ public class TransformInstruction {
         }
         wallet.setSecret(wallet.getPublicKey().equals(senderPublicKey) ? senderSecret : null);
         return wallet;
-    }
-
-    public IbanAccount getIbanOrNull(Wallet wallet) {
-        return (IbanAccount) getAccountOrNull(wallet);
     }
 
     public Account getAccountOrNull(Wallet wallet) {
