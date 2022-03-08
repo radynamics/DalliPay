@@ -59,7 +59,7 @@ public class Main {
 
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-                frm.setSize(1280, 768);
+                frm.setSize(1450, 768);
                 frm.setLocationByPlatform(true);
                 frm.setPeriod(period);
                 frm.setReceivingWallet(wallet);
