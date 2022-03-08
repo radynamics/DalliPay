@@ -81,7 +81,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue("Sender for Export").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue("Sender Account").width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
             if (actor == Actor.Sender) {
@@ -89,12 +89,9 @@ public class PaymentTable extends JPanel {
             }
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue("Receiver from Input").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue("Receiver Account").width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
-            if (actor == Actor.Receiver) {
-                cb.hide();
-            }
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue("Receiver Wallet").width(200).getColumn();

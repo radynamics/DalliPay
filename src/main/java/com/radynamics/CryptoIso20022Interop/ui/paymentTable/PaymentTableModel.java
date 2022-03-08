@@ -141,7 +141,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return isSelectable(getHighestStatus(validationResults));
         }
         if (actor == Actor.Receiver) {
-            return col == getColumnIndex(COL_SENDER_ACCOUNT);
+            return col == getColumnIndex(COL_SENDER_ACCOUNT) || col == getColumnIndex(COL_RECEIVER_ACCOUNT);
         }
         if (actor == Actor.Sender) {
             return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);
