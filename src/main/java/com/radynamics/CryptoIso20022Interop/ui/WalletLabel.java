@@ -48,12 +48,19 @@ public class WalletLabel extends JPanel {
             secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, ledger.getNativeCcySymbol()));
         }
 
-        if (walletInfoAggregator != null) {
-            var wi = walletInfoAggregator.getMostImportant(wallet);
-            secondLineText = wi == null ? secondLineText : String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue());
+        secondLine.setText(secondLineText);
+        if (walletInfoAggregator == null) {
+            return;
         }
 
-        secondLine.setText(secondLineText);
+        var wi = walletInfoAggregator.getMostImportant(wallet);
+        if (wi == null) {
+            return;
+        }
+
+        secondLine.setText(String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue()));
+        secondLine.setForeground(wi.getVerified() ? secondLine.getForeground() : Consts.ColorWarning);
+        secondLine.setToolTipText(wi.getVerified() ? "" : String.format("%s not verified", wi.getText()));
     }
 
     private String getFirstLineText() {
