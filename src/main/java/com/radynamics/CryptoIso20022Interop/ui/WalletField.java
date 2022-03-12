@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 
 import javax.swing.*;
@@ -10,12 +9,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class WalletField extends JPanel {
-    private WalletLookupProvider lookupProvider;
     private JTextField txt;
     private Ledger ledger;
 
-    public WalletField(WalletLookupProvider lookupProvider) {
-        this.lookupProvider = lookupProvider;
+    public WalletField() {
         setupUI();
     }
 
@@ -69,7 +66,7 @@ public class WalletField extends JPanel {
     }
 
     private void lookup() {
-        lookupProvider.open(ledger.createWallet(getText(), ""));
+        ledger.getLookupProvider().open(ledger.createWallet(getText(), ""));
     }
 
     public void setText(String value) {

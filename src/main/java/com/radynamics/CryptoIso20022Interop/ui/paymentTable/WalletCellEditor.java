@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.ui.WalletField;
 
@@ -13,9 +12,9 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
     private final WalletField component;
     private final TableColumn objectColumn;
 
-    public WalletCellEditor(TableColumn objectColumn, WalletLookupProvider lookupProvider, boolean editable) {
+    public WalletCellEditor(TableColumn objectColumn, boolean editable) {
         this.objectColumn = objectColumn;
-        this.component = new WalletField(lookupProvider);
+        this.component = new WalletField();
         this.component.setEditable(editable);
     }
 
