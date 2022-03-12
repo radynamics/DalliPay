@@ -27,12 +27,19 @@ public class WalletCellRenderer extends JLabel implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         pnl.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         wallet.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-        desc.setForeground(isSelected ? table.getSelectionForeground() : Consts.ColorSmallInfo);
+        var descForegroundColor = isSelected ? table.getSelectionForeground() : Consts.ColorSmallInfo;
+        desc.setForeground(descForegroundColor);
 
         if (value instanceof WalletCellValue) {
             var cellValue = (WalletCellValue) value;
             wallet.setText(cellValue.getWallet() == null ? "" : cellValue.getWallet().getPublicKey());
-            desc.setText(cellValue.getWalletInfo() == null ? "" : String.format("%s %s", cellValue.getWalletInfo().getText(), cellValue.getWalletInfo().getValue()));
+            var walletInfo = cellValue.getWalletInfo();
+            if (walletInfo == null) {
+                desc.setText("");
+            } else {
+                desc.setText(String.format("%s %s", walletInfo.getText(), walletInfo.getValue()));
+                desc.setForeground(walletInfo.getVerified() ? descForegroundColor : Consts.ColorWarning);
+            }
         } else {
             wallet.setText((String) value);
             desc.setText("");

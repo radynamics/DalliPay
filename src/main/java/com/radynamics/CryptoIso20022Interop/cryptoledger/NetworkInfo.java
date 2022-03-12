@@ -18,4 +18,14 @@ public class NetworkInfo {
     public HttpUrl getUrl() {
         return url;
     }
+
+    public boolean matches(String text) {
+        if (type == Network.Live && "main".equalsIgnoreCase(text)) {
+            return true;
+        }
+        if (type == Network.Test && "test".equalsIgnoreCase(text)) {
+            return true;
+        }
+        return false;
+    }
 }
