@@ -1,7 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
@@ -37,6 +40,22 @@ public class MainForm extends JFrame {
         } catch (IOException e) {
             ExceptionDialog.show(this, e);
         }
+
+        var menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+
+        var cmdNetwork = new FlatButton();
+        var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
+        var network = transformInstruction.getLedger().getNetwork().getType();
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> network == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
+        cmdNetwork.setIcon(icon);
+        cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
+        cmdNetwork.setFocusable(false);
+        var text = String.format("Currently using %s network", network == Network.Live ? "MAIN" : "TEST");
+        cmdNetwork.setToolTipText(text);
+        cmdNetwork.addActionListener(e -> JOptionPane.showMessageDialog(null, text, "Network", JOptionPane.INFORMATION_MESSAGE));
+        menuBar.add(Box.createGlue());
+        menuBar.add(cmdNetwork);
 
         var pnlMain = new JPanel();
         add(pnlMain);

@@ -97,6 +97,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public NetworkInfo getNetwork() {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public void setNetwork(NetworkInfo network) {
         throw new NotImplementedException();
     }

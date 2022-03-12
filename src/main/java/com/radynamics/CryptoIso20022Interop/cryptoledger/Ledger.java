@@ -30,6 +30,8 @@ public interface Ledger {
 
     boolean requiresDestinationTag(Wallet wallet);
 
+    NetworkInfo getNetwork();
+
     void setNetwork(NetworkInfo network);
 
     WalletLookupProvider getLookupProvider();
