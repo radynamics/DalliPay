@@ -117,9 +117,15 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData() != null;
         } catch (JsonRpcClientErrorException e) {
-            log.error(e.getMessage(), e);
+            if (!isAccountNotFound(e)) {
+                log.error(e.getMessage(), e);
+            }
             return false;
         }
+    }
+
+    private boolean isAccountNotFound(Exception e) {
+        return e.getMessage().equals("Account not found.");
     }
 
     public FeeInfo latestFee() {
@@ -140,7 +146,9 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             return result.accountData().flags().lsfRequireDestTag();
         } catch (JsonRpcClientErrorException e) {
-            log.error(e.getMessage(), e);
+            if (!isAccountNotFound(e)) {
+                log.error(e.getMessage(), e);
+            }
             return false;
         }
     }
@@ -180,7 +188,9 @@ public class JsonRpcApi implements TransactionSource {
             var result = xrplClient.accountInfo(requestParams);
             wallet.setLedgerBalance(result.accountData().balance().value());
         } catch (JsonRpcClientErrorException e) {
-            log.error(e.getMessage(), e);
+            if (!isAccountNotFound(e)) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -191,7 +201,9 @@ public class JsonRpcApi implements TransactionSource {
             var hex = result.accountData().domain().orElse(null);
             return hex == null ? null : Utils.hexToString(hex);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (!isAccountNotFound(e)) {
+                log.error(e.getMessage(), e);
+            }
             return null;
         }
     }
