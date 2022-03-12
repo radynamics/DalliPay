@@ -86,9 +86,8 @@ public class Main {
     }
 
     private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, Network network) {
-        ledger.setNetwork(config.getNetwork(network));
-
-        var t = new TransformInstruction(ledger, new DbAccountMappingSource(ledger.getId()));
+        var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
+        t.setNetwork(network);
         t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
         t.getExchangeRateProvider().init();
         t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));

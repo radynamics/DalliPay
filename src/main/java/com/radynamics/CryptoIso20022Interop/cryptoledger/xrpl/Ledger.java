@@ -18,7 +18,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     public Ledger() {
         walletInfoProvider = new WalletInfoProvider[]{
-                new CachedWalletInfoProvider(new WalletInfoProvider[]{new LedgerWalletInfoProvider(this)})
+                new CachedWalletInfoProvider(this, new WalletInfoProvider[]{new LedgerWalletInfoProvider(this)})
         };
     }
 

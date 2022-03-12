@@ -9,16 +9,18 @@ import java.util.HashMap;
 
 public class CachedWalletInfoProvider implements WalletInfoProvider {
     final static Logger log = LogManager.getLogger(CachedWalletInfoProvider.class);
+    private final Ledger ledger;
     private final WalletInfoProvider[] providers;
     private final HashMap<String, WalletInfo[]> cache = new HashMap<>();
 
-    public CachedWalletInfoProvider(WalletInfoProvider[] providers) {
+    public CachedWalletInfoProvider(Ledger ledger, WalletInfoProvider[] providers) {
+        this.ledger = ledger;
         this.providers = providers;
     }
 
     @Override
     public WalletInfo[] list(Wallet wallet) {
-        var key = wallet.getPublicKey();
+        var key = String.format("%s_%s", ledger.getNetwork().getType(), wallet.getPublicKey());
         if (cache.containsKey(key)) {
             log.trace(String.format("CACHE hit %s", key));
             return cache.get(key);

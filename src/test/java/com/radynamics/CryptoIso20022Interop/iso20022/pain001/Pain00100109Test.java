@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -19,7 +20,7 @@ public class Pain00100109Test {
     @Test
     public void readExample01() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -109,7 +110,7 @@ public class Pain00100109Test {
     @Test
     public void readExample02() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {

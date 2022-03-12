@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -24,7 +25,7 @@ public class Pain00100103Test {
     @Test
     public void readExampleZA1() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -74,7 +75,7 @@ public class Pain00100103Test {
     @Test
     public void readExampleZA6Scor() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -107,7 +108,7 @@ public class Pain00100103Test {
     @CsvSource({"1", "2"})
     public void readDifferentExchangeRates(double rate) throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -133,7 +134,7 @@ public class Pain00100103Test {
     @CsvSource({"TEST", "USE"})
     public void readNoExchangeRate(String targetCcy) throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(targetCcy);
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -159,7 +160,7 @@ public class Pain00100103Test {
     @Test
     public void readSwissQrBillWithQrReference() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -183,7 +184,7 @@ public class Pain00100103Test {
     @Test
     public void readSwissQrBillWithScorReference() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -207,7 +208,7 @@ public class Pain00100103Test {
     @Test
     public void readSwissQrBillWithoutReference() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
@@ -231,7 +232,7 @@ public class Pain00100103Test {
     @Test
     public void readNoAccountMapping() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         ExchangeRate[] rates = {
                 new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
@@ -252,7 +253,7 @@ public class Pain00100103Test {
     @Test
     public void readRmtInfUstrd() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
         // DbtrAcct
         TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");

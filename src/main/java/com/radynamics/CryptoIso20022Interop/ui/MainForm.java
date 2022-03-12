@@ -23,6 +23,7 @@ public class MainForm extends JFrame {
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
+    private FlatButton cmdNetwork;
 
     public MainForm(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -44,16 +45,15 @@ public class MainForm extends JFrame {
         var menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        var cmdNetwork = new FlatButton();
-        var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
-        var network = transformInstruction.getLedger().getNetwork().getType();
-        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> network == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
-        cmdNetwork.setIcon(icon);
+        cmdNetwork = new FlatButton();
+        refreshNetworkButton();
         cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
         cmdNetwork.setFocusable(false);
-        var text = String.format("Currently using %s network", network == Network.Live ? "MAIN" : "TEST");
-        cmdNetwork.setToolTipText(text);
-        cmdNetwork.addActionListener(e -> JOptionPane.showMessageDialog(null, text, "Network", JOptionPane.INFORMATION_MESSAGE));
+        cmdNetwork.addActionListener(e -> {
+            transformInstruction.setNetwork(transformInstruction.getNetwork() == Network.Live ? Network.Test : Network.Live);
+            refreshNetworkButton();
+            sendingPanel.reload();
+        });
         menuBar.add(Box.createGlue());
         menuBar.add(cmdNetwork);
 
@@ -134,6 +134,13 @@ public class MainForm extends JFrame {
                 }
             }
         }
+    }
+
+    private void refreshNetworkButton() {
+        var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> transformInstruction.getNetwork() == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
+        cmdNetwork.setIcon(icon);
+        cmdNetwork.setToolTipText(String.format("Currently using %s network", transformInstruction.getNetwork() == Network.Live ? "MAIN" : "TEST"));
     }
 
     public void setInputFileName(String inputFileName) {

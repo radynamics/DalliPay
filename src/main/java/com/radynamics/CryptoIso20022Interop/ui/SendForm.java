@@ -95,25 +95,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 }
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, 0, SpringLayout.NORTH, panel1);
-                txtInput.addChangedListener(() -> {
-                    try {
-                        var t = new TransactionTranslator(transformInstruction, currencyConverter);
-                        var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
-                        var br = new BalanceRefresher();
-                        br.refreshAllSenderWallets(payments);
-
-                        load(payments);
-
-                        try (var repo = new ConfigRepo()) {
-                            repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
-                            repo.commit();
-                        } catch (Exception e) {
-                            ExceptionDialog.show(this, e);
-                        }
-                    } catch (Exception e) {
-                        ExceptionDialog.show(this, e);
-                    }
-                });
+                txtInput.addChangedListener(() -> onTxtInputChanged());
                 panel1.add(txtInput);
             }
             {
@@ -153,6 +135,26 @@ public class SendForm extends JPanel implements MainFormPane {
             cmd.addActionListener(e -> sendPayments());
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3.add(cmd);
+        }
+    }
+
+    private void onTxtInputChanged() {
+        try {
+            var t = new TransactionTranslator(transformInstruction, currencyConverter);
+            var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+            var br = new BalanceRefresher();
+            br.refreshAllSenderWallets(payments);
+
+            load(payments);
+
+            try (var repo = new ConfigRepo()) {
+                repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
+                repo.commit();
+            } catch (Exception e) {
+                ExceptionDialog.show(this, e);
+            }
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
         }
     }
 
@@ -311,5 +313,14 @@ public class SendForm extends JPanel implements MainFormPane {
     @Override
     public String getTitle() {
         return "Send Payments";
+    }
+
+    public void reload() {
+        if (StringUtils.isEmpty(txtInput.getText())) {
+            load(new Payment[0]);
+            return;
+        }
+
+        onTxtInputChanged();
     }
 }

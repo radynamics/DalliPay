@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
@@ -14,6 +16,7 @@ public class TransformInstruction {
     final static Logger log = LogManager.getLogger(TransformInstruction.class);
 
     private Ledger ledger;
+    private final Config config;
     private final AccountMappingSource accountMappingSource;
     private ExchangeRateProvider exchangeRateProvider;
 
@@ -25,8 +28,9 @@ public class TransformInstruction {
     private StructuredReference creditorReferenceIfMissing;
     private ExchangeRateProvider historicExchangeRateSource;
 
-    public TransformInstruction(Ledger ledger, AccountMappingSource accountMappingSource) {
+    public TransformInstruction(Ledger ledger, Config config, AccountMappingSource accountMappingSource) {
         this.ledger = ledger;
+        this.config = config;
         this.accountMappingSource = accountMappingSource;
     }
 
@@ -107,5 +111,13 @@ public class TransformInstruction {
 
     public AccountMappingSource getAccountMappingSource() {
         return this.accountMappingSource;
+    }
+
+    public Network getNetwork() {
+        return ledger.getNetwork().getType();
+    }
+
+    public void setNetwork(Network network) {
+        ledger.setNetwork(config.getNetwork(network));
     }
 }

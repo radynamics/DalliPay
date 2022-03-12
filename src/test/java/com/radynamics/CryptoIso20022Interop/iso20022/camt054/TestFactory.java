@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
+import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
@@ -18,7 +19,7 @@ public class TestFactory {
     public static TransformInstruction createTransformInstruction() {
         var ledger = LedgerFactory.create("xrpl");
         ledger.setNetwork(new NetworkInfo(Network.Test, null));
-        var i = new TransformInstruction(ledger, new MemoryAccountMappingSource(ledger));
+        var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
         exchange.load();
         i.setExchangeRateProvider(exchange);
