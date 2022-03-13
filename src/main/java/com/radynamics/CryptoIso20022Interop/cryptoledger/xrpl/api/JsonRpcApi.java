@@ -27,6 +27,7 @@ import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
 import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsResult;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -36,6 +37,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class JsonRpcApi implements TransactionSource {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
@@ -53,47 +55,70 @@ public class JsonRpcApi implements TransactionSource {
 
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        var params = createAccountTransactionsRequestParams(wallet, period);
-        var result = xrplClient.accountTransactions(params);
-
         var tr = new TransactionResult();
-        tr.setHasMarker(result.marker().isPresent());
-        for (var r : result.transactions()) {
-            var t = r.resultTransaction().transaction();
-            // TODO: all trx are fetched -> filter earlier
-            if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
-                continue;
-            }
+        var limit = 200;
 
-            if (t.transactionType() == TransactionType.PAYMENT) {
-                var p = (Payment) t;
-                if (!StringUtils.equals(p.destination().value(), wallet.getPublicKey())) {
+        var params = createAccountTransactionsRequestParams(wallet, period, null);
+        var result = xrplClient.accountTransactions(params);
+        while (tr.transactions().length < limit && result.transactions().size() > 0) {
+            for (var r : result.transactions()) {
+                if (tr.transactions().length >= limit) {
+                    tr.setHasMarker(true);
+                    return tr;
+                }
+
+                var t = r.resultTransaction().transaction();
+                // TODO: all trx are fetched -> filter earlier
+                if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
                     continue;
                 }
 
-                // TODO: handle ImmutableIssuedCurrencyAmount
-                var deliveredAmount = r.metadata().get().deliveredAmount().get();
-                if (deliveredAmount instanceof XrpCurrencyAmount) {
-                    tr.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
+                if (t.transactionType() == TransactionType.PAYMENT) {
+                    var p = (Payment) t;
+                    if (!StringUtils.equals(p.destination().value(), wallet.getPublicKey())) {
+                        continue;
+                    }
+
+                    // TODO: handle ImmutableIssuedCurrencyAmount
+                    var deliveredAmount = r.metadata().get().deliveredAmount().get();
+                    if (deliveredAmount instanceof XrpCurrencyAmount) {
+                        tr.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
+                    }
                 }
             }
+
+            if (!result.marker().isPresent()) {
+                tr.setHasMarker(false);
+                return tr;
+            }
+            params = createAccountTransactionsRequestParams(wallet, period, result.marker().get());
+            result = xrplClient.accountTransactions(params);
         }
 
         return tr;
     }
 
-    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {
+    private Collection<com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction> readTransactions(Wallet wallet, DateTimeRange period, AccountTransactionsResult result) throws DecoderException, UnsupportedEncodingException {
+        var list = new ArrayList<com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction>();
+
+        return list;
+    }
+
+    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
         var ledgerRange = ledgerRangeConverter.convert(period);
 
-        return AccountTransactionsRequestParams.builder()
+        var b = AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
                 .ledgerIndexMinimum(LedgerIndexBound.of(ledgerRange.getStart().unsignedIntegerValue().intValue()))
-                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()))
-                .build();
+                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()));
+        if (marker != null) {
+            b.marker(marker);
+        }
+        return b.build();
     }
 
     public Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
-        var params = createAccountTransactionsRequestParams(wallet, period);
+        var params = createAccountTransactionsRequestParams(wallet, period, null);
         var result = xrplClient.accountTransactions(params);
 
         var list = new ArrayList<Transaction>();
