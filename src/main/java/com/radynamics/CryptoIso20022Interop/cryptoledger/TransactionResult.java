@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class TransactionResult {
     private ArrayList<Transaction> transactions = new ArrayList<>();
     private boolean hasMarker;
+    private boolean hasMaxPageCounterReached;
 
     public void add(Transaction t) {
         transactions.add(t);
@@ -20,5 +21,13 @@ public class TransactionResult {
 
     public void setHasMarker(boolean hasMarker) {
         this.hasMarker = hasMarker;
+    }
+
+    public void setHasMaxPageCounterReached(boolean hasMaxPageCounterReached) {
+        this.hasMaxPageCounterReached = hasMaxPageCounterReached;
+    }
+
+    public boolean hasMaxPageCounterReached() {
+        return hasMaxPageCounterReached;
     }
 }

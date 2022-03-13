@@ -57,10 +57,12 @@ public class JsonRpcApi implements TransactionSource {
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var tr = new TransactionResult();
         var limit = 200;
+        var pageCounter = 0;
+        var maxPages = 10;
 
         var params = createAccountTransactionsRequestParams(wallet, period, null);
         var result = xrplClient.accountTransactions(params);
-        while (tr.transactions().length < limit && result.transactions().size() > 0) {
+        while (tr.transactions().length < limit && pageCounter < maxPages && result.transactions().size() > 0) {
             for (var r : result.transactions()) {
                 if (tr.transactions().length >= limit) {
                     tr.setHasMarker(true);
@@ -97,8 +99,10 @@ public class JsonRpcApi implements TransactionSource {
             }
             params = createAccountTransactionsRequestParams(wallet, period, result.marker().get());
             result = xrplClient.accountTransactions(params);
+            pageCounter++;
         }
 
+        tr.setHasMaxPageCounterReached(pageCounter >= maxPages);
         return tr;
     }
 
