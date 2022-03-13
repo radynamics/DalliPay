@@ -88,7 +88,7 @@ public class SendConfirmationForm extends JDialog {
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 70));
+        pnlContent.setPreferredSize(new Dimension(100, 120));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
@@ -217,7 +217,8 @@ public class SendConfirmationForm extends JDialog {
                 .setLedger(l)
                 .setAccount(senderAccount)
                 .setAddress(senderAddress)
-                .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()));
+                .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()))
+                .setInfoLineCount(2);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
         panel1Layout.putConstraint(SpringLayout.NORTH, lbl, padNorth, SpringLayout.NORTH, pnlContent);
         pnlContent.add(lbl);
@@ -363,7 +364,7 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private static int getNorthPad(int line) {
-        final var lineHeight = 60;
+        final var lineHeight = 70;
         return line * lineHeight;
     }
 

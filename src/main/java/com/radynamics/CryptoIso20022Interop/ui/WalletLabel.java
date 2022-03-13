@@ -22,6 +22,7 @@ public class WalletLabel extends JPanel {
     private Account account;
     private Address address;
     private WalletInfoAggregator walletInfoAggregator;
+    private int infoLineCount = 1;
 
     public WalletLabel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -36,31 +37,57 @@ public class WalletLabel extends JPanel {
     private void evaluate() {
         firstLine.setText(getFirstLineText());
 
-        var secondLineText = new WalletFormatter().format(wallet);
+        var walletText = new WalletFormatter().format(wallet);
         if (wallet == null) {
-            secondLine.setText(secondLineText);
+            secondLine.setText(createText(walletText, null, null));
             return;
         }
 
+        String balanceText = null;
         var amtSmallestUnit = wallet.getLedgerBalanceSmallestUnit();
         if (amtSmallestUnit != null && ledger != null) {
             var balance = ledger.convertToNativeCcyAmount(amtSmallestUnit.longValue());
-            secondLineText = String.format("%s (%s)", secondLineText, MoneyFormatter.formatLedger(balance, ledger.getNativeCcySymbol()));
+            balanceText = MoneyFormatter.formatLedger(balance, ledger.getNativeCcySymbol());
         }
 
-        secondLine.setText(secondLineText);
-        if (walletInfoAggregator == null) {
-            return;
+        String walletInfoText = null;
+        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getMostImportant(wallet);
+        if (wi != null) {
+            walletInfoText = String.format("%s %s", wi.getText(), wi.getValue());
         }
 
-        var wi = walletInfoAggregator.getMostImportant(wallet);
-        if (wi == null) {
-            return;
+        secondLine.setText(createText(walletText, balanceText, walletInfoText));
+        if (wi != null) {
+            secondLine.setForeground(wi.getVerified() ? secondLine.getForeground() : Consts.ColorWarning);
+            secondLine.setToolTipText(wi.getVerified() ? "" : String.format("%s not verified", wi.getText()));
+        }
+    }
+
+    private String createText(String walletText, String balanceText, String walletInfoText) {
+        if (balanceText == null && walletInfoText == null) {
+            return walletText;
         }
 
-        secondLine.setText(String.format("%s (%s %s)", secondLineText, wi.getText(), wi.getValue()));
-        secondLine.setForeground(wi.getVerified() ? secondLine.getForeground() : Consts.ColorWarning);
-        secondLine.setToolTipText(wi.getVerified() ? "" : String.format("%s not verified", wi.getText()));
+        if (infoLineCount == 1) {
+            if (balanceText != null && walletInfoText == null) {
+                return String.format("%s (%s)", walletText, balanceText);
+            }
+            if (balanceText == null && walletInfoText != null) {
+                return String.format("%s (%s)", walletText, walletInfoText);
+            }
+            return String.format("%s (%s, %s)", walletText, balanceText, walletInfoText);
+        }
+        if (infoLineCount == 2) {
+            if (balanceText != null && walletInfoText == null) {
+                return String.format("<html><body>%s<br />%s</body></html>", walletText, balanceText);
+            }
+            if (balanceText == null && walletInfoText != null) {
+                return String.format("<html><body>%s<br />%s</body></html>", walletText, balanceText);
+            }
+            return String.format("<html><body>%s<br />%s, %s</body></html>", walletText, balanceText, walletInfoText);
+        }
+
+        return walletText;
     }
 
     private String getFirstLineText() {
@@ -109,6 +136,12 @@ public class WalletLabel extends JPanel {
 
     public WalletLabel setWalletInfoAggregator(WalletInfoAggregator walletInfoAggregator) {
         this.walletInfoAggregator = walletInfoAggregator;
+        evaluate();
+        return this;
+    }
+
+    public WalletLabel setInfoLineCount(int infoLineCount) {
+        this.infoLineCount = infoLineCount;
         evaluate();
         return this;
     }
