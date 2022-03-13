@@ -67,6 +67,10 @@ public class JsonRpcApi implements TransactionSource {
                     return tr;
                 }
 
+                if (!r.metadata().isPresent() || !r.metadata().get().transactionResult().equalsIgnoreCase("tesSUCCESS")) {
+                    continue;
+                }
+
                 var t = r.resultTransaction().transaction();
                 // TODO: all trx are fetched -> filter earlier
                 if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
