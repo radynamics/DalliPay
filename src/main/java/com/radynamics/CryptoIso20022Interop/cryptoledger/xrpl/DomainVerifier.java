@@ -25,7 +25,7 @@ public class DomainVerifier {
             var url = new URL(String.format("https://%s/.well-known/xrp-ledger.toml", domain));
             toml = new Toml().read(url.openStream());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.info(e.getMessage(), e);
             return false;
         }
 
