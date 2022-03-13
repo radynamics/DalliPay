@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
@@ -51,11 +52,12 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     @Override
-    public Transaction[] listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
+    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period);
         var result = xrplClient.accountTransactions(params);
 
-        var list = new ArrayList<Transaction>();
+        var tr = new TransactionResult();
+        tr.setHasMarker(result.marker().isPresent());
         for (var r : result.transactions()) {
             var t = r.resultTransaction().transaction();
             // TODO: all trx are fetched -> filter earlier
@@ -72,12 +74,12 @@ public class JsonRpcApi implements TransactionSource {
                 // TODO: handle ImmutableIssuedCurrencyAmount
                 var deliveredAmount = r.metadata().get().deliveredAmount().get();
                 if (deliveredAmount instanceof XrpCurrencyAmount) {
-                    list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
+                    tr.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
                 }
             }
         }
 
-        return list.toArray(new Transaction[0]);
+        return tr;
     }
 
     private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {

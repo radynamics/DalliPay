@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
@@ -44,6 +45,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private JButton cmdExport;
     private JLabel lblLoading;
     private JComboBox<String> cboTargetCcy;
+    private JPanel pnlInfo;
+    private JLabel lblInfoText;
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -185,12 +188,41 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             panel3Layout.putConstraint(SpringLayout.EAST, cmdExport, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdExport);
 
+            {
+                pnlInfo = new JPanel();
+                pnlInfo.setLayout(new BoxLayout(pnlInfo, BoxLayout.X_AXIS));
+                panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, pnlInfo, 0, SpringLayout.VERTICAL_CENTER, cmdExport);
+                panel3Layout.putConstraint(SpringLayout.WEST, pnlInfo, 0, SpringLayout.WEST, table);
+                panel3.add(pnlInfo);
+                {
+                    var lbl = new JLabel();
+                    lbl.setIcon(new FlatSVGIcon("svg/informationDialog.svg", 16, 16));
+                    pnlInfo.add(lbl);
+                }
+                pnlInfo.add(Box.createRigidArea(new Dimension(5, 0)));
+                {
+                    lblInfoText = new JLabel();
+                    lblInfoText.setOpaque(true);
+                    pnlInfo.add(lblInfoText);
+                }
+                hideInfo();
+            }
+
             lblLoading = new JLabel();
             panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblLoading, 0, SpringLayout.VERTICAL_CENTER, cmdExport);
             panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
         }
+    }
+
+    private void hideInfo() {
+        pnlInfo.setVisible(false);
+    }
+
+    private void showInfo(String text) {
+        lblInfoText.setText(text);
+        pnlInfo.setVisible(true);
     }
 
     private void onSelectedTargetCcyChanged(String ccy) {
@@ -336,9 +368,16 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             t.setTargetCcy(targetCcy);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
-            var payments = t.apply(PaymentConverter.toPayment(transformInstruction.getLedger().listPaymentsReceived(wallet, period), targetCcy));
+            var result = transformInstruction.getLedger().listPaymentsReceived(wallet, period);
+            var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
 
             table.load(payments);
+
+            if (result.hasMarker()) {
+                showInfo("More data would have been available, but was not loaded. Please limit your filtering.");
+            } else {
+                hideInfo();
+            }
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         } finally {
