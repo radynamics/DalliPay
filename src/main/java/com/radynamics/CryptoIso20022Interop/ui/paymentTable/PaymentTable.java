@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.ExceptionDialog;
+import com.radynamics.CryptoIso20022Interop.ui.MultiRowChecker;
 import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
 import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +63,9 @@ public class PaymentTable extends JPanel {
 
         table.setRowHeight(30);
         initColumns();
+
+        var selectorColumn = table.getColumn(PaymentTableModel.COL_SELECTOR);
+        new MultiRowChecker(table, selectorColumn, row -> model.isCellEditable(row, selectorColumn.getModelIndex()));
 
         add(new JScrollPane(table));
     }
