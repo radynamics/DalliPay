@@ -130,11 +130,18 @@ public class ExchangeRatesForm extends JDialog {
                     cboExchange = new JComboBox<>();
                     setAllowChangeExchange(false);
                     cboExchange.setRenderer(new ExchangeRateProviderCellRenderer());
+                    var selectedFound = false;
                     for (var exchange : ExchangeRateProviderFactory.allExchanges()) {
                         cboExchange.addItem(exchange);
                         if (exchange.getId().equals(selectedExchange.getId())) {
                             cboExchange.setSelectedItem(exchange);
+                            selectedFound = true;
                         }
+                    }
+                    // Historic exchange rate providers aren't added.
+                    if (!selectedFound) {
+                        cboExchange.addItem(selectedExchange);
+                        cboExchange.setSelectedItem(selectedExchange);
                     }
                     cboExchange.addItemListener(e -> {
                         if (e.getStateChange() == ItemEvent.SELECTED) {
