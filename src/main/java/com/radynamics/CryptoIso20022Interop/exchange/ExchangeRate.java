@@ -60,7 +60,6 @@ public class ExchangeRate {
     public void setRate(double rate) {
         if (rate < 0) throw new IllegalArgumentException("Parameter 'rates' cannot be less than zero");
         this.rate = rate;
-        pointInTime = LocalDateTime.now();
     }
 
     public LocalDateTime getPointInTime() {
