@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import com.radynamics.CryptoIso20022Interop.update.OnlineUpdate;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -42,20 +43,7 @@ public class MainForm extends JFrame {
             ExceptionDialog.show(this, e);
         }
 
-        var menuBar = new JMenuBar();
-        setJMenuBar(menuBar);
-
-        cmdNetwork = new FlatButton();
-        refreshNetworkButton();
-        cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
-        cmdNetwork.setFocusable(false);
-        cmdNetwork.addActionListener(e -> {
-            transformInstruction.setNetwork(transformInstruction.getNetwork() == Network.Live ? Network.Test : Network.Live);
-            refreshNetworkButton();
-            sendingPanel.reload();
-        });
-        menuBar.add(Box.createGlue());
-        menuBar.add(cmdNetwork);
+        setJMenuBar(createMenuBar());
 
         var pnlMain = new JPanel();
         add(pnlMain);
@@ -134,6 +122,50 @@ public class MainForm extends JFrame {
                 }
             }
         }
+    }
+
+    private JMenuBar createMenuBar() {
+        var menuBar = new JMenuBar();
+        menuBar.add(Box.createGlue());
+
+        {
+            OnlineUpdate.search().thenAccept((updateInfo) -> {
+                if (updateInfo == null) {
+                    return;
+                }
+                var cmdUpdate = new FlatButton();
+                var icon = new FlatSVGIcon("svg/update.svg", 16, 16);
+                icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorAccent));
+                cmdUpdate.setIcon(icon);
+                cmdUpdate.setToolTipText(String.format("Update to newer version %s available", updateInfo.getVersion()));
+                cmdUpdate.setButtonType(FlatButton.ButtonType.toolBarButton);
+                cmdUpdate.setFocusable(false);
+                cmdUpdate.addActionListener(e -> {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try {
+                            Desktop.getDesktop().browse(updateInfo.getUri());
+                        } catch (IOException ex) {
+                            ExceptionDialog.show(this, ex);
+                        }
+                    }
+                });
+                menuBar.add(cmdUpdate);
+                menuBar.updateUI();
+            });
+        }
+
+        cmdNetwork = new FlatButton();
+        refreshNetworkButton();
+        cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
+        cmdNetwork.setFocusable(false);
+        cmdNetwork.addActionListener(e -> {
+            transformInstruction.setNetwork(transformInstruction.getNetwork() == Network.Live ? Network.Test : Network.Live);
+            refreshNetworkButton();
+            sendingPanel.reload();
+        });
+        menuBar.add(cmdNetwork);
+
+        return menuBar;
     }
 
     private void refreshNetworkButton() {
