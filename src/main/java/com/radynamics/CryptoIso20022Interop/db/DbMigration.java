@@ -33,7 +33,7 @@ public class DbMigration {
     }
 
     private void setDbVersion(int value) throws SQLException {
-        var ps = conn.prepareStatement("UPDATE config SET value = ? WHERE key = \"dbVersion\"");
+        var ps = conn.prepareStatement("UPDATE config SET value = ? WHERE key = 'dbVersion'");
         ps.setString(1, String.valueOf(value));
         ps.executeUpdate();
     }
