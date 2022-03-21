@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
@@ -108,9 +109,9 @@ public class PaymentTableModel extends AbstractTableModel {
                 item.setSenderLedger((String) value);
             }
         } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
-            item.payment.setSenderAccount(createAccountOrNull((String) value));
+            item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
-            item.payment.setReceiverAccount(createAccountOrNull((String) value));
+            item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
             if (value instanceof WalletCellValue) {
                 item.setReceiverLedger((WalletCellValue) value);
@@ -127,8 +128,14 @@ public class PaymentTableModel extends AbstractTableModel {
         fireTableCellUpdated(row, col);
     }
 
-    private Account createAccountOrNull(String text) {
-        return StringUtils.isEmpty(text) ? null : AccountFactory.create(text);
+    private Account createAccountOrNull(String text, Wallet wallet) {
+        if (!StringUtils.isEmpty(text)) {
+            return AccountFactory.create(text);
+        }
+        if (wallet != null && !StringUtils.isEmpty(wallet.getPublicKey())) {
+            return AccountFactory.create(wallet.getPublicKey());
+        }
+        return null;
     }
 
     public Class getColumnClass(int c) {
