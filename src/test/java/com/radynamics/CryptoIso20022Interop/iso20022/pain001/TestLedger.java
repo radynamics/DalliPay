@@ -97,6 +97,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean walletAccepts(Wallet wallet, String ccy) {
+        return false;
+    }
+
+    @Override
     public NetworkInfo getNetwork() {
         throw new NotImplementedException();
     }
