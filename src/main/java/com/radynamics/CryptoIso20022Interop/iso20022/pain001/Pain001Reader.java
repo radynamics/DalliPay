@@ -115,7 +115,7 @@ public class Pain001Reader {
         }
 
         if (!StringUtils.isAllEmpty(pstlAdr.getStrtNm())) {
-            a.setStreet(pstlAdr.getStrtNm());
+            a.setStreet(StringUtils.isAllEmpty(pstlAdr.getBldgNb()) ? pstlAdr.getStrtNm() : String.format("%s %s", pstlAdr.getStrtNm(), pstlAdr.getBldgNb()));
         }
         if (!StringUtils.isAllEmpty(pstlAdr.getPstCd())) {
             a.setZip(pstlAdr.getPstCd());
