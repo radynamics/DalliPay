@@ -24,6 +24,7 @@ public class ReceiveExportForm extends JDialog {
     private static Map<String, CamtFormat> formatMapping = new HashMap<>();
 
     public ReceiveExportForm() {
+        formatMapping.put("camt.054 Version 09", CamtFormat.Camt05400109);
         formatMapping.put("camt.054 Version 04", CamtFormat.Camt05400104);
         formatMapping.put("camt.054 Version 02", CamtFormat.Camt05400102);
 
