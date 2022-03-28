@@ -29,7 +29,7 @@ public class Pain00100109Test {
         };
         var r = new Pain001Reader(ledger);
         var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Various/pain.001.001.09_example01.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100109/pain.001.001.09_example01.xml")));
 
         Assertions.assertNotNull(transactions);
         Assertions.assertEquals(4, transactions.length);
@@ -118,7 +118,7 @@ public class Pain00100109Test {
         };
         var r = new Pain001Reader(ledger);
         var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Various/pain.001.001.09_example02.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100109/pain.001.001.09_example02.xml")));
 
         Assertions.assertNotNull(transactions);
         Assertions.assertEquals(3, transactions.length);
