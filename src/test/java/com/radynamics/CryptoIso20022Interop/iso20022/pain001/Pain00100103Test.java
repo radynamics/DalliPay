@@ -42,7 +42,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA1.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001ExampleZA1.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -92,7 +92,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001ExampleZA6Scor.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -121,7 +121,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001ExampleZA6Scor.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -145,7 +145,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001ExampleZA6Scor.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001ExampleZA6Scor.xml")));
 
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
@@ -173,7 +173,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithQrReference.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001SwissQrBillWithQrReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -197,7 +197,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithScorReference.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001SwissQrBillWithScorReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -221,7 +221,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001SwissQrBillWithoutReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -241,7 +241,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001SwissQrBillWithoutReference.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001SwissQrBillWithoutReference.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
@@ -266,7 +266,7 @@ public class Pain00100103Test {
         var r = new Pain001Reader(ledger);
 
         var tt = new TransactionTranslator(ti, ccyConverter);
-        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/Six/pain001RmtInfUstrd.xml")));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001RmtInfUstrd.xml")));
 
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
