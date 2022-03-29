@@ -9,8 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ReceiveExportForm extends JDialog {
@@ -19,14 +18,14 @@ public class ReceiveExportForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean accepted;
     private FilePathField txtOutputFile;
-    private JComboBox<String> cboExportFormat;
+    private JComboBox<CamtFormat> cboExportFormat;
 
-    private static Map<String, CamtFormat> formatMapping = new HashMap<>();
+    private static final Map<CamtFormat, String> formatMapping = new LinkedHashMap<>();
 
     public ReceiveExportForm() {
-        formatMapping.put("camt.054 Version 09", CamtFormat.Camt05400109);
-        formatMapping.put("camt.054 Version 04", CamtFormat.Camt05400104);
-        formatMapping.put("camt.054 Version 02", CamtFormat.Camt05400102);
+        formatMapping.put(CamtFormat.Camt05400109, "camt.054 Version 09");
+        formatMapping.put(CamtFormat.Camt05400104, "camt.054 Version 04");
+        formatMapping.put(CamtFormat.Camt05400102, "camt.054 Version 02");
 
         setupUI();
     }
@@ -137,12 +136,17 @@ public class ReceiveExportForm extends JDialog {
                 lbl.setOpaque(true);
                 pnlContent.add(lbl);
 
-                var exportText = new ArrayList<String>();
-                for (var item : formatMapping.entrySet()) {
-                    exportText.add(item.getKey());
-                }
                 cboExportFormat = new JComboBox<>();
-                cboExportFormat.setModel(new DefaultComboBoxModel<>(exportText.toArray(new String[0])));
+                cboExportFormat.setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        return super.getListCellRendererComponent(list, formatMapping.get(value), index, isSelected, cellHasFocus);
+                    }
+                });
+                for (var item : formatMapping.entrySet()) {
+                    cboExportFormat.addItem(item.getKey());
+                }
+                cboExportFormat.setSelectedItem(CamtFormat.Camt05400104);
                 panel1Layout.putConstraint(SpringLayout.WEST, cboExportFormat, padValueCtrl, SpringLayout.WEST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboExportFormat, getNorthPad(line), SpringLayout.NORTH, pnlContent);
                 pnlContent.add(cboExportFormat);
@@ -200,7 +204,6 @@ public class ReceiveExportForm extends JDialog {
     }
 
     public CamtFormat getExportFormat() {
-        var selectedText = cboExportFormat.getSelectedItem().toString();
-        return formatMapping.get(selectedText);
+        return (CamtFormat) cboExportFormat.getSelectedItem();
     }
 }
