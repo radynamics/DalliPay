@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
-    private Record[] data;
+    private Record[] data = new Record[0];
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
@@ -51,7 +51,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return data == null ? 0 : data.length;
+        return data.length;
     }
 
     public String getColumnName(int col) {
@@ -157,6 +157,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void load(Record[] data) {
+        if (data == null) throw new IllegalArgumentException("Parameter 'data' cannot be null");
         this.data = data;
         fireTableDataChanged();
 
