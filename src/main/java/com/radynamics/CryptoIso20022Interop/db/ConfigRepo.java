@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.db;
 
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormatHelper;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
@@ -95,6 +97,14 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setDefaultOutputDirectory(File value) throws Exception {
         saveOrUpdate("outputDirectory", value == null ? "" : value.getAbsolutePath());
+    }
+
+    public CamtFormat getDefaultExportFormat() throws Exception {
+        return CamtFormatHelper.toType(single("exportFormat").orElse(CamtFormatHelper.toKey(CamtFormatHelper.getDefault())));
+    }
+
+    public void setDefaultExportFormat(CamtFormat value) throws Exception {
+        saveOrUpdate("exportFormat", CamtFormatHelper.toKey(value));
     }
 
     private Optional<String> single(String key) throws Exception {

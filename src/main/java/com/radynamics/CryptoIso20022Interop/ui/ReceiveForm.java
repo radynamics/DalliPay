@@ -302,7 +302,16 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (StringUtils.isAllEmpty(targetFileName)) {
             targetFileName = createTargetFile().getAbsolutePath();
         }
-        var exportFormat = camtExport == null ? CamtFormatHelper.getDefault() : camtExport.getWriter().getExportFormat();
+        var exportFormat = CamtFormatHelper.getDefault();
+        if (camtExport == null) {
+            try (var repo = new ConfigRepo()) {
+                exportFormat = repo.getDefaultExportFormat();
+            } catch (Exception e) {
+                ExceptionDialog.show(this, e);
+            }
+        } else {
+            exportFormat = camtExport.getWriter().getExportFormat();
+        }
 
         var frm = new ReceiveExportForm();
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -323,6 +332,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         targetFileName = frm.getOutputFile();
         try (var repo = new ConfigRepo()) {
             repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
+            repo.setDefaultExportFormat(frm.getExportFormat());
             repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
