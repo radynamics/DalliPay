@@ -14,7 +14,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExport;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExportFactory;
-import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormatHelper;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -54,7 +54,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
-        this.camtExport = CamtExportFactory.create(CamtFormat.Camt05400104, this.transformInstruction, versionController);
 
         setupUI();
     }
@@ -303,6 +302,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (StringUtils.isAllEmpty(targetFileName)) {
             targetFileName = createTargetFile().getAbsolutePath();
         }
+        var exportFormat = camtExport == null ? CamtFormatHelper.getDefault() : camtExport.getWriter().getExportFormat();
 
         var frm = new ReceiveExportForm();
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -310,6 +310,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setOutputFile(targetFileName);
+        frm.setExportFormat(exportFormat);
         frm.setVisible(true);
         if (!frm.isDialogAccepted()) {
             return false;

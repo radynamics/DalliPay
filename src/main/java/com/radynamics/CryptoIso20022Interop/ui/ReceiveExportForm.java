@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
+import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormatHelper;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -146,7 +147,7 @@ public class ReceiveExportForm extends JDialog {
                 for (var item : formatMapping.entrySet()) {
                     cboExportFormat.addItem(item.getKey());
                 }
-                cboExportFormat.setSelectedItem(CamtFormat.Camt05400104);
+                cboExportFormat.setSelectedItem(CamtFormatHelper.getDefault());
                 panel1Layout.putConstraint(SpringLayout.WEST, cboExportFormat, padValueCtrl, SpringLayout.WEST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboExportFormat, getNorthPad(line), SpringLayout.NORTH, pnlContent);
                 pnlContent.add(cboExportFormat);
@@ -205,5 +206,9 @@ public class ReceiveExportForm extends JDialog {
 
     public CamtFormat getExportFormat() {
         return (CamtFormat) cboExportFormat.getSelectedItem();
+    }
+
+    public void setExportFormat(CamtFormat exportFormat) {
+        cboExportFormat.setSelectedItem(exportFormat);
     }
 }

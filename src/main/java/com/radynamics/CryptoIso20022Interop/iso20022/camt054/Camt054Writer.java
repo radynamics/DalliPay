@@ -7,4 +7,6 @@ public interface Camt054Writer {
     Object createDocument(Payment[] transactions) throws Exception;
 
     TransformInstruction getTransformInstruction();
+
+    CamtFormat getExportFormat();
 }

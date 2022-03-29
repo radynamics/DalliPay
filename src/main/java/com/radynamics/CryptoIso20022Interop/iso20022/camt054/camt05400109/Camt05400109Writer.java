@@ -21,6 +21,8 @@ public class Camt05400109Writer implements Camt054Writer {
     private IdGenerator idGenerator;
     private LocalDateTime creationDate;
 
+    public static final CamtFormat ExportFormat = CamtFormat.Camt05400109;
+
     public Camt05400109Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
@@ -243,5 +245,10 @@ public class Camt05400109Writer implements Camt054Writer {
 
     public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
+    }
+
+    @Override
+    public CamtFormat getExportFormat() {
+        return ExportFormat;
     }
 }
