@@ -96,6 +96,12 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public boolean isBlackholed(Wallet wallet) {
+        var api = new JsonRpcApi(this, network);
+        return api.isBlackholed(WalletConverter.from(wallet));
+    }
+
+    @Override
     public boolean walletAccepts(Wallet wallet, String ccy) {
         var api = new JsonRpcApi(this, network);
         return api.walletAccepts(WalletConverter.from(wallet), ccy);

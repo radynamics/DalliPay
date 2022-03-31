@@ -30,6 +30,8 @@ public interface Ledger {
 
     boolean requiresDestinationTag(Wallet wallet);
 
+    boolean isBlackholed(Wallet wallet);
+
     boolean walletAccepts(Wallet wallet, String ccy);
 
     NetworkInfo getNetwork();

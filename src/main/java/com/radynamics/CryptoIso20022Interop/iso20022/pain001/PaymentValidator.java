@@ -32,6 +32,9 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
                 if (!t.getLedger().walletAccepts(t.getReceiverWallet(), t.getLedgerCcy())) {
                     list.add(new ValidationResult(ValidationState.Error, String.format("Receiver wallet disallows receiving %s", t.getLedgerCcy())));
                 }
+                if (t.getLedger().isBlackholed(t.getReceiverWallet())) {
+                    list.add(new ValidationResult(ValidationState.Error, "Receiver wallet is blackholed. Amounts sent to this address will be lost."));
+                }
             }
         }
 

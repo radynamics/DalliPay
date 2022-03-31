@@ -31,13 +31,16 @@ import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsResult;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
+import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class JsonRpcApi implements TransactionSource {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
@@ -147,15 +150,19 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public boolean exists(Wallet wallet) {
+        return getAccountData(wallet) != null;
+    }
+
+    private AccountRootObject getAccountData(Wallet wallet) {
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             var result = xrplClient.accountInfo(requestParams);
-            return result.accountData() != null;
+            return result.accountData();
         } catch (JsonRpcClientErrorException e) {
             if (!isAccountNotFound(e)) {
                 log.error(e.getMessage(), e);
             }
-            return false;
+            return null;
         }
     }
 
@@ -176,16 +183,19 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public boolean requiresDestinationTag(Wallet wallet) {
-        try {
-            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            return result.accountData().flags().lsfRequireDestTag();
-        } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
+        var accountData = getAccountData(wallet);
+        return accountData != null && accountData.flags().lsfRequireDestTag();
+    }
+
+    public boolean isBlackholed(Wallet wallet) {
+        var accountData = getAccountData(wallet);
+        if (accountData == null) {
             return false;
         }
+
+        var blackholed = new HashSet<>(Arrays.asList("rrrrrrrrrrrrrrrrrrrrrhoLvTp", "rrrrrrrrrrrrrrrrrrrrBZbvji"));
+        return accountData.regularKey().isPresent()
+                && accountData.flags().lsfDisableMaster() && blackholed.contains(accountData.regularKey().get().value());
     }
 
     public boolean walletAccepts(Wallet wallet, String ccy) {

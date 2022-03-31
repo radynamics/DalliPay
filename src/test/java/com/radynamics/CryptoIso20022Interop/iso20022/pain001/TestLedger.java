@@ -97,6 +97,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean isBlackholed(Wallet wallet) {
+        return false;
+    }
+
+    @Override
     public boolean walletAccepts(Wallet wallet, String ccy) {
         return false;
     }
