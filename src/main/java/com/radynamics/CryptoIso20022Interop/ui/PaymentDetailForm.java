@@ -167,8 +167,9 @@ public class PaymentDetailForm extends JDialog {
                 for (var m : payment.getMessages()) {
                     sb.append(String.format("%s\n", m));
                 }
-                var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
+                var txt = createTextArea(3, Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(row++, "Messages:", txt, null);
+                row++;
             }
             {
                 var sb = new StringBuilder();
