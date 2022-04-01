@@ -3,6 +3,8 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
@@ -11,6 +13,7 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
     private final WalletInfoProvider[] walletInfoProvider;
@@ -90,21 +93,22 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public boolean requiresDestinationTag(Wallet wallet) {
-        var api = new JsonRpcApi(this, network);
-        return api.requiresDestinationTag(WalletConverter.from(wallet));
-    }
+    public ValidationResult[] validateReceiver(Wallet wallet) {
+        var list = new ArrayList<ValidationResult>();
+        var xrplWallet = WalletConverter.from(wallet);
 
-    @Override
-    public boolean isBlackholed(Wallet wallet) {
         var api = new JsonRpcApi(this, network);
-        return api.isBlackholed(WalletConverter.from(wallet));
-    }
+        if (api.requiresDestinationTag(xrplWallet)) {
+            list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
+        }
+        if (!api.walletAccepts(xrplWallet, getNativeCcySymbol())) {
+            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver wallet disallows receiving %s", getNativeCcySymbol())));
+        }
+        if (api.isBlackholed(xrplWallet)) {
+            list.add(new ValidationResult(ValidationState.Error, "Receiver wallet is blackholed. Amounts sent to this address will be lost."));
+        }
 
-    @Override
-    public boolean walletAccepts(Wallet wallet, String ccy) {
-        var api = new JsonRpcApi(this, network);
-        return api.walletAccepts(WalletConverter.from(wallet), ccy);
+        return list.toArray(new ValidationResult[0]);
     }
 
     public NetworkInfo getNetwork() {

@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -92,18 +93,8 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public boolean requiresDestinationTag(Wallet wallet) {
-        return false;
-    }
-
-    @Override
-    public boolean isBlackholed(Wallet wallet) {
-        return false;
-    }
-
-    @Override
-    public boolean walletAccepts(Wallet wallet, String ccy) {
-        return false;
+    public ValidationResult[] validateReceiver(Wallet wallet) {
+        return new ValidationResult[0];
     }
 
     @Override

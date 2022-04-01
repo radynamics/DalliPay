@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import okhttp3.HttpUrl;
 
 import java.math.BigDecimal;
@@ -28,11 +29,7 @@ public interface Ledger {
 
     boolean exists(Wallet wallet);
 
-    boolean requiresDestinationTag(Wallet wallet);
-
-    boolean isBlackholed(Wallet wallet);
-
-    boolean walletAccepts(Wallet wallet, String ccy);
+    ValidationResult[] validateReceiver(Wallet wallet);
 
     NetworkInfo getNetwork();
 
