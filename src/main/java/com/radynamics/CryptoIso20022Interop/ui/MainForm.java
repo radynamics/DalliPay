@@ -141,13 +141,7 @@ public class MainForm extends JFrame {
                 cmdUpdate.setButtonType(FlatButton.ButtonType.toolBarButton);
                 cmdUpdate.setFocusable(false);
                 cmdUpdate.addActionListener(e -> {
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        try {
-                            Desktop.getDesktop().browse(updateInfo.getUri());
-                        } catch (IOException ex) {
-                            ExceptionDialog.show(this, ex);
-                        }
-                    }
+                    Utils.openBrowser(this, updateInfo.getUri());
                 });
                 menuBar.add(cmdUpdate);
                 menuBar.updateUI();

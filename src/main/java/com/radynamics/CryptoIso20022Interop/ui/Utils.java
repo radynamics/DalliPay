@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
@@ -61,5 +63,15 @@ public final class Utils {
     public static ImageIcon getScaled(String resourceName, int w, int h) {
         var icon = new ImageIcon(ClassLoader.getSystemResource(resourceName));
         return new ImageIcon(icon.getImage().getScaledInstance(w, h, Image.SCALE_DEFAULT));
+    }
+
+    public static void openBrowser(Component parent, URI uri) {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(uri);
+            } catch (IOException ex) {
+                ExceptionDialog.show(parent, ex);
+            }
+        }
     }
 }
