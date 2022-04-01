@@ -137,7 +137,8 @@ public class MainForm extends JFrame {
                 var icon = new FlatSVGIcon("svg/update.svg", 16, 16);
                 icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorAccent));
                 cmdUpdate.setIcon(icon);
-                cmdUpdate.setToolTipText(String.format("Update to newer version %s available", updateInfo.getVersion()));
+                var text = String.format("Update to newer version %s available", updateInfo.getVersion());
+                cmdUpdate.setToolTipText(text);
                 cmdUpdate.setButtonType(FlatButton.ButtonType.toolBarButton);
                 cmdUpdate.setFocusable(false);
                 cmdUpdate.addActionListener(e -> {
@@ -145,6 +146,11 @@ public class MainForm extends JFrame {
                 });
                 menuBar.add(cmdUpdate);
                 menuBar.updateUI();
+
+                int ret = JOptionPane.showConfirmDialog(this, String.format("%s. Do you want to update now?", text), "Update", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (ret == JOptionPane.YES_OPTION) {
+                    Utils.openBrowser(this, updateInfo.getUri());
+                }
             });
         }
 
