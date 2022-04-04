@@ -74,4 +74,8 @@ public final class Utils {
             }
         }
     }
+
+    public static String toHexString(Color color) {
+        return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+    }
 }

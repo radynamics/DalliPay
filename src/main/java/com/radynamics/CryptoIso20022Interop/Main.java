@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop;
 
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
@@ -8,7 +9,9 @@ import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.DbAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import com.radynamics.CryptoIso20022Interop.ui.Consts;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
+import com.radynamics.CryptoIso20022Interop.ui.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +21,7 @@ import javax.swing.*;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
@@ -55,6 +59,7 @@ public class Main {
             transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
 
             javax.swing.SwingUtilities.invokeLater(() -> {
+                FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", Utils.toHexString(Consts.ColorAccent)));
                 FlatLightLaf.setup();
 
                 var frm = new MainForm(transformInstruction);
