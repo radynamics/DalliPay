@@ -86,5 +86,6 @@ task createFatJar(type: Jar) {
         exclude "META-INF/*.RSA"
     }
     //exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     with jar
 }
