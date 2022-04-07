@@ -1,24 +1,34 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Optional;
 
 public class Database {
     final static Logger log = LogManager.getLogger(Database.class);
-    private static String fileName = "cryptoIso20022Interop.db";
+    public static File dbFile = defaultFile();
+
+    public static File defaultFile() {
+        var home = SystemUtils.IS_OS_WINDOWS ? System.getenv("APPDATA") : System.getProperty("user.home");
+        return Paths.get(home, "CryptoIso20022Interop", "cryptoIso20022Interop.db").toFile();
+    }
 
     public static Connection connect() {
-        var dbPath = fileName;
-        String url = String.format("jdbc:sqlite:%s", dbPath);
+        if (defaultFile().equals(dbFile)) {
+            createDefaultDirectory();
+        }
+        String url = String.format("jdbc:sqlite:%s", dbFile);
 
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
             if (conn == null) {
-                throw new DbException(String.format("Could not open db %s", dbPath));
+                throw new DbException(String.format("Could not open db %s", dbFile));
             }
             conn.setAutoCommit(false);
             createTables(conn);
@@ -37,6 +47,13 @@ public class Database {
                 log.error(e2.getMessage(), e2);
             }
             return null;
+        }
+    }
+
+    private static void createDefaultDirectory() {
+        var parent = defaultFile().getParentFile();
+        if (!parent.exists()) {
+            parent.mkdir();
         }
     }
 

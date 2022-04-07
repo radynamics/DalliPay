@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
+import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.DbAccountMappingSource;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -41,6 +43,8 @@ public class Main {
         var walletSecret = getParam(args, "-walletSecret");
         var networkId = getParam(args, "-n", "test"); // live, test
         var configFilePath = getParam(args, "-c", "config.json");
+        var db = getParam(args, "-db");
+        Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
 
         try {
             var now = LocalDateTime.now();
