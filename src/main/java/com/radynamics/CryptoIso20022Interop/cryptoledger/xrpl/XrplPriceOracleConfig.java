@@ -70,7 +70,7 @@ public class XrplPriceOracleConfig {
         return list.toArray(new IssuedCurrency[0]);
     }
 
-    public static List<IssuedCurrency> defaults() {
+    public static List<IssuedCurrency> defaultsXumm() {
         var list = new ArrayList<IssuedCurrency>();
         list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
         list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));

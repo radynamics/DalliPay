@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.options.XrplPriceOracleEdit;
 
+import com.alexandriasoftware.swing.JSplitButton;
+import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
@@ -38,9 +40,16 @@ public class XrplPriceOracleEditor extends JPanel {
             pnl.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
             pnl.add(Box.createHorizontalGlue());
             {
-                var cmd = new JButton("default");
+                var popupMenu = new JPopupMenu();
+                {
+                    var item = new JMenuItem("XRPL labs Price Aggregator");
+                    popupMenu.add(item);
+                    item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsXumm()));
+                }
+                var cmd = new JSplitButton("default");
+                cmd.setAlwaysPopup(true);
+                cmd.setPopupMenu(popupMenu);
                 cmd.setPreferredSize(new Dimension(90, 21));
-                cmd.addActionListener(e -> onDefault());
                 pnl.add(cmd);
             }
             pnl.add(Box.createRigidArea(new Dimension(5, 0)));
@@ -58,10 +67,6 @@ public class XrplPriceOracleEditor extends JPanel {
                 pnl.add(cmd);
             }
         }
-    }
-
-    private void onDefault() {
-        load(XrplPriceOracleConfig.defaults());
     }
 
     private void onAdd() {
