@@ -24,10 +24,7 @@ import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
 import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
-import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
-import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsResult;
+import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -41,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Function;
 
 public class JsonRpcApi implements TransactionSource {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
@@ -57,14 +55,23 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     @Override
+    public TransactionResult listPaymentsSent(Wallet wallet, LocalDateTime since, int limit) throws Exception {
+        var period = DateTimeRange.of(since, LocalDateTime.now());
+        var params = createAccountTransactionsRequestParams(wallet, period, null);
+        return listPayments(params, period, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
+    }
+
+    @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
+        var params = createAccountTransactionsRequestParams(wallet, period, null);
+        return listPayments(params, period, 200, (Payment p) -> StringUtils.equals(p.destination().value(), wallet.getPublicKey()));
+    }
+
+    private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, DateTimeRange period, int limit, Function<Payment, Boolean> include) throws Exception {
         var tr = new TransactionResult();
-        var limit = 200;
         var pageCounter = 0;
         var maxPages = 10;
-
-        var params = createAccountTransactionsRequestParams(wallet, period, null);
-        var result = xrplClient.accountTransactions(params);
+        var result = xrplClient.accountTransactions(params.build());
         while (tr.transactions().length < limit && pageCounter < maxPages && result.transactions().size() > 0) {
             for (var r : result.transactions()) {
                 if (tr.transactions().length >= limit) {
@@ -84,7 +91,7 @@ public class JsonRpcApi implements TransactionSource {
 
                 if (t.transactionType() == TransactionType.PAYMENT) {
                     var p = (Payment) t;
-                    if (!StringUtils.equals(p.destination().value(), wallet.getPublicKey())) {
+                    if (!include.apply(p)) {
                         continue;
                     }
 
@@ -100,8 +107,8 @@ public class JsonRpcApi implements TransactionSource {
                 tr.setHasMarker(false);
                 return tr;
             }
-            params = createAccountTransactionsRequestParams(wallet, period, result.marker().get());
-            result = xrplClient.accountTransactions(params);
+            params.marker(result.marker().get());
+            result = xrplClient.accountTransactions(params.build());
             pageCounter++;
         }
 
@@ -115,7 +122,7 @@ public class JsonRpcApi implements TransactionSource {
         return list;
     }
 
-    private AccountTransactionsRequestParams createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
         var ledgerRange = ledgerRangeConverter.convert(period);
 
         var b = AccountTransactionsRequestParams.builder()
@@ -125,12 +132,12 @@ public class JsonRpcApi implements TransactionSource {
         if (marker != null) {
             b.marker(marker);
         }
-        return b.build();
+        return b;
     }
 
     public Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period, null);
-        var result = xrplClient.accountTransactions(params);
+        var result = xrplClient.accountTransactions(params.build());
 
         var list = new ArrayList<Transaction>();
         for (var r : result.transactions()) {

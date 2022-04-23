@@ -8,6 +8,7 @@ import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
@@ -83,6 +84,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public TransactionResult listPaymentsSent(Wallet wallet, LocalDateTime since, int limit) throws Exception {
+        return new TransactionResult();
+    }
+
+    @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         return new TransactionResult();
     }
@@ -114,6 +120,11 @@ public class TestLedger implements Ledger {
 
     @Override
     public TransactionLookupProvider getTransactionLookupProvider() {
+        return null;
+    }
+
+    @Override
+    public PaymentHistoryProvider getPaymentHistoryProvider() {
         return null;
     }
 

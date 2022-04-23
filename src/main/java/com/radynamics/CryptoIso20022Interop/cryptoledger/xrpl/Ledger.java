@@ -13,6 +13,7 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
@@ -76,6 +77,12 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public TransactionResult listPaymentsSent(Wallet wallet, LocalDateTime since, int limit) throws Exception {
+        var api = new JsonRpcApi(this, network);
+        return api.listPaymentsSent(WalletConverter.from(wallet), since, limit);
+    }
+
+    @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var api = new JsonRpcApi(this, network);
         return api.listPaymentsReceived(WalletConverter.from(wallet), period);
@@ -128,6 +135,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public TransactionLookupProvider getTransactionLookupProvider() {
         return new Bithomp(network.getType());
+    }
+
+    @Override
+    public PaymentHistoryProvider getPaymentHistoryProvider() {
+        return new LedgerPaymentHistoryProvider();
     }
 
     @Override

@@ -16,6 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
+    private final SenderHistoryValidator historyValidator;
+
+    public PaymentValidator(SenderHistoryValidator historyValidator) {
+        this.historyValidator = historyValidator;
+    }
+
     public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
@@ -39,6 +45,8 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             if (walletValidations.length == 0 && WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
             }
+
+            list.addAll(Arrays.asList(historyValidator.validate(t)));
         }
 
         if (t.getExchangeRate() == null) {
@@ -73,5 +81,9 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         return list.toArray(new ValidationResult[0]);
+    }
+
+    public SenderHistoryValidator getHistoryValidator() {
+        return historyValidator;
     }
 }

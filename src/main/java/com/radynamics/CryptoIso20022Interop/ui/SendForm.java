@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.PaymentValidator;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.SenderHistoryValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -27,6 +28,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private final Window owner;
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
+    private final PaymentValidator validator = new PaymentValidator(new SenderHistoryValidator());
 
     private JLabel lblExchange;
     private PaymentTable table;
@@ -126,7 +128,7 @@ public class SendForm extends JPanel implements MainFormPane {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, new PaymentValidator());
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator);
             panel2.add(table);
         }
         {
@@ -184,7 +186,6 @@ public class SendForm extends JPanel implements MainFormPane {
 
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            var validator = new PaymentValidator();
             var results = validator.validate(payments);
             if (results.length > 0) {
                 ValidationResultDialog.show(this, results);
@@ -299,6 +300,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private void load(Payment[] payments) {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
+        validator.getHistoryValidator().clearCache();
         table.load(payments);
     }
 
