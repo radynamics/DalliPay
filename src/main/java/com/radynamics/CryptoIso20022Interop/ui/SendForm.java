@@ -187,8 +187,7 @@ public class SendForm extends JPanel implements MainFormPane {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             var results = validator.validate(payments);
-            if (results.length > 0) {
-                ValidationResultDialog.show(this, results);
+            if (!ValidationResultDialog.showErrorAndWarnings(this, results)) {
                 return;
             }
 
