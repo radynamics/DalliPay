@@ -27,7 +27,6 @@ public class XrplPriceOracleEditor extends JPanel {
         cb.forColumn(IssuedCurrencyTableModel.COL_RECEIVER).width(300).headerValue("Receiver");
 
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        table.setPreferredSize(new Dimension(45 + 45 + 300 + 300, 150));
 
         JScrollPane sp = new JScrollPane(table);
         add(sp);
