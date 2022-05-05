@@ -35,7 +35,8 @@ public class PaymentTable extends JPanel {
     private final Actor actor;
     private Payment[] data = new Payment[0];
     private PaymentValidator validator;
-    private ArrayList<ProgressListener> listener = new ArrayList<>();
+    private ArrayList<ProgressListener> progressListener = new ArrayList<>();
+    private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
         super(new GridLayout(1, 0));
@@ -281,6 +282,7 @@ public class PaymentTable extends JPanel {
             log.warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
             return;
         }
+        raiseRefresh(t);
         model.onTransactionChanged(t);
     }
 
@@ -295,12 +297,22 @@ public class PaymentTable extends JPanel {
     }
 
     public void addProgressListener(ProgressListener l) {
-        listener.add(l);
+        progressListener.add(l);
     }
 
     private void raiseProgress(Progress progress) {
-        for (var l : listener) {
+        for (var l : progressListener) {
             l.onProgress(progress);
+        }
+    }
+
+    public void addRefreshListener(RefreshListener l) {
+        refreshListener.add(l);
+    }
+
+    private void raiseRefresh(Payment p) {
+        for (var l : refreshListener) {
+            l.onRefresh(p);
         }
     }
 }

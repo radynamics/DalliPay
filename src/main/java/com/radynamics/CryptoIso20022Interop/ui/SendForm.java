@@ -135,6 +135,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 cmdSendPayments.setEnabled(progress.isFinished());
             });
+            table.addRefreshListener(p -> validator.getHistoryValidator().loadHistory(p));
             panel2.add(table);
         }
         {
@@ -312,6 +313,7 @@ public class SendForm extends JPanel implements MainFormPane {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
         validator.getHistoryValidator().clearCache();
+        validator.getHistoryValidator().loadHistory(payments);
         cmdSendPayments.setEnabled(false);
         lblLoading.showLoading();
         table.load(payments);

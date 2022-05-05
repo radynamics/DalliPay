@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentHistoryProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -41,11 +42,11 @@ public class SenderHistoryValidator {
             return new ValidationResult[0];
         }
 
-        var key = p.getSenderWallet().getPublicKey();
-        if (!senderPaymentHistory.containsKey(key)) {
-            var paymentHistory = ledger.getPaymentHistoryProvider();
-            paymentHistory.load(ledger, p.getSenderWallet(), ZonedDateTime.now().minusDays(40));
-            senderPaymentHistory.put(key, paymentHistory);
+        var key = createKey(p.getSenderWallet());
+        synchronized (this) {
+            if (!senderPaymentHistory.containsKey(key)) {
+                loadHistory(p);
+            }
         }
 
         var paymentHistory = senderPaymentHistory.get(key);
@@ -59,5 +60,29 @@ public class SenderHistoryValidator {
 
     public void clearCache() {
         senderPaymentHistory.clear();
+    }
+
+    private String createKey(Wallet wallet) {
+        return wallet.getPublicKey();
+    }
+
+    public void loadHistory(Payment p) {
+        loadHistory(new Payment[]{p});
+    }
+
+    public void loadHistory(Payment[] payments) {
+        for (var p : payments) {
+            if (p.getSenderWallet() == null) {
+                continue;
+            }
+
+            var key = createKey(p.getSenderWallet());
+            if (!senderPaymentHistory.containsKey(key)) {
+                var ledger = p.getLedger();
+                var paymentHistory = ledger.getPaymentHistoryProvider();
+                paymentHistory.load(ledger, p.getSenderWallet(), ZonedDateTime.now().minusDays(40));
+                senderPaymentHistory.put(key, paymentHistory);
+            }
+        }
     }
 }
