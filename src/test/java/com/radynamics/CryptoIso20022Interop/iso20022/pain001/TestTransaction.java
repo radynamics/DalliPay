@@ -5,14 +5,14 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
     private long amountSmallestUnit;
     private String ccy;
-    private LocalDateTime booked;
+    private ZonedDateTime booked;
     private Wallet senderWallet;
     private Wallet receiverWallet;
     private ArrayList<String> messages = new ArrayList<>();
@@ -47,12 +47,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public LocalDateTime getBooked() {
+    public ZonedDateTime getBooked() {
         return booked;
     }
 
     @Override
-    public void setBooked(LocalDateTime value) {
+    public void setBooked(ZonedDateTime value) {
         this.booked = value;
     }
 

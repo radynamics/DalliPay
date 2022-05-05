@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.*;
 
@@ -15,11 +15,11 @@ public class CurrencyConverterTest {
 
     public CurrencyConverterTest() {
         ExchangeRate[] rates = {
-                new ExchangeRate("CHF", "TEST", 0.9, LocalDateTime.now()),
-                new ExchangeRate("EUR", "TEST", 1.1, LocalDateTime.now()),
-                new ExchangeRate("JPY", "TEST", 0.0088, LocalDateTime.now()), // sometimes defined with factor 100
-                new ExchangeRate("XXX", "TEST", 0.888888, LocalDateTime.now()),
-                new ExchangeRate("XXX1", "TEST", 0.88888888, LocalDateTime.now()),
+                new ExchangeRate("CHF", "TEST", 0.9, ZonedDateTime.now()),
+                new ExchangeRate("EUR", "TEST", 1.1, ZonedDateTime.now()),
+                new ExchangeRate("JPY", "TEST", 0.0088, ZonedDateTime.now()), // sometimes defined with factor 100
+                new ExchangeRate("XXX", "TEST", 0.888888, ZonedDateTime.now()),
+                new ExchangeRate("XXX1", "TEST", 0.88888888, ZonedDateTime.now()),
         };
         ccyConverter = new CurrencyConverter(rates);
     }
@@ -72,9 +72,9 @@ public class CurrencyConverterTest {
     @Test
     public void get() {
         ExchangeRate[] rates = {
-                new ExchangeRate("TEST", "TEST", 1.0, LocalDateTime.now()),
-                new ExchangeRate("CHF", "TEST", 0.9, LocalDateTime.now()),
-                new ExchangeRate("EUR", "TEST", 1.1, LocalDateTime.now()),
+                new ExchangeRate("TEST", "TEST", 1.0, ZonedDateTime.now()),
+                new ExchangeRate("CHF", "TEST", 0.9, ZonedDateTime.now()),
+                new ExchangeRate("EUR", "TEST", 1.1, ZonedDateTime.now()),
         };
         var ccyConverter = new CurrencyConverter(rates);
 

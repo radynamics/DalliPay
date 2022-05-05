@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class ExchangeRatesForm extends JDialog {
@@ -21,10 +21,10 @@ public class ExchangeRatesForm extends JDialog {
     private Component anchorComponentTopLeft;
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
-    private LocalDateTime pointInTime;
+    private ZonedDateTime pointInTime;
     private JComboBox<ExchangeRateProvider> cboExchange;
 
-    public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, LocalDateTime pointInTime) {
+    public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");

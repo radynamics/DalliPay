@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
@@ -33,7 +32,7 @@ import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,8 +54,8 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     @Override
-    public TransactionResult listPaymentsSent(Wallet wallet, LocalDateTime since, int limit) throws Exception {
-        var period = DateTimeRange.of(since, LocalDateTime.now());
+    public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
+        var period = DateTimeRange.of(since, ZonedDateTime.now());
         var params = createAccountTransactionsRequestParams(wallet, period, null);
         return listPayments(params, period, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
     }
@@ -84,8 +83,7 @@ public class JsonRpcApi implements TransactionSource {
                 }
 
                 var t = r.resultTransaction().transaction();
-                // TODO: all trx are fetched -> filter earlier
-                if (!period.isBetween(DateTimeConvert.toLocal(t.closeDateHuman().get()))) {
+                if (!period.isBetween(t.closeDateHuman().get())) {
                     continue;
                 }
 
@@ -226,7 +224,7 @@ public class JsonRpcApi implements TransactionSource {
         // TODO: handle ImmutableIssuedCurrencyAmount
         var trx = new Transaction(ledger, deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
         trx.setId(t.hash().get().value());
-        trx.setBooked(DateTimeConvert.toLocal(t.closeDateHuman().get()));
+        trx.setBooked(t.closeDateHuman().get());
         trx.setSender(WalletConverter.from(t.account()));
         for (MemoWrapper mw : t.memos()) {
             if (!mw.memo().memoData().isPresent()) {
@@ -335,7 +333,7 @@ public class JsonRpcApi implements TransactionSource {
         }
 
         t.setId(signed.hash().value());
-        t.setBooked(LocalDateTime.now());
+        t.setBooked(ZonedDateTime.now());
 
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }

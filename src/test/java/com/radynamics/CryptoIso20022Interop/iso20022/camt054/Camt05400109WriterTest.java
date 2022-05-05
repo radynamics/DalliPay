@@ -7,8 +7,6 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import org.junit.jupiter.api.Test;
 import org.xmlunit.builder.Input;
 
-import java.time.LocalDateTime;
-
 import static org.junit.Assert.assertThat;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
@@ -35,7 +33,7 @@ public class Camt05400109WriterTest {
 
         var w = new Camt05400109Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
-        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setCreationDate(TestFactory.createCreationDate());
         var actual = camtConverter.toXml(w.createDocument(payments));
         var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream(expectationResourceName)));
 

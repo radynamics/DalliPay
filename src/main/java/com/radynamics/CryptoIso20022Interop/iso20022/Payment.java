@@ -11,7 +11,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class Payment {
     private Transaction cryptoTrx;
@@ -64,7 +64,7 @@ public class Payment {
         senderAccount = account;
     }
 
-    public LocalDateTime getBooked() {
+    public ZonedDateTime getBooked() {
         return cryptoTrx.getBooked();
     }
 

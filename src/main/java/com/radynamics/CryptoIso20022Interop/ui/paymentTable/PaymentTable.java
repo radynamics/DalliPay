@@ -24,7 +24,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class PaymentTable extends JPanel {
@@ -55,7 +55,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
-        table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeCellRenderer());
+        table.setDefaultRenderer(ZonedDateTime.class, new LocalDateTimeCellRenderer());
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
         var cellEditor = new WalletCellEditor(objectColumn, actor == Actor.Sender);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_SENDER_LEDGER)).setCellEditor(cellEditor);

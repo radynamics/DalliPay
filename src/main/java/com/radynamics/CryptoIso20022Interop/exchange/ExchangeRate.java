@@ -1,19 +1,19 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class ExchangeRate {
     private CurrencyPair pair;
     private double rate;
-    private LocalDateTime pointInTime;
+    private ZonedDateTime pointInTime;
 
     public static final double UndefinedRate = 0;
 
-    public ExchangeRate(String ccyFrom, String ccyTo, double rate, LocalDateTime pointInTime) {
+    public ExchangeRate(String ccyFrom, String ccyTo, double rate, ZonedDateTime pointInTime) {
         this(new CurrencyPair(ccyFrom, ccyTo), rate, pointInTime);
     }
 
-    public ExchangeRate(CurrencyPair pair, double rate, LocalDateTime pointInTime) {
+    public ExchangeRate(CurrencyPair pair, double rate, ZonedDateTime pointInTime) {
         this.pair = pair;
         setRate(rate);
         this.pointInTime = pointInTime;
@@ -24,11 +24,11 @@ public class ExchangeRate {
     }
 
     public static ExchangeRate OneToOne(CurrencyPair pair) {
-        return new ExchangeRate(pair.getFirst(), pair.getSecond(), 1, LocalDateTime.now());
+        return new ExchangeRate(pair.getFirst(), pair.getSecond(), 1, ZonedDateTime.now());
     }
 
     public static ExchangeRate Undefined(CurrencyPair pair) {
-        return new ExchangeRate(pair, UndefinedRate, LocalDateTime.now());
+        return new ExchangeRate(pair, UndefinedRate, ZonedDateTime.now());
     }
 
     public static ExchangeRate getOrNull(ExchangeRate[] rates, CurrencyPair pair) {
@@ -62,7 +62,7 @@ public class ExchangeRate {
         this.rate = rate;
     }
 
-    public LocalDateTime getPointInTime() {
+    public ZonedDateTime getPointInTime() {
         return pointInTime;
     }
 

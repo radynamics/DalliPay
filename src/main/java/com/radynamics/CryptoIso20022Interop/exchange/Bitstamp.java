@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
-import com.radynamics.CryptoIso20022Interop.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -9,7 +8,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -56,7 +55,7 @@ public class Bitstamp implements ExchangeRateProvider {
                 var json = load(currencyPair);
                 var ccyFrom = currencyPair.substring(0, 3).toUpperCase();
                 var ccyTo = currencyPair.substring(3).toUpperCase();
-                var pointInTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(json.getLong("timestamp")), TimeZone.getDefault().toZoneId());
+                var pointInTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(json.getLong("timestamp")), TimeZone.getDefault().toZoneId());
                 exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, json.getDouble("last"), pointInTime));
             } catch (Exception e) {
                 log.error(String.format("Could not load rates for currencyPair %s", currencyPair), e);
@@ -92,7 +91,7 @@ public class Bitstamp implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
+    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
         return null;
     }
 }

@@ -12,14 +12,14 @@ import org.apache.commons.lang3.NotImplementedException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class Camt05400109Writer implements Camt054Writer {
     private final Ledger ledger;
     private TransformInstruction transformInstruction;
     private final String productVersion;
     private IdGenerator idGenerator;
-    private LocalDateTime creationDate;
+    private ZonedDateTime creationDate;
 
     public static final CamtFormat ExportFormat = CamtFormat.Camt05400109;
 
@@ -28,7 +28,7 @@ public class Camt05400109Writer implements Camt054Writer {
         this.transformInstruction = transformInstruction;
         this.productVersion = productVersion;
         this.idGenerator = new UUIDIdGenerator();
-        this.creationDate = LocalDateTime.now();
+        this.creationDate = ZonedDateTime.now();
     }
 
     @Override
@@ -243,7 +243,7 @@ public class Camt05400109Writer implements Camt054Writer {
         this.idGenerator = idGenerator;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(ZonedDateTime creationDate) {
         this.creationDate = creationDate;
     }
 

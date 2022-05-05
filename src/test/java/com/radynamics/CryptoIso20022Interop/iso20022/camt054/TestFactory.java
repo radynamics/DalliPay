@@ -13,6 +13,8 @@ import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingS
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class TestFactory {
@@ -42,7 +44,7 @@ public class TestFactory {
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
         t.setAmountSmallestUnit(36350000);
         t.setId("E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA");
-        t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11));
+        t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
         t.setInvoiceId("RG-00123.45");
 
         return t;
@@ -54,7 +56,7 @@ public class TestFactory {
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
         t.setAmountSmallestUnit(50000000);
         t.setId("57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415");
-        t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11));
+        t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.SwissQrBill, "210000000003139471430009017"));
 
         return t;
@@ -66,7 +68,7 @@ public class TestFactory {
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
         t.setAmountSmallestUnit(391000000);
         t.setId("4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9");
-        t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11));
+        t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11).atZone(ZoneId.systemDefault()));
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.Scor, "RF712348231"));
 
         return t;
@@ -77,5 +79,9 @@ public class TestFactory {
         mapping.setAccount(account);
         mapping.setWallet(ti.getLedger().createWallet(walletPublicKey, ""));
         ti.getAccountMappingSource().add(mapping);
+    }
+
+    public static ZonedDateTime createCreationDate() {
+        return ZonedDateTime.of(2021, 06, 01, 16, 46, 10, 0, ZoneId.of("UTC"));
     }
 }

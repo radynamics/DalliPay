@@ -11,7 +11,7 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -24,8 +24,8 @@ public class Pain00100109Test {
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
-                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
-                new ExchangeRate("TRY", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+                new ExchangeRate("TRY", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
         };
         var r = new Pain001Reader(ledger);
         var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
@@ -114,7 +114,7 @@ public class Pain00100109Test {
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
-                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
         };
         var r = new Pain001Reader(ledger);
         var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
@@ -202,8 +202,8 @@ public class Pain00100109Test {
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
-                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
-                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, LocalDateTime.now()),
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
         };
         var r = new Pain001Reader(ledger);
         var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));

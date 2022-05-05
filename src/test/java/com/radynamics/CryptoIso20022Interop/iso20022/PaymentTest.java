@@ -11,7 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class PaymentTest {
     @Test
@@ -34,7 +34,7 @@ public class PaymentTest {
 
     @NotNull
     private ExchangeRate createRate2() {
-        return new ExchangeRate(new CurrencyPair("TEST", "USD"), 2.0, LocalDateTime.now());
+        return new ExchangeRate(new CurrencyPair("TEST", "USD"), 2.0, ZonedDateTime.now());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class PaymentTest {
     @CsvSource(value = {"USD,TEST", "TEST,USD"})
     public void setExchangeRate(String ccyFrom, String ccyTo) {
         var p = new Payment(new TestTransaction(new TestLedger(), 10000, "TEST"));
-        p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, LocalDateTime.now()));
+        p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
 
         Assertions.assertEquals(20, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
@@ -93,7 +93,7 @@ public class PaymentTest {
     @CsvSource(value = {"true", "false"})
     public void setExchangeRateNull(boolean amountDefined) {
         var p = new Payment(new TestTransaction(new TestLedger(), 10000, "TEST"));
-        p.setExchangeRate(new ExchangeRate(new CurrencyPair("USD", "TEST"), 2.0, LocalDateTime.now()));
+        p.setExchangeRate(new ExchangeRate(new CurrencyPair("USD", "TEST"), 2.0, ZonedDateTime.now()));
         if (amountDefined) {
             p.setAmount(BigDecimal.valueOf(20), "USD");
 
@@ -114,7 +114,7 @@ public class PaymentTest {
     public void setExchangeRateLedgerCcyNotAffected(String ccyFrom, String ccyTo) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             var p = new Payment(new TestTransaction(new TestLedger(), 10000, "TEST"));
-            p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, LocalDateTime.now()));
+            p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
         });
     }
 
@@ -124,7 +124,7 @@ public class PaymentTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             var p = new Payment(new TestTransaction(new TestLedger(), 10000, "TEST"));
             p.setAmount(BigDecimal.valueOf(30), "USD");
-            p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, LocalDateTime.now()));
+            p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
         });
     }
 }

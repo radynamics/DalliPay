@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
+import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -7,14 +8,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 
 public class Utils {
-    public static XMLGregorianCalendar toXmlDateTime(LocalDateTime value) throws DatatypeConfigurationException {
-        var gcal = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));
+    public static XMLGregorianCalendar toXmlDateTime(ZonedDateTime value) throws DatatypeConfigurationException {
+        var gcal = GregorianCalendar.from(DateTimeConvert.toUserTimeZone(value));
         return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
     }
 

@@ -3,7 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public interface Transaction {
     void setAmountSmallestUnit(long value);
@@ -12,9 +12,9 @@ public interface Transaction {
 
     String getCcy();
 
-    LocalDateTime getBooked();
+    ZonedDateTime getBooked();
 
-    void setBooked(LocalDateTime value);
+    void setBooked(ZonedDateTime value);
 
     String getId();
 

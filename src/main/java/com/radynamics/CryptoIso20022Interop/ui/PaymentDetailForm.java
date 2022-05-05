@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
@@ -152,7 +153,7 @@ public class PaymentDetailForm extends JDialog {
                         }
                     });
                 }
-                createRow(row++, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(payment.getBooked()), secondLine);
+                createRow(row++, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getBooked())), secondLine);
             }
             {
                 var sb = new StringBuilder();
@@ -210,7 +211,7 @@ public class PaymentDetailForm extends JDialog {
         var fxRateAtText = "unknown";
         if (!payment.isAmountUnknown()) {
             fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
-            fxRateAtText = Utils.createFormatDate().format(payment.getExchangeRate().getPointInTime());
+            fxRateAtText = Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getExchangeRate().getPointInTime()));
         }
         lblLedgerAmount.setText(String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText));
     }

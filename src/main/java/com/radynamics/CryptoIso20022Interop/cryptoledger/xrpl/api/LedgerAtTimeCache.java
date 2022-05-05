@@ -5,14 +5,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 
 public class LedgerAtTimeCache {
     final static Logger log = LogManager.getLogger(LedgerAtTimeCache.class);
     private HashMap<UnsignedInteger, LedgerAtTime> items = new HashMap<>();
 
-    public LedgerAtTime add(LocalDateTime pointInTime, LedgerIndex index) {
+    public LedgerAtTime add(ZonedDateTime pointInTime, LedgerIndex index) {
         var item = new LedgerAtTime(pointInTime, index);
         items.put(index.unsignedIntegerValue(), item);
         return item;
@@ -27,7 +27,7 @@ public class LedgerAtTimeCache {
         return null;
     }
 
-    public LedgerAtTime find(LocalDateTime dt) {
+    public LedgerAtTime find(ZonedDateTime dt) {
         for (var e : items.entrySet()) {
             var item = e.getValue();
             if (item.getPointInTime() == dt) {

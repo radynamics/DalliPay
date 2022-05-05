@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -58,7 +58,7 @@ public class Coinbase implements ExchangeRateProvider {
                 var rates = data.getJSONObject("rates");
                 for (var ccy : rates.keySet()) {
                     var ccyTo = ccy.toUpperCase();
-                    var pointInTime = LocalDateTime.now();
+                    var pointInTime = ZonedDateTime.now();
                     exchangeRates.add(new ExchangeRate(ccyFrom, ccyTo, rates.getDouble(ccy), pointInTime));
                 }
             } catch (Exception e) {
@@ -95,7 +95,7 @@ public class Coinbase implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
+    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
         return null;
     }
 }

@@ -14,8 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.xmlunit.builder.Input;
 
-import java.time.LocalDateTime;
-
 import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
@@ -42,7 +40,7 @@ public class Camt05400104WriterTest {
 
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
-        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setCreationDate(TestFactory.createCreationDate());
         var actual = camtConverter.toXml(w.createDocument(payments));
         var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream(expectationResourceName)));
 
@@ -58,7 +56,7 @@ public class Camt05400104WriterTest {
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
-        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setCreationDate(TestFactory.createCreationDate());
         var actual = (Document) w.createDocument(payments);
 
         var acct = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getAcct();
@@ -78,7 +76,7 @@ public class Camt05400104WriterTest {
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
-        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setCreationDate(TestFactory.createCreationDate());
         var actual = (Document) w.createDocument(payments);
 
         var ntry = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().get(0);
@@ -111,7 +109,7 @@ public class Camt05400104WriterTest {
 
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());
-        w.setCreationDate(LocalDateTime.of(2021, 06, 01, 16, 46, 10));
+        w.setCreationDate(TestFactory.createCreationDate());
         var actual = camtConverter.toXml(w.createDocument(payments));
         var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream("camt054/camt.054.001.04_createCreditorReferenceIfMissing.xml")));
 

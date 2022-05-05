@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +74,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime) {
+    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
         var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
         var targetCcy = pair.getFirst().equals("XRP") ? pair.getSecond() : pair.getFirst();
         var issuedCcy = issuedCurrencies.get(targetCcy);
@@ -113,7 +113,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         return new ExchangeRate(pair, rate, bestMatch.getBooked());
     }
 
-    private Transaction getBestMatch(Transaction[] transactions, LocalDateTime pointInTime) {
+    private Transaction getBestMatch(Transaction[] transactions, ZonedDateTime pointInTime) {
         Transaction best = transactions[0];
 
         for (var t : transactions) {

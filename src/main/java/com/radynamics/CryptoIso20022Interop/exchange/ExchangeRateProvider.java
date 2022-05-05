@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public interface ExchangeRateProvider {
     String getId();
@@ -17,5 +17,5 @@ public interface ExchangeRateProvider {
 
     ExchangeRate[] latestRates();
 
-    ExchangeRate rateAt(CurrencyPair pair, LocalDateTime pointInTime);
+    ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime);
 }

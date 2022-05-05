@@ -5,7 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import okhttp3.HttpUrl;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public interface Ledger {
     LedgerId getId();
@@ -26,7 +26,7 @@ public interface Ledger {
 
     void refreshBalance(Wallet wallet);
 
-    TransactionResult listPaymentsSent(Wallet wallet, LocalDateTime since, int limit) throws Exception;
+    TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception;
 
     TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception;
 

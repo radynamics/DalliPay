@@ -6,7 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class SenderHistoryValidator {
         var key = p.getSenderWallet().getPublicKey();
         if (!senderPaymentHistory.containsKey(key)) {
             var paymentHistory = ledger.getPaymentHistoryProvider();
-            paymentHistory.load(ledger, p.getSenderWallet(), LocalDateTime.now().minusDays(40));
+            paymentHistory.load(ledger, p.getSenderWallet(), ZonedDateTime.now().minusDays(40));
             senderPaymentHistory.put(key, paymentHistory);
         }
 

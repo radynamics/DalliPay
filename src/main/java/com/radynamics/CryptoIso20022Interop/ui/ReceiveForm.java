@@ -28,7 +28,7 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
@@ -351,7 +351,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
 
         var df = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
-        var fileName = String.format("%s_%s.xml", LocalDateTime.now().format(df), txtInput.getText());
+        var fileName = String.format("%s_%s.xml", ZonedDateTime.now().format(df), txtInput.getText());
         return new File(dir, fileName);
     }
 
@@ -407,8 +407,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     public void setPeriod(DateTimeRange period) {
-        dtPickerStart.setDateTimePermissive(period.getStart());
-        dtPickerEnd.setDateTimePermissive(period.getEnd());
+        dtPickerStart.setDateTimePermissive(period.getStart().toLocalDateTime());
+        dtPickerEnd.setDateTimePermissive(period.getEnd().toLocalDateTime());
     }
 
     @Override
