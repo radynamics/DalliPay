@@ -85,12 +85,12 @@ public class Camt05400104WriterTest {
         assertNotNull(ntry.getValDt());
         switch (format) {
             case Date -> {
-                assertEquals("2021-02-21T00:00:00.000Z", ntry.getBookgDt().getDt().toString());
-                assertEquals("2021-02-21T00:00:00.000Z", ntry.getValDt().getDt().toString());
+                assertEquals("2021-02-21T00:00:00.000+01:00", ntry.getBookgDt().getDt().toString());
+                assertEquals("2021-02-21T00:00:00.000+01:00", ntry.getValDt().getDt().toString());
             }
             case DateTime -> {
-                assertEquals("2021-02-21T09:10:11.000Z", ntry.getBookgDt().getDtTm().toString());
-                assertEquals("2021-02-21T09:10:11.000Z", ntry.getValDt().getDtTm().toString());
+                assertEquals("2021-02-21T09:10:11.000+01:00", ntry.getBookgDt().getDtTm().toString());
+                assertEquals("2021-02-21T09:10:11.000+01:00", ntry.getValDt().getDtTm().toString());
             }
             default -> throw new IllegalStateException("Unexpected value: " + format);
         }
