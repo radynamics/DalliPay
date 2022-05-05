@@ -35,6 +35,8 @@ public class SendForm extends JPanel implements MainFormPane {
     private FilePathField txtInput;
     private Pain001Reader reader;
     private Payment[] payments = new Payment[0];
+    private JButton cmdSendPayments;
+    private ProgressLabel lblLoading;
 
     public SendForm(Window owner, TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -129,14 +131,24 @@ public class SendForm extends JPanel implements MainFormPane {
         }
         {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator);
+            table.addProgressListener(progress -> {
+                lblLoading.update(progress);
+                cmdSendPayments.setEnabled(progress.isFinished());
+            });
             panel2.add(table);
         }
         {
-            var cmd = new JButton("Send Payments");
-            cmd.setPreferredSize(new Dimension(150, 35));
-            cmd.addActionListener(e -> sendPayments());
-            panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
-            panel3.add(cmd);
+            cmdSendPayments = new JButton("Send Payments");
+            cmdSendPayments.setPreferredSize(new Dimension(150, 35));
+            cmdSendPayments.addActionListener(e -> sendPayments());
+            panel3Layout.putConstraint(SpringLayout.EAST, cmdSendPayments, 0, SpringLayout.EAST, panel3);
+            panel3.add(cmdSendPayments);
+
+            lblLoading = new ProgressLabel();
+            panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblLoading, 0, SpringLayout.VERTICAL_CENTER, cmdSendPayments);
+            panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdSendPayments);
+            lblLoading.setOpaque(true);
+            panel3.add(lblLoading);
         }
     }
 
@@ -300,6 +312,8 @@ public class SendForm extends JPanel implements MainFormPane {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
         validator.getHistoryValidator().clearCache();
+        cmdSendPayments.setEnabled(false);
+        lblLoading.showLoading();
         table.load(payments);
     }
 
