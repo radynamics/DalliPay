@@ -8,8 +8,8 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.time.ZonedDateTime;
 
-public class LocalDateTimeCellRenderer extends JLabel implements TableCellRenderer {
-    public LocalDateTimeCellRenderer() {
+public class DateTimeCellRenderer extends JLabel implements TableCellRenderer {
+    public DateTimeCellRenderer() {
         setOpaque(true);
     }
 

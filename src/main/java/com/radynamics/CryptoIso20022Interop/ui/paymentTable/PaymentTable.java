@@ -55,7 +55,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(IbanAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(OtherAccount.class, new AccountCellRenderer());
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
-        table.setDefaultRenderer(ZonedDateTime.class, new LocalDateTimeCellRenderer());
+        table.setDefaultRenderer(ZonedDateTime.class, new DateTimeCellRenderer());
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
         var cellEditor = new WalletCellEditor(objectColumn, actor == Actor.Sender);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_SENDER_LEDGER)).setCellEditor(cellEditor);
@@ -102,7 +102,7 @@ public class PaymentTable extends JPanel {
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue("Booked").width(90).getColumn();
-            c.setCellRenderer(new LocalDateTimeCellRenderer());
+            c.setCellRenderer(new DateTimeCellRenderer());
             if (model.getActor() == Actor.Sender) {
                 cb.hide();
             }
