@@ -43,7 +43,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private String targetFileName;
     private CamtExport camtExport;
     private JButton cmdExport;
-    private JLabel lblLoading;
+    private ProgressLabel lblLoading;
     private JComboBox<String> cboTargetCcy;
     private JPanel pnlInfo;
     private JLabel lblInfoText;
@@ -169,12 +169,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator());
             table.addProgressListener(progress -> {
-                if (progress.getCount() == progress.getTotal()) {
-                    lblLoading.setText("");
-                    cmdExport.setEnabled(true);
-                } else {
-                    lblLoading.setText(String.format("Loaded %s / %s...", progress.getCount(), progress.getTotal()));
-                }
+                lblLoading.update(progress);
+                cmdExport.setEnabled(progress.isFinished());
             });
             panel2.add(table);
         }
@@ -207,7 +203,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 hideInfo();
             }
 
-            lblLoading = new JLabel();
+            lblLoading = new ProgressLabel();
             panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblLoading, 0, SpringLayout.VERTICAL_CENTER, cmdExport);
             panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
             lblLoading.setOpaque(true);
@@ -374,7 +370,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             cmdExport.setEnabled(false);
-            lblLoading.setText("Loading, please wait...");
+            lblLoading.showLoading();
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             t.setTargetCcy(targetCcy);

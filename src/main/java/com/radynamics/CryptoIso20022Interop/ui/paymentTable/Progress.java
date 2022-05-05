@@ -16,4 +16,8 @@ public class Progress {
     public int getTotal() {
         return total;
     }
+
+    public boolean isFinished() {
+        return getCount() == getTotal();
+    }
 }
