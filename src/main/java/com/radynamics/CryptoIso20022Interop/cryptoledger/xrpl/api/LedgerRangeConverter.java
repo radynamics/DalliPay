@@ -1,8 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -24,18 +22,9 @@ public class LedgerRangeConverter {
         this.xrplClient = xrplClient;
     }
 
-    public LedgerIndexRange convert(DateTimeRange period) throws JsonRpcClientErrorException, LedgerException {
-        var ledgerAtStart = findLedger(period.getStart());
-        var ledgerAtEnd = findLedger(period.getEnd());
-
-        if (ledgerAtStart == null) {
-            throw new LedgerException(String.format("Could not find ledger at %s", period.getStart()));
-        }
-        if (ledgerAtEnd == null) {
-            throw new LedgerException(String.format("Could not find ledger at %s", period.getEnd()));
-        }
-        log.trace(String.format("RESULT: %s - %s", ledgerAtStart.getPointInTime(), ledgerAtEnd.getPointInTime()));
-        return LedgerIndexRange.of(ledgerAtStart.getLedgerIndex(), ledgerAtEnd.getLedgerIndex());
+    public LedgerIndex findOrNull(ZonedDateTime dt) throws JsonRpcClientErrorException {
+        var ledger = findLedger(dt);
+        return ledger == null ? null : ledger.getLedgerIndex();
     }
 
     private LedgerAtTime findLedger(ZonedDateTime dt) throws JsonRpcClientErrorException {

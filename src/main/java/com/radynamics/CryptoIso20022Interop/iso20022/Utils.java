@@ -8,6 +8,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 
@@ -35,5 +36,9 @@ public class Utils {
 
     public static boolean bothNull(Object first, Object second) {
         return first == null && second == null;
+    }
+
+    public static ZonedDateTime endOfToday() {
+        return ZonedDateTime.now().with(LocalTime.of(23, 59, 59));
     }
 }

@@ -55,7 +55,8 @@ public class JsonRpcApi implements TransactionSource {
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
-        var period = DateTimeRange.of(since, ZonedDateTime.now());
+        // Use endOfToday to ensure data until latest ledger is loaded.
+        var period = DateTimeRange.of(since, Utils.endOfToday());
         var params = createAccountTransactionsRequestParams(wallet, period, null);
         return listPayments(params, period, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
     }
@@ -121,12 +122,22 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
-        var ledgerRange = ledgerRangeConverter.convert(period);
+        var start = ledgerRangeConverter.findOrNull(period.getStart());
+        if (start == null) {
+            throw new LedgerException(String.format("Could not find ledger at %s", period.getStart()));
+        }
 
         var b = AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
-                .ledgerIndexMinimum(LedgerIndexBound.of(ledgerRange.getStart().unsignedIntegerValue().intValue()))
-                .ledgerIndexMaximum(LedgerIndexBound.of(ledgerRange.getEnd().unsignedIntegerValue().intValue()));
+                .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()));
+
+        if (period.getEnd().isBefore(ZonedDateTime.now())) {
+            var end = ledgerRangeConverter.findOrNull(period.getEnd());
+            if (end == null) {
+                throw new LedgerException(String.format("Could not find ledger at %s", period.getEnd()));
+            }
+            b.ledgerIndexMaximum(LedgerIndexBound.of(end.unsignedIntegerValue().intValue()));
+        }
         if (marker != null) {
             b.marker(marker);
         }

@@ -6,8 +6,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -80,7 +80,8 @@ public class SenderHistoryValidator {
             if (!senderPaymentHistory.containsKey(key)) {
                 var ledger = p.getLedger();
                 var paymentHistory = ledger.getPaymentHistoryProvider();
-                paymentHistory.load(ledger, p.getSenderWallet(), ZonedDateTime.now().minusDays(40));
+                // Use endOfToday to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
+                paymentHistory.load(ledger, p.getSenderWallet(), Utils.endOfToday().minusDays(40));
                 senderPaymentHistory.put(key, paymentHistory);
             }
         }
