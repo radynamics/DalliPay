@@ -115,6 +115,7 @@ public class MainForm extends JFrame {
                     optionsPanel = new OptionsForm();
                     optionsPanel.addChangedListener(() -> {
                         transformInstruction.getHistoricExchangeRateSource().init();
+                        receivingPanel.refreshTargetCcys();
                     });
                     optionsPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab("Options", optionsPanel);

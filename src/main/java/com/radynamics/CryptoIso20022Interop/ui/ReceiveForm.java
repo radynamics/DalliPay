@@ -6,7 +6,9 @@ import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
@@ -30,6 +32,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
@@ -118,7 +121,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                         onSelectedTargetCcyChanged((String) e.getItem());
                     }
                 });
-                fillTargetCcy();
+                refreshTargetCcys();
                 panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(cboTargetCcy);
@@ -231,15 +234,30 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         transformInstruction.setTargetCcy(ccy);
     }
 
-    private void fillTargetCcy() {
+
+    public void refreshTargetCcys() {
         String selectedCcy = null;
+        IssuedCurrency[] issuedCurrencies = new IssuedCurrency[0];
         try (var repo = new ConfigRepo()) {
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
+            var xrplOracleConfig = new XrplPriceOracleConfig();
+            xrplOracleConfig.load(repo);
+            issuedCurrencies = xrplOracleConfig.issuedCurrencies();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
 
-        var ccys = new String[]{"USD", "EUR", "JPY", "XRP"};
+        final String ledgerCcy = "XRP";
+        var ccys = new ArrayList<String>();
+        ccys.add(ledgerCcy);
+        for (var ic : issuedCurrencies) {
+            if (ic.getPair().getFirst().equals(ledgerCcy)) {
+                ccys.add(ic.getPair().getSecond());
+            }
+        }
+
+        cboTargetCcy.removeAllItems();
+        ccys.sort(String::compareTo);
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
             if (ccy.equalsIgnoreCase(selectedCcy)) {
