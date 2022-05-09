@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
@@ -97,7 +98,12 @@ public class Main {
     private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, Network network) {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(network);
-        t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
+        try (var repo = new ConfigRepo()) {
+            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
+        }
         t.getExchangeRateProvider().init();
         t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
         t.getHistoricExchangeRateSource().init();
