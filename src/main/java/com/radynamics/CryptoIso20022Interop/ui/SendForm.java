@@ -135,7 +135,6 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 cmdSendPayments.setEnabled(progress.isFinished());
             });
-            table.addRefreshListener(p -> validator.getHistoryValidator().loadHistory(p));
             panel2.add(table);
         }
         {

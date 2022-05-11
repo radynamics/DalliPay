@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
-    private final SenderHistoryValidator historyValidator;
+    private final WalletHistoryValidator historyValidator;
 
-    public PaymentValidator(SenderHistoryValidator historyValidator) {
+    public PaymentValidator(WalletHistoryValidator historyValidator) {
         this.historyValidator = historyValidator;
     }
 
@@ -83,7 +83,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         return list.toArray(new ValidationResult[0]);
     }
 
-    public SenderHistoryValidator getHistoryValidator() {
+    public WalletHistoryValidator getHistoryValidator() {
         return historyValidator;
     }
 }

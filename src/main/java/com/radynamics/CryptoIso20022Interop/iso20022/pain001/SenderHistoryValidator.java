@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SenderHistoryValidator {
+public class SenderHistoryValidator implements WalletHistoryValidator {
     private final Map<String, PaymentHistoryProvider> senderPaymentHistory = new HashMap<>();
     private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM);
 
@@ -66,7 +66,7 @@ public class SenderHistoryValidator {
         return wallet.getPublicKey();
     }
 
-    public void loadHistory(Payment p) {
+    private void loadHistory(Payment p) {
         loadHistory(new Payment[]{p});
     }
 

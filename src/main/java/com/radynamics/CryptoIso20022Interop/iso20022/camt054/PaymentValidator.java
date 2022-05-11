@@ -4,6 +4,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.NullHistoryValidator;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.WalletHistoryValidator;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 
 import java.util.ArrayList;
@@ -23,5 +25,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         return list.toArray(new ValidationResult[0]);
+    }
+
+    @Override
+    public WalletHistoryValidator getHistoryValidator() {
+        return new NullHistoryValidator();
     }
 }
