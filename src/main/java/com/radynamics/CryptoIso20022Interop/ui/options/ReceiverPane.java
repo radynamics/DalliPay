@@ -26,55 +26,40 @@ public class ReceiverPane extends JPanel {
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
 
+        var builder = new RowContentBuilder(this, contentLayout);
         {
             final var topOffset = 5;
             var top = topOffset;
             {
-                addRowLabel(top, "XRPL price oracle:");
-                addRowContent(top, xrplPriceOracleEditor);
+                builder.addRowLabel(top, "XRPL price oracle:");
+                builder.addRowContent(top, xrplPriceOracleEditor);
                 top += 140;
             }
             {
-                var lbl = addRowLabel(top, "Export");
+                var lbl = builder.addRowLabel(top, "Export");
                 lbl.putClientProperty("FlatLaf.styleClass", "h3");
                 top += 40;
             }
             {
-                addRowLabel(top, "Booking date format:");
+                builder.addRowLabel(top, "Booking date format:");
                 cboBookingFormat = createCboDateFormat();
-                addRowContent(top, cboBookingFormat);
+                builder.addRowContent(top, cboBookingFormat);
                 top += 30;
             }
             {
-                addRowLabel(top, "Valuta date format:");
+                builder.addRowLabel(top, "Valuta date format:");
                 cboValutaFormat = createCboDateFormat();
-                addRowContent(top, cboValutaFormat);
+                builder.addRowContent(top, cboValutaFormat);
                 top += 30;
             }
             {
-                addRowLabel(top, "Creditor reference if empty:");
+                builder.addRowLabel(top, "Creditor reference if empty:");
                 txtCreditorReference = new JTextField();
                 txtCreditorReference.setPreferredSize(new Dimension(160, 24));
-                addRowContent(top, txtCreditorReference);
+                builder.addRowContent(top, txtCreditorReference);
                 top += 30;
             }
         }
-    }
-
-    private void addRowContent(int top, Component component) {
-        final int paddingWest = 150;
-        contentLayout.putConstraint(SpringLayout.WEST, component, paddingWest, SpringLayout.WEST, this);
-        contentLayout.putConstraint(SpringLayout.NORTH, component, top, SpringLayout.NORTH, this);
-        add(component);
-    }
-
-    private JLabel addRowLabel(int top, String text) {
-        var lbl = new JLabel(text);
-        contentLayout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, this);
-        contentLayout.putConstraint(SpringLayout.NORTH, lbl, top, SpringLayout.NORTH, this);
-        lbl.setOpaque(true);
-        add(lbl);
-        return lbl;
     }
 
     private JComboBox<DateFormat> createCboDateFormat() {

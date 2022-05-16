@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.ui.options.GeneralPane;
 import com.radynamics.CryptoIso20022Interop.ui.options.ReceiverPane;
 
 import javax.swing.*;
@@ -7,6 +8,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class OptionsForm extends JPanel implements MainFormPane {
+    private final GeneralPane generalPane;
     private final ReceiverPane receiverPane;
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
 
@@ -21,6 +23,8 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
+            generalPane = new GeneralPane();
+            tabbedPane.addTab("General", generalPane);
             receiverPane = new ReceiverPane();
             tabbedPane.addTab("Receive", receiverPane);
         }
@@ -46,6 +50,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
 
     private void save() {
         try {
+            generalPane.save();
             receiverPane.save();
 
             raiseChanged();
@@ -56,6 +61,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
     }
 
     public void load() {
+        generalPane.load();
         receiverPane.load();
     }
 
