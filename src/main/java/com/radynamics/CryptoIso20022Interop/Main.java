@@ -42,7 +42,7 @@ public class Main {
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
         var walletPublicKey = getParam(args, "-wallet");
         var walletSecret = getParam(args, "-walletSecret");
-        var networkId = getParam(args, "-n", "test"); // live, test
+        var networkId = getParam(args, "-n", "live"); // live, test
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
         Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
