@@ -3,15 +3,21 @@ package com.radynamics.CryptoIso20022Interop.db;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.sqlite.SQLiteException;
+import org.sqlite.mc.SQLiteMCSqlCipherConfig;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class Database {
     final static Logger log = LogManager.getLogger(Database.class);
     public static File dbFile = defaultFile();
+    public static String password = null;
 
     public static File defaultFile() {
         var home = SystemUtils.IS_OS_WINDOWS ? System.getenv("APPDATA") : System.getProperty("user.home");
@@ -22,13 +28,13 @@ public class Database {
         if (defaultFile().equals(dbFile)) {
             createDefaultDirectory();
         }
-        String url = String.format("jdbc:sqlite:%s", dbFile);
 
         Connection conn = null;
         try {
-            conn = DriverManager.getConnection(url);
+            conn = connect(password);
             if (conn == null) {
-                throw new DbException(String.format("Could not open db %s", dbFile));
+                log.error(String.format("Could not open db %s", dbFile));
+                return null;
             }
             conn.setAutoCommit(false);
             createTables(conn);
@@ -48,6 +54,33 @@ public class Database {
             }
             return null;
         }
+    }
+
+    private static Connection connect(String password) throws SQLException {
+        String url = String.format("jdbc:sqlite:file:%s", dbFile);
+        try {
+            return SQLiteMCSqlCipherConfig.getV4Defaults().withKey(password).createConnection(url);
+        } catch (SQLiteException sle) {
+            if (sle.getResultCode().name().equals("SQLITE_NOTADB")) {
+                return null;
+            }
+            throw sle;
+        }
+    }
+
+    public static boolean isPasswordAcceptable(String password) {
+        return !"".equals(password);
+    }
+
+    public static void changePassword(String newPassword) throws Exception {
+        if (!isPasswordAcceptable(newPassword)) {
+            throw new Exception("new password cannot be empty");
+        }
+
+        var conn = Database.connect();
+        conn.createStatement().execute(String.format("PRAGMA rekey='%s'", newPassword));
+        conn.close();
+        password = newPassword;
     }
 
     private static void createDefaultDirectory() {
@@ -90,5 +123,23 @@ public class Database {
         if (affected != expectedRowsAffected) {
             throw new SQLException(String.format("%s rows affected but expected %s", affected, expectedRowsAffected));
         }
+    }
+
+    public static boolean isReadable(String password) {
+        try {
+            var conn = connect(password);
+            if (conn == null) {
+                return false;
+            }
+            conn.prepareStatement("SELECT 1 FROM sqlite_sequence").executeQuery();
+            conn.close();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean exists() {
+        return dbFile.exists();
     }
 }

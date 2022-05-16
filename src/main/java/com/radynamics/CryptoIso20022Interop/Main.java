@@ -12,6 +12,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory
 import com.radynamics.CryptoIso20022Interop.transformation.DbAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.Consts;
+import com.radynamics.CryptoIso20022Interop.ui.LoginForm;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -28,7 +29,6 @@ import java.util.Collections;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
-    private static TransformInstruction transformInstruction;
 
     private static final String DATETIME_PATTERN = "yyyyMMddHHmmss";
     //private static final SimpleDateFormat DateFormatter = new SimpleDateFormat(DATETIME_PATTERN);
@@ -61,12 +61,21 @@ public class Main {
 
             var ledger = LedgerFactory.create(LedgerId.Xrpl);
             var config = f.exists() ? Config.load(ledger, configFilePath) : Config.fallback(ledger);
-            transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
 
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", Utils.toHexString(Consts.ColorAccent)));
                 FlatLightLaf.setup();
 
+                var existsDb = Database.exists();
+                if (existsDb && !login()) {
+                    return;
+                }
+
+                if (!existsDb && !askNewPassword()) {
+                    return;
+                }
+
+                var transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
@@ -108,6 +117,26 @@ public class Main {
         t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
         t.getHistoricExchangeRateSource().init();
         return t;
+    }
+
+    private static boolean login() {
+        var frm = new LoginForm();
+        if (!frm.showLogin()) {
+            return false;
+        }
+
+        Database.password = frm.getPassword();
+        return true;
+    }
+
+    private static boolean askNewPassword() {
+        var frm = new LoginForm();
+        if (!frm.showNewPassword()) {
+            return false;
+        }
+
+        Database.password = frm.getPassword();
+        return true;
     }
 
     private static void initLogger() {
