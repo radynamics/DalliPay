@@ -41,7 +41,6 @@ public class Main {
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
         var walletPublicKey = getParam(args, "-wallet");
-        var walletSecret = getParam(args, "-walletSecret");
         var networkId = getParam(args, "-n", "live"); // live, test
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
@@ -55,7 +54,7 @@ public class Main {
             // TODO: validate format
             var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
 
-            Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey, walletSecret);
+            Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey);
 
             var f = new File(configFilePath);
 
