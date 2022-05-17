@@ -3,7 +3,6 @@ package com.radynamics.CryptoIso20022Interop;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
@@ -54,12 +53,12 @@ public class Main {
             // TODO: validate format
             var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
 
-            Wallet wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : new Wallet(walletPublicKey);
-
             var f = new File(configFilePath);
 
             var ledger = LedgerFactory.create(LedgerId.Xrpl);
             var config = f.exists() ? Config.load(ledger, configFilePath) : Config.fallback(ledger);
+
+            var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
 
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", Utils.toHexString(Consts.ColorAccent)));
