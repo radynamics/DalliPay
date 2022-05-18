@@ -31,7 +31,7 @@ public class ValidationResultDialog {
         }
 
         var sb = new StringBuilder();
-        sb.append("Do you wan't to continue?\n");
+        sb.append("Do you want to continue?\n");
         sb.append(toText(ValidationResultUtils.fromWarning(validations)));
 
         return 0 == JOptionPane.showConfirmDialog(parentComponent, sb.toString(), "Warnings", JOptionPane.YES_NO_CANCEL_OPTION);
