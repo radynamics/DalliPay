@@ -84,7 +84,9 @@ public class Main {
                 if (action != null) {
                     switch (action) {
                         case "pain001ToCrypto":
-                            transformInstruction.setStaticSender(wallet.getPublicKey(), wallet.getSecret());
+                            if (wallet != null) {
+                                transformInstruction.setStaticSender(wallet.getPublicKey(), wallet.getSecret());
+                            }
                             frm.setInputFileName(inputFileName);
                             break;
                         case "cryptoToCamt054":
