@@ -174,10 +174,12 @@ public class PaymentTableModel extends AbstractTableModel {
         for (var p : data) {
             var future = loadAsync(p.payment);
             future.thenAccept((result) -> {
-                queue.remove(future);
-                var total = data.length;
-                var loaded = total - queue.size();
-                raiseProgress(new Progress(loaded, total));
+                synchronized (this) {
+                    queue.remove(future);
+                    var total = data.length;
+                    var loaded = total - queue.size();
+                    raiseProgress(new Progress(loaded, total));
+                }
             });
             queue.add(future);
         }
