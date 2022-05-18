@@ -30,9 +30,14 @@ public class ValidationResultDialog {
             return false;
         }
 
+        var validationsToShow = ValidationResultUtils.fromWarning(validations);
+        if (validations.length == 0) {
+            return true;
+        }
+
         var sb = new StringBuilder();
         sb.append("Do you want to continue?\n");
-        sb.append(toText(ValidationResultUtils.fromWarning(validations)));
+        sb.append(toText(validationsToShow));
 
         return 0 == JOptionPane.showConfirmDialog(parentComponent, sb.toString(), "Warnings", JOptionPane.YES_NO_CANCEL_OPTION);
     }
