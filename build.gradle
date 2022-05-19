@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.radynamics.CryptoIso20022Interop'
-version '0.1.0-SNAPSHOT'
+version '0.9.0-BETA'
 
 repositories {
     mavenCentral()
