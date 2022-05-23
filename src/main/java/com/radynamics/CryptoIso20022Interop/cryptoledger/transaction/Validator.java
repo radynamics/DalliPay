@@ -13,7 +13,7 @@ public class Validator {
         }
 
         if (t.getReceiverWallet() == null) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver Cryptocurrency wallet is missing")));
+            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver wallet is missing")));
         }
 
         return list.toArray(new ValidationResult[0]);
