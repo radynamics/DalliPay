@@ -227,8 +227,17 @@ public class SendForm extends JPanel implements MainFormPane {
         }
 
         for (var w : privatKeyMissing) {
-            var userInput = JOptionPane.showInputDialog(this, String.format("Enter secret / private Key for %s:", w.getPublicKey()), "Enter secret", JOptionPane.QUESTION_MESSAGE);
-            if (StringUtils.isAllEmpty(userInput)) {
+            var pnl = new JPanel();
+            pnl.setLayout(new GridLayout(2, 1));
+
+            var lbl = new JLabel(String.format("Enter secret / private Key for %s:", w.getPublicKey()));
+            pnl.add(lbl);
+            var pf = new JPasswordField();
+            pnl.add(pf);
+
+            var userOption = JOptionPane.showConfirmDialog(this, pnl, "Enter secret", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            var userInput = new String(pf.getPassword());
+            if (JOptionPane.OK_OPTION != userOption || StringUtils.isAllEmpty(userInput)) {
                 return false;
             }
             w.setSecret(userInput);
