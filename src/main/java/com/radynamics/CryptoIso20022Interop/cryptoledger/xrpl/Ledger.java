@@ -54,8 +54,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public long convertToSmallestAmount(double amountNativeCcy) {
-        // TODO: rounding is problematic, handle properly
-        return Math.round(amountNativeCcy * 1000000);
+        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amountNativeCcy)).value().longValue();
     }
 
     @Override
