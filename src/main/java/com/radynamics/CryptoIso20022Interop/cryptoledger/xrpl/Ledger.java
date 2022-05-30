@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
-    private final WalletInfoProvider[] walletInfoProvider;
+    private WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
 
     public Ledger() {
@@ -145,6 +145,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public WalletInfoProvider[] getInfoProvider() {
         return walletInfoProvider;
+    }
+
+    @Override
+    public void setInfoProvider(WalletInfoProvider[] walletInfoProvider) {
+        this.walletInfoProvider = walletInfoProvider;
     }
 
     @Override

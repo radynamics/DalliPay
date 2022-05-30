@@ -46,6 +46,8 @@ public interface Ledger {
 
     WalletInfoProvider[] getInfoProvider();
 
+    void setInfoProvider(WalletInfoProvider[] walletInfoProvider);
+
     boolean isValidPublicKey(String publicKey);
 
     HttpUrl getFallbackUrl(Network type);

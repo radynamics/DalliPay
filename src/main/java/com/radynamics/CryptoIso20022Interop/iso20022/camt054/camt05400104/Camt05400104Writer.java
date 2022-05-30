@@ -2,12 +2,15 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400104.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -142,6 +145,8 @@ public class Camt05400104Writer implements Camt054Writer {
         txDtls.setBkTxCd(new BankTransactionCodeStructure4());
         txDtls.getBkTxCd().setDomn(createDomn("AUTT"));
 
+        txDtls.setRltdPties(createRltdPties(trx));
+
         txDtls.setRltdAgts(new TransactionAgents3());
         txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification5());
         txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification8());
@@ -163,6 +168,26 @@ public class Camt05400104Writer implements Camt054Writer {
         }
 
         return ntry;
+    }
+
+    private TransactionParties3 createRltdPties(Payment trx) {
+        var obj = new TransactionParties3();
+
+        var aggregator = new WalletInfoAggregator(trx.getLedger().getInfoProvider());
+        obj.setDbtr(createPartyIdentification(aggregator.getMostImportant(trx.getSenderWallet())));
+        obj.setCdtr(createPartyIdentification(aggregator.getMostImportant(trx.getReceiverWallet())));
+
+        return obj.getDbtr() == null && obj.getCdtr() == null ? null : obj;
+    }
+
+    private PartyIdentification43 createPartyIdentification(WalletInfo wi) {
+        if (wi == null || StringUtils.isEmpty(wi.getValue())) {
+            return null;
+        }
+
+        var obj = new PartyIdentification43();
+        obj.setNm(wi.getValue());
+        return obj;
     }
 
     private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {

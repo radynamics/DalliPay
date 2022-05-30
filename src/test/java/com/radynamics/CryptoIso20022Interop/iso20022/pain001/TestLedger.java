@@ -12,10 +12,12 @@ import java.time.ZonedDateTime;
 
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
+    private WalletInfoProvider[] walletInfoProvider = new WalletInfoProvider[0];
+    private NetworkInfo network;
 
     @Override
     public LedgerId getId() {
-        return null;
+        return LedgerId.Xrpl;
     }
 
     @Override
@@ -110,7 +112,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public void setNetwork(NetworkInfo network) {
-        throw new NotImplementedException();
+        this.network = network;
     }
 
     @Override
@@ -130,7 +132,12 @@ public class TestLedger implements Ledger {
 
     @Override
     public WalletInfoProvider[] getInfoProvider() {
-        return new WalletInfoProvider[0];
+        return walletInfoProvider;
+    }
+
+    @Override
+    public void setInfoProvider(WalletInfoProvider[] walletInfoProvider) {
+        this.walletInfoProvider = walletInfoProvider;
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.TestWalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
@@ -19,7 +20,11 @@ import java.util.ArrayList;
 
 public class TestFactory {
     public static TransformInstruction createTransformInstruction() {
-        var ledger = LedgerFactory.create("xrpl");
+        return createTransformInstruction(LedgerFactory.create("xrpl"));
+    }
+
+    public static TransformInstruction createTransformInstruction(Ledger ledger) {
+        ledger.setInfoProvider(new WalletInfoProvider[]{new TestWalletInfoProvider()});
         ledger.setNetwork(new NetworkInfo(Network.Test, null));
         var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
