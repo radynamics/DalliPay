@@ -62,7 +62,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setId(String value) {
+    public void setId(String id) {
         this.id = id;
     }
 
