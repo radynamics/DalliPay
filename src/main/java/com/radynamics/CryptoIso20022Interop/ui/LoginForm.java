@@ -2,8 +2,10 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.db.Database;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class LoginForm {
     private JPasswordField pf = new JPasswordField(20);
@@ -37,6 +39,16 @@ public class LoginForm {
     }
 
     private boolean show(String labelText, String title) {
+        var frm = new JFrame("CryptoIso20022Interop");
+        try {
+            frm.setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
+        } catch (IOException e) {
+            ExceptionDialog.show(frm, e);
+        }
+        frm.setUndecorated(true);
+        frm.setVisible(true);
+        frm.setLocationRelativeTo(null);
+
         var pnl = new JPanel();
         pnl.setLayout(new GridLayout(2, 1));
 
@@ -45,7 +57,9 @@ public class LoginForm {
         pnl.add(pf);
 
         var icon = Utils.getScaled("img/productIcon.png", 64, 64);
-        return JOptionPane.OK_OPTION == JOptionPane.showOptionDialog(null, pnl, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon, null, null);
+        var result = JOptionPane.showOptionDialog(null, pnl, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon, null, null);
+        frm.dispose();
+        return JOptionPane.OK_OPTION == result;
     }
 
     public String getPassword() {
