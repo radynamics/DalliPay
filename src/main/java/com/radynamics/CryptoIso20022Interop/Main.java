@@ -30,7 +30,6 @@ public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
 
     private static final String DATETIME_PATTERN = "yyyyMMddHHmmss";
-    //private static final SimpleDateFormat DateFormatter = new SimpleDateFormat(DATETIME_PATTERN);
     private static final DateTimeFormatter DateFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     public static void main(String[] args) {
