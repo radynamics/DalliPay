@@ -142,10 +142,13 @@ public class Main {
     }
 
     private static String getParam(String[] args, String param, String defaultValue) {
-        // TODO: validate parameter value existence
         var index = ArrayUtils.indexOf(args, param);
         if (index == -1) {
             return defaultValue;
+        }
+
+        if (args.length <= index + 1) {
+            throw new RuntimeException(String.format("No value present for argument %s", param));
         }
         return args[index + 1];
     }
