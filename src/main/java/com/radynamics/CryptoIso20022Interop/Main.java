@@ -34,8 +34,6 @@ public class Main {
     private static final DateTimeFormatter DateFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     public static void main(String[] args) {
-        initLogger();
-
         var action = getParam(args, "-a");
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
@@ -137,12 +135,6 @@ public class Main {
 
         Database.password = frm.getPassword();
         return true;
-    }
-
-    private static void initLogger() {
-        if (!System.getProperties().containsKey("log4j.configurationFile")) {
-            System.setProperty("log4j.configurationFile", Main.class.getClassLoader().getResource("config/log4j2.xml").toString());
-        }
     }
 
     private static String getParam(String[] args, String param) {
