@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
+import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -14,6 +15,8 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SendForm extends JPanel implements MainFormPane {
+    private final static Logger log = LogManager.getLogger(Database.class);
     private final Window owner;
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
@@ -153,9 +157,17 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void onTxtInputChanged() {
+        var payments = new Payment[0];
         try {
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
-            var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+            payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+        } catch (Exception e) {
+            log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
+            ExceptionDialog.show(this, e, "Could not read payments from ISO 20022 pain.001 file.");
+            return;
+        }
+
+        try {
             var br = new BalanceRefresher();
             br.refreshAllSenderWallets(payments);
 
