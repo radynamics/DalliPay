@@ -1,7 +1,9 @@
 /gradlew
 /gradlew.bat
 /build
-
+/.gradle
+/gradle
+.DS_Store
 /admin
 /logs
 /src/main/resources/version.properties
