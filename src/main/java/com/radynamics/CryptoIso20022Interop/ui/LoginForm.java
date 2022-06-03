@@ -40,11 +40,7 @@ public class LoginForm {
 
     private boolean show(String labelText, String title) {
         var frm = new JFrame("CryptoIso20022Interop");
-        try {
-            frm.setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
-        } catch (IOException e) {
-            ExceptionDialog.show(frm, e);
-        }
+        frm.setIconImage(Utils.getProductIcon());
         frm.setUndecorated(true);
         frm.setVisible(true);
         frm.setLocationRelativeTo(null);

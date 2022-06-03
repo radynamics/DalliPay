@@ -39,12 +39,7 @@ public class SendConfirmationForm extends JDialog {
 
     private void setupUI() {
         setTitle("Confirm Payments");
-
-        try {
-            setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
-        } catch (IOException e) {
-            ExceptionDialog.show(this, e);
-        }
+        setIconImage(Utils.getProductIcon());
 
         var cancelDialog = new ActionListener() {
             @Override

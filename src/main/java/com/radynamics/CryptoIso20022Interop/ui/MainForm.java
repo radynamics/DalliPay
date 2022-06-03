@@ -36,12 +36,7 @@ public class MainForm extends JFrame {
     private void setupUI() {
         var vc = new VersionController();
         setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
-
-        try {
-            setIconImage(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage());
-        } catch (IOException e) {
-            ExceptionDialog.show(this, e);
-        }
+        setIconImage(Utils.getProductIcon());
 
         setJMenuBar(createMenuBar());
 

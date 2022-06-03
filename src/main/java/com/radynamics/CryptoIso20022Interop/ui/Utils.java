@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -58,6 +59,15 @@ public final class Utils {
         lbl.putClientProperty("FlatLaf.styleClass", "small");
         lbl.setForeground(Consts.ColorSmallInfo);
         return lbl;
+    }
+
+    public static Image getProductIcon() {
+        try {
+            return new ImageIcon(ImageIO.read(Utils.class.getClassLoader().getResourceAsStream("img/productIcon.png"))).getImage();
+        } catch (IOException e) {
+            ExceptionDialog.show(null, e);
+            return null;
+        }
     }
 
     public static ImageIcon getScaled(String resourceName, int w, int h) {

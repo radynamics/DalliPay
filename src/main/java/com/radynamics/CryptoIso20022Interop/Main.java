@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -49,6 +50,12 @@ public class Main {
             var until = getParam(args, "-until", now.format(DateFormatter)); // timerange in UTC
             // TODO: validate format
             var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
+
+            try {
+                Taskbar.getTaskbar().setIconImage(Utils.getProductIcon());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
 
             var f = new File(configFilePath);
 
