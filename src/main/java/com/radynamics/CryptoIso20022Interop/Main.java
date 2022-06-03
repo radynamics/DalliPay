@@ -52,7 +52,9 @@ public class Main {
             var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
 
             try {
-                Taskbar.getTaskbar().setIconImage(Utils.getProductIcon());
+                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                    Taskbar.getTaskbar().setIconImage(Utils.getProductIcon());
+                }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
