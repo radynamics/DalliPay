@@ -4,6 +4,8 @@
 /.gradle
 /gradle
 .DS_Store
+.idea
+
 /admin
 /logs
 /src/main/resources/version.properties
