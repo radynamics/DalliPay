@@ -41,7 +41,7 @@ public class XrplPriceOracleEditor extends JPanel {
             {
                 var popupMenu = new JPopupMenu();
                 {
-                    var item = new JMenuItem("XRPL labs Price Aggregator");
+                    var item = new JMenuItem("XRPL Labs Price Aggregator");
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsXumm()));
                 }
