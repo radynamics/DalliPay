@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +27,7 @@ public class WalletField extends JPanel {
                 @Override
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
-                    var result = new WalletValidator(ledger).validateFormat(ledger.createWallet(text, null));
+                    var result = StringUtils.isEmpty(text) ? null : new WalletValidator(ledger).validateFormat(ledger.createWallet(text, null));
                     if (result == null) {
                         txt.putClientProperty("JComponent.outline", null);
                         return true;
