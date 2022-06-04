@@ -23,7 +23,10 @@ import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
 import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
-import org.xrpl.xrpl4j.model.client.accounts.*;
+import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
+import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.ImmutableAccountTransactionsRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -35,7 +38,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Function;
 
@@ -113,12 +115,6 @@ public class JsonRpcApi implements TransactionSource {
 
         tr.setHasMaxPageCounterReached(pageCounter >= maxPages);
         return tr;
-    }
-
-    private Collection<com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction> readTransactions(Wallet wallet, DateTimeRange period, AccountTransactionsResult result) throws DecoderException, UnsupportedEncodingException {
-        var list = new ArrayList<com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction>();
-
-        return list;
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
