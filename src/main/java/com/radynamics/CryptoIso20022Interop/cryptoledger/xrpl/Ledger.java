@@ -158,7 +158,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
             return false;
         }
         var addressCodec = new AddressCodec();
-        return addressCodec.isValidClassicAddress(Address.of(publicKey));
+        try {
+            return addressCodec.isValidClassicAddress(Address.of(publicKey));
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     @Override
