@@ -45,6 +45,11 @@ public class XrplPriceOracleEditor extends JPanel {
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsXumm()));
                 }
+                {
+                    var item = new JMenuItem("radynamics Price Oracle");
+                    popupMenu.add(item);
+                    item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsRadyamics()));
+                }
                 var cmd = new JSplitButton("default");
                 cmd.setAlwaysPopup(true);
                 cmd.setPopupMenu(popupMenu);

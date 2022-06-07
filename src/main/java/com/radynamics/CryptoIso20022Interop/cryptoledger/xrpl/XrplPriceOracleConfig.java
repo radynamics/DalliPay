@@ -77,6 +77,29 @@ public class XrplPriceOracleConfig {
         return list;
     }
 
+    public static List<IssuedCurrency> defaultsRadyamics() {
+        var issuer = new Wallet("rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
+        var receiver = new Wallet("rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
+        var list = new ArrayList<IssuedCurrency>();
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "KRW"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "TRY"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "GBP"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "THB"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "RUB"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "BRL"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "AUD"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "MXN"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "ZAR"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "MYR"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "IDR"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "SGD"), issuer, receiver));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "CHF"), issuer, receiver));
+        return list;
+    }
+
     public IssuedCurrency[] issuedCurrencies() {
         return issuedCurrencies.toArray(new IssuedCurrency[0]);
     }
