@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationS
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
@@ -153,6 +154,9 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public boolean isValidPublicKey(String publicKey) {
+        if (StringUtils.isEmpty(publicKey)) {
+            return false;
+        }
         var addressCodec = new AddressCodec();
         return addressCodec.isValidClassicAddress(Address.of(publicKey));
     }
