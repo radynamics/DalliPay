@@ -175,11 +175,13 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 cmdExport.setEnabled(progress.isFinished());
             });
+            table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
         }
         {
             cmdExport = new JButton("Export...");
             cmdExport.setPreferredSize(new Dimension(150, 35));
+            cmdExport.setEnabled(false);
             cmdExport.addActionListener(e -> {
                 exportSelected();
             });
@@ -286,6 +288,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportSelected() {
+        if (table.selectedPayments().length == 0) {
+            return;
+        }
         try {
             if (!showExportForm()) {
                 return;
@@ -372,7 +377,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     public void load() {
         var walletPublicKey = txtInput.getText();
         if (!transformInstruction.getLedger().isValidPublicKey(walletPublicKey)) {
-            table.load(new Payment[0]);
+            loadTable(new Payment[0]);
             return;
         }
 
@@ -396,7 +401,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             var result = transformInstruction.getLedger().listPaymentsReceived(wallet, period);
             var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
 
-            table.load(payments);
+            loadTable(payments);
 
             if (result.hasMarker()) {
                 showInfo("More data would have been available, but was not loaded. Please change your filter.");
@@ -410,6 +415,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
+    }
+
+    private void loadTable(Payment[] payments) {
+        table.load(payments);
+        cmdExport.setEnabled(false);
     }
 
     public void setWallet(Wallet wallet) {

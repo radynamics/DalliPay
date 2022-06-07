@@ -139,11 +139,13 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 cmdSendPayments.setEnabled(progress.isFinished());
             });
+            table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
         }
         {
             cmdSendPayments = new JButton("Send Payments");
             cmdSendPayments.setPreferredSize(new Dimension(150, 35));
+            cmdSendPayments.setEnabled(false);
             cmdSendPayments.addActionListener(e -> sendPayments());
             panel3Layout.putConstraint(SpringLayout.EAST, cmdSendPayments, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdSendPayments);
@@ -186,6 +188,9 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void sendPayments() {
         var payments = table.selectedPayments();
+        if (payments.length == 0) {
+            return;
+        }
         try {
             try {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -313,7 +318,7 @@ public class SendForm extends JPanel implements MainFormPane {
         var ar = new AmountRefresher(payments);
         ar.refresh();
 
-        table.load(payments);
+        loadTable(payments);
     }
 
     private boolean showConfirmationForm(Payment[] payments) {
@@ -334,9 +339,13 @@ public class SendForm extends JPanel implements MainFormPane {
         this.payments = payments;
         validator.getHistoryValidator().clearCache();
         validator.getHistoryValidator().loadHistory(payments);
-        cmdSendPayments.setEnabled(false);
         lblLoading.showLoading();
+        loadTable(payments);
+    }
+
+    private void loadTable(Payment[] payments) {
         table.load(payments);
+        cmdSendPayments.setEnabled(false);
     }
 
     public void setInput(String value) {

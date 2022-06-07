@@ -10,15 +10,14 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
-import com.radynamics.CryptoIso20022Interop.ui.ExceptionDialog;
-import com.radynamics.CryptoIso20022Interop.ui.MultiRowChecker;
-import com.radynamics.CryptoIso20022Interop.ui.PaymentDetailForm;
-import com.radynamics.CryptoIso20022Interop.ui.TableColumnBuilder;
+import com.radynamics.CryptoIso20022Interop.ui.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,6 +35,7 @@ public class PaymentTable extends JPanel {
     private Payment[] data = new Payment[0];
     private PaymentValidator validator;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
+    private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
@@ -48,6 +48,14 @@ public class PaymentTable extends JPanel {
         model = new PaymentTableModel(exchangeRateLoader, validator);
         model.setActor(actor);
         model.addProgressListener(progress -> raiseProgress(progress));
+        model.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (e.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SELECTOR)) {
+                    raiseSelectorChanged();
+                }
+            }
+        });
 
         table = new JTable(model);
         table.setFillsViewportHeight(true);
@@ -305,6 +313,16 @@ public class PaymentTable extends JPanel {
     private void raiseProgress(Progress progress) {
         for (var l : progressListener) {
             l.onProgress(progress);
+        }
+    }
+
+    public void addSelectorChangedListener(ChangedListener l) {
+        selectorChangedListener.add(l);
+    }
+
+    private void raiseSelectorChanged() {
+        for (var l : selectorChangedListener) {
+            l.onChanged();
         }
     }
 
