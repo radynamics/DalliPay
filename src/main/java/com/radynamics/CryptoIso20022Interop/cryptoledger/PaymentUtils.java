@@ -56,6 +56,7 @@ public class PaymentUtils {
         long sum = 0;
         for (var p : payments) {
             sum += p.getLedgerAmountSmallestUnit();
+            sum += p.getFeeSmallestUnit();
         }
         return sum;
     }
