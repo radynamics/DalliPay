@@ -68,9 +68,9 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
         for (var w : sendingWallets) {
             var affectedPayments = PaymentUtils.fromSender(w, payments);
+            Ledger l = affectedPayments.get(0).getLedger();
             var sum = PaymentUtils.sumSmallestLedgerUnit(affectedPayments);
             if (sum > w.getLedgerBalanceSmallestUnit().longValue()) {
-                Ledger l = affectedPayments.get(0).getLedger();
                 var sumNativeText = MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(sum), l.getNativeCcySymbol());
                 var balanceNativeText = MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(w.getLedgerBalanceSmallestUnit().longValue()), l.getNativeCcySymbol());
                 list.add(new ValidationResult(ValidationState.Error, String.format("Sum of %s payments from %s is %s and exeeds wallet balance of %s.", affectedPayments.size(), w.getPublicKey(), sumNativeText, balanceNativeText)));
@@ -78,6 +78,11 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
 
             if (StringUtils.isAllEmpty(w.getSecret())) {
                 list.add(new ValidationResult(ValidationState.Error, "Sender wallet secret (private Key) is missing."));
+            } else {
+                var vs = new WalletValidator(l).validateSecret(w);
+                if (vs != null) {
+                    list.add(vs);
+                }
             }
         }
 

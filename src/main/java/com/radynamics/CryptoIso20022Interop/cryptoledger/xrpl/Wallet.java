@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.google.common.primitives.UnsignedLong;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 
 public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet {
 
@@ -39,6 +40,11 @@ public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     public void setLedgerBalance(UnsignedLong amountSmallestUnit) {
         this.drops = amountSmallestUnit;
+    }
+
+    @Override
+    public LedgerId getLedgerId() {
+        return LedgerId.Xrpl;
     }
 
     @Override

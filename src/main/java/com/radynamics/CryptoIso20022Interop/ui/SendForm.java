@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -263,6 +264,14 @@ public class SendForm extends JPanel implements MainFormPane {
             if (JOptionPane.OK_OPTION != userOption || StringUtils.isAllEmpty(userInput)) {
                 return false;
             }
+
+            var ledger = PaymentUtils.getLedger(w, payments).orElseThrow();
+            var vs = new WalletValidator(ledger).validateSecret(ledger.createWallet(w.getPublicKey(), userInput));
+            if (vs != null) {
+                ValidationResultDialog.show(this, new ValidationResult[]{vs});
+                return false;
+            }
+
             w.setSecret(userInput);
 
             // Apply value to same but not equal instances.

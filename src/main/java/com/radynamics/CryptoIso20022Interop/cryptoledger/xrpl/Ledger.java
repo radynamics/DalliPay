@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
+import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -160,6 +161,22 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         var addressCodec = new AddressCodec();
         try {
             return addressCodec.isValidClassicAddress(Address.of(publicKey));
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isSecretValid(Wallet wallet) {
+        try {
+            if (StringUtils.isEmpty(wallet.getSecret())) {
+                return false;
+            }
+            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.getType() != Network.Live);
+            if (StringUtils.isEmpty(wallet.getPublicKey())) {
+                return true;
+            }
+            return StringUtils.equals(sender.classicAddress().value(), wallet.getPublicKey());
         } catch (Exception ex) {
             return false;
         }

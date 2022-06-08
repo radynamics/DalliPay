@@ -38,4 +38,10 @@ public class WalletValidator {
                 ? null
                 : new ValidationResult(ValidationState.Error, String.format("%sCryptocurrency wallet isn't a valid address.", prefix));
     }
+
+    public ValidationResult validateSecret(Wallet wallet) {
+        return ledger.isSecretValid(wallet)
+                ? null
+                : new ValidationResult(ValidationState.Error, String.format("Wallet secret (private Key) for %s is not valid or doesn't match it's public key.", wallet.getPublicKey()));
+    }
 }

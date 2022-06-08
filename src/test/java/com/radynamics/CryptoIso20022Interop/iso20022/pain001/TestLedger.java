@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -77,6 +78,11 @@ public class TestLedger implements Ledger {
             public void setLedgerBalance(UnsignedLong amountSmallestUnit) {
                 // do nothing
             }
+
+            @Override
+            public LedgerId getLedgerId() {
+                return getId();
+            }
         };
     }
 
@@ -143,6 +149,11 @@ public class TestLedger implements Ledger {
     @Override
     public boolean isValidPublicKey(String publicKey) {
         return true;
+    }
+
+    @Override
+    public boolean isSecretValid(Wallet wallet) {
+        return !StringUtils.isEmpty(wallet.getSecret());
     }
 
     @Override

@@ -50,5 +50,7 @@ public interface Ledger {
 
     boolean isValidPublicKey(String publicKey);
 
+    boolean isSecretValid(Wallet wallet);
+
     HttpUrl getFallbackUrl(Network type);
 }

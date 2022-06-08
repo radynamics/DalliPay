@@ -7,10 +7,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PaymentUtils {
     public static ArrayList<Wallet> distinctSendingWallets(Payment[] payments) {
@@ -33,6 +30,16 @@ public class PaymentUtils {
             }
         }
         return list.toArray(list.toArray(new Ledger[0]));
+    }
+
+    public static Optional<Ledger> getLedger(Wallet w, Payment[] payments) {
+        for (var p : payments) {
+            var isSameLedger = p.getLedger().getId().textId().equals(w.getLedgerId().textId());
+            if (isSameLedger && WalletCompare.isSame(p.getSenderWallet(), w) || WalletCompare.isSame(p.getReceiverWallet(), w)) {
+                return Optional.of(p.getLedger());
+            }
+        }
+        return Optional.empty();
     }
 
     public static ArrayList<Payment> fromSender(Wallet w, Payment[] payments) {

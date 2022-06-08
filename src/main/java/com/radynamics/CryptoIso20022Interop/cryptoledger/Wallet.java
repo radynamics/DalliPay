@@ -12,4 +12,6 @@ public interface Wallet {
     UnsignedLong getLedgerBalanceSmallestUnit();
 
     void setLedgerBalance(UnsignedLong amountSmallestUnit);
+
+    LedgerId getLedgerId();
 }
