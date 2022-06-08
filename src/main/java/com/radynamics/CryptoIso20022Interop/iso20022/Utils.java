@@ -39,6 +39,10 @@ public class Utils {
     }
 
     public static ZonedDateTime endOfToday() {
-        return ZonedDateTime.now().with(LocalTime.of(23, 59, 59));
+        return endOfDay(ZonedDateTime.now());
+    }
+
+    public static ZonedDateTime endOfDay(ZonedDateTime dt) {
+        return dt.with(LocalTime.of(23, 59, 59));
     }
 }
