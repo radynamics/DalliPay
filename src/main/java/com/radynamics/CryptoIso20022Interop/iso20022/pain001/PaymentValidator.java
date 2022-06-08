@@ -12,8 +12,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
     private final WalletHistoryValidator historyValidator;
@@ -64,6 +63,8 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
     public ValidationResult[] validate(Payment[] payments) {
         var list = new ArrayList<ValidationResult>();
 
+        list.addAll(validateReceiverWalletsUnique(payments));
+
         var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
         for (var w : sendingWallets) {
             var affectedPayments = PaymentUtils.fromSender(w, payments);
@@ -81,6 +82,28 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         return list.toArray(new ValidationResult[0]);
+    }
+
+    private Collection<? extends ValidationResult> validateReceiverWalletsUnique(Payment[] payments) {
+        var list = new ArrayList<ValidationResult>();
+
+        var unique = new Hashtable<String, HashSet<String>>();
+        for (var p : payments) {
+            var key = p.getReceiverWallet().getPublicKey();
+            if (!unique.containsKey(key)) {
+                unique.put(key, new HashSet<>());
+            }
+            unique.get(key).add(p.getReceiverAddress() == null ? "" : p.getReceiverAddress().getName());
+        }
+
+        for (var key : unique.keySet()) {
+            var count = unique.get(key).size();
+            if (count > 1) {
+                list.add(new ValidationResult(ValidationState.Warning, String.format("Receiver wallet %s is defined for %s different sender names.", key, count)));
+            }
+        }
+
+        return list;
     }
 
     public WalletHistoryValidator getHistoryValidator() {
