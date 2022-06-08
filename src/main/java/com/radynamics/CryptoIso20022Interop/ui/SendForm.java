@@ -161,15 +161,19 @@ public class SendForm extends JPanel implements MainFormPane {
     private void onTxtInputChanged() {
         var payments = new Payment[0];
         try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
             payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
         } catch (Exception e) {
             log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
             ExceptionDialog.show(this, e, "Could not read payments from ISO 20022 pain.001 file.");
             return;
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
 
         try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var br = new BalanceRefresher();
             br.refreshAllSenderWallets(payments);
 
@@ -183,6 +187,8 @@ public class SendForm extends JPanel implements MainFormPane {
             }
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
