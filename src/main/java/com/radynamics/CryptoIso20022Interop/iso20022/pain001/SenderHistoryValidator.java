@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentHistoryProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -53,7 +54,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
         var paymentHistory = senderPaymentHistory.get(key);
         var similar = paymentHistory.oldestSimilarOrDefault(p);
         if (similar != null) {
-            list.add(new ValidationResult(ValidationState.Warning, String.format("Similar payment sent to same receiver at %s.", df.format(similar.getBooked()))));
+            list.add(new ValidationResult(ValidationState.Warning, String.format("Similar payment sent to same receiver at %s.", df.format(DateTimeConvert.toUserTimeZone(similar.getBooked())))));
         }
 
         return list.toArray(new ValidationResult[0]);
