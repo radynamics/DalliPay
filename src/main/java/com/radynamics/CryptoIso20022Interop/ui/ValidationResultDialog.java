@@ -31,7 +31,7 @@ public class ValidationResultDialog {
         }
 
         var validationsToShow = ValidationResultUtils.fromWarning(validations);
-        if (validations.length == 0) {
+        if (validationsToShow.length == 0) {
             return true;
         }
 
