@@ -198,6 +198,11 @@ public class SendForm extends JPanel implements MainFormPane {
         if (payments.length == 0) {
             return;
         }
+
+        if (!ValidationResultDialog.showErrorAndWarnings(this, table.getValidationResults(payments))) {
+            return;
+        }
+
         try {
             try {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

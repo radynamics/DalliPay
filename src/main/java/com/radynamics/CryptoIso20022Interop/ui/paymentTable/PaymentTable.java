@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.db.AccountMappingRepo;
@@ -284,6 +285,10 @@ public class PaymentTable extends JPanel {
 
     public Payment[] selectedPayments() {
         return model.selectedPayments();
+    }
+
+    public ValidationResult[] getValidationResults(Payment[] payments) {
+        return model.getValidationResults(payments);
     }
 
     public void refresh(Payment t) {

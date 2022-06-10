@@ -144,8 +144,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public boolean isCellEditable(int row, int col) {
         if (col == getColumnIndex(COL_SELECTOR)) {
-            var validationResults = (ValidationResult[]) getValueAt(row, getColumnIndex(COL_VALIDATION_RESULTS));
-            return isSelectable(getHighestStatus(validationResults));
+            return isSelectable(getHighestStatus(getValidationResults(row)));
         }
         if (actor == Actor.Receiver) {
             return col == getColumnIndex(COL_SENDER_ACCOUNT) || col == getColumnIndex(COL_RECEIVER_ACCOUNT);
@@ -261,6 +260,22 @@ public class PaymentTableModel extends AbstractTableModel {
             }
         }
         return list.toArray(new Payment[0]);
+    }
+
+    public ValidationResult[] getValidationResults(Payment[] payments) {
+        var list = new ArrayList<ValidationResult>();
+        for (var p : payments) {
+            list.addAll(Arrays.asList(getValidationResults(p)));
+        }
+        return list.toArray(new ValidationResult[0]);
+    }
+
+    private ValidationResult[] getValidationResults(Payment p) {
+        return getValidationResults(getRowIndex(p));
+    }
+
+    private ValidationResult[] getValidationResults(int row) {
+        return (ValidationResult[]) getValueAt(row, getColumnIndex(COL_VALIDATION_RESULTS));
     }
 
     public void onAccountOrWalletsChanged(Payment t) {
