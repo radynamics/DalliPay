@@ -219,8 +219,8 @@ public class SendConfirmationForm extends JDialog {
         pnlContent.add(lbl);
 
         var sumsFiatText = PaymentUtils.sumString(payments);
-        var sumLedger = PaymentUtils.sumSmallestLedgerUnit(payments);
-        var sumLedgerText = MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(sumLedger), l.getNativeCcySymbol());
+        var sums = PaymentUtils.sumLedgerUnit(payments);
+        var sumLedgerText = MoneyFormatter.formatLedger(sums);
         var text = String.format("%s (%s, %s payments)", sumsFiatText, sumLedgerText, payments.size());
 
         var lblPayments = new JLabel(text);

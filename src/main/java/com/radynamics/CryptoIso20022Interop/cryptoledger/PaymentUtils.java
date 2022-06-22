@@ -52,11 +52,12 @@ public class PaymentUtils {
         return list;
     }
 
-    public static long sumSmallestLedgerUnit(Collection<Payment> payments) {
-        long sum = 0;
+    public static MoneySums sumLedgerUnit(Collection<Payment> payments) {
+        var sum = new MoneySums();
         for (var p : payments) {
-            sum += p.getLedgerAmountSmallestUnit();
-            sum += p.getFeeSmallestUnit();
+            var l = p.getLedger();
+            sum.plus(l.convertToNativeCcyAmount(p.getLedgerAmountSmallestUnit()).doubleValue(), p.getLedgerCcy());
+            sum.plus(l.convertToNativeCcyAmount(p.getFeeSmallestUnit()).doubleValue(), p.getLedgerCcy());
         }
         return sum;
     }
