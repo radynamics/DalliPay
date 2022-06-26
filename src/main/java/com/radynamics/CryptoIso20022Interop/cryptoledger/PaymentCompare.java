@@ -33,7 +33,7 @@ public class PaymentCompare {
             return Math.abs(first.getAmount() - second.getAmount()) <= first.getAmount() * tolerancePercent;
         } else {
             final Double tolerancePercent = 0.02;
-            return Math.abs(first.getLedgerAmountSmallestUnit() - second.getLedgerAmountSmallestUnit()) <= first.getLedgerAmountSmallestUnit() * tolerancePercent;
+            return Math.abs(first.getAmountLedgerUnit() - second.getAmountLedgerUnit()) <= first.getAmountLedgerUnit() * tolerancePercent;
         }
     }
 }

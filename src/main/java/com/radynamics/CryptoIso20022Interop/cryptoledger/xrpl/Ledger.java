@@ -40,7 +40,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public Transaction createTransaction() {
-        return new Transaction(this, 0, getNativeCcySymbol());
+        return new Transaction(this, 0d, getNativeCcySymbol());
     }
 
     @Override
@@ -52,11 +52,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public BigDecimal convertToNativeCcyAmount(long amountSmallestUnit) {
         return XrpCurrencyAmount.ofDrops(amountSmallestUnit).toXrp();
-    }
-
-    @Override
-    public long convertToSmallestAmount(double amountNativeCcy) {
-        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amountNativeCcy)).value().longValue();
     }
 
     @Override

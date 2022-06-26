@@ -28,7 +28,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public Transaction createTransaction() {
-        return new TestTransaction(this, 0, getNativeCcySymbol());
+        return new TestTransaction(this, 0d, getNativeCcySymbol());
     }
 
     @Override
@@ -39,11 +39,6 @@ public class TestLedger implements Ledger {
     @Override
     public BigDecimal convertToNativeCcyAmount(long amountSmallestUnit) {
         return BigDecimal.valueOf(amountSmallestUnit / FACTOR);
-    }
-
-    @Override
-    public long convertToSmallestAmount(double amountNativeCcy) {
-        return (long) (amountNativeCcy * FACTOR);
     }
 
     @Override

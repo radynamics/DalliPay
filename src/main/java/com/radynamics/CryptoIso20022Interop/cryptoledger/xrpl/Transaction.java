@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
     private Ledger ledger;
-    private long drops;
+    private Double amt;
     private String ccy;
     private ZonedDateTime booked;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet senderWallet;
@@ -24,9 +24,10 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private Throwable transmissionError;
     private long feeDrops;
 
-    public Transaction(Ledger ledger, long drops, String ccy) {
+    public Transaction(Ledger ledger, Double amt, String ccy) {
+        if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
-        this.drops = drops;
+        this.amt = amt;
         this.ccy = ccy;
     }
 
@@ -35,13 +36,13 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public void setAmountSmallestUnit(long value) {
-        drops = value;
+    public void setAmountLedgerUnit(Double value) {
+        amt = value;
     }
 
     @Override
-    public long getAmountSmallestUnit() {
-        return drops;
+    public Double getAmountLedgerUnit() {
+        return amt;
     }
 
     @Override
@@ -149,10 +150,6 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
 
     public void setReceiver(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet receiver) {
         this.receiverWallet = receiver;
-    }
-
-    public void setAmount(long drops) {
-        this.drops = drops;
     }
 
     public void refreshTransmission() {

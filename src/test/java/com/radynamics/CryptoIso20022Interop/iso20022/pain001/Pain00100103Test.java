@@ -48,10 +48,10 @@ public class Pain00100103Test {
         assertEquals(4, transactions.length);
 
         var expectedSenderAddress = new Address("MUSTER AG");
-        Assertion.assertEquals(transactions[0], "010832052", "receiver_010832052", 459000, ReferenceType.Isr, "000000000000060029920346303");
+        Assertion.assertEquals(transactions[0], "010832052", "receiver_010832052", 459.0, ReferenceType.Isr, "000000000000060029920346303");
         Assertion.assertEquals(transactions[0].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[0].getReceiverAddress(), new Address("Settelen AG"));
-        Assertion.assertEquals(transactions[1], "010391391", "receiver_010391391", 3949750, ReferenceType.Isr, "210000000003139471430009017");
+        Assertion.assertEquals(transactions[1], "010391391", "receiver_010391391", 3949.75, ReferenceType.Isr, "210000000003139471430009017");
         Assertion.assertEquals(transactions[1].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[1].getReceiverAddress(), new Address("Destination AG") {{
             setStreet("Zielstrasse 13");
@@ -59,13 +59,13 @@ public class Pain00100103Test {
             setCity("Bern");
             setCountryShort("CH");
         }});
-        Assertion.assertEquals(transactions[2], "010649858", "receiver_010649858", 2838640, ReferenceType.Isr, "030015972590806420080020801");
+        Assertion.assertEquals(transactions[2], "010649858", "receiver_010649858", 2838.64, ReferenceType.Isr, "030015972590806420080020801");
         Assertion.assertEquals(transactions[2].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[2].getReceiverAddress(), new Address("Swisscom (Schweiz) AG") {{
             setStreet("Alte Tiefenaustrasse 6");
             setCity("3050 Bern");
         }});
-        Assertion.assertEquals(transactions[3], "032233441", "receiver_032233441", 1727530, ReferenceType.Isr, "332015900002760103813712236");
+        Assertion.assertEquals(transactions[3], "032233441", "receiver_032233441", 1727.53, ReferenceType.Isr, "332015900002760103813712236");
         Assertion.assertEquals(transactions[3].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[3].getReceiverAddress(), new Address("Ingram Micro GmbH") {{
             setCity("6330 Cham");
@@ -97,10 +97,10 @@ public class Pain00100103Test {
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
 
-        Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 5000000, ReferenceType.Scor, "RF712348231");
-        Assertion.assertEquals(transactions[1], "40271522859882", "receiver_40271522859882", 6000000);
-        Assertion.assertEquals(transactions[2], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 7000000);
-        Assertion.assertEquals(transactions[3], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 8000000);
+        Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 5000.00, ReferenceType.Scor, "RF712348231");
+        Assertion.assertEquals(transactions[1], "40271522859882", "receiver_40271522859882", 6000.00);
+        Assertion.assertEquals(transactions[2], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 7000.00);
+        Assertion.assertEquals(transactions[3], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 8000.00);
     }
 
 
@@ -127,7 +127,7 @@ public class Pain00100103Test {
         assertEquals(4, transactions.length);
 
         Assertion.assertEquals(transactions[0], rates[0]);
-        Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 5000000 / rate, ReferenceType.Scor, "RF712348231");
+        Assertion.assertEquals(transactions[0], "GB96MIDL40271522859882", "receiver_GB96MIDL40271522859882", 5000.0 / rate, ReferenceType.Scor, "RF712348231");
     }
 
     @ParameterizedTest
@@ -178,7 +178,7 @@ public class Pain00100103Test {
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
 
-        Assertion.assertEquals(transactions[0], "CH4431999123000889012", "receiver_CH4431999123000889012", 1949750, ReferenceType.SwissQrBill, "210000000003139471430009017");
+        Assertion.assertEquals(transactions[0], "CH4431999123000889012", "receiver_CH4431999123000889012", 1949.75, ReferenceType.SwissQrBill, "210000000003139471430009017");
     }
 
     @Test
@@ -202,7 +202,7 @@ public class Pain00100103Test {
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
 
-        Assertion.assertEquals(transactions[0], "CH5800791123000889012", "receiver_CH4431999123000889012", 199950, ReferenceType.Scor, "RF18539007547034");
+        Assertion.assertEquals(transactions[0], "CH5800791123000889012", "receiver_CH4431999123000889012", 199.95, ReferenceType.Scor, "RF18539007547034");
     }
 
     @Test
@@ -226,7 +226,7 @@ public class Pain00100103Test {
         assertNotNull(transactions);
         assertEquals(1, transactions.length);
 
-        Assertion.assertEquals(transactions[0], "CH5800791123000889012", "receiver_CH4431999123000889012", 4444000);
+        Assertion.assertEquals(transactions[0], "CH5800791123000889012", "receiver_CH4431999123000889012", 4444.00);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class Pain00100103Test {
         assertEquals(1, transactions.length);
         assertNotNull(transactions[0].getSenderAccount());
         assertEquals("CH5481230000001998736", transactions[0].getSenderAccount().getUnformatted());
-        Assertion.assertEquals(transactions[0], null, "CH5800791123000889012", null, 4444000, null, null);
+        Assertion.assertEquals(transactions[0], null, "CH5800791123000889012", null, 4444.00, null, null);
     }
 
     @Test

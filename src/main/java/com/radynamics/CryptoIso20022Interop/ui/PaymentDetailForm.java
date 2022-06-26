@@ -9,11 +9,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 
 public class PaymentDetailForm extends JDialog {
     private Payment payment;
@@ -196,7 +194,7 @@ public class PaymentDetailForm extends JDialog {
     private void refreshAmountsText() {
         lblAmountText.setText(AmountFormatter.formatAmtWithCcy(payment));
 
-        var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().convertToNativeCcyAmount(payment.getLedgerAmountSmallestUnit()), payment.getLedgerCcy());
+        var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountLedgerUnit(), payment.getLedgerCcy());
         if (payment.getExchangeRate() == null) {
             lblLedgerAmount.setText(String.format("%s, missing exchange rate", amtLedgerText));
             return;

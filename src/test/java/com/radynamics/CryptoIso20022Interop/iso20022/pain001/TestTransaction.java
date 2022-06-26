@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
-    private long amountSmallestUnit;
+    private Double amt;
     private String ccy;
     private ZonedDateTime booked;
     private Wallet senderWallet;
@@ -21,9 +21,10 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private Ledger ledger;
     private long fee = 10;
 
-    public TestTransaction(Ledger ledger, long amountSmallestUnit, String ccy) {
+    public TestTransaction(Ledger ledger, Double amt, String ccy) {
+        if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
-        this.amountSmallestUnit = amountSmallestUnit;
+        this.amt = amt;
         this.ccy = ccy;
     }
 
@@ -32,13 +33,13 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setAmountSmallestUnit(long value) {
-        amountSmallestUnit = value;
+    public void setAmountLedgerUnit(Double value) {
+        amt = value;
     }
 
     @Override
-    public long getAmountSmallestUnit() {
-        return amountSmallestUnit;
+    public Double getAmountLedgerUnit() {
+        return amt;
     }
 
     @Override
@@ -141,9 +142,5 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
 
     public void setReceiver(Wallet receiver) {
         this.receiverWallet = receiver;
-    }
-
-    public void setAmount(long drops) {
-        this.amountSmallestUnit = drops;
     }
 }

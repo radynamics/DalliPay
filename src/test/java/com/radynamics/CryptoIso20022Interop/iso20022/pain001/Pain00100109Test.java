@@ -47,7 +47,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("UEBERWEISUNG AUF DAS KONTO DES BEGU NSTIGTEN Zahlung lt. Avis", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "545445545455");
-            Assertion.assertAmtCcy(t, 50.0, "USD", 50000, "TEST");
+            Assertion.assertAmtCcy(t, 50.0, "USD", 50.0, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress);
             Assertion.assertEquals(t.getReceiverAddress(), new Address("XDR CAHNGZHOU LIMITED") {{
                 setStreet("LVCHENG ROAD");
@@ -64,7 +64,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("ZAHLUNG FUER OEL Zahlung lt. Avis", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "KW81CBKU0000000000001234560101");
-            Assertion.assertAmtCcy(t, 650.0, "USD", 650000, "TEST");
+            Assertion.assertAmtCcy(t, 650.0, "USD", 650.0, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress);
             Assertion.assertEquals(t.getReceiverAddress(), new Address("UTTENDORFER WILLY") {{
                 setStreet("GREAT PLACE");
@@ -81,7 +81,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("LT. AVIS VOM 17,25,2020 Zahlung lt. Avis", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "545445545455");
-            Assertion.assertAmtCcy(t, 200.0, "USD", 200000, "TEST");
+            Assertion.assertAmtCcy(t, 200.0, "USD", 200.0, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress);
             Assertion.assertEquals(t.getReceiverAddress(), new Address("XDR CAHNGZHOU LIMITED") {{
                 setStreet("LVCHENG ROAD");
@@ -98,7 +98,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("RECHNUNG 456123 VOM 25,03,2020 Zahlung lt. Avis", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "TR330006100519786457841326");
-            Assertion.assertAmtCcy(t, 250.0, "TRY", 250000, "TEST");
+            Assertion.assertAmtCcy(t, 250.0, "TRY", 250.0, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress);
             Assertion.assertEquals(t.getReceiverAddress(), new Address("WHEEL INDUSTRY") {{
                 setCity("TR-ANKARA");
@@ -132,7 +132,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("Nur Scheckzahlung m\u00f6glich", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", null);
-            Assertion.assertAmtCcy(t, 5000.0, "EUR", 5000000, "TEST");
+            Assertion.assertAmtCcy(t, 5000.0, "EUR", 5000.0, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("Braun Mathias") {{
                 setStreet("Oxford Road 456");
                 setZip("554554");
@@ -156,7 +156,7 @@ public class Pain00100109Test {
             Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
             Assertions.assertEquals("Ref 455244", t.getStructuredReferences()[0].getUnformatted());
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "50004564552");
-            Assertion.assertAmtCcy(t, 4521.32, "EUR", 4521320, "TEST");
+            Assertion.assertAmtCcy(t, 4521.32, "EUR", 4521.32, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("Maier Bau GmbH") {{
                 setStreet("Bergstra\u00DFe 35");
                 setZip("84347");
@@ -179,7 +179,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("Verwendungszweck 1 Verwendungszweck2", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "DE14740618130000033626", "KW81CBKU0000000000001234560101");
-            Assertion.assertAmtCcy(t, 1234.56, "EUR", 1234560, "TEST");
+            Assertion.assertAmtCcy(t, 1234.56, "EUR", 1234.56, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("Maier Bau GmbH") {{
                 setStreet("Bergstra\u00DFe 35");
                 setZip("84347");
@@ -222,7 +222,7 @@ public class Pain00100109Test {
             Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
             Assertions.assertEquals("RF4220210323103704APG0018", t.getStructuredReferences()[0].getUnformatted());
             Assertion.assertEqualsAccount(t, "CH7280005000088877766", "CH5021977000004331346");
-            Assertion.assertAmtCcy(t, 3949.75, "USD", 3949750, "TEST");
+            Assertion.assertAmtCcy(t, 3949.75, "USD", 3949.75, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("MUSTER AG") {{
                 setCity("SELDWYLA");
                 setCountryShort("CH");
@@ -243,7 +243,7 @@ public class Pain00100109Test {
             Assertions.assertEquals("Rechnung Nr. 408", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);
             Assertion.assertEqualsAccount(t, "CH7280005000088877766", "CH4221988000009522865");
-            Assertion.assertAmtCcy(t, 8479.25, "EUR", 8479250, "TEST");
+            Assertion.assertAmtCcy(t, 8479.25, "EUR", 8479.25, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("MUSTER AG"));
             Assertion.assertEquals(t.getReceiverAddress(), new Address("Robert Scheider SA") {{
                 setStreet("Rue de la gare 24");
@@ -262,7 +262,7 @@ public class Pain00100109Test {
             Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
             Assertions.assertEquals("RF712348231", t.getStructuredReferences()[0].getUnformatted());
             Assertion.assertEqualsAccount(t, "CH7280005000088877766", "DE62007620110623852957");
-            Assertion.assertAmtCcy(t, 3421.00, "EUR", 3421000, "TEST");
+            Assertion.assertAmtCcy(t, 3421.00, "EUR", 3421.00, "TEST");
             Assertion.assertEquals(t.getSenderAddress(), new Address("MUSTER AG"));
             Assertion.assertEquals(t.getReceiverAddress(), new Address("Peter Haller") {{
                 setStreet("Rosenauweg 4");

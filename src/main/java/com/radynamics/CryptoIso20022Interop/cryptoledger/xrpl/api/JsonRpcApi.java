@@ -35,6 +35,7 @@ import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -229,7 +230,7 @@ public class JsonRpcApi implements TransactionSource {
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
         // TODO: handle IOUs
         // TODO: handle ImmutableIssuedCurrencyAmount
-        var trx = new Transaction(ledger, deliveredAmount.value().longValue(), ledger.getNativeCcySymbol());
+        var trx = new Transaction(ledger, deliveredAmount.toXrp().doubleValue(), ledger.getNativeCcySymbol());
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
         trx.setSender(WalletConverter.from(t.account()));
@@ -304,7 +305,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
-        var amount = XrpCurrencyAmount.ofDrops(t.getAmountSmallestUnit());
+        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmountLedgerUnit()));
 
         var memos = new ArrayList<MemoWrapper>();
         memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));

@@ -18,8 +18,6 @@ public interface Ledger {
 
     BigDecimal convertToNativeCcyAmount(long amountSmallestUnit);
 
-    long convertToSmallestAmount(double amountNativeCcy);
-
     FeeSuggestion getFeeSuggestion();
 
     Wallet createWallet(String publicKey, String secret);
