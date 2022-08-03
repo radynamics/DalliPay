@@ -6,7 +6,7 @@ public final class PaymentConverter {
     public static Payment[] toPayment(Transaction[] transactions, String targetCcy) {
         var items = new Payment[transactions.length];
         for (var i = 0; i < transactions.length; i++) {
-            items[i] = toPayment(transactions[i], targetCcy);
+            items[i] = toPayment(transactions[i], getTargetCurrency(transactions[i], targetCcy));
         }
         return items;
     }
@@ -23,5 +23,9 @@ public final class PaymentConverter {
             items[i] = payments[i].getTransaction();
         }
         return items;
+    }
+
+    private static String getTargetCurrency(Transaction t, String targetCcySuggested) {
+        return targetCcySuggested == null ? t.getCcy() : targetCcySuggested;
     }
 }

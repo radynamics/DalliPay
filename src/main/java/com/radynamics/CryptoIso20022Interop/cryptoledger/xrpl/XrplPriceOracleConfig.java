@@ -13,6 +13,8 @@ public class XrplPriceOracleConfig {
     final static Logger log = LogManager.getLogger(XrplPriceOracleConfig.class);
     private final HashSet<IssuedCurrency> issuedCurrencies = new HashSet<>();
 
+    public final static String AsReceived = "As received";
+
     public void load() {
         try (var repo = new ConfigRepo()) {
             load(repo);

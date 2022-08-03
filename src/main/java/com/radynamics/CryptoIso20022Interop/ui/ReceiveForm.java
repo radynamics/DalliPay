@@ -249,17 +249,14 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             ExceptionDialog.show(this, e);
         }
 
-        final String ledgerCcy = "XRP";
         var ccys = new ArrayList<String>();
-        ccys.add(ledgerCcy);
         for (var ic : issuedCurrencies) {
-            if (ic.getPair().getFirst().equals(ledgerCcy)) {
-                ccys.add(ic.getPair().getSecond());
-            }
+            ccys.add(ic.getPair().getSecond());
         }
 
         cboTargetCcy.removeAllItems();
         ccys.sort(String::compareTo);
+        ccys.add(0, XrplPriceOracleConfig.AsReceived);
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
             if (ccy.equalsIgnoreCase(selectedCcy)) {
@@ -382,12 +379,15 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
 
         var targetCcy = cboTargetCcy.getSelectedItem().toString();
-        var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy);
-        var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
-        if (!ccyPair.isOneToOne() && !CurrencyPair.contains(supportedPairs, ccyPair)) {
-            JOptionPane.showMessageDialog(this,
-                    String.format("%s does not support exchange rates for %s", transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
-                    "Currency not supported", JOptionPane.INFORMATION_MESSAGE);
+        targetCcy = targetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : targetCcy;
+        if (targetCcy != null) {
+            var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy);
+            var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
+            if (!ccyPair.isOneToOne() && !CurrencyPair.contains(supportedPairs, ccyPair)) {
+                JOptionPane.showMessageDialog(this,
+                        String.format("%s does not support exchange rates for %s", transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
+                        "Currency not supported", JOptionPane.INFORMATION_MESSAGE);
+            }
         }
 
         try {

@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
@@ -97,11 +98,26 @@ public class JsonRpcApi implements TransactionSource {
                         continue;
                     }
 
-                    // TODO: handle ImmutableIssuedCurrencyAmount
                     var deliveredAmount = r.metadata().get().deliveredAmount().get();
-                    if (deliveredAmount instanceof XrpCurrencyAmount) {
-                        tr.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
-                    }
+                    deliveredAmount.handle(xrpCurrencyAmount -> {
+                        try {
+                            tr.add(toTransaction(t, xrpCurrencyAmount));
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
+                    }, issuedCurrencyAmount -> {
+                        try {
+                            // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
+                            final int ccyCodeStandardFormatLength = 3;
+                            // trim() needed, due value is always 20 bytes, filled with 0.
+                            var ccyCode = issuedCurrencyAmount.currency().length() <= ccyCodeStandardFormatLength ? issuedCurrencyAmount.currency() : Utils.hexToString(issuedCurrencyAmount.currency()).trim();
+                            var ccy = new Currency(ccyCode, ledger.createWallet(issuedCurrencyAmount.issuer().value(), ""));
+                            var amt = issuedCurrencyAmount.value();
+                            tr.add(toTransaction(t, BigDecimal.valueOf(Double.parseDouble(amt)), ccy));
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
+                    });
                 }
             }
 
@@ -228,9 +244,11 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
-        // TODO: handle IOUs
-        // TODO: handle ImmutableIssuedCurrencyAmount
-        var trx = new Transaction(ledger, deliveredAmount.toXrp().doubleValue(), ledger.getNativeCcySymbol());
+        return toTransaction(t, deliveredAmount.toXrp(), new Currency(ledger.getNativeCcySymbol()));
+    }
+
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
+        var trx = new Transaction(ledger, amt.doubleValue(), ccy.getCcy());
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
         trx.setSender(WalletConverter.from(t.account()));
