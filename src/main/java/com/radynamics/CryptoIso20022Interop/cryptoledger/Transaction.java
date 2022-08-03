@@ -6,9 +6,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import java.time.ZonedDateTime;
 
 public interface Transaction {
-    void setAmountLedgerUnit(Double value);
+    void setAmount(Double value);
 
-    Double getAmountLedgerUnit();
+    Double getAmount();
 
     String getCcy();
 

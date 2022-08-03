@@ -33,12 +33,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setAmountLedgerUnit(Double value) {
+    public void setAmount(Double value) {
         amt = value;
     }
 
     @Override
-    public Double getAmountLedgerUnit() {
+    public Double getAmount() {
         return amt;
     }
 

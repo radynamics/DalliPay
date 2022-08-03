@@ -36,12 +36,12 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public void setAmountLedgerUnit(Double value) {
+    public void setAmount(Double value) {
         amt = value;
     }
 
     @Override
-    public Double getAmountLedgerUnit() {
+    public Double getAmount() {
         return amt;
     }
 

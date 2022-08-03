@@ -323,7 +323,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
-        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmountLedgerUnit()));
+        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmount()));
 
         var memos = new ArrayList<MemoWrapper>();
         memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
