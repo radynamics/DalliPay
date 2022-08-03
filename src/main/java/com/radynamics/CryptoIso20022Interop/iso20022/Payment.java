@@ -117,7 +117,7 @@ public class Payment {
             return;
         }
 
-        var amt = BigDecimal.valueOf(getAmountLedgerUnit());
+        var amt = BigDecimal.valueOf(getAmountTransaction());
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
@@ -171,7 +171,7 @@ public class Payment {
         }
     }
 
-    public Double getAmountLedgerUnit() {
+    public Double getAmountTransaction() {
         return cryptoTrx.getAmount();
     }
 

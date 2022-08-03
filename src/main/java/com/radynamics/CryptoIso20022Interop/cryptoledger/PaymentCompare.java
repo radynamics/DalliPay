@@ -34,7 +34,7 @@ public class PaymentCompare {
         } else {
             var sameCcy = StringUtils.equals(first.getLedgerCcy(), second.getLedgerCcy());
             final Double tolerancePercent = 0.02;
-            return sameCcy && Math.abs(first.getAmountLedgerUnit() - second.getAmountLedgerUnit()) <= first.getAmountLedgerUnit() * tolerancePercent;
+            return sameCcy && Math.abs(first.getAmountTransaction() - second.getAmountTransaction()) <= first.getAmountTransaction() * tolerancePercent;
         }
     }
 }

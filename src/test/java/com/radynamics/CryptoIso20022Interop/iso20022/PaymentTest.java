@@ -26,7 +26,7 @@ public class PaymentTest {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
         p.setExchangeRate(createRate2());
 
-        Assertions.assertEquals(10.0, p.getAmountLedgerUnit());
+        Assertions.assertEquals(10.0, p.getAmountTransaction());
         Assertions.assertEquals("TEST", p.getLedgerCcy());
         Assertions.assertEquals(20, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
@@ -64,7 +64,7 @@ public class PaymentTest {
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
-        Assertions.assertEquals(15.0, p.getAmountLedgerUnit());
+        Assertions.assertEquals(15.0, p.getAmountTransaction());
         Assertions.assertEquals("TEST", p.getLedgerCcy());
     }
 
@@ -75,7 +75,7 @@ public class PaymentTest {
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
-        Assertions.assertEquals(0, p.getAmountLedgerUnit());
+        Assertions.assertEquals(0, p.getAmountTransaction());
         Assertions.assertEquals("TEST", p.getLedgerCcy());
     }
 
@@ -100,13 +100,13 @@ public class PaymentTest {
         }
         Assertions.assertEquals(20, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
-        Assertions.assertEquals(10.0, p.getAmountLedgerUnit());
+        Assertions.assertEquals(10.0, p.getAmountTransaction());
 
         p.setExchangeRate(null);
 
         Assertions.assertEquals(amountDefined ? 20 : 0, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
-        Assertions.assertEquals(amountDefined ? 0 : 10.0, p.getAmountLedgerUnit());
+        Assertions.assertEquals(amountDefined ? 0 : 10.0, p.getAmountTransaction());
     }
 
     @ParameterizedTest
