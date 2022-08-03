@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -10,7 +11,9 @@ import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.TestWalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
 import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import java.time.LocalDateTime;
@@ -43,11 +46,25 @@ public class TestFactory {
         return PaymentConverter.toPayment(list.toArray(new Transaction[0]), targetCcy);
     }
 
+    public static Payment[] createTransactionsMultiCcy(Ledger ledger, TransformInstruction ti) {
+        var list = new ArrayList<Transaction>();
+        list.add(TestFactory.createTransaction1(ledger));
+        list.add(TestFactory.createTransaction1(ledger, 7777.77, "XYZ"));
+
+        var t = new TransactionTranslator(ti, new CurrencyConverter(ti.getExchangeRateProvider().latestRates()));
+        final String ccyAsReceived = null;
+        return t.apply(PaymentConverter.toPayment(list.toArray(new Transaction[0]), ccyAsReceived));
+    }
+
     private static Transaction createTransaction1(Ledger ledger) {
-        var t = ledger.createTransaction();
+        return createTransaction1(ledger, 36.35, ledger.getNativeCcySymbol());
+    }
+
+    private static Transaction createTransaction1(Ledger ledger, double amt, String ccy) {
+        var t = new TestTransaction(ledger, amt, ccy);
         t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
-        t.setAmount(36.35);
+        t.setAmount(amt);
         t.setId("E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
         t.setInvoiceId("RG-00123.45");

@@ -72,4 +72,31 @@ public class Camt05400102WriterTest {
         Assertions.assertNotNull(rltdPties.getCdtr());
         Assertions.assertEquals("Company A", rltdPties.getCdtr().getNm());
     }
+
+    @Test
+    public void multipleCurrencies() throws Exception {
+        var ledger = new TestLedger();
+        var ti = TestFactory.createTransformInstruction(ledger);
+        var w = new Camt05400102Writer(ti.getLedger(), ti, ProductVersion);
+        w.setIdGenerator(new FixedValueIdGenerator());
+        w.setCreationDate(TestFactory.createCreationDate());
+
+        var actual = (Document) w.createDocument(TestFactory.createTransactionsMultiCcy(ledger, ti));
+
+        Assertions.assertEquals(2, actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().size());
+        {
+            var ntfctn = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0);
+            Assertions.assertEquals(1, ntfctn.getNtry().size());
+            Assertions.assertEquals("TEST", ntfctn.getAcct().getCcy());
+            Assertions.assertEquals(36.35, ntfctn.getNtry().get(0).getAmt().getValue().doubleValue());
+            Assertions.assertEquals("TEST", ntfctn.getNtry().get(0).getAmt().getCcy());
+        }
+        {
+            var ntfctn = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(1);
+            Assertions.assertEquals(1, ntfctn.getNtry().size());
+            Assertions.assertEquals("XYZ", ntfctn.getAcct().getCcy());
+            Assertions.assertEquals(7777.77, ntfctn.getNtry().get(0).getAmt().getValue().doubleValue());
+            Assertions.assertEquals("XYZ", ntfctn.getNtry().get(0).getAmt().getCcy());
+        }
+    }
 }

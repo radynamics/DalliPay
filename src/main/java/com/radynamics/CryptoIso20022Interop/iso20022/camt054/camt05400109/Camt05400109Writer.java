@@ -49,14 +49,15 @@ public class Camt05400109Writer implements Camt054Writer {
 
         for (var t : transactions) {
             var receiver = t.getReceiverWallet();
-            var stmt = getNtfctnOrNull(d, receiver);
+            var ccy = t.getFiatCcy();
+            var stmt = getNtfctnOrNull(d, receiver, ccy);
             if (stmt == null) {
                 stmt = new AccountNotification19();
                 d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
                 stmt.setId(idGenerator.createStmId());
                 stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
                 stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
-                stmt.setAcct(createAcct(receiver));
+                stmt.setAcct(createAcct(receiver, ccy));
             }
 
             stmt.getNtry().add(createNtry(t));
@@ -70,16 +71,16 @@ public class Camt05400109Writer implements Camt054Writer {
         return transformInstruction;
     }
 
-    private AccountNotification19 getNtfctnOrNull(Document d, Wallet receiver) {
+    private AccountNotification19 getNtfctnOrNull(Document d, Wallet receiver, String ccy) {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
-            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver))) {
+            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, ccy))) {
                 return ntfctn;
             }
         }
         return null;
     }
 
-    private CashAccount41 createAcct(Wallet receiver) {
+    private CashAccount41 createAcct(Wallet receiver, String ccy) {
         var acct = new CashAccount41();
         acct.setId(new AccountIdentification4Choice());
         var account = transformInstruction.getAccountOrNull(receiver);
@@ -95,7 +96,7 @@ public class Camt05400109Writer implements Camt054Writer {
                 acct.getId().getOthr().setId(account.getUnformatted());
             }
         }
-        acct.setCcy(transformInstruction.getTargetCcy());
+        acct.setCcy(ccy);
 
         return acct;
     }
