@@ -62,17 +62,7 @@ public class PaymentUtils {
     }
 
     public static String sumString(ArrayList<Payment> payments) {
-        var sb = new StringBuilder();
-        var i = 0;
-        var sums = sum(payments);
-        for (var sum : sums.entrySet()) {
-            sb.append(MoneyFormatter.formatFiat(BigDecimal.valueOf(sum.getValue()), sum.getKey()));
-            if (i + 1 < sums.size()) {
-                sb.append(", ");
-            }
-            i++;
-        }
-        return sb.toString();
+        return MoneyBagFormatter.format(sum(payments));
     }
 
     public static Map<String, Double> sum(ArrayList<Payment> payments) {

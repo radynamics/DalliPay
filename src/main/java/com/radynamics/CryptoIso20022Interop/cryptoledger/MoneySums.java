@@ -27,7 +27,7 @@ public class MoneySums {
         return sum;
     }
 
-    private String[] currencies() {
+    public String[] currencies() {
         var set = new HashSet<String>();
         for (var amt : amounts) {
             set.add(amt.getKey());

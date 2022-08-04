@@ -278,7 +278,7 @@ public class JsonRpcApi implements TransactionSource {
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             var result = xrplClient.accountInfo(requestParams);
-            wallet.setLedgerBalance(result.accountData().balance().value());
+            wallet.getBalances().set(result.accountData().balance().toXrp().doubleValue(), ledger.getNativeCcySymbol());
         } catch (JsonRpcClientErrorException e) {
             if (!isAccountNotFound(e)) {
                 log.error(e.getMessage(), e);

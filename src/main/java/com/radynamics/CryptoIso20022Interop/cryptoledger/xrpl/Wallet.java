@@ -1,13 +1,13 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.google.common.primitives.UnsignedLong;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.MoneyBag;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 
 public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet {
 
     private String publicKey;
     private String secret;
-    private UnsignedLong drops;
+    private MoneyBag balances = new MoneyBag();
 
     public Wallet(String publicKey) {
         this(publicKey, null);
@@ -34,12 +34,8 @@ public class Wallet implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public UnsignedLong getLedgerBalanceSmallestUnit() {
-        return drops;
-    }
-
-    public void setLedgerBalance(UnsignedLong amountSmallestUnit) {
-        this.drops = amountSmallestUnit;
+    public MoneyBag getBalances() {
+        return balances;
     }
 
     @Override

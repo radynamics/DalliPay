@@ -1,13 +1,12 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.util.Hashtable;
 
 public class BalanceRefresher {
     public void refreshAllSenderWallets(Payment[] payments) {
-        var refreshed = new Hashtable<String, UnsignedLong>();
+        var refreshed = new Hashtable<String, MoneyBag>();
         for (var p : payments) {
             var wallet = p.getSenderWallet();
             if (wallet == null) {
@@ -16,15 +15,15 @@ public class BalanceRefresher {
 
             // Use cached balance for other instances of the same wallet.
             if (refreshed.containsKey(wallet.getPublicKey())) {
-                wallet.setLedgerBalance(refreshed.get(wallet.getPublicKey()));
+                wallet.getBalances().replaceBy(refreshed.get(wallet.getPublicKey()));
                 continue;
             }
 
             p.getLedger().refreshBalance(wallet);
-            if (wallet.getLedgerBalanceSmallestUnit() == null) {
+            if (wallet.getBalances().isEmpty()) {
                 continue;
             }
-            refreshed.put(wallet.getPublicKey(), wallet.getLedgerBalanceSmallestUnit());
+            refreshed.put(wallet.getPublicKey(), wallet.getBalances());
         }
     }
 }

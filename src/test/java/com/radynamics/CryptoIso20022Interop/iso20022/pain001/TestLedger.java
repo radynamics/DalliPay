@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
-import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
@@ -65,13 +64,8 @@ public class TestLedger implements Ledger {
             }
 
             @Override
-            public UnsignedLong getLedgerBalanceSmallestUnit() {
-                return UnsignedLong.ZERO;
-            }
-
-            @Override
-            public void setLedgerBalance(UnsignedLong amountSmallestUnit) {
-                // do nothing
+            public MoneyBag getBalances() {
+                return new MoneyBag();
             }
 
             @Override

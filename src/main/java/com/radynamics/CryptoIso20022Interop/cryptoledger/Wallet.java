@@ -1,7 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.google.common.primitives.UnsignedLong;
-
 public interface Wallet {
     String getPublicKey();
 
@@ -9,9 +7,7 @@ public interface Wallet {
 
     void setSecret(String secret);
 
-    UnsignedLong getLedgerBalanceSmallestUnit();
-
-    void setLedgerBalance(UnsignedLong amountSmallestUnit);
+    MoneyBag getBalances();
 
     LedgerId getLedgerId();
 }

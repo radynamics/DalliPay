@@ -12,7 +12,6 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
@@ -71,11 +70,14 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             var affectedPayments = PaymentUtils.fromSender(w, payments);
             Ledger l = affectedPayments.get(0).getLedger();
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
-            var nativeCcySum = sums.sum(l.getNativeCcySymbol());
-            if (nativeCcySum > w.getLedgerBalanceSmallestUnit().longValue()) {
-                var sumNativeText = MoneyFormatter.formatLedger(BigDecimal.valueOf(nativeCcySum), l.getNativeCcySymbol());
-                var balanceNativeText = MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(w.getLedgerBalanceSmallestUnit().longValue()), l.getNativeCcySymbol());
-                list.add(new ValidationResult(ValidationState.Error, String.format("Sum of %s payments from %s is %s and exeeds wallet balance of %s.", affectedPayments.size(), w.getPublicKey(), sumNativeText, balanceNativeText)));
+            for (var ccy : sums.currencies()) {
+                var balance = w.getBalances().get(ccy);
+                var paymentsSum = sums.sum(ccy);
+                if (balance < paymentsSum) {
+                    var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum, ccy);
+                    var balanceText = MoneyFormatter.formatLedger(balance, ccy);
+                    list.add(new ValidationResult(ValidationState.Error, String.format("Sum of payments from %s is %s and exceeds wallet balance of %s.", w.getPublicKey(), paymentsSumText, balanceText)));
+                }
             }
 
             if (StringUtils.isAllEmpty(w.getSecret())) {
