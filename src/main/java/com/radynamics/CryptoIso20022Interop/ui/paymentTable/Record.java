@@ -64,6 +64,10 @@ public class Record {
         amount = value;
     }
 
+    public Object getCcy(Actor actor) {
+        return actor == Actor.Sender ? payment.getFiatCcy() : payment.getLedgerCurrency();
+    }
+
     @Override
     public String toString() {
         return payment.toString();

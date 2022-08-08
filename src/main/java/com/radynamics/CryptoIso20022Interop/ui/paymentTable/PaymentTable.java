@@ -123,7 +123,7 @@ public class PaymentTable extends JPanel {
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50).getColumn();
-            c.setCellRenderer(new DefaultTableCellRenderer());
+            c.setCellRenderer(new CurrencyCellRenderer());
         }
         cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(50);
         {

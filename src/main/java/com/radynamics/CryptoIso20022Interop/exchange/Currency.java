@@ -20,6 +20,10 @@ public class Currency {
         return ccy;
     }
 
+    public Wallet getIssuer() {
+        return issuer;
+    }
+
     @Override
     public String toString() {
         return issuer == null ? ccy : String.format("%s (%s)", ccy, issuer.getPublicKey());

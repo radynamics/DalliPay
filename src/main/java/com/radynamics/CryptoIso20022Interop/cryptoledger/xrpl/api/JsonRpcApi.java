@@ -248,7 +248,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
-        var trx = new Transaction(ledger, amt.doubleValue(), ccy.getCcy());
+        var trx = new Transaction(ledger, amt.doubleValue(), ccy);
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
         trx.setSender(WalletConverter.from(t.account()));

@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
@@ -204,6 +205,10 @@ public class Payment {
     }
 
     public String getLedgerCcy() {
+        return getLedgerCurrency().getCcy();
+    }
+
+    public Currency getLedgerCurrency() {
         return cryptoTrx.getCcy();
     }
 

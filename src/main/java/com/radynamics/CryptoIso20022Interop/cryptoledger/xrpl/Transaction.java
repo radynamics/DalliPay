@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,7 +14,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private String id;
     private Ledger ledger;
     private Double amt;
-    private String ccy;
+    private Currency ccy;
     private ZonedDateTime booked;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet senderWallet;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet receiverWallet;
@@ -24,8 +25,9 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private Throwable transmissionError;
     private long feeDrops;
 
-    public Transaction(Ledger ledger, Double amt, String ccy) {
+    public Transaction(Ledger ledger, Double amt, Currency ccy) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
+        if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
         this.ledger = ledger;
         this.amt = amt;
         this.ccy = ccy;
@@ -46,7 +48,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public String getCcy() {
+    public Currency getCcy() {
         return ccy;
     }
 

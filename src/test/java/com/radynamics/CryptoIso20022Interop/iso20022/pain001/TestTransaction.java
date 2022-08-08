@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.ZonedDateTime;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
     private Double amt;
-    private String ccy;
+    private Currency ccy;
     private ZonedDateTime booked;
     private Wallet senderWallet;
     private Wallet receiverWallet;
@@ -25,7 +26,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
         this.amt = amt;
-        this.ccy = ccy;
+        this.ccy = new Currency(ccy);
     }
 
     public void addMessage(String message) {
@@ -43,7 +44,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public String getCcy() {
+    public Currency getCcy() {
         return ccy;
     }
 

@@ -85,7 +85,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             return item.getAmount(actor);
         } else if (getColumnIndex(COL_CCY) == col) {
-            return item.payment.getFiatCcy();
+            return item.getCcy(actor);
         } else if (getColumnIndex(COL_TRX_STATUS) == col) {
             return item.payment.getTransmission();
         } else if (getColumnIndex(COL_DETAIL) == col) {
@@ -190,7 +190,6 @@ public class PaymentTableModel extends AbstractTableModel {
         if (actor == Actor.Receiver) {
             loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> {
                 setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
-                setValueAt(t.getFiatCcy(), getRowIndex(t), getColumnIndex(COL_CCY));
             });
         } else {
             loadExchangeRate.complete(null);

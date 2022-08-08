@@ -26,6 +26,6 @@ public final class PaymentConverter {
     }
 
     private static String getTargetCurrency(Transaction t, String targetCcySuggested) {
-        return targetCcySuggested == null ? t.getCcy() : targetCcySuggested;
+        return targetCcySuggested == null ? t.getCcy().getCcy() : targetCcySuggested;
     }
 }
