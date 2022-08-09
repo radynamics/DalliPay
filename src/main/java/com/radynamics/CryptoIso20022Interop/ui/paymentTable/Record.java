@@ -65,7 +65,7 @@ public class Record {
     }
 
     public Object getCcy(Actor actor) {
-        return actor == Actor.Sender ? payment.getFiatCcy() : payment.getLedgerCurrency();
+        return actor == Actor.Sender ? payment.getFiatCcy() : payment.getLedgerCcy();
     }
 
     @Override

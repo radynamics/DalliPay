@@ -27,7 +27,7 @@ public class PaymentTest {
         p.setExchangeRate(createRate2());
 
         Assertions.assertEquals(10.0, p.getAmountTransaction());
-        Assertions.assertEquals("TEST", p.getLedgerCcy());
+        Assertions.assertEquals("TEST", p.getLedgerCcy().getCcy());
         Assertions.assertEquals(20, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
     }
@@ -44,7 +44,7 @@ public class PaymentTest {
         Assertions.assertTrue(p.isAmountUnknown());
         Assertions.assertTrue(p.isCcyUnknown());
         Assertions.assertEquals(0, p.getAmount());
-        Assertions.assertEquals("TEST", p.getLedgerCcy());
+        Assertions.assertEquals("TEST", p.getLedgerCcy().getCcy());
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ public class PaymentTest {
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
         Assertions.assertEquals(15.0, p.getAmountTransaction());
-        Assertions.assertEquals("TEST", p.getLedgerCcy());
+        Assertions.assertEquals("TEST", p.getLedgerCcy().getCcy());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PaymentTest {
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
         Assertions.assertEquals(0, p.getAmountTransaction());
-        Assertions.assertEquals("TEST", p.getLedgerCcy());
+        Assertions.assertEquals("TEST", p.getLedgerCcy().getCcy());
     }
 
     @ParameterizedTest

@@ -49,7 +49,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         }
 
         if (t.getExchangeRate() == null) {
-            var pair = new CurrencyPair(t.getLedgerCcy(), t.getFiatCcy());
+            var pair = new CurrencyPair(t.getLedgerCcy().getCcy(), t.getFiatCcy());
             list.add(new ValidationResult(ValidationState.Error, String.format("No exchange rate for %s available.", pair.getDisplayText())));
         }
 

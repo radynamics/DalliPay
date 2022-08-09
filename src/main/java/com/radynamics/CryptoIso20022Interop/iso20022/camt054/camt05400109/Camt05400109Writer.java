@@ -196,10 +196,10 @@ public class Camt05400109Writer implements Camt054Writer {
     private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {
         var amtLedgerCcy = new ActiveOrHistoricCurrencyAndAmount();
         amtLedgerCcy.setValue(AmountRounder.round(trx.getAmountTransaction(), 4));
-        amtLedgerCcy.setCcy(trx.getLedgerCcy());
+        amtLedgerCcy.setCcy(trx.getLedgerCcy().getCcy());
 
         var ccyXchg = new CurrencyExchange5();
-        ccyXchg.setSrcCcy(trx.getLedgerCcy());
+        ccyXchg.setSrcCcy(trx.getLedgerCcy().getCcy());
         ccyXchg.setTrgtCcy(trx.getFiatCcy());
         ccyXchg.setXchgRate(BigDecimal.valueOf(trx.getExchangeRate().getRate()));
 

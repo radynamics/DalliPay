@@ -122,7 +122,7 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
-            this.ccy = exchangeRate.getPair().getFirst().equals(getLedgerCcy())
+            this.ccy = exchangeRate.getPair().getFirst().equals(getLedgerCcy().getCcy())
                     ? exchangeRate.getPair().getSecond()
                     : exchangeRate.getPair().getFirst();
         }
@@ -152,12 +152,12 @@ public class Payment {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
         if (rate != null) {
             var affectsFiat = rate.getPair().affects(getFiatCcy());
-            var affectsLedger = rate.getPair().affects(getLedgerCcy());
+            var affectsLedger = rate.getPair().affects(getLedgerCcy().getCcy());
             if (!affectsLedger) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getLedgerCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getLedgerCcy().getCcy()));
             }
             if (bothCcyKnown && !affectsFiat) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy().getCcy()));
             }
         }
         this.exchangeRate = rate;
@@ -204,11 +204,7 @@ public class Payment {
         return cryptoTrx;
     }
 
-    public String getLedgerCcy() {
-        return getLedgerCurrency().getCcy();
-    }
-
-    public Currency getLedgerCurrency() {
+    public Currency getLedgerCcy() {
         return cryptoTrx.getCcy();
     }
 
@@ -243,7 +239,7 @@ public class Payment {
         }
 
         var ledgerAmount = BigDecimal.valueOf(cryptoTrx.getAmount());
-        return MoneyFormatter.formatLedger(ledgerAmount, getLedgerCcy());
+        return MoneyFormatter.formatLedger(ledgerAmount, getLedgerCcy().getCcy());
     }
 
     public Throwable getTransmissionError() {
@@ -251,6 +247,6 @@ public class Payment {
     }
 
     public CurrencyPair createCcyPair() {
-        return new CurrencyPair(getLedgerCcy(), getFiatCcy());
+        return new CurrencyPair(getLedgerCcy().getCcy(), getFiatCcy());
     }
 }
