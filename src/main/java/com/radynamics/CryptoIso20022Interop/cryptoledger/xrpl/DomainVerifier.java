@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -24,7 +23,7 @@ public class DomainVerifier {
         try {
             var url = new URL(String.format("https://%s/.well-known/xrp-ledger.toml", domain));
             toml = new Toml().read(url.openStream());
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.info(e.getMessage(), e);
             return false;
         }
