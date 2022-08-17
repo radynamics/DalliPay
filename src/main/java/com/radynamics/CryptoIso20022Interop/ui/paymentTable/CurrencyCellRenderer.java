@@ -1,16 +1,23 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.Iso4217CurrencyCode;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.ui.Consts;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 
 public class CurrencyCellRenderer extends JLabel implements TableCellRenderer {
-    public CurrencyCellRenderer() {
+    private TableColumn objectColumn;
+
+    public CurrencyCellRenderer(TableColumn objectColumn) {
+        this.objectColumn = objectColumn;
+
         setOpaque(true);
         setBorder(new EmptyBorder(0, 3, 0, 0));
     }
@@ -34,7 +41,16 @@ public class CurrencyCellRenderer extends JLabel implements TableCellRenderer {
             return this;
         }
 
-        setToolTipText(String.format("Issued by %s", ccy.getIssuer().getPublicKey()));
+        var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
+
+        var issuerText = ccy.getIssuer().getPublicKey();
+        var walletInfoAggregator = new WalletInfoAggregator(obj.getLedger().getInfoProvider());
+        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getMostImportant(ccy.getIssuer());
+        if (wi != null) {
+            issuerText = String.format("%s (%s)", wi.getValue(), wi.getText());
+        }
+
+        setToolTipText(String.format("Issued by %s", issuerText));
 
         if (Iso4217CurrencyCode.contains(ccy.getCcy())) {
             setForeground(isSelected ? table.getSelectionForeground() : Consts.ColorIssuedFiatCcy);
