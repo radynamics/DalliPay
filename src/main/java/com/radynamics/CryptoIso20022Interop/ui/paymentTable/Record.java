@@ -64,8 +64,11 @@ public class Record {
         amount = value;
     }
 
-    public Object getCcy(Actor actor) {
-        return actor == Actor.Sender ? payment.getFiatCcy() : payment.getLedgerCcy();
+    public Object getCcy() {
+        // When exporting 'As received" return received ccy instance to let user know more about issuer.
+        return payment.getLedgerCcy().getCcy().equals(payment.getFiatCcy())
+                ? payment.getLedgerCcy()
+                : payment.getFiatCcy();
     }
 
     @Override

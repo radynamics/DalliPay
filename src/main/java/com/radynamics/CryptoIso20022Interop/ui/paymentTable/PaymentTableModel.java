@@ -85,7 +85,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             return item.getAmount(actor);
         } else if (getColumnIndex(COL_CCY) == col) {
-            return item.getCcy(actor);
+            return item.getCcy();
         } else if (getColumnIndex(COL_TRX_STATUS) == col) {
             return item.payment.getTransmission();
         } else if (getColumnIndex(COL_DETAIL) == col) {
