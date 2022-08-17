@@ -111,9 +111,31 @@ public class JsonRpcApi implements TransactionSource {
                             final int ccyCodeStandardFormatLength = 3;
                             // trim() needed, due value is always 20 bytes, filled with 0.
                             var ccyCode = issuedCurrencyAmount.currency().length() <= ccyCodeStandardFormatLength ? issuedCurrencyAmount.currency() : Utils.hexToString(issuedCurrencyAmount.currency()).trim();
-                            var ccy = new Currency(ccyCode, ledger.createWallet(issuedCurrencyAmount.issuer().value(), ""));
-                            var amt = issuedCurrencyAmount.value();
-                            tr.add(toTransaction(t, BigDecimal.valueOf(Double.parseDouble(amt)), ccy));
+                            var amt = BigDecimal.valueOf(Double.parseDouble(issuedCurrencyAmount.value()));
+
+                            var issuer = ledger.createWallet(issuedCurrencyAmount.issuer().value(), "");
+                            var ccy = new Currency(ccyCode, issuer);
+                            // When the issuer field of the destination Amount field matches the Destination address, it is treated as a special case meaning "any issuer that the destination accepts." (https://xrpl.org/payment.html)
+                            if (!issuer.getPublicKey().equals((p.destination().value())) || p.sendMax().isEmpty()) {
+                                tr.add(toTransaction(t, amt, ccy));
+                                return;
+                            }
+
+                            p.sendMax().get().handle(xrpCurrencyAmount -> {
+                                        try {
+                                            tr.add(toTransaction(t, amt, ccy));
+                                        } catch (Exception e) {
+                                            log.error(e.getMessage(), e);
+                                        }
+                                    },
+                                    issuedCurrencyAmountSendMax -> {
+                                        var issuerSendMax = ledger.createWallet(issuedCurrencyAmountSendMax.issuer().value(), "");
+                                        try {
+                                            tr.add(toTransaction(t, amt, new Currency(ccyCode, issuerSendMax)));
+                                        } catch (Exception e) {
+                                            log.error(e.getMessage(), e);
+                                        }
+                                    });
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                         }
