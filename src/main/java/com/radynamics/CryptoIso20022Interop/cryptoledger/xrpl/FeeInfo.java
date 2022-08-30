@@ -27,7 +27,7 @@ public class FeeInfo {
         var highValue = Math.round(Long.max(median, openLedger)) * loadFactor;
         var high = Long.min(Math.round(highValue), 100000);
 
-        return new FeeSuggestion(low, medium, high);
+        return new FeeSuggestion(Ledger.dropsToXrp(low), Ledger.dropsToXrp(medium), Ledger.dropsToXrp(high));
     }
 
     @Override

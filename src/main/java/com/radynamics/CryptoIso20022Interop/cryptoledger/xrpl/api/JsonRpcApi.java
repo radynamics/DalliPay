@@ -367,7 +367,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         previousLastLedgerSequence = lastLedgerSequence;
 
-        var fee = XrpCurrencyAmount.ofDrops(t.getFeeSmallestUnit());
+        var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getFee().getNumber().doubleValue()));
 
         // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
         var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, fee, memos);

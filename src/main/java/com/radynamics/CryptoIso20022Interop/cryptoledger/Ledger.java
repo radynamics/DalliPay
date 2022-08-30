@@ -4,7 +4,6 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import okhttp3.HttpUrl;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 public interface Ledger {
@@ -15,8 +14,6 @@ public interface Ledger {
     Transaction createTransaction();
 
     void send(Transaction[] transactions) throws Exception;
-
-    BigDecimal convertToNativeCcyAmount(long amountSmallestUnit);
 
     FeeSuggestion getFeeSuggestion();
 

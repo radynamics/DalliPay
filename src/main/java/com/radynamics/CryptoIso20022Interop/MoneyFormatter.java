@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.MoneySums;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 
 import java.math.BigDecimal;
@@ -11,7 +13,11 @@ public class MoneyFormatter {
     }
 
     public static String formatLedger(BigDecimal amount, String ccy) {
-        return String.format("%s %s", Utils.createFormatLedger().format(amount), ccy);
+        return formatLedger(Money.of(amount, new Currency(ccy)));
+    }
+
+    public static String formatLedger(Money amount) {
+        return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCcy());
     }
 
     public static String formatFiat(BigDecimal amount, String ccy) {

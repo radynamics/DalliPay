@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.util.HashMap;
@@ -15,13 +16,13 @@ public class FeeRefresher {
     public void refresh() {
         var latestFees = getFeeSuggestions();
         for (var p : payments) {
-            p.setFeeSmallestUnit(latestFees.get(createKey(p)).getLow());
+            p.setFee(latestFees.get(createKey(p)).getLow());
         }
     }
 
-    public void refresh(long feeSmallestUnit) {
+    public void refresh(Money fee) {
         for (var p : payments) {
-            p.setFeeSmallestUnit(feeSmallestUnit);
+            p.setFee(fee);
         }
     }
 

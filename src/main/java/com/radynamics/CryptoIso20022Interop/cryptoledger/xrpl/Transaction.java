@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +24,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private String invoiceId;
     private TransmissionState transmission = TransmissionState.Pending;
     private Throwable transmissionError;
-    private long feeDrops;
+    private Money fee;
 
     public Transaction(Ledger ledger, Double amt, Currency ccy) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
@@ -31,6 +32,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
         this.ledger = ledger;
         this.amt = amt;
         this.ccy = ccy;
+        this.fee = Money.zero(new Currency(ledger.getNativeCcySymbol()));
     }
 
     public void addMessage(String message) {
@@ -137,13 +139,16 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public long getFeeSmallestUnit() {
-        return feeDrops;
+    public Money getFee() {
+        return fee;
     }
 
     @Override
-    public void setFeeSmallestUnit(long value) {
-        feeDrops = value;
+    public void setFee(Money value) {
+        if (!value.getCcy().getCcy().equals(ledger.getNativeCcySymbol())) {
+            throw new IllegalArgumentException(String.format("Currency of fee must be %s", ledger.getNativeCcySymbol()));
+        }
+        fee = value;
     }
 
     public void setSender(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet sender) {
@@ -161,9 +166,5 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     public void refreshTransmission(Throwable t) {
         this.transmissionError = t;
         this.transmission = StringUtils.isAllEmpty(getId()) ? TransmissionState.Error : TransmissionState.Success;
-    }
-
-    public void setFeeDrops(long feeDrops) {
-        this.feeDrops = feeDrops;
     }
 }

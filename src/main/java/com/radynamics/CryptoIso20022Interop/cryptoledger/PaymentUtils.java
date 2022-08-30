@@ -1,9 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.math.BigDecimal;
@@ -56,7 +55,7 @@ public class PaymentUtils {
         var sum = new MoneySums();
         for (var p : payments) {
             sum.plus(p.getAmountTransaction(), p.getLedgerCcy().getCcy());
-            sum.plus(p.getLedger().convertToNativeCcyAmount(p.getFeeSmallestUnit()).doubleValue(), p.getLedgerCcy().getCcy());
+            sum.plus(p.getFee().getNumber().doubleValue(), p.getFee().getCcy().getCcy());
         }
         return sum;
     }
@@ -88,12 +87,12 @@ public class PaymentUtils {
         var fiatCcy = payments[0].getFiatCcy();
         for (var fee : fees.entrySet()) {
             var l = fee.getKey();
-            var amt = l.convertToNativeCcyAmount(fee.getValue());
+            var amt = fee.getValue();
 
             var r = ExchangeRate.getOrNull(provider.latestRates(), new CurrencyPair(l.getNativeCcySymbol(), fiatCcy));
-            fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.doubleValue() * r.getRate();
+            fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.getNumber().doubleValue() * r.getRate();
 
-            sb.append(MoneyFormatter.formatLedger(amt, l.getNativeCcySymbol()));
+            sb.append(MoneyFormatter.formatLedger(amt));
             if (i + 1 < fees.size()) {
                 sb.append(", ");
             }
@@ -105,13 +104,13 @@ public class PaymentUtils {
                 : String.format("%s (%s)", MoneyFormatter.formatFiat(BigDecimal.valueOf(fiatSum), fiatCcy), sb);
     }
 
-    public static Map<Ledger, Long> totalFees(Payment[] payments) {
-        var map = new HashMap<Ledger, Long>();
+    public static Map<Ledger, Money> totalFees(Payment[] payments) {
+        var map = new HashMap<Ledger, Money>();
         for (var p : payments) {
             if (!map.containsKey(p.getLedger())) {
-                map.put(p.getLedger(), 0L);
+                map.put(p.getLedger(), Money.zero(new Currency(p.getLedger().getNativeCcySymbol())));
             }
-            map.put(p.getLedger(), map.get(p.getLedger()) + p.getFeeSmallestUnit());
+            map.put(p.getLedger(), map.get(p.getLedger()).add(p.getFee()));
         }
         return map;
     }

@@ -5,10 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.math.BigDecimal;
@@ -224,12 +221,12 @@ public class Payment {
         return exchangeRate;
     }
 
-    public long getFeeSmallestUnit() {
-        return cryptoTrx.getFeeSmallestUnit();
+    public Money getFee() {
+        return cryptoTrx.getFee();
     }
 
-    public void setFeeSmallestUnit(long value) {
-        cryptoTrx.setFeeSmallestUnit(value);
+    public void setFee(Money value) {
+        cryptoTrx.setFee(value);
     }
 
     public String getDisplayText() {

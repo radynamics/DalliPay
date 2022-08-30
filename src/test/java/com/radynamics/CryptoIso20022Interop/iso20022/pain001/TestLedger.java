@@ -3,17 +3,20 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
     private WalletInfoProvider[] walletInfoProvider = new WalletInfoProvider[0];
     private NetworkInfo network;
+
+    private static final String nativeCcySymbol = "TEST";
 
     @Override
     public LedgerId getId() {
@@ -22,7 +25,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public String getNativeCcySymbol() {
-        return "TEST";
+        return nativeCcySymbol;
     }
 
     @Override
@@ -35,14 +38,13 @@ public class TestLedger implements Ledger {
         throw new NotImplementedException();
     }
 
-    @Override
-    public BigDecimal convertToNativeCcyAmount(long amountSmallestUnit) {
-        return BigDecimal.valueOf(amountSmallestUnit / FACTOR);
+    static Money convertToNativeCcyAmount(long amountSmallestUnit) {
+        return Money.of(amountSmallestUnit / FACTOR, new Currency(nativeCcySymbol));
     }
 
     @Override
     public FeeSuggestion getFeeSuggestion() {
-        return new FeeSuggestion(5, 10, 15);
+        return new FeeSuggestion(convertToNativeCcyAmount(5), convertToNativeCcyAmount(10), convertToNativeCcyAmount(15));
     }
 
     @Override

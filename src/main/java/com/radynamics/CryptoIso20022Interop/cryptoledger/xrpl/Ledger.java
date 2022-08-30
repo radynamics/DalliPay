@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -15,13 +16,14 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
+
+    private static final String nativeCcySymbol = "XRP";
 
     public Ledger() {
         walletInfoProvider = new WalletInfoProvider[]{
@@ -36,7 +38,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public String getNativeCcySymbol() {
-        return "XRP";
+        return nativeCcySymbol;
     }
 
     @Override
@@ -50,16 +52,15 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         api.send(transactions);
     }
 
-    @Override
-    public BigDecimal convertToNativeCcyAmount(long amountSmallestUnit) {
-        return XrpCurrencyAmount.ofDrops(amountSmallestUnit).toXrp();
+    static Money dropsToXrp(long drops) {
+        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp(), new Currency(nativeCcySymbol));
     }
 
     @Override
     public FeeSuggestion getFeeSuggestion() {
         var api = new JsonRpcApi(this, network);
         var fees = api.latestFee();
-        return fees == null ? FeeSuggestion.None() : fees.createSuggestion();
+        return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
     }
 
     @Override

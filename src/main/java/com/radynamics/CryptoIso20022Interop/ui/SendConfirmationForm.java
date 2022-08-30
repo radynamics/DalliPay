@@ -4,15 +4,14 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executors;
@@ -252,11 +251,11 @@ public class SendConfirmationForm extends JDialog {
     private void showFeeEdit() {
         var ledger = PaymentUtils.distinctLedgers(payments);
         for (var l : ledger) {
-            showFeeEdit(l, payments.length == 0 ? null : payments[0].getFeeSmallestUnit());
+            showFeeEdit(l, payments.length == 0 ? null : payments[0].getFee());
         }
     }
 
-    private void showFeeEdit(Ledger l, Long currentFee) {
+    private void showFeeEdit(Ledger l, Money currentFee) {
         var fees = l.getFeeSuggestion();
 
         var pnl = new JPanel();
@@ -273,13 +272,13 @@ public class SendConfirmationForm extends JDialog {
         var rdoHigh = new JRadioButton("High");
         group.add(rdoHigh);
 
-        rdoLow.setSelected(currentFee == null || fees.getLow() == currentFee);
-        rdoMedium.setSelected(fees.getMedium() == currentFee);
-        rdoHigh.setSelected(fees.getHigh() == currentFee);
+        rdoLow.setSelected(currentFee == null || fees.getLow().equals(currentFee));
+        rdoMedium.setSelected(fees.getMedium().equals(currentFee));
+        rdoHigh.setSelected(fees.getHigh().equals(currentFee));
 
-        pnl.add(createFeeRow(l, rdoLow, fees.getLow()));
-        pnl.add(createFeeRow(l, rdoMedium, fees.getMedium()));
-        pnl.add(createFeeRow(l, rdoHigh, fees.getHigh()));
+        pnl.add(createFeeRow(rdoLow, fees.getLow()));
+        pnl.add(createFeeRow(rdoMedium, fees.getMedium()));
+        pnl.add(createFeeRow(rdoHigh, fees.getHigh()));
 
         var optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
@@ -310,7 +309,7 @@ public class SendConfirmationForm extends JDialog {
         refreshTotalFee();
     }
 
-    private Component createFeeRow(Ledger l, JRadioButton rdo, long fee) {
+    private Component createFeeRow(JRadioButton rdo, Money fee) {
         var pnl = new JPanel();
         var layout = new SpringLayout();
         pnl.setLayout(layout);
@@ -318,15 +317,11 @@ public class SendConfirmationForm extends JDialog {
         pnl.add(rdo);
         layout.putConstraint(SpringLayout.WEST, rdo, 0, SpringLayout.WEST, pnl);
 
-        var lblFee = new JLabel(formatLedgerAmount(l, fee));
+        var lblFee = new JLabel(MoneyFormatter.formatLedger(fee));
         pnl.add(lblFee);
         layout.putConstraint(SpringLayout.EAST, lblFee, 0, SpringLayout.EAST, pnl);
 
         return pnl;
-    }
-
-    private String formatLedgerAmount(Ledger l, Long amtSmallestUnit) {
-        return MoneyFormatter.formatLedger(l.convertToNativeCcyAmount(amtSmallestUnit), l.getNativeCcySymbol());
     }
 
     private void startTimeoutCountdown() {

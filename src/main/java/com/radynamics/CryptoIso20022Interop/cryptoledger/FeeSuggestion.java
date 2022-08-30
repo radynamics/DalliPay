@@ -1,29 +1,33 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-public class FeeSuggestion {
-    private long low;
-    private long medium;
-    private long high;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 
-    public FeeSuggestion(long low, long medium, long high) {
+public class FeeSuggestion {
+    private Money low;
+    private Money medium;
+    private Money high;
+
+    public FeeSuggestion(Money low, Money medium, Money high) {
         this.low = low;
         this.medium = medium;
         this.high = high;
     }
 
-    public static FeeSuggestion None() {
-        return new FeeSuggestion(0, 0, 0);
+    public static FeeSuggestion None(String ccy) {
+        var zero = Money.of(0, new Currency(ccy));
+        return new FeeSuggestion(zero, zero, zero);
     }
 
-    public long getLow() {
+    public Money getLow() {
         return low;
     }
 
-    public long getMedium() {
+    public Money getMedium() {
         return medium;
     }
 
-    public long getHigh() {
+    public Money getHigh() {
         return high;
     }
 

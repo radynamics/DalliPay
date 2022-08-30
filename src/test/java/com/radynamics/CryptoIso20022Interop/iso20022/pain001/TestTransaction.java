@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.ZonedDateTime;
@@ -20,13 +21,14 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
     private Ledger ledger;
-    private long fee = 10;
+    private Money fee;
 
     public TestTransaction(Ledger ledger, Double amt, String ccy) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
         this.amt = amt;
         this.ccy = new Currency(ccy);
+        this.fee = TestLedger.convertToNativeCcyAmount(10);
     }
 
     public void addMessage(String message) {
@@ -128,12 +130,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public long getFeeSmallestUnit() {
+    public Money getFee() {
         return fee;
     }
 
     @Override
-    public void setFeeSmallestUnit(long value) {
+    public void setFee(Money value) {
         fee = value;
     }
 
