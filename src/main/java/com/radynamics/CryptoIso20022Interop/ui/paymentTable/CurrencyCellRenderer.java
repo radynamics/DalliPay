@@ -32,7 +32,7 @@ public class CurrencyCellRenderer extends JLabel implements TableCellRenderer {
         }
 
         var ccy = (Currency) value;
-        setText(ccy.getCcy());
+        setText(ccy.getCode());
 
         var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
 

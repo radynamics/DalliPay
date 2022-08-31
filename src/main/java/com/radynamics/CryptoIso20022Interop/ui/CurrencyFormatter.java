@@ -28,7 +28,7 @@ public class CurrencyFormatter {
 
         lbl.setToolTipText(String.format("Issued by %s", issuerText));
 
-        if (Iso4217CurrencyCode.contains(ccy.getCcy())) {
+        if (Iso4217CurrencyCode.contains(ccy.getCode())) {
             lbl.setForeground(Consts.ColorIssuedFiatCcy);
         }
     }

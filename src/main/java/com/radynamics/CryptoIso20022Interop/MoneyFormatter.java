@@ -17,7 +17,7 @@ public class MoneyFormatter {
     }
 
     public static String formatLedger(Money amount) {
-        return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCcy());
+        return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCode());
     }
 
     public static String formatFiat(BigDecimal amount, String ccy) {

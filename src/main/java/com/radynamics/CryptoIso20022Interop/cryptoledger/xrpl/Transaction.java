@@ -137,7 +137,7 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
 
     @Override
     public void setFee(Money value) {
-        if (!value.getCcy().getCcy().equals(ledger.getNativeCcySymbol())) {
+        if (!value.getCcy().getCode().equals(ledger.getNativeCcySymbol())) {
             throw new IllegalArgumentException(String.format("Currency of fee must be %s", ledger.getNativeCcySymbol()));
         }
         fee = value;

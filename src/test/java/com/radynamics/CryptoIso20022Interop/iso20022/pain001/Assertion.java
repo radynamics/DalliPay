@@ -30,7 +30,7 @@ public class Assertion {
         assertEqualsWallet(t, senderWallet, receiverWallet);
         Assert.assertEquals(amount, t.getAmountTransaction().getNumber().doubleValue(), 0);
         Assert.assertNotNull(t.getAmountTransaction().getCcy());
-        Assert.assertEquals("TEST", t.getAmountTransaction().getCcy().getCcy());
+        Assert.assertEquals("TEST", t.getAmountTransaction().getCcy().getCode());
         assertNotNull(t.getReceiverAccount());
         Assert.assertEquals(receiverAccount, t.getReceiverAccount().getUnformatted());
         assertNull(t.getId());
@@ -82,7 +82,7 @@ public class Assertion {
         Assert.assertEquals(ccy, transaction.getFiatCcy());
         Assert.assertEquals(amtLedgerUnit, transaction.getAmountTransaction().getNumber());
         Assert.assertNotNull(transaction.getAmountTransaction().getCcy());
-        Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCcy());
+        Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCode());
     }
 
     public static void assertEquals(Payment transaction, ExchangeRate expected) {

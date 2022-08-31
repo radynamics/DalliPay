@@ -66,7 +66,7 @@ public class Record {
 
     public Object getCcy() {
         // When exporting 'As received" return received ccy instance to let user know more about issuer.
-        return payment.getAmountTransaction().getCcy().getCcy().equals(payment.getFiatCcy())
+        return payment.getAmountTransaction().getCcy().getCode().equals(payment.getFiatCcy())
                 ? payment.getAmountTransaction().getCcy()
                 : payment.getFiatCcy();
     }

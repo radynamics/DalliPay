@@ -122,7 +122,7 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
-            this.ccy = exchangeRate.getPair().getFirst().equals(getAmountTransaction().getCcy().getCcy())
+            this.ccy = exchangeRate.getPair().getFirst().equals(getAmountTransaction().getCcy().getCode())
                     ? exchangeRate.getPair().getSecond()
                     : exchangeRate.getPair().getFirst();
         }
@@ -152,12 +152,12 @@ public class Payment {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
         if (rate != null) {
             var affectsFiat = rate.getPair().affects(getFiatCcy());
-            var affectsLedger = rate.getPair().affects(getAmountTransaction().getCcy().getCcy());
+            var affectsLedger = rate.getPair().affects(getAmountTransaction().getCcy().getCode());
             if (!affectsLedger) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getAmountTransaction().getCcy().getCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getAmountTransaction().getCcy().getCode()));
             }
             if (bothCcyKnown && !affectsFiat) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getAmountTransaction().getCcy().getCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getAmountTransaction().getCcy().getCode()));
             }
         }
         this.exchangeRate = rate;
@@ -242,6 +242,6 @@ public class Payment {
     }
 
     public CurrencyPair createCcyPair() {
-        return new CurrencyPair(getAmountTransaction().getCcy().getCcy(), getFiatCcy());
+        return new CurrencyPair(getAmountTransaction().getCcy().getCode(), getFiatCcy());
     }
 }
