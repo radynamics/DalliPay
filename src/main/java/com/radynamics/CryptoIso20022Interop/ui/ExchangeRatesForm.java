@@ -5,11 +5,9 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
@@ -223,9 +221,15 @@ public class ExchangeRatesForm extends JDialog {
         selectedExchange.load();
         for (var i = 0; i < rates.length; i++) {
             var pair = rates[i].getPair();
-            var exchangeRates = selectedExchange.supportsRateAt()
-                    ? new ExchangeRate[]{selectedExchange.rateAt(pair, pointInTime)}
-                    : selectedExchange.latestRates();
+            var exchangeRates = new ExchangeRate[0];
+            if (selectedExchange.supportsRateAt()) {
+                var rate = selectedExchange.rateAt(pair, pointInTime);
+                if (rate != null) {
+                    exchangeRates = new ExchangeRate[]{rate};
+                }
+            } else {
+                exchangeRates = selectedExchange.latestRates();
+            }
             var r = ExchangeRate.getOrNull(exchangeRates, pair);
             if (r != null) {
                 txts.get(i).setText(String.valueOf(r.getRate()));

@@ -78,6 +78,11 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
         var targetCcy = pair.getFirst().equals("XRP") ? pair.getSecond() : pair.getFirst();
         var issuedCcy = issuedCurrencies.get(targetCcy);
+        // Null when no oracle configuration is present for a given currency.
+        if (issuedCcy == null) {
+            return null;
+        }
+
         Transaction[] transactions = new Transaction[0];
         try {
             transactions = ledger.listTrustlineTransactions(issuedCcy.getReceiver(), period, issuedCcy.getIssuer(), targetCcy);
