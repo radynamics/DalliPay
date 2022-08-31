@@ -25,12 +25,12 @@ public class Money {
         return Money.of(0, ccy);
     }
 
-    public Money add(Money fee) {
-        if (fee == null) throw new IllegalArgumentException("Parameter 'fee' cannot be null");
-        if (!fee.getCcy().equals(getCcy())) {
-            throw new IllegalArgumentException(String.format("Currencies %s and %s must be equal", fee.getCcy(), getCcy()));
+    public Money plus(Money value) {
+        if (value == null) throw new IllegalArgumentException("Parameter 'fee' cannot be null");
+        if (!value.getCcy().equals(getCcy())) {
+            throw new IllegalArgumentException(String.format("Currencies %s and %s must be equal", value.getCcy(), getCcy()));
         }
-        return Money.of(getNumber().doubleValue() + fee.getNumber().doubleValue(), getCcy());
+        return Money.of(getNumber().doubleValue() + value.getNumber().doubleValue(), getCcy());
     }
 
     @Override

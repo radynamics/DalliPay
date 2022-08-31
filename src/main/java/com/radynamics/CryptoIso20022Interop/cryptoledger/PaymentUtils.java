@@ -110,7 +110,7 @@ public class PaymentUtils {
             if (!map.containsKey(p.getLedger())) {
                 map.put(p.getLedger(), Money.zero(new Currency(p.getLedger().getNativeCcySymbol())));
             }
-            map.put(p.getLedger(), map.get(p.getLedger()).add(p.getFee()));
+            map.put(p.getLedger(), map.get(p.getLedger()).plus(p.getFee()));
         }
         return map;
     }
