@@ -38,7 +38,7 @@ public class TransactionTranslator {
             var targetCcy = getTargetCcy(t);
             if (t.getLedgerCcy().getCcy().equalsIgnoreCase(targetCcy)) {
                 if (t.isAmountUnknown()) {
-                    t.setAmount(BigDecimal.valueOf(t.getAmountTransaction()), t.getLedgerCcy().getCcy());
+                    t.setAmount(BigDecimal.valueOf(t.getAmountTransaction().getNumber().doubleValue()), t.getLedgerCcy().getCcy());
                     t.setExchangeRate(ExchangeRate.None(t.getLedgerCcy().getCcy()));
                 } else {
                     t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));

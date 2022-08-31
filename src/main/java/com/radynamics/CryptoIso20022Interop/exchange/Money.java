@@ -26,11 +26,24 @@ public class Money {
     }
 
     public Money plus(Money value) {
-        if (value == null) throw new IllegalArgumentException("Parameter 'fee' cannot be null");
+        assertSameCcy(value);
+        return Money.of(getNumber().doubleValue() + value.getNumber().doubleValue(), getCcy());
+    }
+
+    public Money minus(Money value) {
+        assertSameCcy(value);
+        return Money.of(getNumber().doubleValue() - value.getNumber().doubleValue(), getCcy());
+    }
+
+    public Money multiply(Double value) {
+        return Money.of(getNumber().doubleValue() * value, getCcy());
+    }
+
+    private void assertSameCcy(Money value) {
+        if (value == null) throw new IllegalArgumentException("Parameter 'value' cannot be null");
         if (!value.getCcy().equals(getCcy())) {
             throw new IllegalArgumentException(String.format("Currencies %s and %s must be equal", value.getCcy(), getCcy()));
         }
-        return Money.of(getNumber().doubleValue() + value.getNumber().doubleValue(), getCcy());
     }
 
     @Override

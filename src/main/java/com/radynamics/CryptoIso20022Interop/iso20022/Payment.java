@@ -115,7 +115,7 @@ public class Payment {
             return;
         }
 
-        var amt = BigDecimal.valueOf(getAmountTransaction());
+        var amt = BigDecimal.valueOf(getAmountTransaction().getNumber().doubleValue());
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
@@ -169,9 +169,8 @@ public class Payment {
         }
     }
 
-    @Deprecated
-    public Double getAmountTransaction() {
-        return cryptoTrx.getAmount().getNumber().doubleValue();
+    public Money getAmountTransaction() {
+        return cryptoTrx.getAmount();
     }
 
     public String getId() {

@@ -197,7 +197,7 @@ public class PaymentDetailForm extends JDialog {
         var ccyFormatter = new CurrencyFormatter(payment.getLedger().getInfoProvider());
         ccyFormatter.format(lblAmountText, payment.getLedgerCcy());
 
-        var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction(), payment.getLedgerCcy().getCcy());
+        var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {
             lblLedgerAmount.setText(String.format("%s, missing exchange rate", amtLedgerText));
             return;
