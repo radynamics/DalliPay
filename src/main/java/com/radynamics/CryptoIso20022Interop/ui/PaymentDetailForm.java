@@ -101,11 +101,12 @@ public class PaymentDetailForm extends JDialog {
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
                 {
-                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit..."));
+                    var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit...", enabled));
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                            if (e.getClickCount() == 1) {
+                            if (enabled && e.getClickCount() == 1) {
                                 showExchangeRateEdit();
                             }
                         }

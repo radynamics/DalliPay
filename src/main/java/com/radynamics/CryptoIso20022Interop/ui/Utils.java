@@ -35,8 +35,18 @@ public final class Utils {
     }
 
     public static JLabel createLinkLabel(Window owner, String text) {
+        return createLinkLabel(owner, text, true);
+    }
+
+    public static JLabel createLinkLabel(Window owner, String text, boolean enabled) {
         var lbl = new JLabel(text);
+        lbl.setEnabled(enabled);
         lbl.setForeground(Consts.ColorAccent);
+
+        if (!enabled) {
+            return lbl;
+        }
+
         lbl.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
