@@ -5,7 +5,10 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
-import com.radynamics.CryptoIso20022Interop.exchange.*;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.math.BigDecimal;
@@ -119,7 +122,7 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
-            this.ccy = exchangeRate.getPair().getFirst().equals(getLedgerCcy().getCcy())
+            this.ccy = exchangeRate.getPair().getFirst().equals(getAmountTransaction().getCcy().getCcy())
                     ? exchangeRate.getPair().getSecond()
                     : exchangeRate.getPair().getFirst();
         }
@@ -149,12 +152,12 @@ public class Payment {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
         if (rate != null) {
             var affectsFiat = rate.getPair().affects(getFiatCcy());
-            var affectsLedger = rate.getPair().affects(getLedgerCcy().getCcy());
+            var affectsLedger = rate.getPair().affects(getAmountTransaction().getCcy().getCcy());
             if (!affectsLedger) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getLedgerCcy().getCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getAmountTransaction().getCcy().getCcy()));
             }
             if (bothCcyKnown && !affectsFiat) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getLedgerCcy().getCcy()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getAmountTransaction().getCcy().getCcy()));
             }
         }
         this.exchangeRate = rate;
@@ -201,11 +204,6 @@ public class Payment {
         return cryptoTrx;
     }
 
-    @Deprecated
-    public Currency getLedgerCcy() {
-        return cryptoTrx.getAmount().getCcy();
-    }
-
     public Ledger getLedger() {
         return cryptoTrx.getLedger();
     }
@@ -244,6 +242,6 @@ public class Payment {
     }
 
     public CurrencyPair createCcyPair() {
-        return new CurrencyPair(getLedgerCcy().getCcy(), getFiatCcy());
+        return new CurrencyPair(getAmountTransaction().getCcy().getCcy(), getFiatCcy());
     }
 }

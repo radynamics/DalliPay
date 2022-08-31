@@ -195,7 +195,7 @@ public class PaymentDetailForm extends JDialog {
     private void refreshAmountsText() {
         lblAmountText.setText(AmountFormatter.formatAmtWithCcy(payment));
         var ccyFormatter = new CurrencyFormatter(payment.getLedger().getInfoProvider());
-        ccyFormatter.format(lblAmountText, payment.getLedgerCcy());
+        ccyFormatter.format(lblAmountText, payment.getAmountTransaction().getCcy());
 
         var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {

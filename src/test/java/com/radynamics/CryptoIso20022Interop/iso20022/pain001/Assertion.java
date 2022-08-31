@@ -29,8 +29,8 @@ public class Assertion {
     static void assertEquals(Payment t, String senderWallet, String receiverAccount, String receiverWallet, double amount, ReferenceType type, String referenceUnformatted) {
         assertEqualsWallet(t, senderWallet, receiverWallet);
         Assert.assertEquals(amount, t.getAmountTransaction().getNumber().doubleValue(), 0);
-        Assert.assertNotNull(t.getLedgerCcy());
-        Assert.assertEquals("TEST", t.getLedgerCcy().getCcy());
+        Assert.assertNotNull(t.getAmountTransaction().getCcy());
+        Assert.assertEquals("TEST", t.getAmountTransaction().getCcy().getCcy());
         assertNotNull(t.getReceiverAccount());
         Assert.assertEquals(receiverAccount, t.getReceiverAccount().getUnformatted());
         assertNull(t.getId());
@@ -81,8 +81,8 @@ public class Assertion {
         Assert.assertEquals(amt, transaction.getAmount());
         Assert.assertEquals(ccy, transaction.getFiatCcy());
         Assert.assertEquals(amtLedgerUnit, transaction.getAmountTransaction().getNumber());
-        Assert.assertNotNull(transaction.getLedgerCcy());
-        Assert.assertEquals(ledgerCcy, transaction.getLedgerCcy().getCcy());
+        Assert.assertNotNull(transaction.getAmountTransaction().getCcy());
+        Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCcy());
     }
 
     public static void assertEquals(Payment transaction, ExchangeRate expected) {
