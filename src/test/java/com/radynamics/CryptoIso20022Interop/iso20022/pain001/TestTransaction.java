@@ -12,8 +12,7 @@ import java.util.ArrayList;
 
 public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
-    private Double amt;
-    private Currency ccy;
+    private Money amt;
     private ZonedDateTime booked;
     private Wallet senderWallet;
     private Wallet receiverWallet;
@@ -26,8 +25,7 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     public TestTransaction(Ledger ledger, Double amt, String ccy) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
-        this.amt = amt;
-        this.ccy = new Currency(ccy);
+        this.amt = Money.of(amt, new Currency(ccy));
         this.fee = TestLedger.convertToNativeCcyAmount(10);
     }
 
@@ -36,18 +34,13 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public void setAmount(Double value) {
+    public void setAmount(Money value) {
         amt = value;
     }
 
     @Override
-    public Double getAmount() {
+    public Money getAmount() {
         return amt;
-    }
-
-    @Override
-    public Currency getCcy() {
-        return ccy;
     }
 
     @Override

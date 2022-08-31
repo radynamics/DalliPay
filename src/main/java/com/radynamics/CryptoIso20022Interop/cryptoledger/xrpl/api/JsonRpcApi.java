@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
@@ -270,7 +271,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
-        var trx = new Transaction(ledger, amt.doubleValue(), ccy);
+        var trx = new Transaction(ledger, Money.of(amt.doubleValue(), ccy));
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
         trx.setSender(WalletConverter.from(t.account()));
@@ -345,7 +346,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
-        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmount()));
+        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmount().getNumber().doubleValue()));
 
         var memos = new ArrayList<MemoWrapper>();
         memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));

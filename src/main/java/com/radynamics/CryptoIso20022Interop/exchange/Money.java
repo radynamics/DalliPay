@@ -17,6 +17,10 @@ public class Money {
         return new Money(number, ccy);
     }
 
+    public static Money zero(Money value) {
+        return zero(value.getCcy());
+    }
+
     public static Money zero(Currency ccy) {
         return Money.of(0, ccy);
     }

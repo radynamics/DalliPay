@@ -3,8 +3,10 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.DemoExchange;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
@@ -64,7 +66,7 @@ public class TestFactory {
         var t = new TestTransaction(ledger, amt, ccy);
         t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
-        t.setAmount(amt);
+        t.setAmount(Money.of(amt, new Currency(ccy)));
         t.setId("E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
         t.setInvoiceId("RG-00123.45");
@@ -76,7 +78,7 @@ public class TestFactory {
         var t = ledger.createTransaction();
         t.setSenderWallet(ledger.createWallet("rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4", null));
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
-        t.setAmount(50.00);
+        t.setAmount(Money.of(50.00, t.getAmount().getCcy()));
         t.setId("57237F065509B36FB3B31DA771B6AFBBF943E3D3E9D64A3548A6C52BD7CE9415");
         t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.SwissQrBill, "210000000003139471430009017"));
@@ -88,7 +90,7 @@ public class TestFactory {
         var t = ledger.createTransaction();
         t.setSenderWallet(ledger.createWallet("rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4", null));
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
-        t.setAmount(391.00);
+        t.setAmount(Money.of(391.00, t.getAmount().getCcy()));
         t.setId("4CA4105CBC1288D9C3FB5140C61097B247523AB86192C87B89121F4877351DD9");
         t.setBooked(LocalDateTime.of(2021, 12, 28, 11, 15, 11).atZone(ZoneId.systemDefault()));
         t.addStructuredReference(StructuredReferenceFactory.create(ReferenceType.Scor, "RF712348231"));

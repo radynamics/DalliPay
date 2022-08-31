@@ -14,8 +14,7 @@ import java.util.ArrayList;
 public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
     private Ledger ledger;
-    private Double amt;
-    private Currency ccy;
+    private Money amt;
     private ZonedDateTime booked;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet senderWallet;
     private com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet receiverWallet;
@@ -26,12 +25,10 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     private Throwable transmissionError;
     private Money fee;
 
-    public Transaction(Ledger ledger, Double amt, Currency ccy) {
+    public Transaction(Ledger ledger, Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
-        if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
         this.ledger = ledger;
         this.amt = amt;
-        this.ccy = ccy;
         this.fee = Money.zero(new Currency(ledger.getNativeCcySymbol()));
     }
 
@@ -40,18 +37,13 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public void setAmount(Double value) {
+    public void setAmount(Money value) {
         amt = value;
     }
 
     @Override
-    public Double getAmount() {
+    public Money getAmount() {
         return amt;
-    }
-
-    @Override
-    public Currency getCcy() {
-        return ccy;
     }
 
     @Override

@@ -1,18 +1,15 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.time.ZonedDateTime;
 
 public interface Transaction {
-    void setAmount(Double value);
+    void setAmount(Money value);
 
-    Double getAmount();
-
-    Currency getCcy();
+    Money getAmount();
 
     ZonedDateTime getBooked();
 

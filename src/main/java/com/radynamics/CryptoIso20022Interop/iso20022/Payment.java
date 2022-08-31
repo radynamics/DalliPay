@@ -96,11 +96,11 @@ public class Payment {
 
     private void refreshTransactionAmount() {
         if (exchangeRate == null) {
-            cryptoTrx.setAmount(0d);
+            cryptoTrx.setAmount(Money.zero(cryptoTrx.getAmount()));
         } else {
             var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
             var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
-            cryptoTrx.setAmount(amt);
+            cryptoTrx.setAmount(Money.of(amt, cryptoTrx.getAmount().getCcy()));
         }
     }
 
@@ -169,8 +169,9 @@ public class Payment {
         }
     }
 
+    @Deprecated
     public Double getAmountTransaction() {
-        return cryptoTrx.getAmount();
+        return cryptoTrx.getAmount().getNumber().doubleValue();
     }
 
     public String getId() {
@@ -201,8 +202,9 @@ public class Payment {
         return cryptoTrx;
     }
 
+    @Deprecated
     public Currency getLedgerCcy() {
-        return cryptoTrx.getCcy();
+        return cryptoTrx.getAmount().getCcy();
     }
 
     public Ledger getLedger() {
@@ -235,8 +237,7 @@ public class Payment {
             return MoneyFormatter.formatFiat(BigDecimal.valueOf(amount), getFiatCcy());
         }
 
-        var ledgerAmount = BigDecimal.valueOf(cryptoTrx.getAmount());
-        return MoneyFormatter.formatLedger(ledgerAmount, getLedgerCcy().getCcy());
+        return MoneyFormatter.formatLedger(cryptoTrx.getAmount());
     }
 
     public Throwable getTransmissionError() {

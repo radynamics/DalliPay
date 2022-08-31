@@ -43,7 +43,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public Transaction createTransaction() {
-        return new Transaction(this, 0d, new Currency(getNativeCcySymbol()));
+        return new Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
 
     @Override
