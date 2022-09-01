@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -11,10 +12,9 @@ import java.util.Map;
 public class MoneySums {
     private final ArrayList<Pair<String, Double>> amounts = new ArrayList<>();
 
-    public void plus(Double amt, String ccy) {
+    public void plus(Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
-        if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
-        amounts.add(new ImmutablePair<>(ccy, amt));
+        amounts.add(new ImmutablePair<>(amt.getCcy().getCode(), amt.getNumber().doubleValue()));
     }
 
     public Double sum(String ccy) {

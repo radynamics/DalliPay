@@ -54,8 +54,8 @@ public class PaymentUtils {
     public static MoneySums sumLedgerUnit(Collection<Payment> payments) {
         var sum = new MoneySums();
         for (var p : payments) {
-            sum.plus(p.getAmountTransaction().getNumber().doubleValue(), p.getAmountTransaction().getCcy().getCode());
-            sum.plus(p.getFee().getNumber().doubleValue(), p.getFee().getCcy().getCode());
+            sum.plus(p.getAmountTransaction());
+            sum.plus(p.getFee());
         }
         return sum;
     }
