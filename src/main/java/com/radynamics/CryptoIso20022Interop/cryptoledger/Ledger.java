@@ -36,10 +36,6 @@ public interface Ledger {
 
     void setNetwork(NetworkInfo network);
 
-    WalletLookupProvider getLookupProvider();
-
-    TransactionLookupProvider getTransactionLookupProvider();
-
     PaymentHistoryProvider getPaymentHistoryProvider();
 
     WalletInfoProvider[] getInfoProvider();

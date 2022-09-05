@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -230,7 +232,12 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void showLedgerTransaction() {
-        payment.getLedger().getTransactionLookupProvider().open(payment.getId());
+        try {
+            var lp = LookupProviderFactory.createTransactionLookupProvider(payment.getLedger().getId(), payment.getLedger().getNetwork());
+            lp.open(payment.getId());
+        } catch (LookupProviderException ex) {
+            ExceptionDialog.show(this, ex);
+        }
     }
 
     private JScrollPane createTextArea(int rows, String text) {
