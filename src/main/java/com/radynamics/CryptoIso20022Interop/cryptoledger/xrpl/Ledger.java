@@ -126,16 +126,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public WalletLookupProvider getLookupProvider() {
-        return new Bithomp(network.getType());
-    }
-
-    @Override
-    public TransactionLookupProvider getTransactionLookupProvider() {
-        return new Bithomp(network.getType());
-    }
-
-    @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
         return new LedgerPaymentHistoryProvider();
     }

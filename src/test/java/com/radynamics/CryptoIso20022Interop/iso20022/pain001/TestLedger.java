@@ -113,16 +113,6 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public WalletLookupProvider getLookupProvider() {
-        return null;
-    }
-
-    @Override
-    public TransactionLookupProvider getTransactionLookupProvider() {
-        return null;
-    }
-
-    @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
         return null;
     }
