@@ -107,6 +107,10 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("exportFormat", CamtFormatHelper.toKey(value));
     }
 
+    public String getLookupProviderId() throws Exception {
+        return single("lookupProviderId").orElse(null);
+    }
+
     private Optional<String> single(String key) throws Exception {
         var ps = conn.prepareStatement("SELECT value FROM config WHERE key = ?");
         ps.setString(1, key);
