@@ -1,46 +1,44 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
+
+import java.util.ArrayList;
 
 public class MoneyBag {
-    private Hashtable<String, Double> amounts = new Hashtable<>();
+    private ArrayList<Money> amounts = new ArrayList<>();
 
-    public Double get(String ccy) {
-        for (var key : amounts.keySet()) {
-            if (key.equals(ccy)) {
-                return amounts.get(ccy);
+    public Money get(String ccy) {
+        for (var amt : amounts) {
+            if (amt.getCcy().getCode().equals(ccy)) {
+                return amt;
             }
         }
-        return 0d;
+        return Money.zero(new Currency(ccy));
     }
 
     public boolean isEmpty() {
         return amounts.isEmpty();
     }
 
-    public void set(Double amt, String ccy) {
-        amounts.put(ccy, amt);
+    public void set(Money amt) {
+        amounts.removeIf(o -> o.getCcy().equals(amt.getCcy()));
+        amounts.add(amt);
     }
-
 
     public void replaceBy(MoneyBag bag) {
         amounts = bag.amounts;
     }
 
-    public Map<String, Double> all() {
-        return amounts.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    public Money[] all() {
+        return amounts.toArray(new Money[0]);
     }
 
     @Override
     public String toString() {
         var sb = new StringBuilder();
-        for (var key : all().keySet()) {
-            sb.append(String.format("%s %s", amounts.get(key), key));
+        for (var amt : all()) {
+            sb.append(String.format("%s %s", amt.getNumber(), amt.getCcy().getCode()));
         }
         return sb.toString();
     }

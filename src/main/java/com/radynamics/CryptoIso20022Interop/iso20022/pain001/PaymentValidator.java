@@ -71,7 +71,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             Ledger l = affectedPayments.get(0).getLedger();
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
             for (var ccy : sums.currencies()) {
-                var balance = w.getBalances().get(ccy);
+                var balance = w.getBalances().get(ccy).getNumber().doubleValue();
                 var paymentsSum = sums.sum(ccy);
                 if (balance < paymentsSum) {
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum, ccy);
