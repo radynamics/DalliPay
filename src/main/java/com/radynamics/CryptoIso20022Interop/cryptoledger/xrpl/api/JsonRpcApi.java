@@ -141,6 +141,11 @@ public class JsonRpcApi implements TransactionSource {
                 }
             }
 
+            if (pageCounter == 2 && tr.transactions().length == 0) {
+                tr.setHasNoTransactions(true);
+                return tr;
+            }
+
             if (!result.marker().isPresent()) {
                 tr.setHasMarker(false);
                 return tr;

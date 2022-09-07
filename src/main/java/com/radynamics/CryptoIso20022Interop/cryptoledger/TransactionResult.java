@@ -6,6 +6,7 @@ public class TransactionResult {
     private ArrayList<Transaction> transactions = new ArrayList<>();
     private boolean hasMarker;
     private boolean hasMaxPageCounterReached;
+    private boolean hasNoTransactions;
 
     public void add(Transaction t) {
         transactions.add(t);
@@ -29,5 +30,13 @@ public class TransactionResult {
 
     public boolean hasMaxPageCounterReached() {
         return hasMaxPageCounterReached;
+    }
+
+    public void setHasNoTransactions(boolean value) {
+        hasNoTransactions = value;
+    }
+
+    public boolean hasNoTransactions() {
+        return hasNoTransactions;
     }
 }

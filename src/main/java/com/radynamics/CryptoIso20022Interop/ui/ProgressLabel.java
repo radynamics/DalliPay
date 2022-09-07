@@ -9,9 +9,13 @@ public class ProgressLabel extends JLabel {
         setText("Loading, please wait...");
     }
 
+    public void hideLoading() {
+        setText("");
+    }
+
     public void update(Progress progress) {
         if (progress.isFinished()) {
-            setText("");
+            hideLoading();
         } else {
             setText(String.format("Loaded %s / %s...", progress.getCount(), progress.getTotal()));
         }
