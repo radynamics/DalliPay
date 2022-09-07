@@ -25,10 +25,7 @@ import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignatureService;
 import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
-import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.AccountInfoResult;
-import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.ImmutableAccountTransactionsRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -299,9 +296,18 @@ public class JsonRpcApi implements TransactionSource {
 
     public void refreshBalance(Wallet wallet) {
         try {
-            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            wallet.getBalances().set(Money.of(result.accountData().balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+            {
+                var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
+                var result = xrplClient.accountInfo(requestParams);
+                wallet.getBalances().set(Money.of(result.accountData().balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+            }
+            {
+                var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
+                var result = xrplClient.accountLines(requestParams);
+                for (var line : result.lines()) {
+                    wallet.getBalances().set(Money.of(Double.parseDouble(line.balance()), new Currency(line.currency(), ledger.createWallet(line.account().value(), ""))));
+                }
+            }
         } catch (JsonRpcClientErrorException e) {
             if (!isAccountNotFound(e)) {
                 log.error(e.getMessage(), e);
