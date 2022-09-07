@@ -407,6 +407,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 showInfo("More data would have been available, but was not loaded. Please change your filter.");
             } else if (result.hasMaxPageCounterReached()) {
                 showInfo("Maximum paging limit reached. Please change your filter.");
+            } else if (result.hasNoTransactions()) {
+                showInfo("No payments found while paging. Please change your filter.");
             } else {
                 hideInfo();
             }
