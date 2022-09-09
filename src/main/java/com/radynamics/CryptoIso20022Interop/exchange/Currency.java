@@ -14,6 +14,7 @@ public class Currency {
 
     public Currency(String ccy, Wallet issuer) {
         if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
+        if (ccy.length() == 0) throw new IllegalArgumentException("Parameter 'ccy' cannot be empty");
         this.code = ccy;
         this.issuer = issuer;
     }
