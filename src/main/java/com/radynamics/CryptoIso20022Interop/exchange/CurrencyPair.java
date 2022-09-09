@@ -1,32 +1,34 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
 public class CurrencyPair {
-    private String first;
-    private String second;
+    private Currency first;
+    private Currency second;
 
     public CurrencyPair(String first, String second) {
+        this(new Currency(first), new Currency(second));
+    }
+
+    public CurrencyPair(Currency first, Currency second) {
         if (first == null) throw new IllegalArgumentException("Parameter 'first' cannot be null");
-        if (first.length() == 0) throw new IllegalArgumentException("Parameter 'first' cannot be empty");
         if (second == null) throw new IllegalArgumentException("Parameter 'second' cannot be null");
-        if (second.length() == 0) throw new IllegalArgumentException("Parameter 'second' cannot be empty");
         this.first = first;
         this.second = second;
     }
 
     public String getFirst() {
-        return first;
+        return first.getCode();
     }
 
     public Currency getFirstCcy() {
-        return new Currency(first);
+        return first;
     }
 
     public String getSecond() {
-        return second;
+        return second.getCode();
     }
 
     public Currency getSecondCcy() {
-        return new Currency(second);
+        return second;
     }
 
     public static boolean contains(CurrencyPair[] list, CurrencyPair pair) {
