@@ -16,7 +16,7 @@ public class CurrencyConverter {
     }
 
     public double convert(BigDecimal amount, CurrencyPair pair) {
-        return convert(amount, pair.getFirst(), pair.getSecond());
+        return convert(amount, pair.getFirstCode(), pair.getSecondCode());
     }
 
     public double convert(BigDecimal amount, String sourceCcy, String targetCcy) {
@@ -30,10 +30,10 @@ public class CurrencyConverter {
 
         // TODO: improve rounding (ex. JPY)
         for (var r : rates) {
-            if (r.getPair().getFirst().equalsIgnoreCase(sourceCcy) && r.getPair().getSecond().equalsIgnoreCase(targetCcy)) {
+            if (r.getPair().getFirstCode().equalsIgnoreCase(sourceCcy) && r.getPair().getSecondCode().equalsIgnoreCase(targetCcy)) {
                 return Math.round(amount.doubleValue() * r.getRate() * PRECISION) / PRECISION;
             }
-            if (r.getPair().getFirst().equalsIgnoreCase(targetCcy) && r.getPair().getSecond().equalsIgnoreCase(sourceCcy)) {
+            if (r.getPair().getFirstCode().equalsIgnoreCase(targetCcy) && r.getPair().getSecondCode().equalsIgnoreCase(sourceCcy)) {
                 return Math.round(amount.doubleValue() / r.getRate() * PRECISION) / PRECISION;
             }
         }
@@ -49,8 +49,8 @@ public class CurrencyConverter {
         if (pair == null) throw new IllegalArgumentException("Parameter 'pair' cannot be null");
 
         for (var r : rates) {
-            var matches = r.getPair().getFirst().equalsIgnoreCase(pair.getFirst()) && r.getPair().getSecond().equalsIgnoreCase(pair.getSecond());
-            var matchesInverted = r.getPair().getFirst().equalsIgnoreCase(pair.getSecond()) && r.getPair().getSecond().equalsIgnoreCase(pair.getFirst());
+            var matches = r.getPair().getFirstCode().equalsIgnoreCase(pair.getFirstCode()) && r.getPair().getSecondCode().equalsIgnoreCase(pair.getSecondCode());
+            var matchesInverted = r.getPair().getFirstCode().equalsIgnoreCase(pair.getSecondCode()) && r.getPair().getSecondCode().equalsIgnoreCase(pair.getFirstCode());
             if (matches || matchesInverted) {
                 return r;
             }

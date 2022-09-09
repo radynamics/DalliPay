@@ -118,9 +118,9 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
-            this.ccy = exchangeRate.getPair().getFirstCcy().equals(getAmountTransaction().getCcy())
-                    ? exchangeRate.getPair().getSecondCcy()
-                    : exchangeRate.getPair().getFirstCcy();
+            this.ccy = exchangeRate.getPair().getFirst().equals(getAmountTransaction().getCcy())
+                    ? exchangeRate.getPair().getSecond()
+                    : exchangeRate.getPair().getFirst();
         }
     }
 

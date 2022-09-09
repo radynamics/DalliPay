@@ -15,25 +15,25 @@ public class CurrencyPair {
         this.second = second;
     }
 
-    public String getFirst() {
+    public String getFirstCode() {
         return first.getCode();
     }
 
-    public Currency getFirstCcy() {
+    public Currency getFirst() {
         return first;
     }
 
-    public String getSecond() {
+    public String getSecondCode() {
         return second.getCode();
     }
 
-    public Currency getSecondCcy() {
+    public Currency getSecond() {
         return second;
     }
 
     public static boolean contains(CurrencyPair[] list, CurrencyPair pair) {
         for (var item : list) {
-            if (item.getFirst().equals(pair.getFirst()) && item.getSecond().equals(pair.getSecond())) {
+            if (item.getFirstCode().equals(pair.getFirstCode()) && item.getSecondCode().equals(pair.getSecondCode())) {
                 return true;
             }
         }
@@ -41,24 +41,24 @@ public class CurrencyPair {
     }
 
     public String getDisplayText() {
-        return String.format("%s/%s", getFirst(), getSecond());
+        return String.format("%s/%s", getFirstCode(), getSecondCode());
     }
 
     public boolean affects(String ccy) {
-        return getFirst().equals(ccy) || getSecond().equals(ccy);
+        return getFirstCode().equals(ccy) || getSecondCode().equals(ccy);
     }
 
     public CurrencyPair invert() {
-        return new CurrencyPair(getSecond(), getFirst());
+        return new CurrencyPair(getSecondCode(), getFirstCode());
     }
 
     public boolean sameAs(CurrencyPair other) {
         if (other == null) return false;
-        return getFirst().equals(other.getFirst()) && getSecond().equals(other.getSecond());
+        return getFirstCode().equals(other.getFirstCode()) && getSecondCode().equals(other.getSecondCode());
     }
 
     public boolean isOneToOne() {
-        return getFirst().equals(getSecond());
+        return getFirstCode().equals(getSecondCode());
     }
 
     @Override

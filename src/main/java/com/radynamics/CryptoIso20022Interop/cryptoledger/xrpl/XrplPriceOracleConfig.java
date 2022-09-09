@@ -50,8 +50,8 @@ public class XrplPriceOracleConfig {
         for (var ccy : ccys) {
             var k = new JSONObject();
             ccyPairs.put(k);
-            k.put("first", ccy.getPair().getFirst());
-            k.put("second", ccy.getPair().getSecond());
+            k.put("first", ccy.getPair().getFirstCode());
+            k.put("second", ccy.getPair().getSecondCode());
             k.put("issuer", ccy.getIssuer().getPublicKey());
             k.put("receiver", ccy.getReceiver().getPublicKey());
         }

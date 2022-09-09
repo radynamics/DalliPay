@@ -252,7 +252,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
         var ccys = new ArrayList<String>();
         for (var ic : issuedCurrencies) {
-            ccys.add(ic.getPair().getSecond());
+            ccys.add(ic.getPair().getSecondCode());
         }
 
         cboTargetCcy.removeAllItems();

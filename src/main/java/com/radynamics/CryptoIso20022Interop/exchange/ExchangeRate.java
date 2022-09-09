@@ -24,7 +24,7 @@ public class ExchangeRate {
     }
 
     public static ExchangeRate OneToOne(CurrencyPair pair) {
-        return new ExchangeRate(pair.getFirst(), pair.getSecond(), 1, ZonedDateTime.now());
+        return new ExchangeRate(pair.getFirstCode(), pair.getSecondCode(), 1, ZonedDateTime.now());
     }
 
     public static ExchangeRate Undefined(CurrencyPair pair) {
@@ -46,7 +46,7 @@ public class ExchangeRate {
     }
 
     public boolean isNone() {
-        return getPair().getFirst().equals(getPair().getSecond()) && getRate() == 1;
+        return getPair().getFirstCode().equals(getPair().getSecondCode()) && getRate() == 1;
     }
 
     public CurrencyPair getPair() {

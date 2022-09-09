@@ -91,8 +91,8 @@ public class Assertion {
             Assert.assertNull(actual);
         } else {
             Assert.assertNotNull(actual);
-            Assert.assertEquals(actual.getPair().getFirst(), expected.getPair().getFirst());
-            Assert.assertEquals(actual.getPair().getSecond(), expected.getPair().getSecond());
+            Assert.assertEquals(actual.getPair().getFirstCode(), expected.getPair().getFirstCode());
+            Assert.assertEquals(actual.getPair().getSecondCode(), expected.getPair().getSecondCode());
             Assert.assertEquals(actual.getRate(), expected.getRate(), 0);
             Assert.assertEquals(actual.getPointInTime(), expected.getPointInTime());
         }

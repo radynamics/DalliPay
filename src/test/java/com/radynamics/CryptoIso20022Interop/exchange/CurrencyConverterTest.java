@@ -85,8 +85,8 @@ public class CurrencyConverterTest {
         for (var ccy : new String[]{"TEST", "CHF", "EUR"}) {
             var r = ccyConverter.get(new CurrencyPair(ccy, "TEST"));
             Assertions.assertNotNull(r);
-            Assertions.assertEquals(ccy, r.getPair().getFirst());
-            Assertions.assertEquals("TEST", r.getPair().getSecond());
+            Assertions.assertEquals(ccy, r.getPair().getFirstCode());
+            Assertions.assertEquals("TEST", r.getPair().getSecondCode());
         }
 
         Assertions.assertNull(ccyConverter.get(new CurrencyPair("USD", "TEST")));

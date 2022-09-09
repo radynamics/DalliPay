@@ -58,7 +58,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         var config = new XrplPriceOracleConfig();
         config.load();
         for (var o : config.issuedCurrencies()) {
-            var nonLedgerCcy = o.getPair().getFirst().equals(ledger.getNativeCcySymbol()) ? o.getPair().getSecond() : o.getPair().getFirst();
+            var nonLedgerCcy = o.getPair().getFirstCode().equals(ledger.getNativeCcySymbol()) ? o.getPair().getSecondCode() : o.getPair().getFirstCode();
             issuedCurrencies.put(nonLedgerCcy, o);
         }
     }
@@ -76,7 +76,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     @Override
     public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
         var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
-        var targetCcy = pair.getFirst().equals("XRP") ? pair.getSecond() : pair.getFirst();
+        var targetCcy = pair.getFirstCode().equals("XRP") ? pair.getSecondCode() : pair.getFirstCode();
         var issuedCcy = issuedCurrencies.get(targetCcy);
         // Null when no oracle configuration is present for a given currency.
         if (issuedCcy == null) {

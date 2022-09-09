@@ -14,8 +14,8 @@ public class Record {
 
     public Record(IssuedCurrency o) {
         this();
-        first = o.getPair().getFirst();
-        second = o.getPair().getSecond();
+        first = o.getPair().getFirstCode();
+        second = o.getPair().getSecondCode();
         issuer = o.getIssuer().getPublicKey();
         receiver = o.getReceiver().getPublicKey();
     }

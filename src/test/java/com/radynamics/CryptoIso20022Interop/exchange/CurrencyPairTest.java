@@ -16,12 +16,12 @@ public class CurrencyPairTest {
 
     @Test
     public void getFirst() {
-        Assertions.assertEquals("EUR", new CurrencyPair("EUR", "USD").getFirst());
+        Assertions.assertEquals("EUR", new CurrencyPair("EUR", "USD").getFirstCode());
     }
 
     @Test
     public void getSecond() {
-        Assertions.assertEquals("USD", new CurrencyPair("EUR", "USD").getSecond());
+        Assertions.assertEquals("USD", new CurrencyPair("EUR", "USD").getSecondCode());
     }
 
     @Test
@@ -54,8 +54,8 @@ public class CurrencyPairTest {
     @Test
     public void invert() {
         var inverted = new CurrencyPair("EUR", "USD").invert();
-        Assertions.assertEquals("USD", inverted.getFirst());
-        Assertions.assertEquals("EUR", inverted.getSecond());
+        Assertions.assertEquals("USD", inverted.getFirstCode());
+        Assertions.assertEquals("EUR", inverted.getSecondCode());
     }
 
     @Test
