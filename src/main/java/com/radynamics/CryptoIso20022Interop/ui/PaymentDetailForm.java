@@ -98,7 +98,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
-                lblAmountText = new MoneyLabel(payment.getLedger().getInfoProvider());
+                lblAmountText = new MoneyLabel(this, payment.getLedger());
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
