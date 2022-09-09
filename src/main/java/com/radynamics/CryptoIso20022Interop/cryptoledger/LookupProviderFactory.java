@@ -5,35 +5,35 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrpScan;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 
 public class LookupProviderFactory {
-    public static WalletLookupProvider createWalletLookupProvider(LedgerId ledgerId, NetworkInfo network) throws LookupProviderException {
+    public static WalletLookupProvider createWalletLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
-        switch (ledgerId) {
+        switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(network.getType());
+                    return new Bithomp(ledger.getNetwork().getType());
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(network.getType());
+                    return createXrpScan(ledger.getNetwork().getType());
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
-            default -> throw new IllegalStateException("Unexpected value: " + ledgerId);
+            default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
     }
 
-    public static TransactionLookupProvider createTransactionLookupProvider(LedgerId ledgerId, NetworkInfo network) throws LookupProviderException {
+    public static TransactionLookupProvider createTransactionLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
-        switch (ledgerId) {
+        switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(network.getType());
+                    return new Bithomp(ledger.getNetwork().getType());
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(network.getType());
+                    return createXrpScan(ledger.getNetwork().getType());
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
-            default -> throw new IllegalStateException("Unexpected value: " + ledgerId);
+            default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
     }
 

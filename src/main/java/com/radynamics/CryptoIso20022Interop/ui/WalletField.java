@@ -71,7 +71,7 @@ public class WalletField extends JPanel {
     private void lookup() {
         try {
             var wallet = ledger.createWallet(getText(), "");
-            var lp = LookupProviderFactory.createWalletLookupProvider(wallet.getLedgerId(), ledger.getNetwork());
+            var lp = LookupProviderFactory.createWalletLookupProvider(ledger);
             lp.open(wallet);
         } catch (LookupProviderException ex) {
             ExceptionDialog.show(this, ex);

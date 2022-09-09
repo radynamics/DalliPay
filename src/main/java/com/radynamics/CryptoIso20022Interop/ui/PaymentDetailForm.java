@@ -234,7 +234,7 @@ public class PaymentDetailForm extends JDialog {
 
     private void showLedgerTransaction() {
         try {
-            var lp = LookupProviderFactory.createTransactionLookupProvider(payment.getLedger().getId(), payment.getLedger().getNetwork());
+            var lp = LookupProviderFactory.createTransactionLookupProvider(payment.getLedger());
             lp.open(payment.getId());
         } catch (LookupProviderException ex) {
             ExceptionDialog.show(this, ex);
