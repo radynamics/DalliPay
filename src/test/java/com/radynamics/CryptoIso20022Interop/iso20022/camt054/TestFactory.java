@@ -45,7 +45,7 @@ public class TestFactory {
         list.add(createTransaction1(ledger));
         list.add(createTransaction2(ledger));
         list.add(createTransactionScor(ledger));
-        return PaymentConverter.toPayment(list.toArray(new Transaction[0]), targetCcy);
+        return PaymentConverter.toPayment(list.toArray(new Transaction[0]), new Currency(targetCcy));
     }
 
     public static Payment[] createTransactionsMultiCcy(Ledger ledger, TransformInstruction ti) {
@@ -54,7 +54,7 @@ public class TestFactory {
         list.add(TestFactory.createTransaction1(ledger, 7777.77, "XYZ"));
 
         var t = new TransactionTranslator(ti, new CurrencyConverter(ti.getExchangeRateProvider().latestRates()));
-        final String ccyAsReceived = null;
+        final Currency ccyAsReceived = null;
         return t.apply(PaymentConverter.toPayment(list.toArray(new Transaction[0]), ccyAsReceived));
     }
 

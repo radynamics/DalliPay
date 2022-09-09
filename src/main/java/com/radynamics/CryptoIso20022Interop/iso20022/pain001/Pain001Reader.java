@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
@@ -56,7 +58,7 @@ public class Pain001Reader {
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {
-                    t.setAmount(sourceAmt, sourceCcy);
+                    t.setAmount(Money.of(sourceAmt, new Currency(sourceCcy)));
                 }
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();

@@ -8,8 +8,6 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
-import java.math.BigDecimal;
-
 public class TransactionTranslator {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
@@ -38,7 +36,7 @@ public class TransactionTranslator {
             var targetCcy = getTargetCcy(t);
             if (t.getAmountTransaction().getCcy().getCode().equalsIgnoreCase(targetCcy)) {
                 if (t.isAmountUnknown()) {
-                    t.setAmount(BigDecimal.valueOf(t.getAmountTransaction().getNumber().doubleValue()), t.getAmountTransaction().getCcy().getCode());
+                    t.setAmount(t.getAmountTransaction());
                     t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
                 } else {
                     t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
@@ -50,7 +48,7 @@ public class TransactionTranslator {
                 if (currencyConverter.has(ccyPair)) {
                     t.setExchangeRate(currencyConverter.get(ccyPair));
                 } else {
-                    t.setFiatCcy(ccyPair.getSecond());
+                    t.setUserCcy(ccyPair.getSecondCcy());
                 }
             }
         }

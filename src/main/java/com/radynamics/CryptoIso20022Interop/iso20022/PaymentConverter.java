@@ -1,9 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 
 public final class PaymentConverter {
-    public static Payment[] toPayment(Transaction[] transactions, String targetCcy) {
+    public static Payment[] toPayment(Transaction[] transactions, Currency targetCcy) {
         var items = new Payment[transactions.length];
         for (var i = 0; i < transactions.length; i++) {
             items[i] = toPayment(transactions[i], getTargetCurrency(transactions[i], targetCcy));
@@ -11,9 +12,9 @@ public final class PaymentConverter {
         return items;
     }
 
-    public static Payment toPayment(Transaction t, String targetCcy) {
+    public static Payment toPayment(Transaction t, Currency targetCcy) {
         var p = new Payment(t);
-        p.setFiatCcy(targetCcy);
+        p.setUserCcy(targetCcy);
         return p;
     }
 
@@ -25,7 +26,7 @@ public final class PaymentConverter {
         return items;
     }
 
-    private static String getTargetCurrency(Transaction t, String targetCcySuggested) {
-        return targetCcySuggested == null ? t.getAmount().getCcy().getCode() : targetCcySuggested;
+    private static Currency getTargetCurrency(Transaction t, Currency targetCcySuggested) {
+        return targetCcySuggested == null ? t.getAmount().getCcy() : targetCcySuggested;
     }
 }

@@ -17,8 +17,16 @@ public class CurrencyPair {
         return first;
     }
 
+    public Currency getFirstCcy() {
+        return new Currency(first);
+    }
+
     public String getSecond() {
         return second;
+    }
+
+    public Currency getSecondCcy() {
+        return new Currency(second);
     }
 
     public static boolean contains(CurrencyPair[] list, CurrencyPair pair) {

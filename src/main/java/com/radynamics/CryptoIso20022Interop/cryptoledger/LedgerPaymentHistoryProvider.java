@@ -26,7 +26,7 @@ public class LedgerPaymentHistoryProvider implements PaymentHistoryProvider {
     @Override
     public Transaction oldestSimilarOrDefault(Payment p) {
         for (var t : transactions) {
-            if (PaymentCompare.isSimilar(PaymentConverter.toPayment(t, p.getFiatCcy()), p)) {
+            if (PaymentCompare.isSimilar(PaymentConverter.toPayment(t, p.getUserCcy()), p)) {
                 return t;
             }
         }

@@ -1,7 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestLedger;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 public class PaymentTest {
@@ -52,7 +53,7 @@ public class PaymentTest {
     public void setAmountNull(Double amt, String ccy) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
-            p.setAmount(amt == null ? null : BigDecimal.valueOf(amt), ccy);
+            p.setAmount(amt == null ? null : Money.of(amt, new Currency(ccy)));
         });
     }
 
@@ -60,7 +61,7 @@ public class PaymentTest {
     public void setAmount() {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
         p.setExchangeRate(createRate2());
-        p.setAmount(BigDecimal.valueOf(30), "USD");
+        p.setAmount(Money.of(30, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
@@ -71,7 +72,7 @@ public class PaymentTest {
     @Test
     public void setAmountNoExchangeRate() {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
-        p.setAmount(BigDecimal.valueOf(30), "USD");
+        p.setAmount(Money.of(30, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getFiatCcy());
@@ -95,7 +96,7 @@ public class PaymentTest {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
         p.setExchangeRate(new ExchangeRate(new CurrencyPair("USD", "TEST"), 2.0, ZonedDateTime.now()));
         if (amountDefined) {
-            p.setAmount(BigDecimal.valueOf(20), "USD");
+            p.setAmount(Money.of(20, new Currency("USD")));
 
         }
         Assertions.assertEquals(20, p.getAmount());
@@ -123,7 +124,7 @@ public class PaymentTest {
     public void setExchangeRateFiatCcyNotAffected(String ccyFrom, String ccyTo) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
-            p.setAmount(BigDecimal.valueOf(30), "USD");
+            p.setAmount(Money.of(30, new Currency("USD")));
             p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
         });
     }

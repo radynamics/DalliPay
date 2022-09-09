@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.IbanAccount;
@@ -111,7 +112,7 @@ public class Camt05400104WriterTest {
         trx.removeStructuredReferences(0);
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
-        var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}, "XRP"));
+        var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}, new Currency("XRP")));
 
         var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
         w.setIdGenerator(new FixedValueIdGenerator());

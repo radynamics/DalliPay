@@ -5,10 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.math.BigDecimal;
@@ -21,11 +18,11 @@ public class Payment {
     private Address senderAddress;
     private Address receiverAddress;
     private Double amount = UnknownAmount;
-    private String ccy = UnknownCCy;
+    private Currency ccy = UnknownCCy;
     private ExchangeRate exchangeRate;
 
     private static final Double UnknownAmount = Double.valueOf(0);
-    private static final String UnknownCCy = "";
+    private static final Currency UnknownCCy = null;
     private boolean amountDefined;
 
     public Payment(Transaction cryptoTrx) {
@@ -85,12 +82,11 @@ public class Payment {
         return this.amount;
     }
 
-    public void setAmount(BigDecimal amt, String ccy) {
+    public void setAmount(Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
-        if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
-        this.amount = amt.doubleValue();
-        this.ccy = ccy;
-        if (!UnknownAmount.equals(amt.doubleValue())) {
+        this.amount = amt.getNumber().doubleValue();
+        this.ccy = amt.getCcy();
+        if (!UnknownAmount.equals(amt.getNumber())) {
             this.amountDefined = true;
         }
 
@@ -122,17 +118,22 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         this.amount = cc.convert(amt, exchangeRate.getPair());
         if (isCcyUnknown()) {
-            this.ccy = exchangeRate.getPair().getFirst().equals(getAmountTransaction().getCcy().getCode())
-                    ? exchangeRate.getPair().getSecond()
-                    : exchangeRate.getPair().getFirst();
+            this.ccy = exchangeRate.getPair().getFirstCcy().equals(getAmountTransaction().getCcy())
+                    ? exchangeRate.getPair().getSecondCcy()
+                    : exchangeRate.getPair().getFirstCcy();
         }
     }
 
     public String getFiatCcy() {
-        return this.ccy;
+        return this.ccy == null ? "" : this.ccy.getCode();
     }
 
-    public void setFiatCcy(String ccy) {
+    // TODO: remove getFiatCcy
+    public Currency getUserCcy() {
+        return cryptoTrx.getAmount().getCcy();
+    }
+
+    public void setUserCcy(Currency ccy) {
         this.ccy = ccy;
     }
 
@@ -145,7 +146,7 @@ public class Payment {
     }
 
     public boolean isCcyUnknown() {
-        return UnknownCCy.equals(ccy);
+        return UnknownCCy == ccy;
     }
 
     public void setExchangeRate(ExchangeRate rate) {

@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -378,10 +379,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
-        var targetCcy = cboTargetCcy.getSelectedItem().toString();
-        targetCcy = targetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : targetCcy;
+        var selectedTargetCcy = cboTargetCcy.getSelectedItem().toString();
+        var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
-            var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy);
+            var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy.getCode());
             var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
             if (!ccyPair.isOneToOne() && !CurrencyPair.contains(supportedPairs, ccyPair)) {
                 JOptionPane.showMessageDialog(this,
@@ -396,7 +397,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             lblLoading.showLoading();
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
-            t.setTargetCcy(targetCcy);
+            t.setTargetCcy(targetCcy == null ? "" : targetCcy.getCode());
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
             var result = transformInstruction.getLedger().listPaymentsReceived(wallet, period);
             var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));

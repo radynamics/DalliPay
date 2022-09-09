@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import org.apache.commons.lang3.NotImplementedException;
@@ -121,7 +122,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             item.setAmount((Double) value);
         } else if (getColumnIndex(COL_CCY) == col) {
-            item.payment.setFiatCcy((String) value);
+            item.payment.setUserCcy(new Currency((String) value));
         } else {
             throw new NotImplementedException(String.format("Setting value for column %s is not implemented", col));
         }
