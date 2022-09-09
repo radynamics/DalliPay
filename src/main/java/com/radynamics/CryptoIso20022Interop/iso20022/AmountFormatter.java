@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,6 +24,13 @@ public class AmountFormatter {
                 ? dfCryptocurrency
                 : dfFiat;
         return df.format(p.getAmount());
+    }
+
+    public static String formatAmtWithCcy(Money amt) {
+        if (amt == null) {
+            return "n/a";
+        }
+        return MoneyFormatter.formatFiat(dfFiat.format(amt.getNumber()), amt.getCcy().getCode());
     }
 
     public static String formatAmtWithCcy(Payment p) {

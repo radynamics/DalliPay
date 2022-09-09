@@ -130,7 +130,7 @@ public class Payment {
 
     // TODO: remove getFiatCcy
     public Currency getUserCcy() {
-        return cryptoTrx.getAmount().getCcy();
+        return this.ccy;
     }
 
     public void setUserCcy(Currency ccy) {
@@ -243,6 +243,6 @@ public class Payment {
     }
 
     public CurrencyPair createCcyPair() {
-        return new CurrencyPair(getAmountTransaction().getCcy().getCode(), getFiatCcy());
+        return new CurrencyPair(getAmountTransaction().getCcy(), getUserCcy());
     }
 }

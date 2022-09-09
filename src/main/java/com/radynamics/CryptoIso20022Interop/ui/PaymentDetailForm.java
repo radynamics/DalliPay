@@ -7,7 +7,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 
@@ -26,7 +26,7 @@ public class PaymentDetailForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
-    private JLabel lblAmountText;
+    private MoneyLabel lblAmountText;
 
     public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -98,7 +98,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
-                lblAmountText = new JLabel();
+                lblAmountText = new MoneyLabel(payment.getLedger().getInfoProvider());
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
@@ -195,9 +195,7 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshAmountsText() {
-        lblAmountText.setText(AmountFormatter.formatAmtWithCcy(payment));
-        var ccyFormatter = new CurrencyFormatter(payment.getLedger().getInfoProvider());
-        ccyFormatter.format(lblAmountText, payment.getAmountTransaction().getCcy());
+        lblAmountText.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
 
         var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {
