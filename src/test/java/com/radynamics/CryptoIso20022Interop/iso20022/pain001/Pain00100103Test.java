@@ -150,7 +150,7 @@ public class Pain00100103Test {
         assertNotNull(transactions);
         assertEquals(4, transactions.length);
 
-        assertEquals("GBP", transactions[0].getFiatCcy());
+        assertEquals("GBP", transactions[0].getUserCcyCodeOrEmpty());
         Assertions.assertEquals(5000, (double) transactions[0].getAmount());
         Assertion.assertEquals(transactions[0], null);
         var expectedLedgerAmount = 0;

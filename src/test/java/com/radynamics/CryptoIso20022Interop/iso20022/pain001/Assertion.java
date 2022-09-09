@@ -79,7 +79,7 @@ public class Assertion {
 
     public static void assertAmtCcy(Payment transaction, Double amt, String ccy, Double amtLedgerUnit, String ledgerCcy) {
         Assert.assertEquals(amt, transaction.getAmount());
-        Assert.assertEquals(ccy, transaction.getFiatCcy());
+        Assert.assertEquals(ccy, transaction.getUserCcyCodeOrEmpty());
         Assert.assertEquals(amtLedgerUnit, transaction.getAmountTransaction().getNumber());
         Assert.assertNotNull(transaction.getAmountTransaction().getCcy());
         Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCode());

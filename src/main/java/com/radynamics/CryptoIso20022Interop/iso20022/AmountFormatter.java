@@ -20,7 +20,7 @@ public class AmountFormatter {
             return "...";
         }
 
-        var df = StringUtils.equalsIgnoreCase(p.getLedger().getNativeCcySymbol(), p.getFiatCcy())
+        var df = StringUtils.equalsIgnoreCase(p.getLedger().getNativeCcySymbol(), p.getUserCcyCodeOrEmpty())
                 ? dfCryptocurrency
                 : dfFiat;
         return df.format(p.getAmount());
@@ -35,7 +35,7 @@ public class AmountFormatter {
 
     public static String formatAmtWithCcy(Payment p) {
         return p.isAmountUnknown() || p.getAmount() == null
-                ? MoneyFormatter.formatFiat(formatAmt(p), p.getFiatCcy())
-                : MoneyFormatter.formatFiat(BigDecimal.valueOf(p.getAmount()), p.getFiatCcy());
+                ? MoneyFormatter.formatFiat(formatAmt(p), p.getUserCcyCodeOrEmpty())
+                : MoneyFormatter.formatFiat(BigDecimal.valueOf(p.getAmount()), p.getUserCcyCodeOrEmpty());
     }
 }

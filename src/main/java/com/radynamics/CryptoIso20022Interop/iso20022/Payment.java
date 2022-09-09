@@ -124,11 +124,10 @@ public class Payment {
         }
     }
 
-    public String getFiatCcy() {
+    public String getUserCcyCodeOrEmpty() {
         return this.ccy == null ? "" : this.ccy.getCode();
     }
 
-    // TODO: remove getFiatCcy
     public Currency getUserCcy() {
         return this.ccy;
     }
@@ -152,13 +151,13 @@ public class Payment {
     public void setExchangeRate(ExchangeRate rate) {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
         if (rate != null) {
-            var affectsFiat = rate.getPair().affects(getFiatCcy());
+            var affectsFiat = rate.getPair().affects(getUserCcyCodeOrEmpty());
             var affectsLedger = rate.getPair().affects(getAmountTransaction().getCcy().getCode());
             if (!affectsLedger) {
                 throw new IllegalArgumentException(String.format("Exchange rate must affect %s", getAmountTransaction().getCcy().getCode()));
             }
             if (bothCcyKnown && !affectsFiat) {
-                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getFiatCcy(), getAmountTransaction().getCcy().getCode()));
+                throw new IllegalArgumentException(String.format("Exchange rate must affect %s and %s.", getUserCcyCodeOrEmpty(), getAmountTransaction().getCcy().getCode()));
             }
         }
         this.exchangeRate = rate;
@@ -232,7 +231,7 @@ public class Payment {
     public String getDisplayText() {
         var amount = getAmount();
         if (amount != null) {
-            return MoneyFormatter.formatFiat(BigDecimal.valueOf(amount), getFiatCcy());
+            return MoneyFormatter.formatFiat(BigDecimal.valueOf(amount), getUserCcyCodeOrEmpty());
         }
 
         return MoneyFormatter.formatLedger(cryptoTrx.getAmount());

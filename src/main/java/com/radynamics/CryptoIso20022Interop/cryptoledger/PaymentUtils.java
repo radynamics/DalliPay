@@ -67,10 +67,10 @@ public class PaymentUtils {
     public static Map<String, Double> sum(ArrayList<Payment> payments) {
         var map = new HashMap<String, Double>();
         for (var p : payments) {
-            if (!map.containsKey(p.getFiatCcy())) {
-                map.put(p.getFiatCcy(), (double) 0);
+            if (!map.containsKey(p.getUserCcyCodeOrEmpty())) {
+                map.put(p.getUserCcyCodeOrEmpty(), (double) 0);
             }
-            map.put(p.getFiatCcy(), map.get(p.getFiatCcy()) + p.getAmount());
+            map.put(p.getUserCcyCodeOrEmpty(), map.get(p.getUserCcyCodeOrEmpty()) + p.getAmount());
         }
         return map;
     }
@@ -84,7 +84,7 @@ public class PaymentUtils {
         var i = 0;
         var fees = totalFees(payments);
         Double fiatSum = (double) 0;
-        var fiatCcy = payments[0].getFiatCcy();
+        var fiatCcy = payments[0].getUserCcyCodeOrEmpty();
         for (var fee : fees.entrySet()) {
             var l = fee.getKey();
             var amt = fee.getValue();

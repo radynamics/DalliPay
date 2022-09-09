@@ -23,7 +23,7 @@ public class PaymentCompare {
             return false;
         }
 
-        if (!StringUtils.equals(first.getFiatCcy(), second.getFiatCcy())) {
+        if (!StringUtils.equals(first.getUserCcyCodeOrEmpty(), second.getUserCcyCodeOrEmpty())) {
             return false;
         }
 

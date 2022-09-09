@@ -61,7 +61,7 @@ public class TransactionTranslator {
             return targetCcy;
         }
 
-        return t.getFiatCcy();
+        return t.getUserCcyCodeOrEmpty();
     }
 
     private Account getAccountOrNull(Wallet wallet) {

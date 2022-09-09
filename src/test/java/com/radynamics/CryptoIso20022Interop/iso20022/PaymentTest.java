@@ -30,7 +30,7 @@ public class PaymentTest {
         Assertions.assertEquals(10.0, p.getAmountTransaction().getNumber());
         Assertions.assertEquals("TEST", p.getAmountTransaction().getCcy().getCode());
         Assertions.assertEquals(20, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
     }
 
     @NotNull
@@ -64,7 +64,7 @@ public class PaymentTest {
         p.setAmount(Money.of(30, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
         Assertions.assertEquals(15.0, p.getAmountTransaction().getNumber());
         Assertions.assertEquals("TEST", p.getAmountTransaction().getCcy().getCode());
     }
@@ -75,7 +75,7 @@ public class PaymentTest {
         p.setAmount(Money.of(30, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
         Assertions.assertEquals(0, p.getAmountTransaction().getNumber());
         Assertions.assertEquals("TEST", p.getAmountTransaction().getCcy().getCode());
     }
@@ -87,7 +87,7 @@ public class PaymentTest {
         p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
 
         Assertions.assertEquals(20, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
     }
 
     @ParameterizedTest
@@ -100,13 +100,13 @@ public class PaymentTest {
 
         }
         Assertions.assertEquals(20, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
         Assertions.assertEquals(10.0, p.getAmountTransaction().getNumber());
 
         p.setExchangeRate(null);
 
         Assertions.assertEquals(amountDefined ? 20 : 0, p.getAmount());
-        Assertions.assertEquals("USD", p.getFiatCcy());
+        Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
         Assertions.assertEquals(amountDefined ? 0 : 10.0, p.getAmountTransaction().getNumber().doubleValue());
     }
 

@@ -49,7 +49,7 @@ public class Camt05400109Writer implements Camt054Writer {
 
         for (var t : transactions) {
             var receiver = t.getReceiverWallet();
-            var ccy = t.getFiatCcy();
+            var ccy = t.getUserCcyCodeOrEmpty();
             var stmt = getNtfctnOrNull(d, receiver, ccy);
             if (stmt == null) {
                 stmt = new AccountNotification19();
@@ -109,7 +109,7 @@ public class Camt05400109Writer implements Camt054Writer {
 
         var amt = new ActiveOrHistoricCurrencyAndAmount();
         amt.setValue(AmountRounder.round(trx.getAmount(), 2));
-        amt.setCcy(trx.getFiatCcy());
+        amt.setCcy(trx.getUserCcyCodeOrEmpty());
 
         ntry.setAmt(amt);
         var amtDtls = trx.createCcyPair().isOneToOne() ? null : createAmtDtls(trx);
@@ -200,7 +200,7 @@ public class Camt05400109Writer implements Camt054Writer {
 
         var ccyXchg = new CurrencyExchange5();
         ccyXchg.setSrcCcy(trx.getAmountTransaction().getCcy().getCode());
-        ccyXchg.setTrgtCcy(trx.getFiatCcy());
+        ccyXchg.setTrgtCcy(trx.getUserCcyCodeOrEmpty());
         ccyXchg.setXchgRate(BigDecimal.valueOf(trx.getExchangeRate().getRate()));
 
         var o = new AmountAndCurrencyExchange3();
