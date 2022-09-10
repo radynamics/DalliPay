@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
@@ -11,7 +12,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 public class TransactionTranslator {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
-    private String targetCcy;
+    private Currency targetCcy;
 
     public TransactionTranslator(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
@@ -34,7 +35,7 @@ public class TransactionTranslator {
             }
 
             var targetCcy = getTargetCcy(t);
-            if (t.getAmountTransaction().getCcy().getCode().equalsIgnoreCase(targetCcy)) {
+            if (t.getAmountTransaction().getCcy().equals(targetCcy)) {
                 if (t.isAmountUnknown()) {
                     t.setAmount(t.getAmountTransaction());
                     t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
@@ -43,7 +44,7 @@ public class TransactionTranslator {
                 }
             } else {
                 var ccyPair = t.isCcyUnknown()
-                        ? new CurrencyPair(t.getAmountTransaction().getCcy().getCode(), targetCcy)
+                        ? new CurrencyPair(t.getAmountTransaction().getCcy(), targetCcy)
                         : t.createCcyPair();
                 if (currencyConverter.has(ccyPair)) {
                     t.setExchangeRate(currencyConverter.get(ccyPair));
@@ -56,12 +57,9 @@ public class TransactionTranslator {
         return transactions;
     }
 
-    private String getTargetCcy(Payment t) {
-        if (targetCcy != null) {
-            return targetCcy;
-        }
+    private Currency getTargetCcy(Payment t) {
+        return targetCcy == null ? t.getUserCcy() : targetCcy;
 
-        return t.getUserCcyCodeOrEmpty();
     }
 
     private Account getAccountOrNull(Wallet wallet) {
@@ -72,7 +70,7 @@ public class TransactionTranslator {
         return account == null ? new OtherAccount(wallet.getPublicKey()) : account;
     }
 
-    public void setTargetCcy(String targetCcy) {
+    public void setTargetCcy(Currency targetCcy) {
         this.targetCcy = targetCcy;
     }
 }

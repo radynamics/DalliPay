@@ -397,7 +397,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             lblLoading.showLoading();
             var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
             var t = new TransactionTranslator(transformInstruction, currencyConverter);
-            t.setTargetCcy(targetCcy == null ? "" : targetCcy.getCode());
+            t.setTargetCcy(targetCcy);
             var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
             var result = transformInstruction.getLedger().listPaymentsReceived(wallet, period);
             var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
