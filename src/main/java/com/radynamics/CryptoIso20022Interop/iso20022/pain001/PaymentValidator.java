@@ -8,7 +8,9 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,7 +73,8 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             Ledger l = affectedPayments.get(0).getLedger();
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
             for (var ccy : sums.currencies()) {
-                var balance = w.getBalances().get(ccy).getNumber().doubleValue();
+                var balanceOrZero = w.getBalances().get(ccy).orElseGet(() -> Money.zero(new Currency(ccy)));
+                var balance = balanceOrZero.getNumber().doubleValue();
                 var paymentsSum = sums.sum(ccy);
                 if (balance < paymentsSum) {
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum, ccy);

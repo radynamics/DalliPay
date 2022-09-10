@@ -1,20 +1,20 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class MoneyBag {
     private ArrayList<Money> amounts = new ArrayList<>();
 
-    public Money get(String ccy) {
+    public Optional<Money> get(String ccy) {
         for (var amt : amounts) {
             if (amt.getCcy().getCode().equals(ccy)) {
-                return amt;
+                return Optional.of(amt);
             }
         }
-        return Money.zero(new Currency(ccy));
+        return Optional.empty();
     }
 
     public boolean isEmpty() {
