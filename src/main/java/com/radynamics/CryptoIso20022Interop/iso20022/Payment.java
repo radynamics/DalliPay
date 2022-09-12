@@ -141,7 +141,15 @@ public class Payment {
     }
 
     public boolean isAmountUnknown() {
-        return amount == UnknownAmount;
+        return Payment.isAmountUnknown(amount);
+    }
+
+    private static boolean isAmountUnknown(Number value) {
+        return value == UnknownAmount;
+    }
+
+    public static boolean isAmountUnknown(Money value) {
+        return value == null || Payment.isAmountUnknown(value.getNumber());
     }
 
     public boolean isCcyUnknown() {

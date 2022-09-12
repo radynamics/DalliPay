@@ -27,7 +27,7 @@ public class AmountFormatter {
     }
 
     public static String formatAmtWithCcy(Money amt) {
-        if (amt == null) {
+        if (Payment.isAmountUnknown(amt)) {
             return "n/a";
         }
         return MoneyFormatter.formatFiat(dfFiat.format(amt.getNumber()), amt.getCcy().getCode());
