@@ -27,6 +27,11 @@ public final class PaymentConverter {
     }
 
     private static Currency getTargetCurrency(Transaction t, Currency targetCcySuggested) {
-        return targetCcySuggested == null ? t.getAmount().getCcy() : targetCcySuggested;
+        var transactionCcy = t.getAmount().getCcy();
+        if (targetCcySuggested == null || targetCcySuggested.getCode().equals(transactionCcy.getCode())) {
+            return transactionCcy;
+        }
+
+        return targetCcySuggested;
     }
 }
