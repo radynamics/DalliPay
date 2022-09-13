@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
 
 import java.util.Objects;
 
@@ -32,7 +33,7 @@ public class Currency {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Currency currency = (Currency) o;
-        return Objects.equals(code, currency.code) && Objects.equals(issuer, currency.issuer);
+        return Objects.equals(code, currency.code) && WalletCompare.isSame(issuer, currency.issuer);
     }
 
     @Override
