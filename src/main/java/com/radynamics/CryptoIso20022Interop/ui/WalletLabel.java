@@ -1,6 +1,10 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletFormatter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.AccountFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -41,7 +45,7 @@ public class WalletLabel extends JPanel {
 
         String balanceText = null;
         if (!wallet.getBalances().isEmpty() && ledger != null) {
-            balanceText = MoneyBagFormatter.format(wallet.getBalances());
+            balanceText = MoneyFormatter.formatFiat(wallet.getBalances().all());
         }
 
         String walletInfoText = null;

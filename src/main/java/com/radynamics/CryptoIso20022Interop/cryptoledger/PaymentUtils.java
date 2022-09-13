@@ -61,18 +61,16 @@ public class PaymentUtils {
     }
 
     public static String sumString(ArrayList<Payment> payments) {
-        return MoneyBagFormatter.format(sum(payments));
+        return MoneyFormatter.formatFiat(sum(payments));
     }
 
-    public static Map<String, Double> sum(ArrayList<Payment> payments) {
-        var map = new HashMap<String, Double>();
+    public static Money[] sum(ArrayList<Payment> payments) {
+        var sums = new MoneySums();
         for (var p : payments) {
-            if (!map.containsKey(p.getUserCcyCodeOrEmpty())) {
-                map.put(p.getUserCcyCodeOrEmpty(), (double) 0);
-            }
-            map.put(p.getUserCcyCodeOrEmpty(), map.get(p.getUserCcyCodeOrEmpty()) + p.getAmount());
+            sums.plus(Money.of(p.getAmount(), p.getUserCcy()));
         }
-        return map;
+
+        return sums.sum();
     }
 
     public static String totalFeesText(Payment[] payments, ExchangeRateProvider provider) {

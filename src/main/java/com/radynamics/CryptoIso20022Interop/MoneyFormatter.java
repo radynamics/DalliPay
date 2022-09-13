@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.MoneySums;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
@@ -20,6 +19,10 @@ public class MoneyFormatter {
         return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCode());
     }
 
+    public static String formatFiat(Money amount) {
+        return formatFiat(Utils.createFormatFiat().format(amount.getNumber()), amount.getCcy().getCode());
+    }
+
     public static String formatFiat(BigDecimal amount, String ccy) {
         return formatFiat(Utils.createFormatFiat().format(amount), ccy);
     }
@@ -28,14 +31,15 @@ public class MoneyFormatter {
         return String.format("%s %s", amount, ccy);
     }
 
-    public static String formatLedger(MoneySums sums) {
+    public static String formatFiat(Money[] amounts) {
         var sb = new StringBuilder();
-        var allSums = sums.sum();
-        for (var sum : allSums) {
-            if (sb.length() > 0) {
+        var i = 0;
+        for (var amt : amounts) {
+            sb.append(MoneyFormatter.formatFiat(amt));
+            if (i + 1 < amounts.length) {
                 sb.append(", ");
             }
-            sb.append(formatLedger(sum));
+            i++;
         }
         return sb.toString();
     }
