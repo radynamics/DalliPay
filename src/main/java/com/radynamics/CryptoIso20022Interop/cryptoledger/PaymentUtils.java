@@ -61,7 +61,7 @@ public class PaymentUtils {
     }
 
     public static String sumString(ArrayList<Payment> payments) {
-        return MoneyFormatter.formatFiat(sum(payments));
+        return MoneyFormatter.formatFiat(Money.sort(sum(payments)));
     }
 
     public static Money[] sum(ArrayList<Payment> payments) {

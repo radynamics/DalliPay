@@ -4,8 +4,6 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 
 public class MoneySums {
@@ -39,9 +37,6 @@ public class MoneySums {
         for (var ccy : currencies()) {
             list.add(sum(ccy));
         }
-
-        Collections.sort(list, Comparator.comparingDouble(o -> o.getNumber().doubleValue()));
-
         return list.toArray(new Money[0]);
     }
 

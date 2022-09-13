@@ -1,5 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class Money {
@@ -23,6 +26,12 @@ public class Money {
 
     public static Money zero(Currency ccy) {
         return Money.of(0, ccy);
+    }
+
+    public static Money[] sort(Money[] values) {
+        var list = Arrays.asList(values);
+        Collections.sort(list, Comparator.comparingDouble(o -> o.getNumber().doubleValue()));
+        return list.toArray(new Money[0]);
     }
 
     public Money plus(Money value) {
