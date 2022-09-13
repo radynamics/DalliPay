@@ -51,6 +51,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private JComboBox<String> cboTargetCcy;
     private JPanel pnlInfo;
     private JLabel lblInfoText;
+    private final JLabel lblUsingExchangeRatesFrom = new JLabel();
+    private final JLabel lblUsingExchangeRatesFromSource = new JLabel();
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -127,15 +129,16 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(cboTargetCcy);
 
-                var lbl3 = new JLabel(" using exchange rates from ");
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 0, SpringLayout.EAST, cboTargetCcy);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, getNorthPad(1), SpringLayout.NORTH, panel1);
-                panel1.add(lbl3);
 
-                var lbl2 = new JLabel(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl2, 0, SpringLayout.EAST, lbl3);
-                panel1Layout.putConstraint(SpringLayout.NORTH, lbl2, getNorthPad(1), SpringLayout.NORTH, panel1);
-                panel1.add(lbl2);
+                lblUsingExchangeRatesFrom.setText(" using exchange rates from ");
+                panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFrom, 0, SpringLayout.EAST, cboTargetCcy);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFrom, getNorthPad(1), SpringLayout.NORTH, panel1);
+                panel1.add(lblUsingExchangeRatesFrom);
+
+                lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
+                panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFromSource, 0, SpringLayout.EAST, lblUsingExchangeRatesFrom);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFromSource, getNorthPad(1), SpringLayout.NORTH, panel1);
+                panel1.add(lblUsingExchangeRatesFromSource);
             }
             {
                 var lbl = new JLabel("Payments between:");
@@ -233,6 +236,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+
+        var isAsReceived = ccy.equals(XrplPriceOracleConfig.AsReceived);
+        lblUsingExchangeRatesFrom.setVisible(!isAsReceived);
+        lblUsingExchangeRatesFromSource.setVisible(!isAsReceived);
 
         transformInstruction.setTargetCcy(ccy);
     }
