@@ -1,27 +1,26 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Map;
 
 public class MoneySums {
-    private final ArrayList<Pair<String, Double>> amounts = new ArrayList<>();
+    private final ArrayList<Money> amounts = new ArrayList<>();
 
     public void plus(Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
-        amounts.add(new ImmutablePair<>(amt.getCcy().getCode(), amt.getNumber().doubleValue()));
+        amounts.add(amt);
     }
 
-    public Double sum(String ccy) {
-        var sum = 0.0;
+    public Money sum(String ccy) {
+        var sum = Money.zero(new Currency(ccy));
         for (var amt : amounts) {
-            if (amt.getKey().equals(ccy)) {
-                sum += amt.getValue();
+            if (amt.getCcy().getCode().equals(ccy)) {
+                sum = sum.plus(amt);
             }
         }
         return sum;
@@ -30,24 +29,20 @@ public class MoneySums {
     public String[] currencies() {
         var set = new HashSet<String>();
         for (var amt : amounts) {
-            set.add(amt.getKey());
+            set.add(amt.getCcy().getCode());
         }
         return set.toArray(new String[0]);
     }
 
-    public Map<String, Double> sum() {
-        var list = new ArrayList<Map.Entry<String, Double>>();
+    public Money[] sum() {
+        var list = new ArrayList<Money>();
         for (var ccy : currencies()) {
-            list.add(Map.entry(ccy, sum(ccy)));
+            list.add(sum(ccy));
         }
 
-        list.sort(Map.Entry.comparingByValue());
+        Collections.sort(list, Comparator.comparingDouble(o -> o.getNumber().doubleValue()));
 
-        var map = new HashMap<String, Double>();
-        for (var item : list) {
-            map.put(item.getKey(), item.getValue());
-        }
-        return map;
+        return list.toArray(new Money[0]);
     }
 
     @Override

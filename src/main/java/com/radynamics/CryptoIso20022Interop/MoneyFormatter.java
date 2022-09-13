@@ -31,11 +31,11 @@ public class MoneyFormatter {
     public static String formatLedger(MoneySums sums) {
         var sb = new StringBuilder();
         var allSums = sums.sum();
-        for (var sum : allSums.entrySet()) {
+        for (var sum : allSums) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(formatLedger(BigDecimal.valueOf(sum.getValue()), sum.getKey()));
+            sb.append(formatLedger(sum));
         }
         return sb.toString();
     }
