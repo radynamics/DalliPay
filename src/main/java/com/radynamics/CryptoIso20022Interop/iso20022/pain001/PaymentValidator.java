@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -73,12 +72,11 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             Ledger l = affectedPayments.get(0).getLedger();
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
             for (var ccy : sums.currencies()) {
-                var balanceOrZero = w.getBalances().get(ccy).orElseGet(() -> Money.zero(new Currency(ccy)));
-                var balance = balanceOrZero.getNumber().doubleValue();
+                var balance = w.getBalances().get(ccy).orElseGet(() -> Money.zero(ccy));
                 var paymentsSum = sums.sum(ccy);
-                if (balance < paymentsSum.getNumber().doubleValue()) {
+                if (balance.getNumber().doubleValue() < paymentsSum.getNumber().doubleValue()) {
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum);
-                    var balanceText = MoneyFormatter.formatLedger(balance, ccy);
+                    var balanceText = MoneyFormatter.formatLedger(balance);
                     list.add(new ValidationResult(ValidationState.Error, String.format("Sum of payments from %s is %s and exceeds wallet balance of %s.", w.getPublicKey(), paymentsSumText, balanceText)));
                 }
             }

@@ -16,22 +16,22 @@ public class MoneySums {
         amounts.add(amt);
     }
 
-    public Money sum(String ccy) {
-        var sum = Money.zero(new Currency(ccy));
+    public Money sum(Currency ccy) {
+        var sum = Money.zero(ccy);
         for (var amt : amounts) {
-            if (amt.getCcy().getCode().equals(ccy)) {
+            if (amt.getCcy().equals(ccy)) {
                 sum = sum.plus(amt);
             }
         }
         return sum;
     }
 
-    public String[] currencies() {
-        var set = new HashSet<String>();
+    public Currency[] currencies() {
+        var set = new HashSet<Currency>();
         for (var amt : amounts) {
-            set.add(amt.getCcy().getCode());
+            set.add(amt.getCcy());
         }
-        return set.toArray(new String[0]);
+        return set.toArray(new Currency[0]);
     }
 
     public Money[] sum() {

@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 
 import java.util.ArrayList;
@@ -8,9 +9,9 @@ import java.util.Optional;
 public class MoneyBag {
     private ArrayList<Money> amounts = new ArrayList<>();
 
-    public Optional<Money> get(String ccy) {
+    public Optional<Money> get(Currency ccy) {
         for (var amt : amounts) {
-            if (amt.getCcy().getCode().equals(ccy)) {
+            if (amt.getCcy().equals(ccy)) {
                 return Optional.of(amt);
             }
         }
