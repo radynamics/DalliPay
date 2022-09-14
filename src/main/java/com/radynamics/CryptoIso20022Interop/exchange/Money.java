@@ -1,9 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.exchange;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 
 public class Money {
     private final Number number;
@@ -31,6 +28,16 @@ public class Money {
     public static Money[] sort(Money[] values) {
         var list = Arrays.asList(values);
         Collections.sort(list, Comparator.comparingDouble(o -> o.getNumber().doubleValue()));
+        return list.toArray(new Money[0]);
+    }
+
+    public static Money[] removeZero(Money[] values) {
+        var list = new ArrayList<Money>();
+        for (var amt : values) {
+            if (amt.getNumber().doubleValue() != 0.0) {
+                list.add(amt);
+            }
+        }
         return list.toArray(new Money[0]);
     }
 
