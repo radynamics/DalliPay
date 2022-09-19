@@ -138,7 +138,7 @@ public class SendForm extends JPanel implements MainFormPane {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
-                cmdSendPayments.setEnabled(progress.isFinished());
+                enableInputControls(progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
@@ -178,6 +178,8 @@ public class SendForm extends JPanel implements MainFormPane {
             var br = new BalanceRefresher();
             br.refreshAllSenderWallets(payments);
 
+            enableInputControls(false);
+            lblLoading.showLoading();
             load(payments);
 
             try (var repo = new ConfigRepo()) {
@@ -359,8 +361,13 @@ public class SendForm extends JPanel implements MainFormPane {
         this.payments = payments;
         validator.getHistoryValidator().clearCache();
         validator.getHistoryValidator().loadHistory(payments);
-        lblLoading.showLoading();
         loadTable(payments);
+    }
+
+    private void enableInputControls(boolean enabled) {
+        txtInput.setEnabled(enabled);
+        table.setEditable(enabled);
+        cmdSendPayments.setEnabled(enabled);
     }
 
     private void loadTable(Payment[] payments) {
