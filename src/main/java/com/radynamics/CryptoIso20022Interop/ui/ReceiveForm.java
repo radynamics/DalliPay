@@ -6,6 +6,7 @@ import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
@@ -33,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
@@ -390,34 +393,44 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     "Currency not supported", JOptionPane.INFORMATION_MESSAGE);
         }
 
-        try {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            cmdExport.setEnabled(false);
-            lblLoading.showLoading();
-            var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
-            var t = new TransactionTranslator(transformInstruction, currencyConverter);
-            t.setTargetCcy(targetCcy);
-            var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
-            var result = transformInstruction.getLedger().listPaymentsReceived(wallet, period);
-            var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        cmdExport.setEnabled(false);
+        lblLoading.showLoading();
+        var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
+        var t = new TransactionTranslator(transformInstruction, currencyConverter);
+        t.setTargetCcy(targetCcy);
+        var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
 
-            loadTable(payments);
+        var cf = new CompletableFuture<TransactionResult>();
+        var frm = this;
+        cf.thenAccept(result -> {
+                    var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
+                    loadTable(payments);
 
-            if (result.hasMarker()) {
-                showInfo("More data would have been available, but was not loaded. Please change your filter.");
-            } else if (result.hasMaxPageCounterReached()) {
-                showInfo("Maximum paging limit reached. Please change your filter.");
-            } else if (result.hasNoTransactions()) {
-                showInfo("No payments found while paging. Please change your filter.");
-            } else {
-                hideInfo();
+                    if (result.hasMarker()) {
+                        showInfo("More data would have been available, but was not loaded. Please change your filter.");
+                    } else if (result.hasMaxPageCounterReached()) {
+                        showInfo("Maximum paging limit reached. Please change your filter.");
+                    } else if (result.hasNoTransactions()) {
+                        showInfo("No payments found while paging. Please change your filter.");
+                    } else {
+                        hideInfo();
+                    }
+                })
+                .whenComplete((unused, e) -> {
+                    lblLoading.hideLoading();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    if (e != null) {
+                        ExceptionDialog.show(frm, e);
+                    }
+                });
+        Executors.newCachedThreadPool().submit(() -> {
+            try {
+                cf.complete(transformInstruction.getLedger().listPaymentsReceived(wallet, period));
+            } catch (Exception e) {
+                cf.completeExceptionally(e);
             }
-        } catch (Exception e) {
-            lblLoading.hideLoading();
-            ExceptionDialog.show(this, e);
-        } finally {
-            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        }
+        });
     }
 
     private void loadTable(Payment[] payments) {
