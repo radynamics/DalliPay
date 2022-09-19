@@ -27,6 +27,8 @@ import java.io.FileInputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class SendForm extends JPanel implements MainFormPane {
     private final static Logger log = LogManager.getLogger(Database.class);
@@ -160,38 +162,40 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void onTxtInputChanged() {
-        var payments = new Payment[0];
-        try {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var t = new TransactionTranslator(transformInstruction, currencyConverter);
-            payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
-        } catch (Exception e) {
-            log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
-            ExceptionDialog.show(this, e, "Could not read payments from ISO 20022 pain.001 file.");
-            return;
-        } finally {
-            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        }
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        enableInputControls(false);
+        lblLoading.showLoading();
 
-        try {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            var br = new BalanceRefresher();
-            br.refreshAllSenderWallets(payments);
+        var cf = new CompletableFuture<Payment[]>();
+        cf.thenAccept(result -> {
+                    load(result);
+                })
+                .whenComplete((unused, e) -> {
+                    lblLoading.hideLoading();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    if (e != null) {
+                        log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
+                        ExceptionDialog.show(this, e, "Could not read payments from ISO 20022 pain.001 file.");
+                    }
+                });
+        Executors.newCachedThreadPool().submit(() -> {
+            try {
+                var t = new TransactionTranslator(transformInstruction, currencyConverter);
+                var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
 
-            enableInputControls(false);
-            lblLoading.showLoading();
-            load(payments);
-
-            try (var repo = new ConfigRepo()) {
-                repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
-                repo.commit();
+                var br = new BalanceRefresher();
+                br.refreshAllSenderWallets(payments);
+                cf.complete(payments);
             } catch (Exception e) {
-                ExceptionDialog.show(this, e);
+                cf.completeExceptionally(e);
             }
+        });
+
+        try (var repo = new ConfigRepo()) {
+            repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
+            repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
-        } finally {
-            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
