@@ -403,7 +403,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
 
         var cf = new CompletableFuture<TransactionResult>();
-        var frm = this;
         cf.thenAccept(result -> {
                     var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
                     loadTable(payments);
@@ -422,7 +421,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     lblLoading.hideLoading();
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
-                        ExceptionDialog.show(frm, e);
+                        ExceptionDialog.show(this, e);
                     }
                 });
         Executors.newCachedThreadPool().submit(() -> {
