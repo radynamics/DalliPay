@@ -48,6 +48,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
     private CamtExport camtExport;
+    private JButton cmdRefresh;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
     private JComboBox<String> cboTargetCcy;
@@ -162,21 +163,21 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerEnd, getNorthPad(2), SpringLayout.NORTH, panel1);
                 panel1.add(dtPickerEnd);
 
-                var cmd = new JButton("Refresh");
-                cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> {
+                cmdRefresh = new JButton("Refresh");
+                cmdRefresh.setPreferredSize(new Dimension(150, 35));
+                cmdRefresh.addActionListener(e -> {
                     load();
                 });
-                panel1Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, cmd, getNorthPad(2), SpringLayout.NORTH, panel1);
-                panel1.add(cmd);
+                panel1Layout.putConstraint(SpringLayout.EAST, cmdRefresh, 0, SpringLayout.EAST, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, cmdRefresh, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1.add(cmdRefresh);
             }
         }
         {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator());
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
-                cmdExport.setEnabled(progress.isFinished());
+                enableInputControls(progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
@@ -394,7 +395,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
 
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        cmdExport.setEnabled(false);
+        enableInputControls(false);
         lblLoading.showLoading();
         var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
         var t = new TransactionTranslator(transformInstruction, currencyConverter);
@@ -431,6 +432,12 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 cf.completeExceptionally(e);
             }
         });
+    }
+
+    private void enableInputControls(boolean enabled) {
+        cmdRefresh.setEnabled(enabled);
+        table.setEditable(enabled);
+        cmdExport.setEnabled(enabled);
     }
 
     private void loadTable(Payment[] payments) {

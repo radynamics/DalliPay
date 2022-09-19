@@ -26,6 +26,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private Actor actor = Actor.Sender;
     private ArrayList<ProgressListener> listener = new ArrayList<>();
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
+    private boolean editable;
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -143,6 +144,9 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
+        if (!editable) {
+            return false;
+        }
         if (col == getColumnIndex(COL_SELECTOR)) {
             return isSelectable(getHighestStatus(getValidationResults(row)));
         }
@@ -318,5 +322,9 @@ public class PaymentTableModel extends AbstractTableModel {
         for (var l : listener) {
             l.onProgress(progress);
         }
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 }
