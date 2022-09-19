@@ -340,4 +340,8 @@ public class PaymentTable extends JPanel {
             l.onRefresh(p);
         }
     }
+
+    public void setEditable(boolean editable) {
+        model.setEditable(editable);
+    }
 }

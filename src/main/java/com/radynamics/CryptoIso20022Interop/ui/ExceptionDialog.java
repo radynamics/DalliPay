@@ -7,11 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public final class ExceptionDialog {
-    public static void show(Component parentComponent, Exception e) {
+    public static void show(Component parentComponent, Throwable e) {
         show(parentComponent, e, null);
     }
 
-    public static void show(Component parentComponent, Exception e, String prefix) {
+    public static void show(Component parentComponent, Throwable e, String prefix) {
         var errorMsg = e.getMessage() == null || e.getMessage().length() == 0 ? "Unknown exception occured. See error logs for details" : e.getMessage();
         var msg = StringUtils.isEmpty(prefix) ? errorMsg : String.format("%s\n%s", prefix, errorMsg);
         LogManager.getLogger(ExceptionDialog.class).error(msg, e);
