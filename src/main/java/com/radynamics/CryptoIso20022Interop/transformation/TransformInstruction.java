@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
@@ -22,7 +23,7 @@ public class TransformInstruction {
 
     private String senderPublicKey;
     private String senderSecret;
-    private String targetCcy = "USD";
+    private String targetCcy = XrplPriceOracleConfig.AsReceived;
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
     private StructuredReference creditorReferenceIfMissing;
