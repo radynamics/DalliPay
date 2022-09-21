@@ -14,7 +14,7 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     final static Logger log = LogManager.getLogger(Bithomp.class);
     private final String baseUrl;
 
-    public static String Id = "bithomp";
+    public static final String Id = "bithomp";
     public static final String displayName = "Bithomp";
 
     public Bithomp(Network network) {
