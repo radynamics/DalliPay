@@ -429,6 +429,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     lblLoading.hideLoading();
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
+                        enableInputControls(true);
                         ExceptionDialog.show(this, e);
                     }
                 });
