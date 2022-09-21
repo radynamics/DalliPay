@@ -13,7 +13,7 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
     private final static Logger log = LogManager.getLogger(XrpScan.class);
     private final String baseUrl = "https://xrpscan.com";
 
-    public static String Id = "xrpscan";
+    public static final String Id = "xrpscan";
 
     @Override
     public void open(Wallet wallet) {
