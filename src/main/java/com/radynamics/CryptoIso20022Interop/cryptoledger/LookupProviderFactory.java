@@ -44,6 +44,26 @@ public class LookupProviderFactory {
         }
     }
 
+    public static String[] allIds(LedgerId id) {
+        switch (id) {
+            case Xrpl -> {
+                return new String[]{Bithomp.Id, XrplOrg.Id, XrpScan.Id};
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + id);
+        }
+    }
+
+    public static String getDisplayText(String lookupProviderId) {
+        if (lookupProviderId.equals(Bithomp.Id)) {
+            return Bithomp.displayName;
+        } else if (lookupProviderId.equals(XrplOrg.Id)) {
+            return XrplOrg.displayName;
+        } else if (lookupProviderId.equals(XrpScan.Id)) {
+            return XrpScan.displayName;
+        }
+        throw new IllegalStateException("Unexpected value: " + lookupProviderId);
+    }
+
     private static String loadProviderIdOrNull() throws LookupProviderException {
         try (var repo = new ConfigRepo()) {
             return repo.getLookupProviderId();

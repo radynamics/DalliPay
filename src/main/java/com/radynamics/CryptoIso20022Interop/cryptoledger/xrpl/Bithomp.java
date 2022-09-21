@@ -15,6 +15,7 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     private final String baseUrl;
 
     public static String Id = "bithomp";
+    public static final String displayName = "Bithomp";
 
     public Bithomp(Network network) {
         switch (network) {

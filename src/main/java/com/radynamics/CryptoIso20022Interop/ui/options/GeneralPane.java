@@ -1,10 +1,15 @@
 package com.radynamics.CryptoIso20022Interop.ui.options;
 
 import com.radynamics.CryptoIso20022Interop.VersionController;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.ui.ExceptionDialog;
 import com.radynamics.CryptoIso20022Interop.ui.LoginForm;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +17,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class GeneralPane extends JPanel {
+    private final static Logger log = LogManager.getLogger(GeneralPane.class);
+
     private final SpringLayout contentLayout;
+    private JComboBox<String> cboExplorer;
 
     public GeneralPane(Window owner) {
         setPreferredSize(new Dimension(1000, 400));
@@ -23,6 +31,20 @@ public class GeneralPane extends JPanel {
         {
             final var topOffset = 5;
             var top = topOffset;
+            {
+                builder.addRowLabel(top, "Explorer:");
+                cboExplorer = new JComboBox<>();
+                cboExplorer.setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        return super.getListCellRendererComponent(list, LookupProviderFactory.getDisplayText(value.toString()), index, isSelected, cellHasFocus);
+                    }
+                });
+                refreshExplorer();
+                cboExplorer.setPreferredSize(new Dimension(150, 21));
+                builder.addRowContent(top, cboExplorer);
+                top += 30;
+            }
             {
                 builder.addRowLabel(top, "Version:");
                 var pnl = new JPanel();
@@ -51,6 +73,14 @@ public class GeneralPane extends JPanel {
                 builder.addRowContent(top, cmd);
                 top += 30;
             }
+        }
+    }
+
+    private void refreshExplorer() {
+        cboExplorer.removeAllItems();
+        var ledgerId = LedgerId.Xrpl;
+        for (var id : LookupProviderFactory.allIds(ledgerId)) {
+            cboExplorer.addItem(id);
         }
     }
 
@@ -122,11 +152,19 @@ public class GeneralPane extends JPanel {
         }
     }
 
-    public void save() {
-        // do nothing
+    public void save() throws Exception {
+        try (var repo = new ConfigRepo()) {
+            repo.setLookupProviderId(cboExplorer.getSelectedItem().toString());
+
+            repo.commit();
+        }
     }
 
     public void load() {
-        // do nothing
+        try (var repo = new ConfigRepo()) {
+            cboExplorer.setSelectedItem(repo.getLookupProviderId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

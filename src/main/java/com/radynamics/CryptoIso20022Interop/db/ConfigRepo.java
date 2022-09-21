@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Bithomp;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
@@ -108,7 +109,11 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public String getLookupProviderId() throws Exception {
-        return single("lookupProviderId").orElse(null);
+        return single("lookupProviderId").orElse(Bithomp.Id);
+    }
+
+    public void setLookupProviderId(String value) throws Exception {
+        saveOrUpdate("lookupProviderId", value);
     }
 
     private Optional<String> single(String key) throws Exception {

@@ -14,6 +14,7 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
     private final String baseUrl = "https://xrpscan.com";
 
     public static final String Id = "xrpscan";
+    public static final String displayName = "XRPScan";
 
     @Override
     public void open(Wallet wallet) {

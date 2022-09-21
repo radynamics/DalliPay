@@ -15,6 +15,7 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
     private final String baseUrl;
 
     public static final String Id = "xrpl.org";
+    public static final String displayName = "xrpl.org";
 
     public XrplOrg(Network network) {
         switch (network) {
