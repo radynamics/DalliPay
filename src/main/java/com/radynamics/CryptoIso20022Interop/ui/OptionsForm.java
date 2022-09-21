@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.ui.options.GeneralPane;
 import com.radynamics.CryptoIso20022Interop.ui.options.ReceiverPane;
 
@@ -49,20 +50,26 @@ public class OptionsForm extends JPanel implements MainFormPane {
     }
 
     private void save() {
-        try {
-            generalPane.save();
-            receiverPane.save();
-
-            raiseChanged();
-            JOptionPane.showMessageDialog(this, "Settings saved successfully.", "Saved", JOptionPane.INFORMATION_MESSAGE);
+        try (var repo = new ConfigRepo()) {
+            generalPane.save(repo);
+            receiverPane.save(repo);
+            repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
+            return;
         }
+
+        raiseChanged();
+        JOptionPane.showMessageDialog(this, "Settings saved successfully.", "Saved", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void load() {
-        generalPane.load();
-        receiverPane.load();
+        try (var repo = new ConfigRepo()) {
+            generalPane.load(repo);
+            receiverPane.load(repo);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
     }
 
     @Override

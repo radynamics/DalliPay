@@ -69,31 +69,23 @@ public class ReceiverPane extends JPanel {
         return cbo;
     }
 
-    public void save() throws Exception {
+    public void save(ConfigRepo repo) throws Exception {
         xrplPriceOracleEditor.apply();
         xrplPriceOracleConfig.set(xrplPriceOracleEditor.issuedCurrencies());
 
-        try (var repo = new ConfigRepo()) {
-            xrplPriceOracleConfig.save(repo);
-            repo.setBookingDateFormat((DateFormat) cboBookingFormat.getSelectedItem());
-            repo.setValutaDateFormat((DateFormat) cboValutaFormat.getSelectedItem());
-            repo.setCreditorReferenceIfMissing(txtCreditorReference.getText());
-
-            repo.commit();
-        }
+        xrplPriceOracleConfig.save(repo);
+        repo.setBookingDateFormat((DateFormat) cboBookingFormat.getSelectedItem());
+        repo.setValutaDateFormat((DateFormat) cboValutaFormat.getSelectedItem());
+        repo.setCreditorReferenceIfMissing(txtCreditorReference.getText());
     }
 
-    public void load() {
-        try (var repo = new ConfigRepo()) {
-            xrplPriceOracleConfig.load(repo);
-            xrplPriceOracleEditor.load(Arrays.asList(xrplPriceOracleConfig.issuedCurrencies()));
+    public void load(ConfigRepo repo) throws Exception {
+        xrplPriceOracleConfig.load(repo);
+        xrplPriceOracleEditor.load(Arrays.asList(xrplPriceOracleConfig.issuedCurrencies()));
 
-            cboBookingFormat.setSelectedItem(repo.getBookingDateFormat());
-            cboValutaFormat.setSelectedItem(repo.getValutaDateFormat());
-            var referenceNo = repo.getCreditorReferenceIfMissing();
-            txtCreditorReference.setText(referenceNo == null ? "" : referenceNo.getUnformatted());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+        cboBookingFormat.setSelectedItem(repo.getBookingDateFormat());
+        cboValutaFormat.setSelectedItem(repo.getValutaDateFormat());
+        var referenceNo = repo.getCreditorReferenceIfMissing();
+        txtCreditorReference.setText(referenceNo == null ? "" : referenceNo.getUnformatted());
     }
 }

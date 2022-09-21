@@ -152,19 +152,11 @@ public class GeneralPane extends JPanel {
         }
     }
 
-    public void save() throws Exception {
-        try (var repo = new ConfigRepo()) {
-            repo.setLookupProviderId(cboExplorer.getSelectedItem().toString());
-
-            repo.commit();
-        }
+    public void save(ConfigRepo repo) throws Exception {
+        repo.setLookupProviderId(cboExplorer.getSelectedItem().toString());
     }
 
-    public void load() {
-        try (var repo = new ConfigRepo()) {
-            cboExplorer.setSelectedItem(repo.getLookupProviderId());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    public void load(ConfigRepo repo) throws Exception {
+        cboExplorer.setSelectedItem(repo.getLookupProviderId());
     }
 }
