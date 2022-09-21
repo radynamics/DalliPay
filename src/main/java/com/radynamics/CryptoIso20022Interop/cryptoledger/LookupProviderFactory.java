@@ -7,13 +7,14 @@ import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 public class LookupProviderFactory {
     public static WalletLookupProvider createWalletLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
+        var networkType = ledger.getNetwork().getType();
         switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(ledger.getNetwork().getType());
+                    return new Bithomp(networkType);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(ledger.getNetwork().getType());
+                    return createXrpScan(networkType);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -23,13 +24,14 @@ public class LookupProviderFactory {
 
     public static TransactionLookupProvider createTransactionLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
+        var networkType = ledger.getNetwork().getType();
         switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(ledger.getNetwork().getType());
+                    return new Bithomp(networkType);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(ledger.getNetwork().getType());
+                    return createXrpScan(networkType);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
