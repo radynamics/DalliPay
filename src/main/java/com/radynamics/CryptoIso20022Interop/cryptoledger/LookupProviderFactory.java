@@ -74,7 +74,7 @@ public class LookupProviderFactory {
 
     private static XrpScan createXrpScan(Network network) throws LookupProviderException {
         if (network == Network.Test) {
-            throw new LookupProviderException(String.format("XrpScan.com doesn't support test network."));
+            throw new LookupProviderException(String.format("%s doesn't support test network.", XrpScan.displayName));
         }
         return new XrpScan();
     }
