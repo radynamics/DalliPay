@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Bithomp;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrpScan;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplOrg;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 
 public class LookupProviderFactory {
@@ -13,6 +14,8 @@ public class LookupProviderFactory {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(networkType);
+                } else if (lookupProviderId.equals(XrplOrg.Id)) {
+                    return new XrplOrg(networkType);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
                     return createXrpScan(networkType);
                 }
@@ -30,6 +33,8 @@ public class LookupProviderFactory {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(networkType);
+                } else if (lookupProviderId.equals(XrplOrg.Id)) {
+                    return new XrplOrg(networkType);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
                     return createXrpScan(networkType);
                 }
