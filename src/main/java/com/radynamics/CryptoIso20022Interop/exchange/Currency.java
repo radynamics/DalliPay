@@ -20,6 +20,11 @@ public class Currency {
         this.issuer = issuer;
     }
 
+    public boolean sameCode(Currency ccy) {
+        if (ccy == null) return false;
+        return code.equals(ccy.getCode());
+    }
+
     public String getCode() {
         return code;
     }

@@ -27,6 +27,7 @@ public class PaymentDetailForm extends JDialog {
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
     private MoneyLabel lblAmountText;
+    private JLabel lblEditExchangeRate;
 
     public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -100,12 +101,13 @@ public class PaymentDetailForm extends JDialog {
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
                 lblAmountText = new MoneyLabel(this, payment.getLedger());
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
+
+                var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+                lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
                 {
-                    var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
-                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit...", enabled));
-                    lbl.addMouseListener(new MouseAdapter() {
+                    lblEditExchangeRate.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             if (enabled && e.getClickCount() == 1) {
@@ -113,8 +115,8 @@ public class PaymentDetailForm extends JDialog {
                             }
                         }
                     });
-                    lbl.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                    secondLine.add(lbl);
+                    lblEditExchangeRate.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+                    secondLine.add(lblEditExchangeRate);
                 }
                 anchorComponentTopLeft = createRow(row++, "Amount:", lblAmountText, secondLine, false);
             }
@@ -196,6 +198,9 @@ public class PaymentDetailForm extends JDialog {
 
     private void refreshAmountsText() {
         lblAmountText.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
+
+        lblLedgerAmount.setVisible(!payment.isUserCcyEqualTransactionCcy());
+        lblEditExchangeRate.setVisible(!payment.isUserCcyEqualTransactionCcy());
 
         var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {

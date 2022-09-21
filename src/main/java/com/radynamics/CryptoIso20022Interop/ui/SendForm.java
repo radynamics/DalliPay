@@ -181,10 +181,11 @@ public class SendForm extends JPanel implements MainFormPane {
         Executors.newCachedThreadPool().submit(() -> {
             try {
                 var t = new TransactionTranslator(transformInstruction, currencyConverter);
-                var payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
+                payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
 
                 var br = new BalanceRefresher();
                 br.refreshAllSenderWallets(payments);
+                t.applyUserCcy(payments);
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);

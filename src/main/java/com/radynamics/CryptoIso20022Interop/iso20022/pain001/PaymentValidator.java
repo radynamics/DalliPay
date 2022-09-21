@@ -49,7 +49,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             list.addAll(Arrays.asList(historyValidator.validate(t)));
         }
 
-        if (t.getExchangeRate() == null) {
+        if (t.getExchangeRate() == null && !t.isUserCcyEqualTransactionCcy()) {
             var pair = new CurrencyPair(t.getAmountTransaction().getCcy().getCode(), t.getUserCcyCodeOrEmpty());
             list.add(new ValidationResult(ValidationState.Error, String.format("No exchange rate for %s available.", pair.getDisplayText())));
         }

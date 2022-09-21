@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.CurrencyRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -35,7 +36,7 @@ public class TransactionTranslator {
             }
 
             var targetCcy = getTargetCcy(t);
-            if (t.getAmountTransaction().getCcy().equals(targetCcy)) {
+            if (t.getAmountTransaction().getCcy().sameCode(targetCcy)) {
                 if (t.isAmountUnknown()) {
                     t.setAmount(t.getAmountTransaction());
                     t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
@@ -68,6 +69,15 @@ public class TransactionTranslator {
         }
         var account = transformInstruction.getAccountOrNull(wallet);
         return account == null ? new OtherAccount(wallet.getPublicKey()) : account;
+    }
+
+    public void applyUserCcy(Payment[] payments) {
+        for (var t : payments) {
+            if (t.getSenderWallet() != null) {
+                var cr = new CurrencyRefresher(t.getSenderWallet().getBalances());
+                cr.refresh(t);
+            }
+        }
     }
 
     public void setTargetCcy(Currency targetCcy) {

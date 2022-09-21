@@ -96,11 +96,18 @@ public class Payment {
     private void refreshTransactionAmount() {
         if (exchangeRate == null) {
             cryptoTrx.setAmount(Money.zero(cryptoTrx.getAmount()));
-        } else {
-            var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
-            var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
-            cryptoTrx.setAmount(Money.of(amt, cryptoTrx.getAmount().getCcy()));
+            return;
         }
+
+        if (ccy.getIssuer() != null) {
+            setExchangeRate(null);
+            cryptoTrx.setAmount(Money.of(amount, ccy));
+            return;
+        }
+
+        var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
+        var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
+        cryptoTrx.setAmount(Money.of(amt, cryptoTrx.getAmount().getCcy()));
     }
 
     private void refreshAmount() {
@@ -178,6 +185,10 @@ public class Payment {
         } else {
             refreshAmount();
         }
+    }
+
+    public boolean isUserCcyEqualTransactionCcy() {
+        return getUserCcy().equals(getAmountTransaction().getCcy());
     }
 
     public Money getAmountTransaction() {
