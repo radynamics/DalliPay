@@ -1,7 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,6 +67,14 @@ public class AccountMapping {
 
     public boolean bothSame() {
         return allPresent() && StringUtils.equals(getAccount().getUnformatted(), getWallet().getPublicKey());
+    }
+
+    public boolean isWalletPresentAndValid() {
+        if (walletMissing()) {
+            return false;
+        }
+
+        return WalletValidator.isValidFormat(LedgerFactory.create(wallet.getLedgerId()), wallet);
     }
 
     @Override

@@ -62,14 +62,25 @@ public class AccountMappingRepo implements AutoCloseable {
         return o;
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Account account, Wallet wallet) throws SQLException {
-        if (account == null || wallet == null) {
+    public Optional<AccountMapping> single(LedgerId ledgerId, Account account) throws SQLException {
+        if (account == null) {
             return Optional.empty();
         }
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? AND walletPublicKey = ? LIMIT 1");
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? LIMIT 1");
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, account.getUnformatted());
-        ps.setString(3, wallet.getPublicKey());
+
+        var rs = ps.executeQuery();
+        return rs.next() ? Optional.of(read(rs)) : Optional.empty();
+    }
+
+    public Optional<AccountMapping> single(LedgerId ledgerId, Wallet wallet) throws SQLException {
+        if (wallet == null) {
+            return Optional.empty();
+        }
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? LIMIT 1");
+        ps.setInt(1, ledgerId.numericId());
+        ps.setString(2, wallet.getPublicKey());
 
         var rs = ps.executeQuery();
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
