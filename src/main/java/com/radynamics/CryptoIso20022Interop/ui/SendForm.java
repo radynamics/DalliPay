@@ -364,7 +364,9 @@ public class SendForm extends JPanel implements MainFormPane {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
         validator.getHistoryValidator().clearCache();
-        validator.getHistoryValidator().loadHistory(payments);
+        for (var p : payments) {
+            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
+        }
         loadTable(payments);
     }
 
