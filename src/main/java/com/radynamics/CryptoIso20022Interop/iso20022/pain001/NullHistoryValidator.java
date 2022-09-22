@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
@@ -10,7 +12,7 @@ public class NullHistoryValidator implements WalletHistoryValidator {
     }
 
     @Override
-    public void loadHistory(Payment[] payments) {
+    public void loadHistory(Ledger ledger, Wallet wallet) {
         // do nothing
     }
 

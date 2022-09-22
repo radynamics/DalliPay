@@ -217,8 +217,8 @@ public class PaymentTable extends JPanel {
         for (var p : data) {
             if (mi.apply(p)) {
                 // Ensure a newly entered senderWallet's history is loaded for following validation calls.
-                if (mapping.isWalletPresentAndValid()) {
-                    validator.getHistoryValidator().loadHistory(new Payment[]{p});
+                if (mapping.isWalletPresentAndValid() && p.getSenderWallet() != null) {
+                    validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
                 }
                 model.onAccountOrWalletsChanged(p);
             }

@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentHistoryProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
@@ -47,7 +48,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
         var key = createKey(p.getSenderWallet());
         synchronized (this) {
             if (!senderPaymentHistory.containsKey(key)) {
-                loadHistory(p);
+                loadHistory(ledger, p.getSenderWallet());
             }
         }
 
@@ -68,29 +69,22 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
         return wallet.getPublicKey();
     }
 
-    private void loadHistory(Payment p) {
-        loadHistory(new Payment[]{p});
-    }
+    public void loadHistory(Ledger ledger, Wallet wallet) {
+        if (wallet == null) {
+            return;
+        }
 
-    public void loadHistory(Payment[] payments) {
-        for (var p : payments) {
-            if (p.getSenderWallet() == null) {
-                continue;
-            }
+        var key = createKey(wallet);
+        if (!senderPaymentHistory.containsKey(key)) {
+            var paymentHistory = ledger.getPaymentHistoryProvider();
 
-            var key = createKey(p.getSenderWallet());
-            if (!senderPaymentHistory.containsKey(key)) {
-                var ledger = p.getLedger();
-                var paymentHistory = ledger.getPaymentHistoryProvider();
+            var desired = ZonedDateTime.now().minusDays(40);
+            var availableSince = ledger.getNetwork().historyAvailableSince();
+            var since = desired.isBefore(availableSince) ? availableSince : desired;
 
-                var desired = ZonedDateTime.now().minusDays(40);
-                var availableSince = ledger.getNetwork().historyAvailableSince();
-                var since = desired.isBefore(availableSince) ? availableSince : desired;
-
-                // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
-                paymentHistory.load(ledger, p.getSenderWallet(), Utils.endOfDay(since));
-                senderPaymentHistory.put(key, paymentHistory);
-            }
+            // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
+            paymentHistory.load(ledger, wallet, Utils.endOfDay(since));
+            senderPaymentHistory.put(key, paymentHistory);
         }
     }
 }
