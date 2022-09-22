@@ -206,21 +206,7 @@ public class PaymentTable extends JPanel {
         }
 
         try (var repo = new AccountMappingRepo()) {
-            if (mapping.allPresent()) {
-                // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
-                if (mapping.bothSame()) {
-                    if (mapping.isPersisted()) {
-                        repo.delete(mapping);
-                    }
-                } else {
-                    if (mapping.isWalletPresentAndValid()) {
-                        repo.saveOrUpdate(mapping);
-                    }
-                }
-            } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
-                // Interpret "" as removal. During creation values are maybe not yet defined.
-                repo.delete(mapping);
-            }
+            repo.persistOrDelete(mapping);
             repo.commit();
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);

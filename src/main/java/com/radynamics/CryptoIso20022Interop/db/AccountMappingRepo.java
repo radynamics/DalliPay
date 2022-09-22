@@ -86,7 +86,7 @@ public class AccountMappingRepo implements AutoCloseable {
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
     }
 
-    public void saveOrUpdate(AccountMapping value) throws Exception {
+    private void saveOrUpdate(AccountMapping value) throws Exception {
         String sql = "INSERT OR REPLACE INTO accountmapping (id, ledgerId, bankAccount, walletPublicKey) \n"
                 + "	    VALUES ((SELECT id FROM accountmapping WHERE id = ?), ?, ?, ?);";
         var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -106,11 +106,30 @@ public class AccountMappingRepo implements AutoCloseable {
         }
     }
 
-    public void delete(AccountMapping value) throws Exception {
+    private void delete(AccountMapping value) throws Exception {
         var ps = conn.prepareStatement("DELETE FROM accountmapping WHERE id = ?");
         ps.setLong(1, value.getId());
 
         Database.executeUpdate(ps, 1);
+    }
+
+
+    public void persistOrDelete(AccountMapping mapping) throws Exception {
+        if (mapping.allPresent()) {
+            // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
+            if (mapping.bothSame()) {
+                if (mapping.isPersisted()) {
+                    delete(mapping);
+                }
+            } else {
+                if (mapping.isWalletPresentAndValid()) {
+                    saveOrUpdate(mapping);
+                }
+            }
+        } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
+            // Interpret "" as removal. During creation values are maybe not yet defined.
+            delete(mapping);
+        }
     }
 
     public void commit() throws SQLException {
