@@ -28,6 +28,11 @@ public class WalletValidator {
         return list.toArray(new ValidationResult[0]);
     }
 
+    public static boolean isValidFormat(Ledger ledger, Wallet wallet) {
+        var v = new WalletValidator(ledger);
+        return v.validateFormat(wallet) == null;
+    }
+
     public ValidationResult validateFormat(Wallet wallet) {
         return validateFormat(wallet, null);
     }

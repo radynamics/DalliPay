@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -173,7 +172,13 @@ public class PaymentTable extends JPanel {
         mapping.setAccount(a);
         mapping.setWallet(w);
         try (var repo = new AccountMappingRepo()) {
-            mapping = repo.single(t.getLedger().getId(), a, w).orElse(mapping);
+            if (editedActor == Actor.Sender) {
+                // User maps an account number to a wallet
+                mapping = repo.single(t.getLedger().getId(), a).orElse(mapping);
+            } else {
+                // User maps a wallet to an account number
+                mapping = repo.single(t.getLedger().getId(), w).orElse(mapping);
+            }
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
@@ -201,19 +206,7 @@ public class PaymentTable extends JPanel {
         }
 
         try (var repo = new AccountMappingRepo()) {
-            if (mapping.allPresent()) {
-                // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
-                if (mapping.bothSame()) {
-                    if (mapping.isPersisted()) {
-                        repo.delete(mapping);
-                    }
-                } else {
-                    repo.saveOrUpdate(mapping);
-                }
-            } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
-                // Interpret "" as removal. During creation values are maybe not yet defined.
-                repo.delete(mapping);
-            }
+            repo.persistOrDelete(mapping);
             repo.commit();
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
@@ -224,7 +217,9 @@ public class PaymentTable extends JPanel {
         for (var p : data) {
             if (mi.apply(p)) {
                 // Ensure a newly entered senderWallet's history is loaded for following validation calls.
-                validator.getHistoryValidator().loadHistory(new Payment[]{p});
+                if (mapping.isWalletPresentAndValid()) {
+                    validator.getHistoryValidator().loadHistory(new Payment[]{p});
+                }
                 model.onAccountOrWalletsChanged(p);
             }
         }

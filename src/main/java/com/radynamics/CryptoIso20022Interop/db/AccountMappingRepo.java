@@ -62,14 +62,25 @@ public class AccountMappingRepo implements AutoCloseable {
         return o;
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Account account, Wallet wallet) throws SQLException {
-        if (account == null || wallet == null) {
+    public Optional<AccountMapping> single(LedgerId ledgerId, Account account) throws SQLException {
+        if (account == null) {
             return Optional.empty();
         }
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? AND walletPublicKey = ? LIMIT 1");
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? LIMIT 1");
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, account.getUnformatted());
-        ps.setString(3, wallet.getPublicKey());
+
+        var rs = ps.executeQuery();
+        return rs.next() ? Optional.of(read(rs)) : Optional.empty();
+    }
+
+    public Optional<AccountMapping> single(LedgerId ledgerId, Wallet wallet) throws SQLException {
+        if (wallet == null) {
+            return Optional.empty();
+        }
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? LIMIT 1");
+        ps.setInt(1, ledgerId.numericId());
+        ps.setString(2, wallet.getPublicKey());
 
         var rs = ps.executeQuery();
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
@@ -95,11 +106,30 @@ public class AccountMappingRepo implements AutoCloseable {
         }
     }
 
-    public void delete(AccountMapping value) throws Exception {
+    private void delete(AccountMapping value) throws Exception {
         var ps = conn.prepareStatement("DELETE FROM accountmapping WHERE id = ?");
         ps.setLong(1, value.getId());
 
         Database.executeUpdate(ps, 1);
+    }
+
+
+    public void persistOrDelete(AccountMapping mapping) throws Exception {
+        if (mapping.allPresent()) {
+            // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
+            if (mapping.bothSame()) {
+                if (mapping.isPersisted()) {
+                    delete(mapping);
+                }
+            } else {
+                if (mapping.isWalletPresentAndValid()) {
+                    saveOrUpdate(mapping);
+                }
+            }
+        } else if (mapping.isPersisted() && mapping.accountOrWalletMissing()) {
+            // Interpret "" as removal. During creation values are maybe not yet defined.
+            delete(mapping);
+        }
     }
 
     public void commit() throws SQLException {
