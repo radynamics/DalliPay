@@ -5,6 +5,10 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import java.util.Hashtable;
 
 public class BalanceRefresher {
+    public void refreshSenderWallet(Payment payment) {
+        refreshAllSenderWallets(new Payment[]{payment});
+    }
+
     public void refreshAllSenderWallets(Payment[] payments) {
         var refreshed = new Hashtable<String, MoneyBag>();
         for (var p : payments) {

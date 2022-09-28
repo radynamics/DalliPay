@@ -39,7 +39,7 @@ public class WalletValidator {
 
     private ValidationResult validateFormat(Wallet wallet, String senderOrReceiver) {
         var prefix = senderOrReceiver == null ? "" : String.format("%s ", senderOrReceiver);
-        return ledger.isValidPublicKey(wallet.getPublicKey())
+        return wallet != null && ledger.isValidPublicKey(wallet.getPublicKey())
                 ? null
                 : new ValidationResult(ValidationState.Error, String.format("%sCryptocurrency wallet isn't a valid address.", prefix));
     }

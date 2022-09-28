@@ -25,6 +25,10 @@ public class Currency {
         return code.equals(ccy.getCode());
     }
 
+    public Currency withoutIssuer() {
+        return new Currency(code);
+    }
+
     public String getCode() {
         return code;
     }

@@ -20,6 +20,10 @@ public class TransactionTranslator {
         this.currencyConverter = currencyConverter;
     }
 
+    private Payment[] apply(Payment transaction) {
+        return apply(new Payment[]{transaction});
+    }
+
     public Payment[] apply(Payment[] transactions) {
         for (var t : transactions) {
             if (t.getSenderAccount() == null) {
@@ -71,11 +75,16 @@ public class TransactionTranslator {
         return account == null ? new OtherAccount(wallet.getPublicKey()) : account;
     }
 
+    public void applyUserCcy(Payment payment) {
+        applyUserCcy(new Payment[]{payment});
+    }
+
     public void applyUserCcy(Payment[] payments) {
+        var cr = new CurrencyRefresher();
         for (var t : payments) {
-            if (t.getSenderWallet() != null) {
-                var cr = new CurrencyRefresher(t.getSenderWallet().getBalances());
-                cr.refresh(t);
+            cr.refresh(t);
+            if (t.getUserCcy().getIssuer() == null) {
+                apply(t);
             }
         }
     }

@@ -142,6 +142,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
+            table.addSenderLedgerChangedListener(this::onWalletChanged);
             table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
         }
@@ -159,6 +160,16 @@ public class SendForm extends JPanel implements MainFormPane {
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
         }
+    }
+
+    private void onWalletChanged(Payment p, Wallet newWallet) {
+        // Used transaction currency depends on sender/receiver wallets
+        if (WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet())) {
+            var br = new BalanceRefresher();
+            br.refreshSenderWallet(p);
+        }
+        var t = new TransactionTranslator(transformInstruction, currencyConverter);
+        t.applyUserCcy(p);
     }
 
     private void onTxtInputChanged() {

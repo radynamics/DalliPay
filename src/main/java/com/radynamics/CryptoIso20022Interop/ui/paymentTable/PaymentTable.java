@@ -35,6 +35,8 @@ public class PaymentTable extends JPanel {
     private Payment[] data = new Payment[0];
     private PaymentValidator validator;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
+    private ArrayList<WalletChangedListener> senderLedgerChangedListener = new ArrayList<>();
+    private ArrayList<WalletChangedListener> receiverLedgerChangedListener = new ArrayList<>();
     private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
 
@@ -48,6 +50,8 @@ public class PaymentTable extends JPanel {
         model = new PaymentTableModel(exchangeRateLoader, validator);
         model.setActor(actor);
         model.addProgressListener(progress -> raiseProgress(progress));
+        model.addSenderLedgerChangedListener(this::raiseSenderLedgerChanged);
+        model.addReceiverLedgerChangedListener(this::raiseReceiverLedgerChanged);
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -333,6 +337,26 @@ public class PaymentTable extends JPanel {
     private void raiseRefresh(Payment p) {
         for (var l : refreshListener) {
             l.onRefresh(p);
+        }
+    }
+
+    public void addSenderLedgerChangedListener(WalletChangedListener l) {
+        senderLedgerChangedListener.add(l);
+    }
+
+    private void raiseSenderLedgerChanged(Payment p, Wallet wallet) {
+        for (var l : senderLedgerChangedListener) {
+            l.onChanged(p, wallet);
+        }
+    }
+
+    public void addReceiverLedgerChangedListener(WalletChangedListener l) {
+        receiverLedgerChangedListener.add(l);
+    }
+
+    private void raiseReceiverLedgerChanged(Payment p, Wallet wallet) {
+        for (var l : receiverLedgerChangedListener) {
+            l.onChanged(p, wallet);
         }
     }
 

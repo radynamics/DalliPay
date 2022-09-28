@@ -25,7 +25,9 @@ public class PaymentTableModel extends AbstractTableModel {
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
-    private ArrayList<ProgressListener> listener = new ArrayList<>();
+    private ArrayList<ProgressListener> progressListener = new ArrayList<>();
+    private ArrayList<WalletChangedListener> senderLedgerChangedListener = new ArrayList<>();
+    private ArrayList<WalletChangedListener> receiverLedgerChangedListener = new ArrayList<>();
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private boolean editable;
 
@@ -106,9 +108,13 @@ public class PaymentTableModel extends AbstractTableModel {
             item.status = (ValidationState) value;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
             if (value instanceof WalletCellValue) {
-                item.setSenderLedger((WalletCellValue) value);
+                var cellValue = (WalletCellValue) value;
+                item.setSenderLedger(cellValue);
+                raiseSenderLedgerChanged(item.payment, cellValue.getWallet());
             } else {
+                // Invalid wallet address
                 item.setSenderLedger((String) value);
+                raiseSenderLedgerChanged(item.payment, null);
             }
         } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
             item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
@@ -116,9 +122,13 @@ public class PaymentTableModel extends AbstractTableModel {
             item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
             if (value instanceof WalletCellValue) {
-                item.setReceiverLedger((WalletCellValue) value);
+                var cellValue = (WalletCellValue) value;
+                item.setReceiverLedger(cellValue);
+                raiseReceiverLedgerChanged(item.payment, cellValue.getWallet());
             } else {
+                // Invalid wallet address
                 item.setReceiverLedger((String) value);
+                raiseReceiverLedgerChanged(item.payment, null);
             }
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             item.setAmount((Double) value);
@@ -315,12 +325,32 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void addProgressListener(ProgressListener l) {
-        listener.add(l);
+        progressListener.add(l);
     }
 
     private void raiseProgress(Progress progress) {
-        for (var l : listener) {
+        for (var l : progressListener) {
             l.onProgress(progress);
+        }
+    }
+
+    public void addSenderLedgerChangedListener(WalletChangedListener l) {
+        senderLedgerChangedListener.add(l);
+    }
+
+    private void raiseSenderLedgerChanged(Payment p, Wallet wallet) {
+        for (var l : senderLedgerChangedListener) {
+            l.onChanged(p, wallet);
+        }
+    }
+
+    public void addReceiverLedgerChangedListener(WalletChangedListener l) {
+        receiverLedgerChangedListener.add(l);
+    }
+
+    private void raiseReceiverLedgerChanged(Payment p, Wallet wallet) {
+        for (var l : receiverLedgerChangedListener) {
+            l.onChanged(p, wallet);
         }
     }
 

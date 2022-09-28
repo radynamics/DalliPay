@@ -7,20 +7,30 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import java.util.Arrays;
 
 public class CurrencyRefresher {
-    private final MoneyBag senderBalances;
-
-    public CurrencyRefresher(MoneyBag senderBalances) {
-        this.senderBalances = senderBalances;
-    }
-
     public void refresh(Payment p) {
-        var available = Arrays.stream(senderBalances.all()).map(Money::getCcy).toArray(Currency[]::new);
+        var senderValid = WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet());
+        var receiverValid = WalletValidator.isValidFormat(p.getLedger(), p.getReceiverWallet());
+
+        // Use ledger native currency if information about sender/receiver is missing
+        if (!senderValid || !receiverValid) {
+            setAmountLedgerUnit(p);
+            return;
+        }
+
+        var available = Arrays.stream(p.getSenderWallet().getBalances().all()).map(Money::getCcy).toArray(Currency[]::new);
         Currency ccyAnyIssuer = findSameCode(available, p.getUserCcy());
+        // Use ledger native currency if expected currency code isn't available
         if (ccyAnyIssuer == null) {
+            setAmountLedgerUnit(p);
             return;
         }
 
         p.setAmount(Money.of(p.getAmount(), ccyAnyIssuer));
+    }
+
+    private void setAmountLedgerUnit(Payment p) {
+        p.setExchangeRate(null);
+        p.setAmount(Money.of(p.getAmount(), p.getUserCcy().withoutIssuer()));
     }
 
     private static Currency findSameCode(Currency[] available, Currency ccy) {
