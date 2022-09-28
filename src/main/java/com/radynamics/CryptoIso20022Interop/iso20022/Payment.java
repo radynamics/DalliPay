@@ -95,7 +95,7 @@ public class Payment {
 
     private void refreshTransactionAmount() {
         if (exchangeRate == null) {
-            if (ccy.getIssuer() == null) {
+            if (ccy.getIssuer() == null && !ccy.equals(cryptoTrx.getAmount().getCcy())) {
                 // Use ledger native currency if there is no specific issued currency
                 cryptoTrx.setAmount(Money.of(0, new Currency(cryptoTrx.getLedger().getNativeCcySymbol())));
             } else {
