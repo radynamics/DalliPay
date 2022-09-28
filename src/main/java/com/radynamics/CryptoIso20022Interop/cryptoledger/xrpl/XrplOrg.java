@@ -14,8 +14,8 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
     private final static Logger log = LogManager.getLogger(XrplOrg.class);
     private final String baseUrl;
 
-    public static final String Id = "xrpl.org";
-    public static final String displayName = "xrpl.org";
+    public static final String Id = "xrplExplorer";
+    public static final String displayName = "XRPL Explorer";
 
     public XrplOrg(Network network) {
         switch (network) {
