@@ -32,7 +32,7 @@ public class PaymentCompare {
             final Double tolerancePercent = 0.005;
             return Math.abs(first.getAmount() - second.getAmount()) <= first.getAmount() * tolerancePercent;
         } else {
-            var sameCcy = StringUtils.equals(first.getAmountTransaction().getCcy().getCode(), second.getAmountTransaction().getCcy().getCode());
+            var sameCcy = first.getAmountTransaction().getCcy().equals(second.getAmountTransaction().getCcy());
             final Double tolerancePercent = 0.02;
             return sameCcy && Math.abs(first.getAmountTransaction().minus(second.getAmountTransaction()).getNumber().doubleValue()) <= first.getAmountTransaction().multiply(tolerancePercent).getNumber().doubleValue();
         }
