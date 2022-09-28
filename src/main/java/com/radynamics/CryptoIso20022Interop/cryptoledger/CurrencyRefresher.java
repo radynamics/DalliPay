@@ -17,15 +17,21 @@ public class CurrencyRefresher {
             return;
         }
 
-        var available = Arrays.stream(p.getSenderWallet().getBalances().all()).map(Money::getCcy).toArray(Currency[]::new);
-        Currency ccyAnyIssuer = findSameCode(available, p.getUserCcy());
+        var ccyAnyIssuerSender = findSameCode(p.getSenderWallet().getBalances(), p.getUserCcy());
         // Use ledger native currency if expected currency code isn't available
-        if (ccyAnyIssuer == null) {
+        if (ccyAnyIssuerSender == null) {
             setAmountLedgerUnit(p);
             return;
         }
 
-        p.setAmount(Money.of(p.getAmount(), ccyAnyIssuer));
+        var ccyBothAccepting = findEqual(p.getSenderWallet().getBalances(), p.getReceiverWallet().getBalances(), ccyAnyIssuerSender);
+        // Use ledger native currency if expected currency isn't available on both sides
+        if (ccyBothAccepting == null) {
+            setAmountLedgerUnit(p);
+            return;
+        }
+
+        p.setAmount(Money.of(p.getAmount(), ccyBothAccepting));
     }
 
     private void setAmountLedgerUnit(Payment p) {
@@ -33,7 +39,27 @@ public class CurrencyRefresher {
         p.setAmount(Money.of(p.getAmount(), p.getUserCcy().withoutIssuer()));
     }
 
-    private static Currency findSameCode(Currency[] available, Currency ccy) {
+    private static Currency findEqual(MoneyBag first, MoneyBag second, Currency ccyAnyIssuer) {
+        var firstCandidates = filter(first, ccyAnyIssuer);
+        var secondCandidates = filter(second, ccyAnyIssuer);
+
+        for (var candidate : firstCandidates) {
+            for (var secondCandidate : secondCandidates) {
+                if (candidate.equals(secondCandidate)) {
+                    return candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static Currency[] filter(MoneyBag bag, Currency ccyAnyIssuer) {
+        return Arrays.stream(bag.all()).map(Money::getCcy).filter(o -> o.sameCode(ccyAnyIssuer)).toArray(Currency[]::new);
+    }
+
+    private static Currency findSameCode(MoneyBag balance, Currency ccy) {
+        var available = Arrays.stream(balance.all()).map(Money::getCcy).toArray(Currency[]::new);
         for (var o : available) {
             if (o.sameCode(ccy)) {
                 return o;

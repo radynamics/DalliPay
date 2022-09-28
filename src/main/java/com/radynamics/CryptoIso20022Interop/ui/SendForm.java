@@ -142,7 +142,8 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
-            table.addSenderLedgerChangedListener(this::onWalletChanged);
+            table.addSenderLedgerChangedListener(this::onSenderWalletChanged);
+            table.addReceiverLedgerChangedListener(this::onReceiverWalletChanged);
             table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
         }
@@ -162,11 +163,19 @@ public class SendForm extends JPanel implements MainFormPane {
         }
     }
 
-    private void onWalletChanged(Payment p, Wallet newWallet) {
+    private void onSenderWalletChanged(Payment p, Wallet newWallet) {
+        onWalletChanged(p, p.getSenderWallet());
+    }
+
+    private void onReceiverWalletChanged(Payment p, Wallet newWallet) {
+        onWalletChanged(p, p.getReceiverWallet());
+    }
+
+    private void onWalletChanged(Payment p, Wallet wallet) {
         // Used transaction currency depends on sender/receiver wallets
-        if (WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet())) {
+        if (WalletValidator.isValidFormat(p.getLedger(), wallet)) {
             var br = new BalanceRefresher();
-            br.refreshSenderWallet(p);
+            br.refresh(p.getLedger(), wallet);
         }
         var t = new TransactionTranslator(transformInstruction, currencyConverter);
         t.applyUserCcy(p);
