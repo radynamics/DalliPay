@@ -164,15 +164,19 @@ public class PaymentTable extends JPanel {
         var editedActor = getEditedActor(tcl.getColumn());
         AccountMapping mapping = new AccountMapping(t.getLedger().getId());
         Account a = null;
+        Wallet oldWallet = null;
+        Wallet newWallet = null;
         if (tcl.getOldValue() instanceof Account) {
             a = (Account) tcl.getOldValue();
+            oldWallet = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
+            // When changing an account, the wallet remains unchanged.
+            newWallet = oldWallet;
         } else if (tcl.getOldValue() instanceof WalletCellValue) {
             // While sending payments user is able to change "Receiver from Input". Account is not changeable.
             a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
+            oldWallet = createWalletOrNull(tcl.getOldValue());
+            newWallet = createWalletOrNull(tcl.getNewValue());
         }
-
-        var oldWallet = createWalletOrNull(tcl.getOldValue());
-        var newWallet = createWalletOrNull(tcl.getNewValue());
 
         mapping.setAccount(a);
         mapping.setWallet(oldWallet);
