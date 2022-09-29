@@ -154,7 +154,7 @@ public class MainForm extends JFrame {
         cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
         cmdNetwork.setFocusable(false);
         cmdNetwork.addActionListener(e -> {
-            transformInstruction.setNetwork(transformInstruction.getNetwork() == Network.Live ? Network.Test : Network.Live);
+            transformInstruction.setNetwork(transformInstruction.getNetwork().getType() == Network.Live ? Network.Test : Network.Live);
             refreshNetworkButton();
             sendingPanel.reload();
         });
@@ -165,9 +165,10 @@ public class MainForm extends JFrame {
 
     private void refreshNetworkButton() {
         var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
-        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> transformInstruction.getNetwork() == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
+        var networkInfo = transformInstruction.getNetwork();
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.getType() == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format("Currently using %s network", NetworkHelper.toShort(transformInstruction.getNetwork())));
+        cmdNetwork.setToolTipText(String.format("Currently using %s network (%s)", NetworkHelper.toShort(networkInfo.getType()), networkInfo.getUrl()));
     }
 
     public void setInputFileName(String inputFileName) {
