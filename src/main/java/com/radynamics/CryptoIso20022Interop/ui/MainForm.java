@@ -5,17 +5,16 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkHelper;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.update.OnlineUpdate;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
 
@@ -168,7 +167,7 @@ public class MainForm extends JFrame {
         var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> transformInstruction.getNetwork() == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format("Currently using %s network", transformInstruction.getNetwork() == Network.Live ? "MAIN" : "TEST"));
+        cmdNetwork.setToolTipText(String.format("Currently using %s network", NetworkHelper.toShort(transformInstruction.getNetwork())));
     }
 
     public void setInputFileName(String inputFileName) {
