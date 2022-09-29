@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
@@ -221,6 +222,7 @@ public class PaymentTable extends JPanel {
         }
 
         // Update all affected payments
+        var br = new BalanceRefresher();
         var mi = new MappingInfo(mapping, changedValue);
         for (var p : data) {
             if (mi.apply(p)) {
@@ -233,10 +235,12 @@ public class PaymentTable extends JPanel {
                         break;
                     }
                     case SenderWallet -> {
+                        br.refresh(p.getLedger(), p.getSenderWallet());
                         raiseSenderLedgerChanged(p, p.getSenderWallet());
                         break;
                     }
                     case ReceiverWallet -> {
+                        br.refresh(p.getLedger(), p.getReceiverWallet());
                         raiseReceiverLedgerChanged(p, p.getReceiverWallet());
                         break;
                     }

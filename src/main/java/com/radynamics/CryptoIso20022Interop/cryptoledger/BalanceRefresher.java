@@ -6,6 +6,8 @@ import java.util.Hashtable;
 import java.util.function.Function;
 
 public class BalanceRefresher {
+    private final Hashtable<String, MoneyBag> cache = new Hashtable<>();
+
     public void refreshAllSenderWallets(Payment[] payments) {
         refresh(payments, (Payment::getSenderWallet));
     }
@@ -16,28 +18,31 @@ public class BalanceRefresher {
     }
 
     private void refresh(Payment[] payments, Function<Payment, Wallet> getWallet) {
-        var refreshed = new Hashtable<String, MoneyBag>();
         for (var p : payments) {
-            var wallet = getWallet.apply(p);
-            if (wallet == null) {
-                continue;
-            }
-
-            // Use cached balance for other instances of the same wallet.
-            if (refreshed.containsKey(wallet.getPublicKey())) {
-                wallet.getBalances().replaceBy(refreshed.get(wallet.getPublicKey()));
-                continue;
-            }
-
-            refresh(p.getLedger(), wallet);
-            if (wallet.getBalances().isEmpty()) {
-                continue;
-            }
-            refreshed.put(wallet.getPublicKey(), wallet.getBalances());
+            refresh(p.getLedger(), getWallet.apply(p));
         }
     }
 
     public void refresh(Ledger ledger, Wallet wallet) {
+        loadOrGet(ledger, wallet);
+    }
+
+    private void loadOrGet(Ledger ledger, Wallet wallet) {
+        if (!WalletValidator.isValidFormat(ledger, wallet)) {
+            return;
+        }
+
+        var key = wallet.getPublicKey();
+        // Use cached balance for other instances of the same wallet.
+        if (cache.containsKey(key)) {
+            wallet.getBalances().replaceBy(cache.get(key));
+            return;
+        }
+
         ledger.refreshBalance(wallet);
+        if (wallet.getBalances().isEmpty()) {
+            return;
+        }
+        cache.put(key, wallet.getBalances());
     }
 }

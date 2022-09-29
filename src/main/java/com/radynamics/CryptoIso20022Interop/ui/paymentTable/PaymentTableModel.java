@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
@@ -115,6 +116,7 @@ public class PaymentTableModel extends AbstractTableModel {
                 raiseSenderLedgerChanged(item.payment, null);
             } else {
                 item.setSenderLedger(cellValue);
+                refreshBalances(item.payment, cellValue.getWallet());
                 raiseSenderLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
@@ -129,6 +131,7 @@ public class PaymentTableModel extends AbstractTableModel {
                 raiseReceiverLedgerChanged(item.payment, null);
             } else {
                 item.setReceiverLedger(cellValue);
+                refreshBalances(item.payment, cellValue.getWallet());
                 raiseReceiverLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_AMOUNT) == col) {
@@ -139,6 +142,11 @@ public class PaymentTableModel extends AbstractTableModel {
             throw new NotImplementedException(String.format("Setting value for column %s is not implemented", col));
         }
         fireTableCellUpdated(row, col);
+    }
+
+    private void refreshBalances(Payment payment, Wallet wallet) {
+        var br = new BalanceRefresher();
+        br.refresh(payment.getLedger(), wallet);
     }
 
     private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value) {

@@ -164,19 +164,15 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void onSenderWalletChanged(Payment p, Wallet newWallet) {
-        onWalletChanged(p, p.getSenderWallet());
+        onWalletChanged(p);
     }
 
     private void onReceiverWalletChanged(Payment p, Wallet newWallet) {
-        onWalletChanged(p, p.getReceiverWallet());
+        onWalletChanged(p);
     }
 
-    private void onWalletChanged(Payment p, Wallet wallet) {
+    private void onWalletChanged(Payment p) {
         // Used transaction currency depends on sender/receiver wallets
-        if (WalletValidator.isValidFormat(p.getLedger(), wallet)) {
-            var br = new BalanceRefresher();
-            br.refresh(p.getLedger(), wallet);
-        }
         var t = new TransactionTranslator(transformInstruction, currencyConverter);
         t.applyUserCcy(p);
     }
