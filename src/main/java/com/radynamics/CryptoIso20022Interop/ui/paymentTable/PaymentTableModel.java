@@ -224,12 +224,13 @@ public class PaymentTableModel extends AbstractTableModel {
 
     private CompletableFuture<Void> loadWalletInfoAsync(Payment p) {
         return walletInfoLoader.load(p).thenAccept(result -> {
-            var rowIndex = getRowIndex(result.getPayment());
+            var item = data[getRowIndex(result.getPayment())];
 
             var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
-            setValueAt(senderCellValue, rowIndex, getColumnIndex(COL_SENDER_LEDGER));
+            // Don't use setValueAt to prevent event raising during async load.
+            item.setSenderLedger(senderCellValue);
             var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
-            setValueAt(receiverCellValue, rowIndex, getColumnIndex(COL_RECEIVER_LEDGER));
+            item.setReceiverLedger(receiverCellValue);
         });
     }
 

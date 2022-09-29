@@ -204,7 +204,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
 
                 var br = new BalanceRefresher();
-                br.refreshAllSenderWallets(payments);
+                br.refresh(payments);
                 t.applyUserCcy(payments);
                 cf.complete(payments);
             } catch (Exception e) {

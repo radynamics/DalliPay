@@ -3,12 +3,22 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import java.util.Hashtable;
+import java.util.function.Function;
 
 public class BalanceRefresher {
     public void refreshAllSenderWallets(Payment[] payments) {
+        refresh(payments, (Payment::getSenderWallet));
+    }
+
+    public void refresh(Payment[] payments) {
+        refresh(payments, (Payment::getSenderWallet));
+        refresh(payments, (Payment::getReceiverWallet));
+    }
+
+    private void refresh(Payment[] payments, Function<Payment, Wallet> getWallet) {
         var refreshed = new Hashtable<String, MoneyBag>();
         for (var p : payments) {
-            var wallet = p.getSenderWallet();
+            var wallet = getWallet.apply(p);
             if (wallet == null) {
                 continue;
             }
