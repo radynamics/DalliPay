@@ -117,7 +117,8 @@ public class AccountMappingRepo implements AutoCloseable {
     public void persistOrDelete(AccountMapping mapping) throws Exception {
         if (mapping.allPresent()) {
             // When user clicks into cell and predefined value (ex senderWallet) matches other one (ex senderAccount).
-            if (mapping.bothSame()) {
+            // When user enters an invalid wallet remove mapping to prevent multiple wallets to same account after entering a valid wallet again.
+            if (mapping.bothSame() || !mapping.isWalletPresentAndValid()) {
                 if (mapping.isPersisted()) {
                     delete(mapping);
                 }
