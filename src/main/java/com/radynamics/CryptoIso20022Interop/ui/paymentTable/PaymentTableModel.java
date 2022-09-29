@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
@@ -107,28 +108,28 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_STATUS) == col) {
             item.status = (ValidationState) value;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
-            if (value instanceof WalletCellValue) {
-                var cellValue = (WalletCellValue) value;
-                item.setSenderLedger(cellValue);
-                raiseSenderLedgerChanged(item.payment, cellValue.getWallet());
-            } else {
-                // Invalid wallet address
+            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            // Invalid wallet address
+            if (cellValue == null) {
                 item.setSenderLedger((String) value);
                 raiseSenderLedgerChanged(item.payment, null);
+            } else {
+                item.setSenderLedger(cellValue);
+                raiseSenderLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
             item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
             item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
-            if (value instanceof WalletCellValue) {
-                var cellValue = (WalletCellValue) value;
-                item.setReceiverLedger(cellValue);
-                raiseReceiverLedgerChanged(item.payment, cellValue.getWallet());
-            } else {
-                // Invalid wallet address
+            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            // Invalid wallet address
+            if (cellValue == null) {
                 item.setReceiverLedger((String) value);
                 raiseReceiverLedgerChanged(item.payment, null);
+            } else {
+                item.setReceiverLedger(cellValue);
+                raiseReceiverLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             item.setAmount((Double) value);
@@ -138,6 +139,24 @@ public class PaymentTableModel extends AbstractTableModel {
             throw new NotImplementedException(String.format("Setting value for column %s is not implemented", col));
         }
         fireTableCellUpdated(row, col);
+    }
+
+    private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value) {
+        if (value instanceof WalletCellValue) {
+            return (WalletCellValue) value;
+        }
+
+        // User ended cell edit
+        if (value instanceof String) {
+            var userInput = (String) value;
+            var ledger = p.getLedger();
+            var wallet = ledger.createWallet(userInput, "");
+            if (WalletValidator.isValidFormat(ledger, wallet)) {
+                return new WalletCellValue(wallet);
+            }
+        }
+
+        return null;
     }
 
     private Account createAccountOrNull(String text, Wallet wallet) {

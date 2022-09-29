@@ -159,7 +159,6 @@ public class PaymentTable extends JPanel {
     }
 
     private void onCellEdited(TableCellListener tcl) {
-        var cleanedInput = tcl.getNewValue().toString().trim();
         var row = tcl.getRow();
         var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
@@ -172,16 +171,21 @@ public class PaymentTable extends JPanel {
             // While sending payments user is able to change "Receiver from Input". Account is not changeable.
             a = editedActor == Actor.Sender ? t.getSenderAccount() : t.getReceiverAccount();
         }
-        var w = editedActor == Actor.Sender ? t.getSenderWallet() : t.getReceiverWallet();
+
+        var oldWallet = createWalletOrNull(tcl.getOldValue());
+        var newWallet = createWalletOrNull(tcl.getNewValue());
+
         mapping.setAccount(a);
-        mapping.setWallet(w);
+        mapping.setWallet(oldWallet);
         try (var repo = new AccountMappingRepo()) {
             if (editedActor == Actor.Sender) {
                 // User maps an account number to a wallet
                 mapping = repo.single(t.getLedger().getId(), a).orElse(mapping);
             } else {
                 // User maps a wallet to an account number
-                mapping = repo.single(t.getLedger().getId(), w).orElse(mapping);
+                if (oldWallet != null) {
+                    mapping = repo.single(t.getLedger().getId(), oldWallet).orElse(mapping);
+                }
             }
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
@@ -190,7 +194,7 @@ public class PaymentTable extends JPanel {
         ChangedValue changedValue = null;
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
             changedValue = ChangedValue.SenderWallet;
-            mapping.setWallet(createWalletOrNull(cleanedInput));
+            mapping.setWallet(newWallet);
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
             changedValue = ChangedValue.SenderAccount;
@@ -202,7 +206,7 @@ public class PaymentTable extends JPanel {
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
             changedValue = ChangedValue.ReceiverWallet;
-            mapping.setWallet(createWalletOrNull(cleanedInput));
+            mapping.setWallet(newWallet);
         }
 
         if (changedValue == null) {
@@ -224,6 +228,20 @@ public class PaymentTable extends JPanel {
                 if (mapping.isWalletPresentAndValid() && p.getSenderWallet() != null) {
                     validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
                 }
+                switch (changedValue) {
+                    case SenderAccount, ReceiverAccount -> {
+                        break;
+                    }
+                    case SenderWallet -> {
+                        raiseSenderLedgerChanged(p, p.getSenderWallet());
+                        break;
+                    }
+                    case ReceiverWallet -> {
+                        raiseReceiverLedgerChanged(p, p.getReceiverWallet());
+                        break;
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + changedValue);
+                }
                 model.onAccountOrWalletsChanged(p);
             }
         }
@@ -238,7 +256,12 @@ public class PaymentTable extends JPanel {
         return Actor.Receiver;
     }
 
-    private Wallet createWalletOrNull(String text) {
+    private Wallet createWalletOrNull(Object newValue) {
+        if (newValue instanceof WalletCellValue) {
+            return ((WalletCellValue) newValue).getWallet();
+        }
+
+        var text = newValue.toString().trim();
         return StringUtils.isEmpty(text) ? null : transformInstruction.getLedger().createWallet(text, null);
     }
 
