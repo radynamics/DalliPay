@@ -51,8 +51,6 @@ public class PaymentTable extends JPanel {
         model = new PaymentTableModel(exchangeRateLoader, validator);
         model.setActor(actor);
         model.addProgressListener(progress -> raiseProgress(progress));
-        model.addSenderLedgerChangedListener(this::raiseSenderLedgerChanged);
-        model.addReceiverLedgerChangedListener(this::raiseReceiverLedgerChanged);
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {

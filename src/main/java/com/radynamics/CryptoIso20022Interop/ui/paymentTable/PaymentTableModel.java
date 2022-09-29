@@ -1,8 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
@@ -28,8 +28,6 @@ public class PaymentTableModel extends AbstractTableModel {
     private PaymentValidator validator;
     private Actor actor = Actor.Sender;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
-    private ArrayList<WalletChangedListener> senderLedgerChangedListener = new ArrayList<>();
-    private ArrayList<WalletChangedListener> receiverLedgerChangedListener = new ArrayList<>();
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private boolean editable;
 
@@ -113,11 +111,9 @@ public class PaymentTableModel extends AbstractTableModel {
             // Invalid wallet address
             if (cellValue == null) {
                 item.setSenderLedger((String) value);
-                raiseSenderLedgerChanged(item.payment, null);
-            } else {
+            } else if (!WalletCompare.isSame(cellValue.getWallet(), item.payment.getSenderWallet())) {
+                // If same keep old record with already loaded WalletInfo
                 item.setSenderLedger(cellValue);
-                refreshBalances(item.payment, cellValue.getWallet());
-                raiseSenderLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
             item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
@@ -128,11 +124,9 @@ public class PaymentTableModel extends AbstractTableModel {
             // Invalid wallet address
             if (cellValue == null) {
                 item.setReceiverLedger((String) value);
-                raiseReceiverLedgerChanged(item.payment, null);
-            } else {
+            } else if (!WalletCompare.isSame(cellValue.getWallet(), item.payment.getReceiverWallet())) {
+                // If same keep old record with already loaded WalletInfo
                 item.setReceiverLedger(cellValue);
-                refreshBalances(item.payment, cellValue.getWallet());
-                raiseReceiverLedgerChanged(item.payment, cellValue.getWallet());
             }
         } else if (getColumnIndex(COL_AMOUNT) == col) {
             item.setAmount((Double) value);
@@ -142,11 +136,6 @@ public class PaymentTableModel extends AbstractTableModel {
             throw new NotImplementedException(String.format("Setting value for column %s is not implemented", col));
         }
         fireTableCellUpdated(row, col);
-    }
-
-    private void refreshBalances(Payment payment, Wallet wallet) {
-        var br = new BalanceRefresher();
-        br.refresh(payment.getLedger(), wallet);
     }
 
     private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value) {
@@ -359,26 +348,6 @@ public class PaymentTableModel extends AbstractTableModel {
     private void raiseProgress(Progress progress) {
         for (var l : progressListener) {
             l.onProgress(progress);
-        }
-    }
-
-    public void addSenderLedgerChangedListener(WalletChangedListener l) {
-        senderLedgerChangedListener.add(l);
-    }
-
-    private void raiseSenderLedgerChanged(Payment p, Wallet wallet) {
-        for (var l : senderLedgerChangedListener) {
-            l.onChanged(p, wallet);
-        }
-    }
-
-    public void addReceiverLedgerChangedListener(WalletChangedListener l) {
-        receiverLedgerChangedListener.add(l);
-    }
-
-    private void raiseReceiverLedgerChanged(Payment p, Wallet wallet) {
-        for (var l : receiverLedgerChangedListener) {
-            l.onChanged(p, wallet);
         }
     }
 
