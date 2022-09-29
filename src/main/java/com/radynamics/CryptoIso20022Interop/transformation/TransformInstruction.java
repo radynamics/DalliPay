@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -114,8 +115,8 @@ public class TransformInstruction {
         return this.accountMappingSource;
     }
 
-    public Network getNetwork() {
-        return ledger.getNetwork().getType();
+    public NetworkInfo getNetwork() {
+        return ledger.getNetwork();
     }
 
     public void setNetwork(Network network) {
