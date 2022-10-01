@@ -6,19 +6,21 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 
 public class NetworkInfo {
-    private final HttpUrl url;
-    private final String networkId;
+    private HttpUrl url;
+    private String networkId;
 
     public static final String liveId = "livenet";
     public static final String testnetId = "testnet";
 
-    public NetworkInfo(HttpUrl url) {
-        this(url, null);
+    public static NetworkInfo create(HttpUrl url) {
+        return create(url, null);
     }
 
-    public NetworkInfo(HttpUrl url, String networkId) {
-        this.networkId = networkId;
-        this.url = url;
+    public static NetworkInfo create(HttpUrl url, String networkId) {
+        var o = new NetworkInfo();
+        o.networkId = networkId;
+        o.url = url;
+        return o;
     }
 
     public String getShortText() {

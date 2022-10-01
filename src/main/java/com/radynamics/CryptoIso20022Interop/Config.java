@@ -78,7 +78,7 @@ public class Config {
             return null;
         }
 
-        return new NetworkInfo(HttpUrl.get(endpoint.getString("url")), endpoint.getString("id"));
+        return NetworkInfo.create(HttpUrl.get(endpoint.getString("url")), endpoint.getString("id"));
     }
 
     public NetworkInfo[] getNetworkInfos() {

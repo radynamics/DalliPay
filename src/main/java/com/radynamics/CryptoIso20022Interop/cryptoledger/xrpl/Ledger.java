@@ -171,8 +171,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = new NetworkInfo(HttpUrl.get("https://xrplcluster.com/"), NetworkInfo.liveId);
-        networks[1] = new NetworkInfo(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), NetworkInfo.testnetId);
+        networks[0] = NetworkInfo.create(HttpUrl.get("https://xrplcluster.com/"), NetworkInfo.liveId);
+        networks[1] = NetworkInfo.create(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), NetworkInfo.testnetId);
         return networks;
     }
 }

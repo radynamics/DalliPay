@@ -48,7 +48,7 @@ public class NetworkPopMenu {
                 }
 
                 // TODO: Sidechains are also "live" networks.
-                var networkInfo = new NetworkInfo(httpUrl, NetworkInfo.testnetId);
+                var networkInfo = NetworkInfo.create(httpUrl, NetworkInfo.testnetId);
                 var item = addEntryAtEnd(networkInfo, value);
 
                 onNetworkChanged(item);
