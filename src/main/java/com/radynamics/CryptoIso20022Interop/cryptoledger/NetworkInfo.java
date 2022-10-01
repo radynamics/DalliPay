@@ -9,12 +9,21 @@ public class NetworkInfo {
     private HttpUrl url;
     private String networkId;
 
-    public static final String liveId = "livenet";
-    public static final String testnetId = "testnet";
+    private static final String liveId = "livenet";
+    private static final String testnetId = "testnet";
 
     public static NetworkInfo create(HttpUrl url) {
         return create(url, null);
     }
+
+    public static NetworkInfo createLivenet(HttpUrl url) {
+        return create(url, liveId);
+    }
+
+    public static NetworkInfo createTestnet(HttpUrl url) {
+        return create(url, testnetId);
+    }
+
 
     public static NetworkInfo create(HttpUrl url, String networkId) {
         var o = new NetworkInfo();
@@ -36,16 +45,24 @@ public class NetworkInfo {
     }
 
     public boolean matches(String text) {
-        if (liveId.equals(networkId) && "main".equalsIgnoreCase(text)) {
+        if (isLivenet() && "main".equalsIgnoreCase(text)) {
             return true;
         }
-        if (testnetId.equals(networkId) && "test".equalsIgnoreCase(text)) {
+        if (isTestnet() && "test".equalsIgnoreCase(text)) {
             return true;
         }
         return false;
     }
 
     public ZonedDateTime historyAvailableSince() {
-        return liveId.equals(networkId) ? ZonedDateTime.now().minusDays(40) : ZonedDateTime.now().minusDays(5);
+        return isLivenet() ? ZonedDateTime.now().minusDays(40) : ZonedDateTime.now().minusDays(5);
+    }
+
+    public boolean isLivenet() {
+        return liveId.equals(networkId);
+    }
+
+    public boolean isTestnet() {
+        return testnetId.equals(networkId);
     }
 }

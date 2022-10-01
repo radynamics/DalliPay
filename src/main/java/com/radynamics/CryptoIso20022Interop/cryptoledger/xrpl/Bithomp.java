@@ -18,14 +18,12 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "Bithomp";
 
     public Bithomp(NetworkInfo network) {
-        switch (network.getId()) {
-            case NetworkInfo.liveId -> {
-                this.baseUrl = "https://www.bithomp.com/explorer/";
-            }
-            case NetworkInfo.testnetId -> {
-                this.baseUrl = "https://test.bithomp.com/explorer/";
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + network);
+        if (network.isLivenet()) {
+            this.baseUrl = "https://www.bithomp.com/explorer/";
+        } else if (network.isTestnet()) {
+            this.baseUrl = "https://test.bithomp.com/explorer/";
+        } else {
+            throw new IllegalStateException(String.format("%s doesn't support network %s.", displayName, network.getId()));
         }
     }
 

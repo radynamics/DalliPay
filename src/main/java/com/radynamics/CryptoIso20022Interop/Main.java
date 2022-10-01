@@ -28,6 +28,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 
@@ -129,7 +130,9 @@ public class Main {
             t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
         }
         t.getExchangeRateProvider().init();
-        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, getNetworkOrDefault(config, NetworkInfo.liveId)));
+
+        var livenet = Arrays.stream(ledger.getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
+        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet));
         t.getHistoricExchangeRateSource().init();
         return t;
     }

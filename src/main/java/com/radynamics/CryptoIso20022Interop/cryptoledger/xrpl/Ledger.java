@@ -158,7 +158,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
             if (StringUtils.isEmpty(wallet.getSecret())) {
                 return false;
             }
-            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), NetworkInfo.testnetId.equals(network.getId()));
+            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.isTestnet());
             if (StringUtils.isEmpty(wallet.getPublicKey())) {
                 return true;
             }
@@ -171,8 +171,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = NetworkInfo.create(HttpUrl.get("https://xrplcluster.com/"), NetworkInfo.liveId);
-        networks[1] = NetworkInfo.create(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), NetworkInfo.testnetId);
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"));
+        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"));
         return networks;
     }
 }

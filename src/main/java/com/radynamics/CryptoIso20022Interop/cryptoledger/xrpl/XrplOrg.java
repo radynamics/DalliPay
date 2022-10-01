@@ -18,14 +18,12 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "XRPL Explorer";
 
     public XrplOrg(NetworkInfo network) {
-        switch (network.getId()) {
-            case NetworkInfo.liveId -> {
-                this.baseUrl = "https://livenet.xrpl.org";
-            }
-            case NetworkInfo.testnetId -> {
-                this.baseUrl = "https://testnet.xrpl.org";
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + network);
+        if (network.isLivenet()) {
+            this.baseUrl = "https://livenet.xrpl.org";
+        } else if (network.isTestnet()) {
+            this.baseUrl = "https://testnet.xrpl.org";
+        } else {
+            throw new IllegalStateException(String.format("%s doesn't support network %s.", displayName, network.getId()));
         }
     }
 

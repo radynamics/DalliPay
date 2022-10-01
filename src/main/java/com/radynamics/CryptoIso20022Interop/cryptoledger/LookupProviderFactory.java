@@ -73,7 +73,7 @@ public class LookupProviderFactory {
     }
 
     private static XrpScan createXrpScan(NetworkInfo network) throws LookupProviderException {
-        if (NetworkInfo.liveId.equals(network.getId())) {
+        if (network.isLivenet()) {
             return new XrpScan();
         }
         throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getId()));

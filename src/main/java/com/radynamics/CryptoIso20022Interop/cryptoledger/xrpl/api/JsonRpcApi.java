@@ -350,7 +350,7 @@ public class JsonRpcApi implements TransactionSource {
         var accountSequenceOffset = sequences.getRight();
 
         var walletFactory = DefaultWalletFactory.getInstance();
-        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), NetworkInfo.testnetId.equals(network.getId()));
+        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.isTestnet());
         if (!StringUtils.equals(sender.classicAddress().value(), t.getSenderWallet().getPublicKey())) {
             throw new LedgerException(String.format("Secret matches for sending wallet %s but expected was %s.", sender.classicAddress().value(), t.getSenderWallet().getPublicKey()));
         }
