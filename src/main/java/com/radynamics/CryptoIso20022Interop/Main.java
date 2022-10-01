@@ -2,7 +2,10 @@ package com.radynamics.CryptoIso20022Interop;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
@@ -26,6 +29,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Locale;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
@@ -38,7 +42,7 @@ public class Main {
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
         var walletPublicKey = getParam(args, "-wallet");
-        var networkId = getParam(args, "-n", "live"); // live, test
+        var networkId = getParam(args, "-n", "livenet"); // livenet, testnet
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
         Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
@@ -79,7 +83,7 @@ public class Main {
                     return;
                 }
 
-                var transformInstruction = createTransformInstruction(ledger, config, config.getNetwork(NetworkConverter.from(networkId)));
+                var transformInstruction = createTransformInstruction(ledger, config, getNetworkOrDefault(config, networkId));
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
@@ -110,6 +114,11 @@ public class Main {
         }
     }
 
+    private static NetworkInfo getNetworkOrDefault(Config config, String networkId) {
+        var defaultNetwork = config.getNetworkInfos().length == 0 ? null : config.getNetworkInfos()[0];
+        return config.getNetwork(networkId.toLowerCase(Locale.ROOT)).orElse(defaultNetwork);
+    }
+
     private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, NetworkInfo network) {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(network);
@@ -120,7 +129,7 @@ public class Main {
             t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
         }
         t.getExchangeRateProvider().init();
-        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
+        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, getNetworkOrDefault(config, NetworkInfo.liveId)));
         t.getHistoricExchangeRateSource().init();
         return t;
     }

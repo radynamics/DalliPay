@@ -5,7 +5,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -150,9 +149,7 @@ public class MainForm extends JFrame {
             });
         }
 
-        var livenet = transformInstruction.getConfig().getNetwork(Network.Live);
-        var testnet = transformInstruction.getConfig().getNetwork(Network.Test);
-        var popupMenu = new NetworkPopMenu(new NetworkInfo[]{livenet, testnet});
+        var popupMenu = new NetworkPopMenu(transformInstruction.getConfig().getNetworkInfos());
         popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
         popupMenu.addChangedListener(() -> {
             var selected = popupMenu.getSelectedNetwork();
