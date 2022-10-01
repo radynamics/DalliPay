@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.Config;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracleConfig;
@@ -119,8 +118,8 @@ public class TransformInstruction {
         return ledger.getNetwork();
     }
 
-    public void setNetwork(Network network) {
-        ledger.setNetwork(config.getNetwork(network));
+    public void setNetwork(NetworkInfo network) {
+        ledger.setNetwork(network);
     }
 
     public Config getConfig() {

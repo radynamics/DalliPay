@@ -79,7 +79,7 @@ public class Main {
                     return;
                 }
 
-                var transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
+                var transformInstruction = createTransformInstruction(ledger, config, config.getNetwork(NetworkConverter.from(networkId)));
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
@@ -110,7 +110,7 @@ public class Main {
         }
     }
 
-    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, Network network) {
+    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, NetworkInfo network) {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(network);
         try (var repo = new ConfigRepo()) {

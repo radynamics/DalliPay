@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
@@ -25,6 +25,6 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
     @Override
     public WalletInfo[] list(Wallet wallet) {
         var key = wallet.getPublicKey();
-        return ledger.getNetwork().getType() != Network.Live || !known.containsKey(key) ? new WalletInfo[0] : known.get(key);
+        return !NetworkInfo.liveId.equals(ledger.getNetwork().getId()) || !known.containsKey(key) ? new WalletInfo[0] : known.get(key);
     }
 }

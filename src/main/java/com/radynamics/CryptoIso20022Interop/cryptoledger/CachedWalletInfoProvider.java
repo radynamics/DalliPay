@@ -20,7 +20,7 @@ public class CachedWalletInfoProvider implements WalletInfoProvider {
 
     @Override
     public WalletInfo[] list(Wallet wallet) {
-        var key = String.format("%s_%s", ledger.getNetwork().getType(), wallet.getPublicKey());
+        var key = String.format("%s_%s", ledger.getNetwork().getId(), wallet.getPublicKey());
         if (cache.containsKey(key)) {
             log.trace(String.format("CACHE hit %s", key));
             return cache.get(key);

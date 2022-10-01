@@ -159,7 +159,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
             if (StringUtils.isEmpty(wallet.getSecret())) {
                 return false;
             }
-            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.getType() != Network.Live);
+            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), NetworkInfo.testnetId.equals(network.getId()));
             if (StringUtils.isEmpty(wallet.getPublicKey())) {
                 return true;
             }

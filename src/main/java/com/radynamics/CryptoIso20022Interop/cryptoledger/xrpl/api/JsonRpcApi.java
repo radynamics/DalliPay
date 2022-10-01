@@ -4,7 +4,6 @@ import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
@@ -351,7 +350,7 @@ public class JsonRpcApi implements TransactionSource {
         var accountSequenceOffset = sequences.getRight();
 
         var walletFactory = DefaultWalletFactory.getInstance();
-        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.getType() != Network.Live);
+        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), NetworkInfo.testnetId.equals(network.getId()));
         if (!StringUtils.equals(sender.classicAddress().value(), t.getSenderWallet().getPublicKey())) {
             throw new LedgerException(String.format("Secret matches for sending wallet %s but expected was %s.", sender.classicAddress().value(), t.getSenderWallet().getPublicKey()));
         }

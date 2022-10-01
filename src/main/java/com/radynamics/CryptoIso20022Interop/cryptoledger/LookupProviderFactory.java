@@ -8,16 +8,16 @@ import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 public class LookupProviderFactory {
     public static WalletLookupProvider createWalletLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
-        var networkType = ledger.getNetwork().getType();
+        var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(networkType);
+                    return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
-                    return new XrplOrg(networkType);
+                    return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(networkType);
+                    return createXrpScan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -27,16 +27,16 @@ public class LookupProviderFactory {
 
     public static TransactionLookupProvider createTransactionLookupProvider(Ledger ledger) throws LookupProviderException {
         String lookupProviderId = loadProviderIdOrNull();
-        var networkType = ledger.getNetwork().getType();
+        var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
                 lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
-                    return new Bithomp(networkType);
+                    return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
-                    return new XrplOrg(networkType);
+                    return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(networkType);
+                    return createXrpScan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -72,10 +72,10 @@ public class LookupProviderFactory {
         }
     }
 
-    private static XrpScan createXrpScan(Network network) throws LookupProviderException {
-        if (network == Network.Test) {
-            throw new LookupProviderException(String.format("%s doesn't support test network.", XrpScan.displayName));
+    private static XrpScan createXrpScan(NetworkInfo network) throws LookupProviderException {
+        if (NetworkInfo.liveId.equals(network.getId())) {
+            return new XrpScan();
         }
-        return new XrpScan();
+        throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getId()));
     }
 }

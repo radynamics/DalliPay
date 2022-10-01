@@ -30,7 +30,7 @@ public class TestFactory {
 
     public static TransformInstruction createTransformInstruction(Ledger ledger) {
         ledger.setInfoProvider(new WalletInfoProvider[]{new TestWalletInfoProvider()});
-        ledger.setNetwork(new NetworkInfo(Network.Test, null));
+        ledger.setNetwork(new NetworkInfo(null, NetworkInfo.testnetId));
         var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
         exchange.load();

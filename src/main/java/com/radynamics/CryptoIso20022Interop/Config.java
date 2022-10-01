@@ -10,9 +10,10 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class Config {
-    final static Logger log = LogManager.getLogger(Config.class);
+    private final static Logger log = LogManager.getLogger(Config.class);
 
     private NetworkInfo live;
     private NetworkInfo test;
@@ -26,16 +27,27 @@ public class Config {
 
     public static Config load(Ledger ledger, String path) {
         var c = new Config();
-        c.live = load(ledger, path, Network.Live);
-        c.test = load(ledger, path, Network.Test);
+        var loaded = loadFile(ledger, path);
+        for (var n : loaded) {
+            if (NetworkInfo.liveId.equals(n.getId())) {
+                c.live = n;
+            }
+            if (NetworkInfo.testnetId.equals(n.getId())) {
+                c.test = n;
+            }
+        }
+
+        c.live = c.live != null ? c.live : new NetworkInfo(ledger.getFallbackUrl(Network.Live), NetworkInfo.liveId);
+        c.test = c.test != null ? c.test : new NetworkInfo(ledger.getFallbackUrl(Network.Test), NetworkInfo.testnetId);
+
         return c;
     }
 
-    private static NetworkInfo load(Ledger ledger, String path, Network type) {
-        var fallback = new NetworkInfo(type, ledger.getFallbackUrl(type));
+    private static ArrayList<NetworkInfo> loadFile(Ledger ledger, String path) {
+        var list = new ArrayList<NetworkInfo>();
 
         if (path == null || !new File(path).exists()) {
-            return fallback;
+            return list;
         }
 
         JSONObject json;
@@ -44,43 +56,35 @@ public class Config {
             json = new JSONObject(new JSONTokener(bufferedReader));
         } catch (FileNotFoundException e) {
             log.error(String.format("Reading config file %s failed. Taking default values instead.", path), e);
-            return fallback;
+            return list;
         }
 
         if (!json.has(ledger.getId().textId())) {
-            return fallback;
+            return list;
         }
 
         var n = json.getJSONObject(ledger.getId().textId());
         if (!n.has("rpcEndpoints")) {
-            return fallback;
+            return list;
         }
 
         var endpoints = n.getJSONArray("rpcEndpoints");
         for (var i = 0; i < endpoints.length(); i++) {
             var e = endpoints.getJSONObject(i);
-            var info = getNetworkInfoOrNull(e, type);
+            var info = getNetworkInfoOrNull(e);
             if (info != null) {
-                return info;
+                list.add(info);
             }
         }
-        return fallback;
+        return list;
     }
 
-    private static NetworkInfo getNetworkInfoOrNull(JSONObject endpoint, Network type) {
+    private static NetworkInfo getNetworkInfoOrNull(JSONObject endpoint) {
         if (!endpoint.has("id") || !endpoint.has("url")) {
             return null;
         }
 
-        var url = HttpUrl.get(endpoint.getString("url"));
-        if (type == Network.Live && "livenet".equals(endpoint.getString("id"))) {
-            return new NetworkInfo(type, url);
-        }
-        if (type == Network.Test && "testnet".equals(endpoint.getString("id"))) {
-            return new NetworkInfo(type, url);
-        }
-
-        return null;
+        return new NetworkInfo(HttpUrl.get(endpoint.getString("url")), endpoint.getString("id"));
     }
 
     public NetworkInfo getNetwork(Network network) {

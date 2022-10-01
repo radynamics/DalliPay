@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
@@ -17,12 +17,12 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
     public static final String Id = "xrplExplorer";
     public static final String displayName = "XRPL Explorer";
 
-    public XrplOrg(Network network) {
-        switch (network) {
-            case Live -> {
+    public XrplOrg(NetworkInfo network) {
+        switch (network.getId()) {
+            case NetworkInfo.liveId -> {
                 this.baseUrl = "https://livenet.xrpl.org";
             }
-            case Test -> {
+            case NetworkInfo.testnetId -> {
                 this.baseUrl = "https://testnet.xrpl.org";
             }
             default -> throw new IllegalStateException("Unexpected value: " + network);

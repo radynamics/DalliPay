@@ -1,8 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkHelper;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +21,7 @@ public class NetworkPopMenu {
     public NetworkPopMenu(NetworkInfo[] networks) {
         var index = 0;
         for (var network : networks) {
-            addEntry(network, String.format("%s network", NetworkHelper.toShort(network.getType())), index++);
+            addEntry(network, String.format("%s network", network.getShortText()), index++);
         }
 
         {
@@ -50,7 +48,7 @@ public class NetworkPopMenu {
                 }
 
                 // TODO: Sidechains are also "live" networks.
-                var networkInfo = new NetworkInfo(Network.Test, httpUrl);
+                var networkInfo = new NetworkInfo(httpUrl, NetworkInfo.testnetId);
                 var item = addEntryAtEnd(networkInfo, value);
 
                 onNetworkChanged(item);
@@ -103,7 +101,7 @@ public class NetworkPopMenu {
             }
         }
 
-        var item = addEntryAtEnd(network, String.format("%s network", NetworkHelper.toShort(network.getType())));
+        var item = addEntryAtEnd(network, String.format("%s network", network.getShortText()));
         onNetworkChanged(item);
     }
 

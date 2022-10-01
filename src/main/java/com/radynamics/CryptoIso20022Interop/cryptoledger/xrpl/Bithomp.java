@@ -1,6 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
@@ -17,12 +17,12 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     public static final String Id = "bithomp";
     public static final String displayName = "Bithomp";
 
-    public Bithomp(Network network) {
-        switch (network) {
-            case Live -> {
+    public Bithomp(NetworkInfo network) {
+        switch (network.getId()) {
+            case NetworkInfo.liveId -> {
                 this.baseUrl = "https://www.bithomp.com/explorer/";
             }
-            case Test -> {
+            case NetworkInfo.testnetId -> {
                 this.baseUrl = "https://test.bithomp.com/explorer/";
             }
             default -> throw new IllegalStateException("Unexpected value: " + network);
