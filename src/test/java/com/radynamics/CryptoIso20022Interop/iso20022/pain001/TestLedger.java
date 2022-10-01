@@ -138,6 +138,6 @@ public class TestLedger implements Ledger {
 
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
-        return null;
+        return new NetworkInfo[0];
     }
 }
