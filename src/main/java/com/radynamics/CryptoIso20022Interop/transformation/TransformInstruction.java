@@ -122,4 +122,8 @@ public class TransformInstruction {
     public void setNetwork(Network network) {
         ledger.setNetwork(config.getNetwork(network));
     }
+
+    public Config getConfig() {
+        return config;
+    }
 }
