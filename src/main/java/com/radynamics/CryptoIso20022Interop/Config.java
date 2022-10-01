@@ -52,16 +52,32 @@ public class Config {
         }
 
         var n = json.getJSONObject(ledger.getId().textId());
-        var info = getNetworkInfoOrNull(n, type);
-        return info == null ? fallback : info;
+        if (!n.has("rpcEndpoints")) {
+            return fallback;
+        }
+
+        var endpoints = n.getJSONArray("rpcEndpoints");
+        for (var i = 0; i < endpoints.length(); i++) {
+            var e = endpoints.getJSONObject(i);
+            var info = getNetworkInfoOrNull(e, type);
+            if (info != null) {
+                return info;
+            }
+        }
+        return fallback;
     }
 
-    private static NetworkInfo getNetworkInfoOrNull(JSONObject json, Network type) {
-        if (type == Network.Live && json.has("liveUrl")) {
-            return new NetworkInfo(type, HttpUrl.get(json.getString("liveUrl")));
+    private static NetworkInfo getNetworkInfoOrNull(JSONObject endpoint, Network type) {
+        if (!endpoint.has("id") || !endpoint.has("url")) {
+            return null;
         }
-        if (type == Network.Test && json.has("testUrl")) {
-            return new NetworkInfo(type, HttpUrl.get(json.getString("testUrl")));
+
+        var url = HttpUrl.get(endpoint.getString("url"));
+        if (type == Network.Live && "livenet".equals(endpoint.getString("id"))) {
+            return new NetworkInfo(type, url);
+        }
+        if (type == Network.Test && "testnet".equals(endpoint.getString("id"))) {
+            return new NetworkInfo(type, url);
         }
 
         return null;
