@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +11,7 @@ import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Config {
@@ -31,8 +31,7 @@ public class Config {
         c.networkInfos = loadFile(ledger, path);
 
         if (c.networkInfos.size() == 0) {
-            c.networkInfos.add(new NetworkInfo(ledger.getFallbackUrl(Network.Live), NetworkInfo.liveId));
-            c.networkInfos.add(new NetworkInfo(ledger.getFallbackUrl(Network.Test), NetworkInfo.testnetId));
+            c.networkInfos.addAll(List.of(ledger.getDefaultNetworkInfo()));
         }
 
         return c;

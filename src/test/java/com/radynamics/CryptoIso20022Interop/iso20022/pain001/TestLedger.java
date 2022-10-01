@@ -5,7 +5,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
-import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -138,7 +137,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public HttpUrl getFallbackUrl(Network type) {
+    public NetworkInfo[] getDefaultNetworkInfo() {
         return null;
     }
 }

@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
-import okhttp3.HttpUrl;
 
 import java.time.ZonedDateTime;
 
@@ -43,5 +42,5 @@ public interface Ledger {
 
     boolean isSecretValid(Wallet wallet);
 
-    HttpUrl getFallbackUrl(Network type);
+    NetworkInfo[] getDefaultNetworkInfo();
 }
