@@ -1,9 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionLookupProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,13 +15,13 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     public static final String Id = "bithomp";
     public static final String displayName = "Bithomp";
 
-    public Bithomp(NetworkInfo network) {
+    public Bithomp(NetworkInfo network) throws LookupProviderException {
         if (network.isLivenet()) {
             this.baseUrl = "https://www.bithomp.com/explorer/";
         } else if (network.isTestnet()) {
             this.baseUrl = "https://test.bithomp.com/explorer/";
         } else {
-            throw new IllegalStateException(String.format("%s doesn't support network %s.", displayName, network.getId()));
+            throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
         }
     }
 
