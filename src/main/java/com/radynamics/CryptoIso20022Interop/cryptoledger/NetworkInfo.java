@@ -33,7 +33,7 @@ public class NetworkInfo {
     }
 
     public String getShortText() {
-        return getId().toUpperCase(Locale.ROOT);
+        return getId() == null ? "UNKNOWN" : getId().toUpperCase(Locale.ROOT);
     }
 
     public HttpUrl getUrl() {
