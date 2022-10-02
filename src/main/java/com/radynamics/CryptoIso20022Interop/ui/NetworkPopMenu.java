@@ -26,8 +26,7 @@ public class NetworkPopMenu {
 
         {
             var pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            // TODO: enable option after support for sidechains is implemented.
-            //popupMenu.add(pnl);
+            popupMenu.add(pnl);
             pnl.setBorder(new EmptyBorder(10, 20, 0, 0));
             pnl.setBackground(popupMenu.getBackground());
             var txt = new JSidechainTextField();
