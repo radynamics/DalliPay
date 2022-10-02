@@ -164,6 +164,7 @@ public class MainForm extends JFrame {
         cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         refreshNetworkButton();
         cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
+        cmdNetwork.setBackground(getBackground());
         cmdNetwork.setAlwaysPopup(true);
         cmdNetwork.setPopupMenu(popupMenu.get());
         menuBar.add(cmdNetwork);
