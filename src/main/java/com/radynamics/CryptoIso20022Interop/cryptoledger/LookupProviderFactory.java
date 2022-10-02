@@ -17,7 +17,7 @@ public class LookupProviderFactory {
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
                     return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(network);
+                    return new XrpScan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -36,7 +36,7 @@ public class LookupProviderFactory {
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
                     return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
-                    return createXrpScan(network);
+                    return new XrpScan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -70,12 +70,5 @@ public class LookupProviderFactory {
         } catch (Exception e) {
             throw new LookupProviderException("Error loading lookupProvider from config.", e);
         }
-    }
-
-    private static XrpScan createXrpScan(NetworkInfo network) throws LookupProviderException {
-        if (network.isLivenet()) {
-            return new XrpScan();
-        }
-        throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getId()));
     }
 }
