@@ -5,7 +5,9 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -158,6 +160,7 @@ public class MainForm extends JFrame {
             transformInstruction.setNetwork(selected);
             refreshNetworkButton();
             sendingPanel.reload();
+            saveLastUsedNetwork(selected);
         });
 
         final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
@@ -178,6 +181,15 @@ public class MainForm extends JFrame {
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
         cmdNetwork.setToolTipText(String.format("Currently using %s network (%s)", networkInfo.getShortText(), networkInfo.getUrl()));
+    }
+
+    private void saveLastUsedNetwork(NetworkInfo selected) {
+        try (var repo = new ConfigRepo()) {
+            repo.setLastUsedRpcUrl(selected.getUrl());
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
     }
 
     public void setInputFileName(String inputFileName) {

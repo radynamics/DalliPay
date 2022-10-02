@@ -97,7 +97,8 @@ public class NetworkPopMenu {
             }
         }
 
-        var item = addEntryAtEnd(network, String.format("%s network", network.getShortText()));
+        var text = network.getId() == null ? network.getUrl().toString() : String.format("%s network", network.getShortText());
+        var item = addEntryAtEnd(network, text);
         onNetworkChanged(item);
     }
 

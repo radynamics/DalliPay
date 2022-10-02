@@ -17,6 +17,7 @@ import com.radynamics.CryptoIso20022Interop.ui.Consts;
 import com.radynamics.CryptoIso20022Interop.ui.LoginForm;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
+import okhttp3.HttpUrl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ public class Main {
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
         var walletPublicKey = getParam(args, "-wallet");
-        var networkId = getParam(args, "-n", "livenet"); // livenet, testnet
+        var networkId = getParam(args, "-n"); // livenet, testnet
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
         Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
@@ -116,8 +117,31 @@ public class Main {
     }
 
     private static NetworkInfo getNetworkOrDefault(Config config, String networkId) {
-        var defaultNetwork = config.getNetworkInfos().length == 0 ? null : config.getNetworkInfos()[0];
-        return config.getNetwork(networkId.toLowerCase(Locale.ROOT)).orElse(defaultNetwork);
+        if (!StringUtils.isEmpty(networkId)) {
+            var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
+            if (networkByParam.isPresent()) {
+                return networkByParam.get();
+            }
+        }
+
+        HttpUrl lastUsed = null;
+        try (var repo = new ConfigRepo()) {
+            lastUsed = repo.getLastUsedRpcUrl();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        if (lastUsed == null) {
+            return config.getDefaultNetworkInfo();
+        }
+
+        for (var ni : config.getNetworkInfos()) {
+            if (ni.getUrl().equals(lastUsed)) {
+                return ni;
+            }
+        }
+
+        return NetworkInfo.create(lastUsed);
     }
 
     private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, NetworkInfo network) {

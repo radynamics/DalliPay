@@ -93,4 +93,13 @@ public class Config {
         }
         return Optional.empty();
     }
+
+    public NetworkInfo getDefaultNetworkInfo() {
+        for (var n : networkInfos) {
+            if (n.isLivenet()) {
+                return n;
+            }
+        }
+        return networkInfos.get(0);
+    }
 }
