@@ -2,7 +2,10 @@ package com.radynamics.CryptoIso20022Interop;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
@@ -14,6 +17,7 @@ import com.radynamics.CryptoIso20022Interop.ui.Consts;
 import com.radynamics.CryptoIso20022Interop.ui.LoginForm;
 import com.radynamics.CryptoIso20022Interop.ui.MainForm;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
+import okhttp3.HttpUrl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +29,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
@@ -38,7 +44,7 @@ public class Main {
         var inputFileName = getParam(args, "-in"); // "pain_001_Beispiel_QRR_SCOR.xml"
         var outputFileName = getParam(args, "-out"); // "test_camt054.xml"
         var walletPublicKey = getParam(args, "-wallet");
-        var networkId = getParam(args, "-n", "live"); // live, test
+        var networkId = getParam(args, "-n"); // livenet, testnet
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
         Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
@@ -79,7 +85,7 @@ public class Main {
                     return;
                 }
 
-                var transformInstruction = createTransformInstruction(ledger, config, NetworkConverter.from(networkId));
+                var transformInstruction = createTransformInstruction(ledger, config, getNetworkOrDefault(config, networkId));
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
@@ -110,7 +116,35 @@ public class Main {
         }
     }
 
-    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, Network network) {
+    private static NetworkInfo getNetworkOrDefault(Config config, String networkId) {
+        if (!StringUtils.isEmpty(networkId)) {
+            var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
+            if (networkByParam.isPresent()) {
+                return networkByParam.get();
+            }
+        }
+
+        HttpUrl lastUsed = null;
+        try (var repo = new ConfigRepo()) {
+            lastUsed = repo.getLastUsedRpcUrl();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        if (lastUsed == null) {
+            return config.getDefaultNetworkInfo();
+        }
+
+        for (var ni : config.getNetworkInfos()) {
+            if (ni.getUrl().equals(lastUsed)) {
+                return ni;
+            }
+        }
+
+        return NetworkInfo.create(lastUsed);
+    }
+
+    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, NetworkInfo network) {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(network);
         try (var repo = new ConfigRepo()) {
@@ -120,7 +154,9 @@ public class Main {
             t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
         }
         t.getExchangeRateProvider().init();
-        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, config.getNetwork(Network.Live)));
+
+        var livenet = Arrays.stream(ledger.getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
+        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet));
         t.getHistoricExchangeRateSource().init();
         return t;
     }

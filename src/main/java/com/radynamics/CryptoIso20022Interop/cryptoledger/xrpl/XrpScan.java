@@ -1,8 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionLookupProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletLookupProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +14,12 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
 
     public static final String Id = "xrpscan";
     public static final String displayName = "XRPScan";
+
+    public XrpScan(NetworkInfo network) throws LookupProviderException {
+        if (!network.isLivenet()) {
+            throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getShortText()));
+        }
+    }
 
     @Override
     public void open(Wallet wallet) {

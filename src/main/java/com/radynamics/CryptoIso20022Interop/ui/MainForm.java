@@ -1,12 +1,13 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.VersionController;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Network;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkHelper;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -23,7 +24,7 @@ public class MainForm extends JFrame {
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
-    private FlatButton cmdNetwork;
+    private JSplitButton cmdNetwork;
 
     public MainForm(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -149,15 +150,26 @@ public class MainForm extends JFrame {
             });
         }
 
-        cmdNetwork = new FlatButton();
-        refreshNetworkButton();
-        cmdNetwork.setButtonType(FlatButton.ButtonType.toolBarButton);
-        cmdNetwork.setFocusable(false);
-        cmdNetwork.addActionListener(e -> {
-            transformInstruction.setNetwork(transformInstruction.getNetwork().getType() == Network.Live ? Network.Test : Network.Live);
+        var popupMenu = new NetworkPopMenu(transformInstruction.getConfig().getNetworkInfos());
+        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        popupMenu.addChangedListener(() -> {
+            var selected = popupMenu.getSelectedNetwork();
+            if (selected == null) {
+                return;
+            }
+            transformInstruction.setNetwork(selected);
             refreshNetworkButton();
             sendingPanel.reload();
+            saveLastUsedNetwork(selected);
         });
+
+        final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
+        cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
+        refreshNetworkButton();
+        cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
+        cmdNetwork.setBackground(getBackground());
+        cmdNetwork.setAlwaysPopup(true);
+        cmdNetwork.setPopupMenu(popupMenu.get());
         menuBar.add(cmdNetwork);
 
         return menuBar;
@@ -166,9 +178,18 @@ public class MainForm extends JFrame {
     private void refreshNetworkButton() {
         var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
         var networkInfo = transformInstruction.getNetwork();
-        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.getType() == Network.Live ? Consts.ColorLivenet : Consts.ColorTestnet));
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format("Currently using %s network (%s)", NetworkHelper.toShort(networkInfo.getType()), networkInfo.getUrl()));
+        cmdNetwork.setToolTipText(String.format("Currently using %s network (%s)", networkInfo.getShortText(), networkInfo.getUrl()));
+    }
+
+    private void saveLastUsedNetwork(NetworkInfo selected) {
+        try (var repo = new ConfigRepo()) {
+            repo.setLastUsedRpcUrl(selected.getUrl());
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
     }
 
     public void setInputFileName(String inputFileName) {

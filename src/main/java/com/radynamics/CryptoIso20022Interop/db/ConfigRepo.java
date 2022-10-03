@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.DateFormatHelper;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
+import okhttp3.HttpUrl;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -98,6 +99,15 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setDefaultOutputDirectory(File value) throws Exception {
         saveOrUpdate("outputDirectory", value == null ? "" : value.getAbsolutePath());
+    }
+
+    public HttpUrl getLastUsedRpcUrl() throws Exception {
+        var value = single("lastUsedRpcUrl").orElse("");
+        return value.length() == 0 ? null : HttpUrl.get(value);
+    }
+
+    public void setLastUsedRpcUrl(HttpUrl value) throws Exception {
+        saveOrUpdate("lastUsedRpcUrl", value == null ? "" : value.toString());
     }
 
     public CamtFormat getDefaultExportFormat() throws Exception {

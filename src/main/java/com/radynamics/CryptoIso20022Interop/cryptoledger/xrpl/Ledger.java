@@ -9,7 +9,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import okhttp3.HttpUrl;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
 import org.xrpl.xrpl4j.model.transactions.Address;
@@ -159,7 +158,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
             if (StringUtils.isEmpty(wallet.getSecret())) {
                 return false;
             }
-            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.getType() != Network.Live);
+            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.isTestnet());
             if (StringUtils.isEmpty(wallet.getPublicKey())) {
                 return true;
             }
@@ -170,15 +169,10 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public HttpUrl getFallbackUrl(Network type) {
-        switch (type) {
-            case Live -> {
-                return HttpUrl.get("https://xrplcluster.com/");
-            }
-            case Test -> {
-                return HttpUrl.get("https://s.altnet.rippletest.net:51234/");
-            }
-            default -> throw new NotImplementedException(String.format("unknown network %s", type));
-        }
+    public NetworkInfo[] getDefaultNetworkInfo() {
+        var networks = new NetworkInfo[2];
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"));
+        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"));
+        return networks;
     }
 }
