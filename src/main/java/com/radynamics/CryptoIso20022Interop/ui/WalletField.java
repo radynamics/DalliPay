@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -48,14 +49,8 @@ public class WalletField extends JPanel {
             add(txt, c);
         }
         {
-            var lbl = new JLabel("find...");
-            lbl.setForeground(Consts.ColorAccent);
-            lbl.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    lookup();
-                }
-            });
+            var pnl = new JPanel();
+            pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
 
             var c = new GridBagConstraints();
             c.insets = new Insets(0, 5, 0, 5);
@@ -64,7 +59,29 @@ public class WalletField extends JPanel {
             c.weighty = 0.5;
             c.gridx = 1;
             c.gridy = 0;
-            add(lbl, c);
+            add(pnl, c);
+            {
+                var lbl = new JLabel("find...");
+                pnl.add(lbl);
+                lbl.setForeground(Consts.ColorAccent);
+                lbl.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        lookup();
+                    }
+                });
+            }
+            {
+                var lbl = new JLabel("detail...");
+                pnl.add(lbl);
+                lbl.setForeground(Consts.ColorAccent);
+                lbl.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        showMore();
+                    }
+                });
+            }
         }
     }
 
@@ -75,6 +92,25 @@ public class WalletField extends JPanel {
             lp.open(wallet);
         } catch (LookupProviderException ex) {
             ExceptionDialog.show(this, ex);
+        }
+    }
+
+    private void showMore() {
+        var wallet = ledger.createWallet(getText(), "");
+        if (!WalletValidator.isValidFormat(ledger, wallet)) {
+            return;
+        }
+
+        try {
+            var sb = new StringBuilder();
+            for (var p : ledger.getInfoProvider()) {
+                for (var wi : p.list(wallet)) {
+                    sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
+                }
+            }
+            JOptionPane.showMessageDialog(this, sb.toString());
+        } catch (WalletInfoLookupException e) {
+            ExceptionDialog.show(this, e);
         }
     }
 
