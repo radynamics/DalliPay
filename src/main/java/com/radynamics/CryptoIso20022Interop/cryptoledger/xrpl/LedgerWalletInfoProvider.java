@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
 
         var domain = api.getAccountDomain(WalletConverter.from(wallet));
         if (!StringUtils.isAllEmpty(domain)) {
-            var wi = new WalletInfo("Domain", domain, 100);
+            var wi = new WalletInfo("Domain", domain, 100, InfoType.Domain);
             var dv = new DomainVerifier(ledger.getNetwork());
             wi.setVerified(dv.isValid(wallet, domain));
             list.add(wi);

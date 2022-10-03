@@ -21,7 +21,7 @@ public class CurrencyFormatter {
         }
 
         var issuerText = ccy.getIssuer().getPublicKey();
-        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getMostImportant(ccy.getIssuer());
+        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getNameOrDomain(ccy.getIssuer());
         if (wi != null) {
             issuerText = String.format("%s (%s)", wi.getValue(), wi.getText());
         }

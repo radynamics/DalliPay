@@ -50,7 +50,7 @@ public class WalletLabel extends JPanel {
         }
 
         String walletInfoText = null;
-        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getMostImportant(wallet);
+        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getNameOrDomain(wallet);
         if (wi != null) {
             walletInfoText = String.format("%s %s", wi.getText(), wi.getValue());
         }

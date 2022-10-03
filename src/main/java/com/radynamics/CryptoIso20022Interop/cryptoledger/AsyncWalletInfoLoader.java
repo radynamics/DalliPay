@@ -22,7 +22,7 @@ public class AsyncWalletInfoLoader {
         Executors.newCachedThreadPool().submit(() -> {
             var aggregator = new WalletInfoAggregator(p.getLedger().getInfoProvider());
             completableFuture.complete(
-                    new PaymentWalletInfo(p, aggregator.getMostImportant(p.getSenderWallet()), aggregator.getMostImportant(p.getReceiverWallet())))
+                    new PaymentWalletInfo(p, aggregator.getNameOrDomain(p.getSenderWallet()), aggregator.getNameOrDomain(p.getReceiverWallet())))
             ;
         });
 
