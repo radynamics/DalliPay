@@ -6,6 +6,10 @@ public class WalletInfo {
     private int importance;
     private boolean verified;
 
+    public WalletInfo(String text, boolean value, int importance) {
+        this(text, String.valueOf(value), importance);
+    }
+
     public WalletInfo(String text, String value, int importance) {
         this.text = text;
         this.value = value;
