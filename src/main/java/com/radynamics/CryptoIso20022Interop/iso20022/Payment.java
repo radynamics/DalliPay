@@ -94,6 +94,12 @@ public class Payment {
     }
 
     private void refreshTransactionAmount() {
+        if (ccy.getIssuer() != null) {
+            setExchangeRate(null, false);
+            cryptoTrx.setAmount(Money.of(amount, ccy));
+            return;
+        }
+
         if (exchangeRate == null) {
             if (ccy.getIssuer() == null && !ccy.equals(cryptoTrx.getAmount().getCcy())) {
                 // Use ledger native currency if there is no specific issued currency
@@ -101,12 +107,6 @@ public class Payment {
             } else {
                 cryptoTrx.setAmount(Money.zero(cryptoTrx.getAmount()));
             }
-            return;
-        }
-
-        if (ccy.getIssuer() != null) {
-            setExchangeRate(null);
-            cryptoTrx.setAmount(Money.of(amount, ccy));
             return;
         }
 
@@ -169,6 +169,10 @@ public class Payment {
     }
 
     public void setExchangeRate(ExchangeRate rate) {
+        setExchangeRate(rate, true);
+    }
+
+    private void setExchangeRate(ExchangeRate rate, boolean refreshAmounts) {
         var bothCcyKnown = !isAmountUnknown() && !isCcyUnknown();
         if (rate != null) {
             var affectsFiat = rate.getPair().affects(getUserCcyCodeOrEmpty());
@@ -181,7 +185,9 @@ public class Payment {
             }
         }
         this.exchangeRate = rate;
-        refreshAmounts();
+        if (refreshAmounts) {
+            refreshAmounts();
+        }
     }
 
     public void refreshAmounts() {
