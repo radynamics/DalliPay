@@ -356,7 +356,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
-        var amount = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getAmount().getNumber().doubleValue()));
+        var amount = toCurrencyAmount(t.getAmount());
 
         var memos = new ArrayList<MemoWrapper>();
         memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
@@ -397,8 +397,25 @@ public class JsonRpcApi implements TransactionSource {
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }
 
+    private CurrencyAmount toCurrencyAmount(Money amount) throws LedgerException {
+        var ccy = amount.getCcy();
+        if (ccy.getCode().equals(ledger.getNativeCcySymbol())) {
+            return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue()));
+        }
+
+        if (ccy.getIssuer() == null) {
+            throw new LedgerException(String.format("%s is considered an issued currency and therefore must have an issuer.", ccy.getCode()));
+        }
+
+        return IssuedCurrencyAmount.builder()
+                .currency(ccy.getCode())
+                .issuer(Address.of(ccy.getIssuer().getPublicKey()))
+                .value(String.valueOf(amount.getNumber().doubleValue()))
+                .build();
+    }
+
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, XrpCurrencyAmount amount, XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
+                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount, XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException {
         // Code from https://github.com/ripple/xrpl-dev-portal/blob/master/content/_code-samples/send-xrp/SendXrp.java
 
