@@ -72,6 +72,10 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             Ledger l = affectedPayments.get(0).getLedger();
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
             for (var ccy : sums.currencies()) {
+                // If sender is issuer of the transferred ccy, it's balance is always negative.
+                if (WalletCompare.isSame(w, ccy.getIssuer())) {
+                    continue;
+                }
                 var balance = w.getBalances().get(ccy).orElseGet(() -> Money.zero(ccy));
                 var paymentsSum = sums.sum(ccy);
                 if (balance.lessThan(paymentsSum)) {
