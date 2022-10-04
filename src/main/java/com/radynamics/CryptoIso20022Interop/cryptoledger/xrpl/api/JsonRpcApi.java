@@ -21,10 +21,12 @@ import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
-import org.xrpl.xrpl4j.crypto.signing.SignatureService;
 import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
-import org.xrpl.xrpl4j.model.client.accounts.*;
+import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.AccountLinesRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.ImmutableAccountTransactionsRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -362,15 +364,12 @@ public class JsonRpcApi implements TransactionSource {
         memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
 
         // Get the latest validated ledger index
-        LedgerIndex validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
+        var validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
                 .ledgerIndex()
                 .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
 
         // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
-        UnsignedInteger lastLedgerSequence = UnsignedInteger.valueOf(
-                validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue()
-        );
-
+        var lastLedgerSequence = UnsignedInteger.valueOf(validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue());
         if (previousLastLedgerSequence == UnsignedInteger.ZERO) {
             accountSequenceOffset = UnsignedInteger.ZERO;
         } else {
@@ -383,7 +382,6 @@ public class JsonRpcApi implements TransactionSource {
         // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
         var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, fee, memos);
 
-        // Idea: return prepared payment without signing to ensure this code never needs access to private key (option?)
         var signed = sign(prepared, sender);
 
         var prelimResult = xrplClient.submit(signed);
@@ -415,23 +413,17 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount, XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
+                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount,
+                                   XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException {
-        // Code from https://github.com/ripple/xrpl-dev-portal/blob/master/content/_code-samples/send-xrp/SendXrp.java
-
-        // Prepare transaction --------------------------------------------------------
-        // Look up your Account Info
-        AccountInfoRequestParams requestParams = AccountInfoRequestParams.builder()
+        var requestParams = AccountInfoRequestParams.builder()
                 .ledgerIndex(LedgerIndex.VALIDATED)
                 .account(sender.classicAddress())
                 .build();
-        AccountInfoResult accountInfoResult = xrplClient.accountInfo(requestParams);
-        UnsignedInteger sequence = accountInfoResult.accountData().sequence();
-        sequence = sequence.plus(accountSequenceOffset);
-        System.out.println("AccSequence: " + sequence);
+        var accountInfoResult = xrplClient.accountInfo(requestParams);
+        var sequence = accountInfoResult.accountData().sequence().plus(accountSequenceOffset);
 
-        // Construct a Payment
-        Payment payment = Payment.builder()
+        return Payment.builder()
                 .account(sender.classicAddress())
                 .amount(amount)
                 .addAllMemos(memos)
@@ -442,26 +434,12 @@ public class JsonRpcApi implements TransactionSource {
                 .signingPublicKey(sender.publicKey())
                 .lastLedgerSequence(lastLedgerSequence)
                 .build();
-
-        return payment;
     }
 
     private SignedTransaction<Payment> sign(Payment prepared, org.xrpl.xrpl4j.wallet.Wallet sender) {
-        // Code from https://github.com/ripple/xrpl-dev-portal/blob/master/content/_code-samples/send-xrp/SendXrp.java
+        var privateKey = PrivateKey.fromBase16EncodedPrivateKey(sender.privateKey().get());
+        var signatureService = new SingleKeySignatureService(privateKey);
 
-        // Sign transaction -----------------------------------------------------------
-        // Construct a SignatureService to sign the Payment
-        PrivateKey privateKey = PrivateKey.fromBase16EncodedPrivateKey(
-                sender.privateKey().get()
-        );
-        SignatureService signatureService = new SingleKeySignatureService(privateKey);
-
-        // Sign the Payment
-        SignedTransaction<Payment> signedPayment = signatureService.sign(
-                KeyMetadata.EMPTY,
-                prepared
-        );
-        //System.out.println("Signed Payment: " + signedPayment.signedTransaction());
-        return signedPayment;
+        return signatureService.sign(KeyMetadata.EMPTY, prepared);
     }
 }
