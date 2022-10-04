@@ -311,7 +311,9 @@ public class JsonRpcApi implements TransactionSource {
                 var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
                 var result = xrplClient.accountLines(requestParams);
                 for (var line : result.lines()) {
-                    wallet.getBalances().set(Money.of(Double.parseDouble(line.balance()), new Currency(line.currency(), ledger.createWallet(line.account().value(), ""))));
+                    var amt = Double.parseDouble(line.balance());
+                    var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
+                    wallet.getBalances().set(Money.of(amt, new Currency(line.currency(), issuer)));
                 }
             }
         } catch (JsonRpcClientErrorException e) {
