@@ -41,6 +41,11 @@ public class Money {
         return list.toArray(new Money[0]);
     }
 
+    public boolean lessThan(Money value) {
+        assertSameCcy(value);
+        return getNumber().doubleValue() < value.getNumber().doubleValue();
+    }
+
     public Money plus(Money value) {
         assertSameCcy(value);
         return Money.of(getNumber().doubleValue() + value.getNumber().doubleValue(), getCcy());

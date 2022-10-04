@@ -74,7 +74,7 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             for (var ccy : sums.currencies()) {
                 var balance = w.getBalances().get(ccy).orElseGet(() -> Money.zero(ccy));
                 var paymentsSum = sums.sum(ccy);
-                if (balance.getNumber().doubleValue() < paymentsSum.getNumber().doubleValue()) {
+                if (balance.lessThan(paymentsSum)) {
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum);
                     var balanceText = MoneyFormatter.formatLedger(balance);
                     list.add(new ValidationResult(ValidationState.Error, String.format("Sum of payments from %s is %s and exceeds wallet balance of %s.", w.getPublicKey(), paymentsSumText, balanceText)));
