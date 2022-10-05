@@ -37,6 +37,8 @@ public interface Ledger {
 
     ExchangeRateProvider createHistoricExchangeRateSource();
 
+    com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator();
+
     WalletInfoProvider[] getInfoProvider();
 
     void setInfoProvider(WalletInfoProvider[] walletInfoProvider);

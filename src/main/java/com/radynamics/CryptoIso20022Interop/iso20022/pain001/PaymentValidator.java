@@ -12,11 +12,14 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator {
     private final WalletHistoryValidator historyValidator;
+    private final ArrayList<Pair<Ledger, com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator>> ledgerSpecificValidators = new ArrayList<>();
 
     public PaymentValidator(WalletHistoryValidator historyValidator) {
         this.historyValidator = historyValidator;
@@ -58,7 +61,24 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             list.add(new ValidationResult(ValidationState.Info, String.format("Remittance info is missing. Receiver won't be able to match awaited payment exactly.")));
         }
 
+        var ledgerSpecific = getOrCreateLedgerSpecific(t.getLedger());
+        if (ledgerSpecific != null) {
+            list.addAll(Arrays.asList(ledgerSpecific.validate(t)));
+        }
+
         return list.toArray(new ValidationResult[0]);
+    }
+
+    private com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator getOrCreateLedgerSpecific(Ledger ledger) {
+        for (var p : ledgerSpecificValidators) {
+            if (p.getKey().getId().equals(ledger.getId())) {
+                return p.getValue();
+            }
+        }
+
+        var v = ledger.createPaymentValidator();
+        ledgerSpecificValidators.add(new ImmutablePair<>(ledger, v));
+        return v;
     }
 
     public ValidationResult[] validate(Payment[] payments) {
@@ -122,5 +142,11 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
 
     public WalletHistoryValidator getHistoryValidator() {
         return historyValidator;
+    }
+
+    public void clearCache() {
+        for (var p : ledgerSpecificValidators) {
+            p.getValue().clearCache();
+        }
     }
 }

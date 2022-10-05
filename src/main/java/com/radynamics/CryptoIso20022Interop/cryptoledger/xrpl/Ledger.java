@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
@@ -136,6 +137,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         var livenet = Arrays.stream(getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
         return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet);
+    }
+
+    @Override
+    public com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator() {
+        return new EmptyPaymentValidator();
     }
 
     @Override

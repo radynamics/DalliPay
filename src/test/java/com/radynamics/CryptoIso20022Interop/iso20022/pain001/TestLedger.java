@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -120,6 +121,11 @@ public class TestLedger implements Ledger {
     @Override
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         return null;
+    }
+
+    @Override
+    public com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator() {
+        return new EmptyPaymentValidator();
     }
 
     @Override

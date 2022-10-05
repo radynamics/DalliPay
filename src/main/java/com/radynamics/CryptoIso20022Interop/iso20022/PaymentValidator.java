@@ -7,4 +7,6 @@ public interface PaymentValidator {
     ValidationResult[] validate(Payment t);
 
     WalletHistoryValidator getHistoryValidator();
+
+    void clearCache();
 }

@@ -16,6 +16,7 @@ public class AsyncValidator {
     }
 
     public CompletableFuture<ImmutablePair<Payment, ValidationResult[]>>[] validate(Payment[] payments) {
+        validator.clearCache();
         var list = new ArrayList<CompletableFuture<ImmutablePair<Payment, ValidationResult[]>>>();
         for (var t : payments) {
             list.add(validate(t));

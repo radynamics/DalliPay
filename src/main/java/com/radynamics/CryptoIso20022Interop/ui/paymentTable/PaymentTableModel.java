@@ -200,6 +200,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return;
         }
 
+        validator.clearCache();
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : data) {
             var future = loadAsync(p.payment);
@@ -319,6 +320,7 @@ public class PaymentTableModel extends AbstractTableModel {
         int row = getRowIndex(t);
         fireTableRowsUpdated(row, row);
 
+        validator.clearCache();
         validateAsync(t);
     }
 

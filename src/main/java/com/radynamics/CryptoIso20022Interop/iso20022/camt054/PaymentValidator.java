@@ -31,4 +31,9 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
     public WalletHistoryValidator getHistoryValidator() {
         return new NullHistoryValidator();
     }
+
+    @Override
+    public void clearCache() {
+        // do nothing
+    }
 }
