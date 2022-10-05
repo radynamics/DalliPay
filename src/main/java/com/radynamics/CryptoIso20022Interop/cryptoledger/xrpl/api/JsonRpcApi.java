@@ -381,7 +381,10 @@ public class JsonRpcApi implements TransactionSource {
         var amount = toCurrencyAmount(t.getAmount());
 
         var memos = new ArrayList<MemoWrapper>();
-        memos.add(Convert.toMemoWrapper(PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages())));
+        var memoData = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
+        if (!StringUtils.isEmpty(memoData)) {
+            memos.add(Convert.toMemoWrapper(memoData));
+        }
 
         // Get the latest validated ledger index
         var validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
