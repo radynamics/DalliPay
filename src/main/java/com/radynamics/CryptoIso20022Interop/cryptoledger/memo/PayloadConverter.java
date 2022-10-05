@@ -14,6 +14,10 @@ public final class PayloadConverter {
         if (refs == null) throw new IllegalArgumentException("Parameter 'refs' cannot be null");
         if (freeText == null) throw new IllegalArgumentException("Parameter 'freeText' cannot be null");
 
+        if (refs.length == 0 && freeText.length == 0) {
+            return "";
+        }
+
         var json = new JSONObject();
         json.put("v", VERSION);
 
