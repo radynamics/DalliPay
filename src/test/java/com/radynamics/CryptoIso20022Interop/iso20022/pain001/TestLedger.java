@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -113,6 +114,11 @@ public class TestLedger implements Ledger {
 
     @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
+        return null;
+    }
+
+    @Override
+    public ExchangeRateProvider createHistoricExchangeRateSource() {
         return null;
     }
 
