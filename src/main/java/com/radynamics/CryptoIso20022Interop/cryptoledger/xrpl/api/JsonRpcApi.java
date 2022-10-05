@@ -307,20 +307,38 @@ public class JsonRpcApi implements TransactionSource {
                 var result = xrplClient.accountInfo(requestParams);
                 wallet.getBalances().set(Money.of(result.accountData().balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
             }
-            {
-                var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
-                var result = xrplClient.accountLines(requestParams);
-                for (var line : result.lines()) {
-                    var amt = Double.parseDouble(line.balance());
-                    var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
-                    wallet.getBalances().set(Money.of(amt, new Currency(line.currency(), issuer)));
-                }
+
+            for (var t : listTrustlines(wallet)) {
+                wallet.getBalances().set(t.getBalance());
             }
         } catch (JsonRpcClientErrorException e) {
             if (!isAccountNotFound(e)) {
                 log.error(e.getMessage(), e);
             }
         }
+    }
+
+    public Trustline[] listTrustlines(Wallet wallet) {
+        var list = new ArrayList<Trustline>();
+        try {
+            var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
+            var result = xrplClient.accountLines(requestParams);
+            for (var line : result.lines()) {
+                var amt = Double.parseDouble(line.balance());
+                var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
+                var ccy = new Currency(line.currency(), issuer);
+                var balance = Money.of(amt, ccy);
+                var lmt = Double.parseDouble(line.limit());
+                var limit = Money.of(lmt, ccy);
+
+                list.add(new Trustline(wallet, balance, limit));
+            }
+        } catch (JsonRpcClientErrorException e) {
+            if (!isAccountNotFound(e)) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return list.toArray(new Trustline[0]);
     }
 
     public String getAccountDomain(Wallet wallet) {
