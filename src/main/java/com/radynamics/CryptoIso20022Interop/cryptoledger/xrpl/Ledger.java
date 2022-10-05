@@ -7,6 +7,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationR
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -127,6 +130,12 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
         return new LedgerPaymentHistoryProvider();
+    }
+
+    @Override
+    public ExchangeRateProvider createHistoricExchangeRateSource() {
+        var livenet = Arrays.stream(getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
+        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet);
     }
 
     @Override

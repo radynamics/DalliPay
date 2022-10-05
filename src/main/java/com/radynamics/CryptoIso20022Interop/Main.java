@@ -6,7 +6,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
@@ -29,7 +28,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 
@@ -155,8 +153,8 @@ public class Main {
         }
         t.getExchangeRateProvider().init();
 
-        var livenet = Arrays.stream(ledger.getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
-        t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet));
+        // Different ledgers/sidechains may provide different sources for historic exchange rates.
+        t.setHistoricExchangeRateSource(ledger.createHistoricExchangeRateSource());
         t.getHistoricExchangeRateSource().init();
         return t;
     }
