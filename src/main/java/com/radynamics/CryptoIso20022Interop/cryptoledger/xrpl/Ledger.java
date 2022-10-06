@@ -95,6 +95,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
     }
 
+    public Trustline[] listTrustlines(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet wallet) {
+        var api = new JsonRpcApi(this, network);
+        return api.listTrustlines(wallet);
+    }
+
     @Override
     public boolean exists(Wallet wallet) {
         var api = new JsonRpcApi(this, network);
@@ -142,7 +147,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator() {
-        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.PaymentValidator(new JsonRpcApi(this, network));
+        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.PaymentValidator(new TrustlineCache(this));
     }
 
     @Override

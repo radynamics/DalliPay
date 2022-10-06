@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,12 +8,12 @@ import java.util.HashMap;
 
 public class TrustlineCache {
     private final static Logger log = LogManager.getLogger(TrustlineCache.class);
-    private final JsonRpcApi api;
+    private final Ledger ledger;
     private final HashMap<Wallet, Trustline[]> items = new HashMap<>();
 
-    public TrustlineCache(JsonRpcApi api) {
-        if (api == null) throw new IllegalArgumentException("Parameter 'api' cannot be null");
-        this.api = api;
+    public TrustlineCache(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
     }
 
     public Trustline[] get(Wallet wallet) {
@@ -39,7 +38,7 @@ public class TrustlineCache {
     }
 
     private void load(Wallet wallet) {
-        items.put(wallet, api.listTrustlines(wallet));
+        items.put(wallet, ledger.listTrustlines(wallet));
     }
 
     public void clear() {
