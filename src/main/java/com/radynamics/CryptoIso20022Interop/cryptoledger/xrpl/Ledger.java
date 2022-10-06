@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProviderFactory;
@@ -29,7 +30,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     public Ledger() {
         walletInfoProvider = new WalletInfoProvider[]{
-                new CachedWalletInfoProvider(this, new WalletInfoProvider[]{new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this)})
+                new CachedWalletInfoProvider(this, new WalletInfoProvider[]{
+                        new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this), new Xumm()})
         };
     }
 

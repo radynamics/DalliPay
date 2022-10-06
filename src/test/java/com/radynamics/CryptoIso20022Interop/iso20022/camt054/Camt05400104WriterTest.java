@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.camt054;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -129,8 +128,8 @@ public class Camt05400104WriterTest {
         var ti = TestFactory.createTransformInstruction(ledger);
 
         var wip = new TestWalletInfoProvider();
-        wip.add("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", new WalletInfo("Name", "Company A", 1));
-        wip.add("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", new WalletInfo("Name", "Company B", 1));
+        wip.addName("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", "Company A");
+        wip.addName("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", "Company B");
         ledger.setInfoProvider(new WalletInfoProvider[]{wip});
 
         var t = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));

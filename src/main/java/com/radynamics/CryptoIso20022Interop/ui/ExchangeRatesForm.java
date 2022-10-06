@@ -7,7 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
@@ -21,6 +23,7 @@ public class ExchangeRatesForm extends JDialog {
     private boolean accepted;
     private ZonedDateTime pointInTime;
     private JComboBox<ExchangeRateProvider> cboExchange;
+    private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
@@ -37,20 +40,7 @@ public class ExchangeRatesForm extends JDialog {
         setTitle("Exchange rates");
         setIconImage(Utils.getProductIcon());
 
-        var cancelDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                close();
-            }
-        };
-        getRootPane().registerKeyboardAction(cancelDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        var acceptDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onOk();
-            }
-        };
-        getRootPane().registerKeyboardAction(acceptDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        formAcceptCloseHandler.configure();
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -104,7 +94,7 @@ public class ExchangeRatesForm extends JDialog {
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
                 {
-                    var lbl = Utils.createLinkLabel(this, "Refresh");
+                    var lbl = Utils.createLinkLabel(pnlMain, "Refresh");
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -165,13 +155,18 @@ public class ExchangeRatesForm extends JDialog {
             {
                 var cmd = new JButton("OK");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> onOk());
+                cmd.addActionListener(e -> {
+                            apply();
+                            setDialogAccepted(true);
+                            formAcceptCloseHandler.accept();
+                        }
+                );
                 pnl.add(cmd);
             }
             {
                 var cmd = new JButton("Cancel");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> close());
+                cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
             }
         }
@@ -237,12 +232,6 @@ public class ExchangeRatesForm extends JDialog {
         }
     }
 
-    private void onOk() {
-        apply();
-        setDialogAccepted(true);
-        close();
-    }
-
     private void apply() {
         for (var i = 0; i < rates.length; i++) {
             rates[i].setRate(getTxtValue(txts.get(i)));
@@ -251,10 +240,6 @@ public class ExchangeRatesForm extends JDialog {
 
     private static Double getTxtValue(JTextField txt) {
         return StringUtils.isAllEmpty(txt.getText()) ? ExchangeRate.UndefinedRate : Double.parseDouble(txt.getText());
-    }
-
-    private void close() {
-        dispose();
     }
 
     private static int getNorthPad(int line) {

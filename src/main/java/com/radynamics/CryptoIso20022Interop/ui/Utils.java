@@ -34,11 +34,11 @@ public final class Utils {
         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
     }
 
-    public static JLabel createLinkLabel(Window owner, String text) {
+    public static JLabel createLinkLabel(JComponent owner, String text) {
         return createLinkLabel(owner, text, true);
     }
 
-    public static JLabel createLinkLabel(Window owner, String text, boolean enabled) {
+    public static JLabel createLinkLabel(JComponent owner, String text, boolean enabled) {
         var lbl = new JLabel(text);
         lbl.setEnabled(enabled);
         lbl.setForeground(Consts.ColorAccent);

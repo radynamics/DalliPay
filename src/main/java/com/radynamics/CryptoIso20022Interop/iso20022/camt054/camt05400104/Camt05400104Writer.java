@@ -175,8 +175,8 @@ public class Camt05400104Writer implements Camt054Writer {
         var obj = new TransactionParties3();
 
         var aggregator = new WalletInfoAggregator(trx.getLedger().getInfoProvider());
-        obj.setDbtr(createPartyIdentification(aggregator.getMostImportant(trx.getSenderWallet())));
-        obj.setCdtr(createPartyIdentification(aggregator.getMostImportant(trx.getReceiverWallet())));
+        obj.setDbtr(createPartyIdentification(aggregator.getNameOrDomain(trx.getSenderWallet())));
+        obj.setCdtr(createPartyIdentification(aggregator.getNameOrDomain(trx.getReceiverWallet())));
 
         return obj.getDbtr() == null && obj.getCdtr() == null ? null : obj;
     }

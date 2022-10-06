@@ -32,7 +32,6 @@ import java.util.concurrent.Executors;
 
 public class SendForm extends JPanel implements MainFormPane {
     private final static Logger log = LogManager.getLogger(Database.class);
-    private final Window owner;
     private TransformInstruction transformInstruction;
     private CurrencyConverter currencyConverter;
     private final PaymentValidator validator = new PaymentValidator(new SenderHistoryValidator());
@@ -45,12 +44,10 @@ public class SendForm extends JPanel implements MainFormPane {
     private JButton cmdSendPayments;
     private ProgressLabel lblLoading;
 
-    public SendForm(Window owner, TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
-        if (owner == null) throw new IllegalArgumentException("Parameter 'owner' cannot be null");
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
-        this.owner = owner;
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
 
@@ -98,7 +95,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new FilePathField(owner);
+                txtInput = new FilePathField(this);
                 try (var repo = new ConfigRepo()) {
                     txtInput.setCurrentDirectory(repo.getDefaultInputDirectory());
                 } catch (Exception e) {
@@ -122,7 +119,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblExchange, 30, SpringLayout.NORTH, panel1);
                 panel1.add(lblExchange);
 
-                var lbl3 = Utils.createLinkLabel(owner, "edit...");
+                var lbl3 = Utils.createLinkLabel(this, "edit...");
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblExchange);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 30, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {

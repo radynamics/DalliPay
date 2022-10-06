@@ -92,7 +92,7 @@ public class MainForm extends JFrame {
                     var provider = transformInstruction.getExchangeRateProvider();
                     provider.load();
 
-                    sendingPanel = new SendForm(this, transformInstruction, new CurrencyConverter(provider.latestRates()));
+                    sendingPanel = new SendForm(transformInstruction, new CurrencyConverter(provider.latestRates()));
                     sendingPanel.setBorder(mainContentBorder);
                     sendingPanel.setReader(new Pain001Reader(transformInstruction.getLedger()));
                     tabbedPane.addTab("Send", sendingPanel);
@@ -107,7 +107,7 @@ public class MainForm extends JFrame {
                     tabbedPane.setEnabledAt(2, false);
                 }
                 {
-                    optionsPanel = new OptionsForm(this);
+                    optionsPanel = new OptionsForm();
                     optionsPanel.addChangedListener(() -> {
                         transformInstruction.getHistoricExchangeRateSource().init();
                         receivingPanel.refreshTargetCcys();

@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 
 import java.util.HashMap;
 
@@ -14,16 +15,25 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
     public StaticWalletInfoProvider(Ledger ledger) {
         this.ledger = ledger;
 
-        known.put("rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq", new WalletInfo[]{new WalletInfo("Name", "GateHub", 100)});
-        known.put("rhotcWYdfn6qxhVMbPKGDF3XCKqwXar5J4", new WalletInfo[]{new WalletInfo("Name", "GateHub", 100)});
-        known.put("rctArjqVvTHihekzDeecKo6mkTYTUSBNc", new WalletInfo[]{new WalletInfo("Name", "GateHub Fifth", 100)});
-        known.put("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", new WalletInfo[]{new WalletInfo("Name", "Bitstamp", 100)});
-        known.put("rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz", new WalletInfo[]{new WalletInfo("Name", "Sologenic", 100)});
+        known.put("rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq", createWalletInfos("GateHub"));
+        known.put("rhotcWYdfn6qxhVMbPKGDF3XCKqwXar5J4", createWalletInfos("GateHub"));
+        known.put("rctArjqVvTHihekzDeecKo6mkTYTUSBNc", createWalletInfos("GateHub Fifth"));
+        known.put("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59", createWalletInfos("Bitstamp"));
+        known.put("rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz", createWalletInfos("Sologenic"));
+    }
+
+    private WalletInfo[] createWalletInfos(String name) {
+        return new WalletInfo[]{new WalletInfo(this, name, InfoType.Name)};
     }
 
     @Override
     public WalletInfo[] list(Wallet wallet) {
         var key = wallet.getPublicKey();
         return !ledger.getNetwork().isLivenet() || !known.containsKey(key) ? new WalletInfo[0] : known.get(key);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Static information";
     }
 }

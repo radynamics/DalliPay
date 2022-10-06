@@ -13,11 +13,11 @@ public class FilePathField extends JPanel {
     private JTextField txt;
 
     private ArrayList<ChangedListener> listener = new ArrayList<>();
-    private Window owner;
+    private JComponent owner;
     private boolean validateExists;
     private File currentDirectory;
 
-    public FilePathField(Window owner) {
+    public FilePathField(JComponent owner) {
         this.owner = owner;
         setupUI();
     }
