@@ -30,14 +30,14 @@ public class Xumm implements WalletInfoProvider {
 
         var list = new ArrayList<WalletInfo>();
 
-        list.add(new WalletInfo("KYC approved", result.getBoolean("kycApproved"), 80));
+        list.add(new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80));
         if (result.has("xummProfile")) {
             var xummProfile = result.getJSONObject("xummProfile");
             if (!xummProfile.isNull("accountAlias")) {
-                list.add(new WalletInfo("XUMM account alias", xummProfile.getString("accountAlias"), 50));
+                list.add(new WalletInfo(this, "XUMM account alias", xummProfile.getString("accountAlias"), 50));
             }
             if (!xummProfile.isNull("ownerAlias")) {
-                list.add(new WalletInfo("XUMM owner alias", xummProfile.getString("ownerAlias"), 50));
+                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50));
             }
         }
 
@@ -45,21 +45,26 @@ public class Xumm implements WalletInfoProvider {
             var thirdPartyProfiles = result.getJSONArray("thirdPartyProfiles");
             for (var i = 0; i < thirdPartyProfiles.length(); i++) {
                 var o = thirdPartyProfiles.getJSONObject(i);
-                list.add(new WalletInfo(String.format("%s account alias", o.getString("source")), o.getString("accountAlias"), 40));
+                list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), o.getString("accountAlias"), 40));
             }
         }
 
         if (result.has("globalid")) {
             var globalid = result.getJSONObject("globalid");
             if (!globalid.isNull("profileUrl")) {
-                list.add(new WalletInfo("GlobaliD profile URL", globalid.getString("profileUrl"), 50));
+                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50));
             }
             if (!globalid.isNull("sufficientTrust")) {
-                list.add(new WalletInfo("GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60));
+                list.add(new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60));
             }
         }
 
         return list.toArray(new WalletInfo[0]);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Xumm";
     }
 
     private JSONObject load(Wallet wallet) throws IOException, WalletInfoLookupException {

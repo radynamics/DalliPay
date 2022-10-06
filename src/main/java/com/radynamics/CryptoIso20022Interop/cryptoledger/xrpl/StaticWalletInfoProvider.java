@@ -22,13 +22,18 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
         known.put("rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz", createWalletInfos("Sologenic"));
     }
 
-    private static WalletInfo[] createWalletInfos(String name) {
-        return new WalletInfo[]{new WalletInfo("Name", name, 100, InfoType.Name)};
+    private WalletInfo[] createWalletInfos(String name) {
+        return new WalletInfo[]{new WalletInfo(this, "Name", name, 100, InfoType.Name)};
     }
 
     @Override
     public WalletInfo[] list(Wallet wallet) {
         var key = wallet.getPublicKey();
         return !ledger.getNetwork().isLivenet() || !known.containsKey(key) ? new WalletInfo[0] : known.get(key);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Static information";
     }
 }

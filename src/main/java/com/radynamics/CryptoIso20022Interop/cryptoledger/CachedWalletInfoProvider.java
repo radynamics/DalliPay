@@ -35,4 +35,9 @@ public class CachedWalletInfoProvider implements WalletInfoProvider {
         cache.put(key, list.toArray(new WalletInfo[0]));
         return cache.get(key);
     }
+
+    @Override
+    public String getDisplayText() {
+        return "Cached values";
+    }
 }

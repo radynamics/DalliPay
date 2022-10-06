@@ -104,13 +104,19 @@ public class WalletField extends JPanel {
         }
 
         try {
+            String lastInfoProviderDisplayText = null;
             var sb = new StringBuilder();
             for (var p : ledger.getInfoProvider()) {
-                if (sb.length() > 0) {
-                    sb.append("\n");
-                }
                 for (var wi : p.list(wallet)) {
+                    var infoProviderDisplayText = wi.getProvider().getDisplayText();
+                    if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {
+                        if (sb.length() > 0) {
+                            sb.append("\n");
+                        }
+                        sb.append(String.format("=== %s ===\n", infoProviderDisplayText));
+                    }
                     sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
+                    lastInfoProviderDisplayText = infoProviderDisplayText;
                 }
             }
 

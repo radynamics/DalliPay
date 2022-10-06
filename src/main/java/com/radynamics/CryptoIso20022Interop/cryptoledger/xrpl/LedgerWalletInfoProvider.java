@@ -25,12 +25,17 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
 
         var domain = api.getAccountDomain(WalletConverter.from(wallet));
         if (!StringUtils.isAllEmpty(domain)) {
-            var wi = new WalletInfo("Domain", domain, 100, InfoType.Domain);
+            var wi = new WalletInfo(this, "Domain", domain, 100, InfoType.Domain);
             var dv = new DomainVerifier(ledger.getNetwork());
             wi.setVerified(dv.isValid(wallet, domain));
             list.add(wi);
         }
 
         return list.toArray(new WalletInfo[0]);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return String.format("Ledger values (%s)", ledger.getId());
     }
 }

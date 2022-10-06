@@ -4,4 +4,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletI
 
 public interface WalletInfoProvider {
     WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException;
+
+    String getDisplayText();
 }

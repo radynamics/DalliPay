@@ -3,21 +3,23 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 
 public class WalletInfo {
+    private final WalletInfoProvider provider;
     private String text;
     private String value;
     private int importance;
     private InfoType type;
     private boolean verified;
 
-    public WalletInfo(String text, boolean value, int importance) {
-        this(text, String.valueOf(value), importance);
+    public WalletInfo(WalletInfoProvider provider, String text, boolean value, int importance) {
+        this(provider, text, String.valueOf(value), importance);
     }
 
-    public WalletInfo(String text, String value, int importance) {
-        this(text, value, importance, InfoType.Undefined);
+    public WalletInfo(WalletInfoProvider provider, String text, String value, int importance) {
+        this(provider, text, value, importance, InfoType.Undefined);
     }
 
-    public WalletInfo(String text, String value, int importance, InfoType type) {
+    public WalletInfo(WalletInfoProvider provider, String text, String value, int importance, InfoType type) {
+        this.provider = provider;
         this.text = text;
         this.value = value;
         this.importance = importance;
@@ -46,5 +48,9 @@ public class WalletInfo {
 
     public InfoType getType() {
         return type;
+    }
+
+    public WalletInfoProvider getProvider() {
+        return provider;
     }
 }
