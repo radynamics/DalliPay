@@ -11,7 +11,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executors;
@@ -21,6 +22,7 @@ public class SendConfirmationForm extends JDialog {
     private final Payment[] payments;
     private final ExchangeRateProvider provider;
     private int totalPaymentCount;
+    private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -40,20 +42,7 @@ public class SendConfirmationForm extends JDialog {
         setTitle("Confirm Payments");
         setIconImage(Utils.getProductIcon());
 
-        var cancelDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                close();
-            }
-        };
-        getRootPane().registerKeyboardAction(cancelDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        var acceptDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onOk();
-            }
-        };
-        getRootPane().registerKeyboardAction(acceptDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        formAcceptCloseHandler.configure();
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -184,13 +173,17 @@ public class SendConfirmationForm extends JDialog {
             {
                 cmdSend = new JButton("Send");
                 cmdSend.setPreferredSize(new Dimension(150, 35));
-                cmdSend.addActionListener(e -> onOk());
+                cmdSend.addActionListener(e -> {
+                            setDialogAccepted(true);
+                            formAcceptCloseHandler.accept();
+                        }
+                );
                 pnl.add(cmdSend);
             }
             {
                 var cmd = new JButton("Cancel");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> close());
+                cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
             }
         }
@@ -342,15 +335,6 @@ public class SendConfirmationForm extends JDialog {
             }
         };
         scheduler.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
-    }
-
-    private void onOk() {
-        setDialogAccepted(true);
-        close();
-    }
-
-    private void close() {
-        dispose();
     }
 
     private static int getNorthPad(int line) {

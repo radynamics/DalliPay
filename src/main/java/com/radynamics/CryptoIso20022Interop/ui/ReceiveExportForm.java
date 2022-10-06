@@ -3,13 +3,8 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormat;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormatHelper;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,6 +15,7 @@ public class ReceiveExportForm extends JDialog {
     private boolean accepted;
     private FilePathField txtOutputFile;
     private JComboBox<CamtFormat> cboExportFormat;
+    private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private static final Map<CamtFormat, String> formatMapping = new LinkedHashMap<>();
 
@@ -35,20 +31,7 @@ public class ReceiveExportForm extends JDialog {
         setTitle("Export");
         setIconImage(Utils.getProductIcon());
 
-        var cancelDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                close();
-            }
-        };
-        getRootPane().registerKeyboardAction(cancelDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        var acceptDialog = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onOk();
-            }
-        };
-        getRootPane().registerKeyboardAction(acceptDialog, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        formAcceptCloseHandler.configure();
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -157,25 +140,20 @@ public class ReceiveExportForm extends JDialog {
             {
                 var cmd = new JButton("OK");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> onOk());
+                cmd.addActionListener(e -> {
+                            setDialogAccepted(true);
+                            formAcceptCloseHandler.accept();
+                        }
+                );
                 pnl.add(cmd);
             }
             {
                 var cmd = new JButton("Cancel");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> close());
+                cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
             }
         }
-    }
-
-    private void onOk() {
-        setDialogAccepted(true);
-        close();
-    }
-
-    private void close() {
-        dispose();
     }
 
     private static int getNorthPad(int line) {
