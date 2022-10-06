@@ -106,6 +106,9 @@ public class WalletField extends JPanel {
         try {
             var sb = new StringBuilder();
             for (var p : ledger.getInfoProvider()) {
+                if (sb.length() > 0) {
+                    sb.append("\n");
+                }
                 for (var wi : p.list(wallet)) {
                     sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
                 }
