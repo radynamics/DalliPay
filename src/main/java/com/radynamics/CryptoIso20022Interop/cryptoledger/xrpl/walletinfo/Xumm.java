@@ -71,6 +71,7 @@ public class Xumm implements WalletInfoProvider {
         URL url = new URL(String.format("https://xumm.app/api/v1/platform/account-meta/%s", wallet.getPublicKey()));
 
         var conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(2000);
         conn.setRequestMethod("GET");
         conn.connect();
 
