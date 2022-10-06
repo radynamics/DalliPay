@@ -104,7 +104,7 @@ public class ExchangeRatesForm extends JDialog {
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
                 {
-                    var lbl = Utils.createLinkLabel(this, "Refresh");
+                    var lbl = Utils.createLinkLabel(pnlMain, "Refresh");
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {

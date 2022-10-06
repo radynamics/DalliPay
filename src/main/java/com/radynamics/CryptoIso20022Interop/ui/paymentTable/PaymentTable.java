@@ -66,7 +66,7 @@ public class PaymentTable extends JPanel {
         table.setDefaultRenderer(Address.class, new AddressCellRenderer());
         table.setDefaultRenderer(ZonedDateTime.class, new DateTimeCellRenderer());
         var objectColumn = table.getColumn(PaymentTableModel.COL_OBJECT);
-        var cellEditor = new WalletCellEditor(objectColumn, actor == Actor.Sender);
+        var cellEditor = new WalletCellEditor(this, objectColumn, actor == Actor.Sender);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_SENDER_LEDGER)).setCellEditor(cellEditor);
         table.getColumnModel().getColumn(model.findColumn(PaymentTableModel.COL_RECEIVER_LEDGER)).setCellEditor(cellEditor);
 
@@ -130,6 +130,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new ShowDetailCellRenderer());
         }
 
+        var owner = this;
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {

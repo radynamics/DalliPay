@@ -22,7 +22,7 @@ public class GeneralPane extends JPanel {
     private final SpringLayout contentLayout;
     private JComboBox<String> cboExplorer;
 
-    public GeneralPane(Window owner) {
+    public GeneralPane() {
         setPreferredSize(new Dimension(1000, 400));
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
@@ -53,7 +53,7 @@ public class GeneralPane extends JPanel {
                     pnl.add(new JLabel(vc.getVersion()));
                 }
                 {
-                    var lbl = Utils.createLinkLabel(owner, "show licenses...");
+                    var lbl = Utils.createLinkLabel(this, "show licenses...");
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {

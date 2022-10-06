@@ -13,10 +13,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class WalletField extends JPanel {
+    private final JComponent owner;
     private JTextField txt;
     private Ledger ledger;
 
-    public WalletField() {
+    public WalletField(JComponent owner) {
+        this.owner = owner;
         setupUI();
     }
 
@@ -61,9 +63,8 @@ public class WalletField extends JPanel {
             c.gridy = 0;
             add(pnl, c);
             {
-                var lbl = new JLabel("find...");
+                var lbl = Utils.createLinkLabel(owner, "find...");
                 pnl.add(lbl);
-                lbl.setForeground(Consts.ColorAccent);
                 lbl.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {

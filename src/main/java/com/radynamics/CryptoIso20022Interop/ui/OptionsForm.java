@@ -13,7 +13,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
     private final ReceiverPane receiverPane;
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
 
-    public OptionsForm(Window owner) {
+    public OptionsForm() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         var pnlContent = new JPanel();
@@ -24,7 +24,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
-            generalPane = new GeneralPane(owner);
+            generalPane = new GeneralPane();
             tabbedPane.addTab("General", generalPane);
             receiverPane = new ReceiverPane();
             tabbedPane.addTab("Receive", receiverPane);
