@@ -15,11 +15,13 @@ import java.awt.event.MouseEvent;
 public class WalletField extends JPanel {
     private final JComponent owner;
     private JTextField txt;
+    private JLabel lblShowDetail;
     private Ledger ledger;
 
     public WalletField(JComponent owner) {
         this.owner = owner;
         setupUI();
+        setShowDetailVisible(false);
     }
 
     private void setupUI() {
@@ -73,9 +75,9 @@ public class WalletField extends JPanel {
                 });
             }
             {
-                var lbl = Utils.createLinkLabel(owner, "detail...");
-                pnl.add(lbl);
-                lbl.addMouseListener(new MouseAdapter() {
+                lblShowDetail = Utils.createLinkLabel(owner, "detail...");
+                pnl.add(lblShowDetail);
+                lblShowDetail.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         showMore();
@@ -129,5 +131,9 @@ public class WalletField extends JPanel {
 
     public void setEditable(boolean b) {
         txt.setEditable(b);
+    }
+
+    public void setShowDetailVisible(boolean visible) {
+        lblShowDetail.setVisible(visible);
     }
 }
