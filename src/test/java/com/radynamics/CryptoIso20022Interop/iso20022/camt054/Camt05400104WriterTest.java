@@ -129,8 +129,8 @@ public class Camt05400104WriterTest {
         var ti = TestFactory.createTransformInstruction(ledger);
 
         var wip = new TestWalletInfoProvider();
-        wip.add("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", new WalletInfo("Name", "Company A", 1));
-        wip.add("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", new WalletInfo("Name", "Company B", 1));
+        wip.add("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", new WalletInfo(wip, "Name", "Company A", 1));
+        wip.add("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", new WalletInfo(wip, "Name", "Company B", 1));
         ledger.setInfoProvider(new WalletInfoProvider[]{wip});
 
         var t = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));

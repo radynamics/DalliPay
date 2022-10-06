@@ -27,4 +27,9 @@ public class TestWalletInfoProvider implements WalletInfoProvider {
         }
         return new WalletInfo[0];
     }
+
+    @Override
+    public String getDisplayText() {
+        return "Test provider";
+    }
 }
