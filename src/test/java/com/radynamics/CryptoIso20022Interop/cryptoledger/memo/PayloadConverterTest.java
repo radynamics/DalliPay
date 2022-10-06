@@ -22,7 +22,7 @@ public class PayloadConverterTest {
 
     @Test
     public void toMemo() {
-        assertEquals("{\"CdOrPrtry\":[],\"v\":1,\"ft\":[]}",
+        assertEquals("",
                 PayloadConverter.toMemo(new StructuredReference[0], new String[0]));
 
         var refs = new ArrayList<StructuredReference>();

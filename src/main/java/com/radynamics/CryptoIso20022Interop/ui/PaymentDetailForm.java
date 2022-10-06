@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
@@ -173,7 +174,9 @@ public class PaymentDetailForm extends JDialog {
                 if (payment.getTransmissionError() != null) {
                     sb.append(String.format("%s\n", payment.getTransmissionError().getMessage()));
                 }
-                for (var vr : validator.validate(payment)) {
+                var validations = validator.validate(payment);
+                ValidationResultUtils.sortDescending(validations);
+                for (var vr : validations) {
                     sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
                 }
                 var pnl = new JPanel();

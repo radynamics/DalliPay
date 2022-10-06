@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 
 import javax.swing.*;
@@ -39,6 +40,7 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
         setText(null);
         var status = (ValidationState) value;
         var obj = (ValidationResult[]) table.getModel().getValueAt(row, validationResultsColumn.getModelIndex());
+        ValidationResultUtils.sortDescending(obj);
         setIcon(getIconOrNull(status));
         setToolTipText(createToolTipText(obj));
         return this;
