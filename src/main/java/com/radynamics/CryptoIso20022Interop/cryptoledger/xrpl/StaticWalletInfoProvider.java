@@ -23,7 +23,7 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
     }
 
     private WalletInfo[] createWalletInfos(String name) {
-        return new WalletInfo[]{new WalletInfo(this, "Name", name, 100, InfoType.Name)};
+        return new WalletInfo[]{new WalletInfo(this, name, InfoType.Name)};
     }
 
     @Override

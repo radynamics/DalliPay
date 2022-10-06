@@ -14,7 +14,7 @@ public class TestWalletInfoProvider implements WalletInfoProvider {
 
 
     public void addName(String walletPublicKey, String name) {
-        add(walletPublicKey, new WalletInfo(this, "Name", name, 1, InfoType.Name));
+        add(walletPublicKey, new WalletInfo(this, name, InfoType.Name));
     }
 
     public void add(String walletPublicKey, WalletInfo info) {

@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 
+import java.util.HashMap;
+
 public class WalletInfo {
     private final WalletInfoProvider provider;
     private String text;
@@ -10,12 +12,24 @@ public class WalletInfo {
     private InfoType type;
     private boolean verified;
 
+    static HashMap<InfoType, String> map = new HashMap<>();
+
+    static {
+        map.put(InfoType.Undefined, "Undefined");
+        map.put(InfoType.Name, "Name");
+        map.put(InfoType.Domain, "Domain");
+    }
+
     public WalletInfo(WalletInfoProvider provider, String text, boolean value, int importance) {
         this(provider, text, String.valueOf(value), importance);
     }
 
     public WalletInfo(WalletInfoProvider provider, String text, String value, int importance) {
         this(provider, text, value, importance, InfoType.Undefined);
+    }
+
+    public WalletInfo(WalletInfoProvider provider, String value, InfoType type) {
+        this(provider, map.getOrDefault(type, "Undefined"), value, 100, type);
     }
 
     public WalletInfo(WalletInfoProvider provider, String text, String value, int importance, InfoType type) {
