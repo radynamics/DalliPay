@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,11 @@ import java.util.Map;
 
 public class TestWalletInfoProvider implements WalletInfoProvider {
     private final Map<String, ArrayList<WalletInfo>> list = new HashMap<>();
+
+
+    public void addName(String walletPublicKey, String name) {
+        add(walletPublicKey, new WalletInfo(this, name, InfoType.Name));
+    }
 
     public void add(String walletPublicKey, WalletInfo info) {
         if (!list.containsKey(walletPublicKey)) {
@@ -26,5 +32,10 @@ public class TestWalletInfoProvider implements WalletInfoProvider {
             }
         }
         return new WalletInfo[0];
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Test provider";
     }
 }

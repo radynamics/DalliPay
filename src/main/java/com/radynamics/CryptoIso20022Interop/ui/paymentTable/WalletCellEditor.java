@@ -16,6 +16,7 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
         this.objectColumn = objectColumn;
         this.component = new WalletField(owner);
         this.component.setEditable(editable);
+        this.component.setShowDetailVisible(true);
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
