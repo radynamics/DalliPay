@@ -110,7 +110,15 @@ public class WalletField extends JPanel {
                     sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
                 }
             }
-            JOptionPane.showMessageDialog(this, sb.toString());
+
+            var textArea = new JTextArea(sb.toString());
+            textArea.setColumns(30);
+            textArea.setRows(15);
+            textArea.setEditable(false);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
+            JOptionPane.showMessageDialog(this, new JScrollPane(textArea), wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
         } catch (WalletInfoLookupException e) {
             ExceptionDialog.show(this, e);
         }
