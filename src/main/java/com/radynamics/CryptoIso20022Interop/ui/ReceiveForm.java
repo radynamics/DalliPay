@@ -109,7 +109,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new WalletField();
+                txtInput = new WalletField(this);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setLedger(transformInstruction.getLedger());

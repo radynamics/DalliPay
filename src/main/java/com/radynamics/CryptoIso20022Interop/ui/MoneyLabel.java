@@ -18,10 +18,10 @@ public class MoneyLabel extends JPanel {
     private Money value;
     private final Ledger ledger;
 
-    public MoneyLabel(Window owner, Ledger ledger) {
+    public MoneyLabel(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
-        detailLink = Utils.createLinkLabel(owner, "show issuer...");
+        detailLink = Utils.createLinkLabel(this, "show issuer...");
         detailLink.putClientProperty("FlatLaf.styleClass", "small");
         detailLink.setVisible(false);
         setupUI();

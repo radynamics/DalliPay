@@ -12,9 +12,9 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
     private final WalletField component;
     private final TableColumn objectColumn;
 
-    public WalletCellEditor(TableColumn objectColumn, boolean editable) {
+    public WalletCellEditor(JComponent owner, TableColumn objectColumn, boolean editable) {
         this.objectColumn = objectColumn;
-        this.component = new WalletField();
+        this.component = new WalletField(owner);
         this.component.setEditable(editable);
     }
 

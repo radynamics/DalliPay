@@ -99,13 +99,13 @@ public class PaymentDetailForm extends JDialog {
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
-                lblAmountText = new MoneyLabel(this, payment.getLedger());
+                lblAmountText = new MoneyLabel(payment.getLedger());
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
                 {
                     var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
-                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "edit...", enabled));
+                    var lbl = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -140,7 +140,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 JLabel secondLine = null;
                 if (payment.getId() != null) {
-                    secondLine = formatSecondLineLinkLabel(Utils.createLinkLabel(this, "show ledger transaction..."));
+                    secondLine = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "show ledger transaction..."));
                     secondLine.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
