@@ -29,7 +29,11 @@ public class CachedWalletInfoProvider implements WalletInfoProvider {
 
         var list = new ArrayList<WalletInfo>();
         for (var p : providers) {
-            list.addAll(Arrays.asList(p.list(wallet)));
+            try {
+                list.addAll(Arrays.asList(p.list(wallet)));
+            } catch (WalletInfoLookupException e) {
+                log.warn(e.getMessage(), e);
+            }
         }
 
         cache.put(key, list.toArray(new WalletInfo[0]));

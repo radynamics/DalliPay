@@ -1,18 +1,20 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class WalletField extends JPanel {
+    private final static Logger log = LogManager.getLogger(WalletField.class);
     private final JComponent owner;
     private JTextField txt;
     private JLabel lblShowDetail;
@@ -103,34 +105,37 @@ public class WalletField extends JPanel {
             return;
         }
 
-        try {
-            String lastInfoProviderDisplayText = null;
-            var sb = new StringBuilder();
-            for (var p : ledger.getInfoProvider()) {
-                for (var wi : p.list(wallet)) {
-                    var infoProviderDisplayText = wi.getProvider().getDisplayText();
-                    if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {
-                        if (sb.length() > 0) {
-                            sb.append("\n");
-                        }
-                        sb.append(String.format("=== %s ===\n", infoProviderDisplayText));
-                    }
-                    sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
-                    lastInfoProviderDisplayText = infoProviderDisplayText;
-                }
+        var infos = new ArrayList<WalletInfo>();
+        for (var p : ledger.getInfoProvider()) {
+            try {
+                infos.addAll(Arrays.asList(p.list(wallet)));
+            } catch (WalletInfoLookupException e) {
+                log.warn(e.getMessage(), e);
             }
-
-            var textArea = new JTextArea(sb.toString());
-            textArea.setColumns(30);
-            textArea.setRows(15);
-            textArea.setEditable(false);
-            textArea.setLineWrap(true);
-            textArea.setWrapStyleWord(true);
-            textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
-            JOptionPane.showMessageDialog(this, new JScrollPane(textArea), wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
-        } catch (WalletInfoLookupException e) {
-            ExceptionDialog.show(this, e);
         }
+
+        String lastInfoProviderDisplayText = null;
+        var sb = new StringBuilder();
+        for (var wi : infos) {
+            var infoProviderDisplayText = wi.getProvider().getDisplayText();
+            if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {
+                if (sb.length() > 0) {
+                    sb.append("\n");
+                }
+                sb.append(String.format("=== %s ===\n", infoProviderDisplayText));
+            }
+            sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
+            lastInfoProviderDisplayText = infoProviderDisplayText;
+        }
+
+        var textArea = new JTextArea(sb.toString());
+        textArea.setColumns(30);
+        textArea.setRows(15);
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
+        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void setText(String value) {
