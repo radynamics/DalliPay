@@ -73,9 +73,8 @@ public class WalletField extends JPanel {
                 });
             }
             {
-                var lbl = new JLabel("detail...");
+                var lbl = Utils.createLinkLabel(owner, "detail...");
                 pnl.add(lbl);
-                lbl.setForeground(Consts.ColorAccent);
                 lbl.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
