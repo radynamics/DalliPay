@@ -18,7 +18,7 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
         known.put("rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq", createWalletInfos("GateHub"));
         known.put("rhotcWYdfn6qxhVMbPKGDF3XCKqwXar5J4", createWalletInfos("GateHub"));
         known.put("rctArjqVvTHihekzDeecKo6mkTYTUSBNc", createWalletInfos("GateHub Fifth"));
-        known.put("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59", createWalletInfos("Bitstamp"));
+        known.put("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", createWalletInfos("Bitstamp"));
         known.put("rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz", createWalletInfos("Sologenic"));
     }
 
