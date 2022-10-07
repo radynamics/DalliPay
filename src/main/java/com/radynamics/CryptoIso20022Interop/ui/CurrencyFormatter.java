@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.Iso4217CurrencyCode;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 
@@ -23,7 +24,7 @@ public class CurrencyFormatter {
         var issuerText = ccy.getIssuer().getPublicKey();
         var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getNameOrDomain(ccy.getIssuer());
         if (wi != null) {
-            issuerText = String.format("%s (%s)", wi.getValue(), wi.getText());
+            issuerText = WalletInfoFormatter.format(wi);
         }
 
         lbl.setToolTipText(String.format("Issued by %s", issuerText));

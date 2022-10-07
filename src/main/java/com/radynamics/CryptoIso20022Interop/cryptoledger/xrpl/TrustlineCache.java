@@ -48,4 +48,8 @@ public class TrustlineCache {
     public void clear() {
         items.clear();
     }
+
+    public Ledger getLedger() {
+        return ledger;
+    }
 }
