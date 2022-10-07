@@ -124,12 +124,13 @@ public class WalletField extends JPanel {
                 }
                 sb.append(String.format("=== %s ===\n", infoProviderDisplayText));
             }
-            sb.append(String.format("%s: %s\n", wi.getText(), wi.getValue()));
+            var text = StringUtils.isEmpty(wi.getText()) ? "" : String.format("%s: ", wi.getText());
+            sb.append(String.format("%s%s\n", text, wi.getValue()));
             lastInfoProviderDisplayText = infoProviderDisplayText;
         }
 
         var textArea = new JTextArea(sb.toString());
-        textArea.setColumns(30);
+        textArea.setColumns(50);
         textArea.setRows(15);
         textArea.setEditable(false);
         textArea.setLineWrap(true);
