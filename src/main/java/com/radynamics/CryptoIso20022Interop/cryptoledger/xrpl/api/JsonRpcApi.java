@@ -313,9 +313,11 @@ public class JsonRpcApi implements TransactionSource {
     public void refreshBalance(Wallet wallet) {
         try {
             {
-                var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-                var result = xrplClient.accountInfo(requestParams);
-                wallet.getBalances().set(Money.of(result.accountData().balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+                accountDataCache.evict(wallet);
+                var accountData = getAccountData(wallet);
+                if (accountData != null) {
+                    wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+                }
             }
             {
                 var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();

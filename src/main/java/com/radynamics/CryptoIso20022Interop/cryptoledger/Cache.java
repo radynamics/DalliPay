@@ -41,6 +41,11 @@ public class Cache<T> {
         return o == null ? null : o.getValue();
     }
 
+    public void evict(Wallet wallet) {
+        var key = createKey(wallet);
+        cache.entrySet().removeIf(entry -> entry.getKey().equals(key));
+    }
+
     public synchronized void evictOutdated() {
         var oldSize = cache.size();
         cache.entrySet().removeIf(entry -> entry.getValue().getAge().toSeconds() > maxAge.toSeconds());
