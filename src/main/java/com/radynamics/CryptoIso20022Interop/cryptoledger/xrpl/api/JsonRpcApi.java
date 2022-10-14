@@ -334,15 +334,15 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public String getAccountDomain(Wallet wallet) {
+        var accountData = getAccountData(wallet);
+        if (accountData == null) {
+            return null;
+        }
+        var hex = accountData.domain().orElse(null);
         try {
-            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            var hex = result.accountData().domain().orElse(null);
             return hex == null ? null : Utils.hexToString(hex);
         } catch (Exception e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
+            log.error(e.getMessage(), e);
             return null;
         }
     }
