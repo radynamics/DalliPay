@@ -269,19 +269,14 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public boolean walletAccepts(Wallet wallet, String ccy) {
-        try {
-            if ("XRP".equalsIgnoreCase(ccy)) {
-                var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-                var result = xrplClient.accountInfo(requestParams);
-                return !result.accountData().flags().lsfDisallowXrp();
+        if ("XRP".equalsIgnoreCase(ccy)) {
+            var accountData = getAccountData(wallet);
+            if (accountData == null) {
+                return false;
             }
-            return false;
-        } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
-            return false;
+            return !accountData.flags().lsfDisallowXrp();
         }
+        return false;
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
