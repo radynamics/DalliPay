@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Cache;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
@@ -48,12 +49,14 @@ public class JsonRpcApi implements TransactionSource {
     private final NetworkInfo network;
     private final XrplClient xrplClient;
     private final LedgerRangeConverter ledgerRangeConverter;
+    private final Cache<AccountRootObject> accountDataCache;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
         this.xrplClient = new XrplClient(network.getUrl());
         this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
+        this.accountDataCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -209,12 +212,24 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private AccountRootObject getAccountData(Wallet wallet) {
+        accountDataCache.evictOutdated();
+        var data = accountDataCache.get(wallet);
+        if (data != null) {
+            return data;
+        }
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (accountDataCache.isPresent(wallet)) {
+            return null;
+        }
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            return result.accountData();
+            data = xrplClient.accountInfo(requestParams).accountData();
+            accountDataCache.add(wallet, data);
+            return data;
         } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
+            if (isAccountNotFound(e)) {
+                accountDataCache.add(wallet, null);
+            } else {
                 log.error(e.getMessage(), e);
             }
             return null;
