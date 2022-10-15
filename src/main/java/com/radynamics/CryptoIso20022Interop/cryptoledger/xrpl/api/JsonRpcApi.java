@@ -24,10 +24,7 @@ import org.xrpl.xrpl4j.crypto.KeyMetadata;
 import org.xrpl.xrpl4j.crypto.PrivateKey;
 import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
-import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.AccountLinesRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsRequestParams;
-import org.xrpl.xrpl4j.model.client.accounts.ImmutableAccountTransactionsRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
@@ -50,6 +47,7 @@ public class JsonRpcApi implements TransactionSource {
     private final XrplClient xrplClient;
     private final LedgerRangeConverter ledgerRangeConverter;
     private final Cache<AccountRootObject> accountDataCache;
+    private final Cache<AccountLinesResult> accountTrustLineCache;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
@@ -57,6 +55,7 @@ public class JsonRpcApi implements TransactionSource {
         this.xrplClient = new XrplClient(network.getUrl());
         this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
         this.accountDataCache = new Cache<>(network.getUrl().toString());
+        this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -214,12 +213,9 @@ public class JsonRpcApi implements TransactionSource {
     private AccountRootObject getAccountData(Wallet wallet) {
         accountDataCache.evictOutdated();
         var data = accountDataCache.get(wallet);
-        if (data != null) {
-            return data;
-        }
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (accountDataCache.isPresent(wallet)) {
-            return null;
+        if (data != null || accountDataCache.isPresent(wallet)) {
+            return data;
         }
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
@@ -229,6 +225,28 @@ public class JsonRpcApi implements TransactionSource {
         } catch (JsonRpcClientErrorException e) {
             if (isAccountNotFound(e)) {
                 accountDataCache.add(wallet, null);
+            } else {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        }
+    }
+
+    private AccountLinesResult getAccountLines(Wallet wallet) {
+        accountTrustLineCache.evictOutdated();
+        var data = accountTrustLineCache.get(wallet);
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (data != null || accountTrustLineCache.isPresent(wallet)) {
+            return data;
+        }
+        try {
+            var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
+            data = xrplClient.accountLines(requestParams);
+            accountTrustLineCache.add(wallet, data);
+            return data;
+        } catch (JsonRpcClientErrorException e) {
+            if (isAccountNotFound(e)) {
+                accountTrustLineCache.add(wallet, null);
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -324,23 +342,19 @@ public class JsonRpcApi implements TransactionSource {
 
     public Trustline[] listTrustlines(Wallet wallet) {
         var list = new ArrayList<Trustline>();
-        try {
-            var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
-            var result = xrplClient.accountLines(requestParams);
-            for (var line : result.lines()) {
-                var amt = Double.parseDouble(line.balance());
-                var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
-                var ccy = new Currency(line.currency(), issuer);
-                var balance = Money.of(amt, ccy);
-                var lmt = Double.parseDouble(line.limit());
-                var limit = Money.of(lmt, ccy);
+        var result = getAccountLines(wallet);
+        if (result == null) {
+            return new Trustline[0];
+        }
+        for (var line : result.lines()) {
+            var amt = Double.parseDouble(line.balance());
+            var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
+            var ccy = new Currency(line.currency(), issuer);
+            var balance = Money.of(amt, ccy);
+            var lmt = Double.parseDouble(line.limit());
+            var limit = Money.of(lmt, ccy);
 
-                list.add(new Trustline(wallet, balance, limit));
-            }
-        } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
+            list.add(new Trustline(wallet, balance, limit));
         }
         return list.toArray(new Trustline[0]);
     }
