@@ -45,8 +45,18 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
             var walletValidations = wv.validate(t.getSenderWallet(), "Sender");
             list.addAll(Arrays.asList(walletValidations));
 
-            if (walletValidations.length == 0 && WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
-                list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
+            if (walletValidations.length == 0) {
+                if (WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
+                    list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
+                }
+
+                var ccy = t.getAmountTransaction().getCcy();
+                var currentBalance = t.getSenderWallet().getBalances().get(ccy).orElse(null);
+                if (currentBalance == null) {
+                    list.add(new ValidationResult(ValidationState.Error, String.format("Sender wallet balance doesn't hold %s.", ccy.getCode())));
+                } else if (currentBalance.lessThan(t.getAmountTransaction())) {
+                    list.add(new ValidationResult(ValidationState.Error, String.format("Sender wallet balance %s is too low.", MoneyFormatter.formatFiat(currentBalance))));
+                }
             }
 
             list.addAll(Arrays.asList(historyValidator.validate(t)));
