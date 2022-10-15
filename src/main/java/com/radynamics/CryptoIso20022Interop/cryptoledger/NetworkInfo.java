@@ -26,6 +26,7 @@ public class NetworkInfo {
 
 
     public static NetworkInfo create(HttpUrl url, String networkId) {
+        if (url == null) throw new IllegalArgumentException("Parameter 'url' cannot be null");
         var o = new NetworkInfo();
         o.networkId = networkId;
         o.url = url;

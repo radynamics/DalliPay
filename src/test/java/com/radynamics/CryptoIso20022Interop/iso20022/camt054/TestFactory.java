@@ -17,6 +17,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
 import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
+import okhttp3.HttpUrl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,7 +31,7 @@ public class TestFactory {
 
     public static TransformInstruction createTransformInstruction(Ledger ledger) {
         ledger.setInfoProvider(new WalletInfoProvider[]{new TestWalletInfoProvider()});
-        ledger.setNetwork(NetworkInfo.createTestnet(null));
+        ledger.setNetwork(NetworkInfo.createTestnet(HttpUrl.get("https://test.url")));
         var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
         exchange.load();
