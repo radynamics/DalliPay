@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Cache;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
@@ -15,9 +16,20 @@ import java.util.Scanner;
 
 public class Xumm implements WalletInfoProvider {
     final static Logger log = LogManager.getLogger(WalletInfoProvider.class);
+    private final Cache<WalletInfo[]> cache = new Cache<>("");
 
     @Override
     public WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException {
+        cache.evictOutdated();
+        var data = cache.get(wallet);
+        if (data != null) {
+            return data;
+        }
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (cache.isPresent(wallet)) {
+            return new WalletInfo[0];
+        }
+
         JSONObject result;
         try {
             result = load(wallet);
@@ -59,7 +71,9 @@ public class Xumm implements WalletInfoProvider {
             }
         }
 
-        return list.toArray(new WalletInfo[0]);
+        var infos = list.toArray(new WalletInfo[0]);
+        cache.add(wallet, infos);
+        return infos;
     }
 
     @Override

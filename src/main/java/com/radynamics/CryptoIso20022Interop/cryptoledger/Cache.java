@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
