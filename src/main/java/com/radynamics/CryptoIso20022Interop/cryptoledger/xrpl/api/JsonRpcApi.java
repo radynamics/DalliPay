@@ -275,6 +275,19 @@ public class JsonRpcApi implements TransactionSource {
         return accountData != null && accountData.flags().lsfRequireDestTag();
     }
 
+    public double getTransferFee(Wallet wallet) {
+        var accountData = getAccountData(wallet);
+        if (accountData == null) {
+            return 0;
+        }
+
+        // "0%" fee (https://xrpl.org/transfer-fees.html)
+        final UnsignedInteger zeroFee = UnsignedInteger.valueOf(1000000000);
+        var transferRate = accountData.transferRate().orElse(zeroFee);
+        // Return fee as value between 0.0 (0%) and 1.0 (100%)
+        return transferRate.minus(zeroFee).doubleValue() / zeroFee.doubleValue();
+    }
+
     public boolean isBlackholed(Wallet wallet) {
         var accountData = getAccountData(wallet);
         if (accountData == null) {
@@ -350,6 +363,7 @@ public class JsonRpcApi implements TransactionSource {
             var amt = Double.parseDouble(line.balance());
             var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
             var ccy = new Currency(line.currency(), issuer);
+            ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
             var balance = Money.of(amt, ccy);
             var lmt = Double.parseDouble(line.limit());
             var limit = Money.of(lmt, ccy);

@@ -8,6 +8,7 @@ import java.util.Objects;
 public class Currency {
     private final String code;
     private final Wallet issuer;
+    private Double transferFee = (double) 0;
 
     public Currency(String ccy) {
         this(ccy, null);
@@ -35,6 +36,14 @@ public class Currency {
 
     public Wallet getIssuer() {
         return issuer;
+    }
+
+    public void setTransferFee(double transferFee) {
+        this.transferFee = transferFee;
+    }
+
+    public Double getTransferFee() {
+        return transferFee;
     }
 
     @Override

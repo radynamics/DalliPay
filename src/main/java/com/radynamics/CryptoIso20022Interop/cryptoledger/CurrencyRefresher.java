@@ -4,7 +4,10 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class CurrencyRefresher {
     public void refresh(Payment p) {
@@ -43,15 +46,22 @@ public class CurrencyRefresher {
         var firstCandidates = filter(first, ccyAnyIssuer);
         var secondCandidates = filter(second, ccyAnyIssuer);
 
+        var candidates = new ArrayList<Currency>();
         for (var candidate : firstCandidates) {
             for (var secondCandidate : secondCandidates) {
                 if (candidate.equals(secondCandidate)) {
-                    return candidate;
+                    candidates.add(candidate);
                 }
             }
         }
 
-        return null;
+        if (candidates.size() == 0) {
+            return null;
+        }
+
+        // Choose lowest fee
+        Collections.sort(candidates, Comparator.comparing(Currency::getTransferFee));
+        return candidates.get(0);
     }
 
     private static Currency[] filter(MoneyBag bag, Currency ccyAnyIssuer) {
