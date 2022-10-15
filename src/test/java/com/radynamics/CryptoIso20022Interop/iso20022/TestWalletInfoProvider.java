@@ -38,4 +38,9 @@ public class TestWalletInfoProvider implements WalletInfoProvider {
     public String getDisplayText() {
         return "Test provider";
     }
+
+    @Override
+    public InfoType[] supportedTypes() {
+        return new InfoType[]{InfoType.Name};
+    }
 }

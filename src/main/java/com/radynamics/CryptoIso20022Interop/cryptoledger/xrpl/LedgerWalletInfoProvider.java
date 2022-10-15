@@ -38,4 +38,9 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
     public String getDisplayText() {
         return String.format("Ledger values (%s)", ledger.getId());
     }
+
+    @Override
+    public InfoType[] supportedTypes() {
+        return new InfoType[]{InfoType.Domain};
+    }
 }

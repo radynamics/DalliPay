@@ -2,11 +2,13 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class WalletInfoAggregator {
     final static Logger log = LogManager.getLogger(WalletInfoAggregator.class);
@@ -23,7 +25,8 @@ public class WalletInfoAggregator {
         }
 
         var list = new ArrayList<WalletInfo>();
-        for (var p : providers) {
+        var filtered = filterBy(new InfoType[]{InfoType.Name, InfoType.Domain});
+        for (var p : filtered) {
             try {
                 list.addAll(Arrays.asList(p.list(wallet)));
             } catch (WalletInfoLookupException e) {
@@ -43,5 +46,15 @@ public class WalletInfoAggregator {
         }
 
         return name != null ? name : domain;
+    }
+
+    private WalletInfoProvider[] filterBy(InfoType[] infoTypes) {
+        var set = new HashSet<WalletInfoProvider>();
+        for (var p : providers) {
+            if (Arrays.stream(infoTypes).anyMatch(it -> ArrayUtils.contains(p.supportedTypes(), it))) {
+                set.add(p);
+            }
+        }
+        return set.toArray(new WalletInfoProvider[0]);
     }
 }

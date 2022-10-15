@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 
 import java.util.ArrayList;
@@ -38,5 +39,10 @@ public class TrustlineInfoProvider implements WalletInfoProvider {
     @Override
     public String getDisplayText() {
         return "Trustlines";
+    }
+
+    @Override
+    public InfoType[] supportedTypes() {
+        return new InfoType[0];
     }
 }

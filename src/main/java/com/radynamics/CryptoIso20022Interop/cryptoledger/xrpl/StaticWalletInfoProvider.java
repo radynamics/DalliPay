@@ -36,4 +36,9 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
     public String getDisplayText() {
         return "Static information";
     }
+
+    @Override
+    public InfoType[] supportedTypes() {
+        return new InfoType[]{InfoType.Name};
+    }
 }

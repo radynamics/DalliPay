@@ -1,12 +1,11 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class CachedWalletInfoProvider implements WalletInfoProvider {
     final static Logger log = LogManager.getLogger(CachedWalletInfoProvider.class);
@@ -43,5 +42,14 @@ public class CachedWalletInfoProvider implements WalletInfoProvider {
     @Override
     public String getDisplayText() {
         return "Cached values";
+    }
+
+    @Override
+    public InfoType[] supportedTypes() {
+        var set = new HashSet<InfoType>();
+        for (var p : providers) {
+            set.addAll(List.of(p.supportedTypes()));
+        }
+        return set.toArray(new InfoType[0]);
     }
 }

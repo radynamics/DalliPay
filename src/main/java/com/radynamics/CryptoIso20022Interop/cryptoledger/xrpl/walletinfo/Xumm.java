@@ -81,6 +81,11 @@ public class Xumm implements WalletInfoProvider {
         return "Xumm";
     }
 
+    @Override
+    public InfoType[] supportedTypes() {
+        return new InfoType[0];
+    }
+
     private JSONObject load(Wallet wallet) throws IOException, WalletInfoLookupException {
         URL url = new URL(String.format("https://xumm.app/api/v1/platform/account-meta/%s", wallet.getPublicKey()));
 
