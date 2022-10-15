@@ -311,22 +311,14 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public void refreshBalance(Wallet wallet) {
-        try {
-            {
-                accountDataCache.evict(wallet);
-                var accountData = getAccountData(wallet);
-                if (accountData != null) {
-                    wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
-                }
-            }
+        accountDataCache.evict(wallet);
+        var accountData = getAccountData(wallet);
+        if (accountData != null) {
+            wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        }
 
-            for (var t : listTrustlines(wallet)) {
-                wallet.getBalances().set(t.getBalance());
-            }
-        } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
+        for (var t : listTrustlines(wallet)) {
+            wallet.getBalances().set(t.getBalance());
         }
     }
 
