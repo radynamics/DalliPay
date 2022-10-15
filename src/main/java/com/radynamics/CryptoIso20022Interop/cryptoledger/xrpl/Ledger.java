@@ -92,7 +92,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     public Trustline[] listTrustlines(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet wallet) {
-        var api = new JsonRpcApi(this, network);
         return api.listTrustlines(wallet);
     }
 
