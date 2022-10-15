@@ -25,6 +25,7 @@ import java.util.Arrays;
 public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
+    private JsonRpcApi api;
 
     private static final String nativeCcySymbol = "XRP";
 
@@ -53,7 +54,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
-        var api = new JsonRpcApi(this, network);
         api.send(transactions);
     }
 
@@ -63,7 +63,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public FeeSuggestion getFeeSuggestion() {
-        var api = new JsonRpcApi(this, network);
         var fees = api.latestFee();
         return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
     }
@@ -75,24 +74,20 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public void refreshBalance(Wallet wallet) {
-        var api = new JsonRpcApi(this, network);
         api.refreshBalance(WalletConverter.from(wallet));
     }
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
-        var api = new JsonRpcApi(this, network);
         return api.listPaymentsSent(WalletConverter.from(wallet), since, limit);
     }
 
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        var api = new JsonRpcApi(this, network);
         return api.listPaymentsReceived(WalletConverter.from(wallet), period);
     }
 
     public Transaction[] listTrustlineTransactions(com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
-        var api = new JsonRpcApi(this, network);
         return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
     }
 
@@ -103,7 +98,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public boolean exists(Wallet wallet) {
-        var api = new JsonRpcApi(this, network);
         return api.exists(WalletConverter.from(wallet));
     }
 
@@ -112,7 +106,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         var list = new ArrayList<ValidationResult>();
         var xrplWallet = WalletConverter.from(wallet);
 
-        var api = new JsonRpcApi(this, network);
         if (api.requiresDestinationTag(xrplWallet)) {
             list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
         }
@@ -133,6 +126,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     @Override
     public void setNetwork(NetworkInfo network) {
         this.network = network;
+        api = new JsonRpcApi(this, network);
     }
 
     @Override

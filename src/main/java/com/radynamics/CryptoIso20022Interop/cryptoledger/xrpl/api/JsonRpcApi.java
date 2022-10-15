@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Cache;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
@@ -48,12 +49,14 @@ public class JsonRpcApi implements TransactionSource {
     private final NetworkInfo network;
     private final XrplClient xrplClient;
     private final LedgerRangeConverter ledgerRangeConverter;
+    private final Cache<AccountRootObject> accountDataCache;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
         this.xrplClient = new XrplClient(network.getUrl());
         this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
+        this.accountDataCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -209,12 +212,24 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private AccountRootObject getAccountData(Wallet wallet) {
+        accountDataCache.evictOutdated();
+        var data = accountDataCache.get(wallet);
+        if (data != null) {
+            return data;
+        }
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (accountDataCache.isPresent(wallet)) {
+            return null;
+        }
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            return result.accountData();
+            data = xrplClient.accountInfo(requestParams).accountData();
+            accountDataCache.add(wallet, data);
+            return data;
         } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
+            if (isAccountNotFound(e)) {
+                accountDataCache.add(wallet, null);
+            } else {
                 log.error(e.getMessage(), e);
             }
             return null;
@@ -254,19 +269,14 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public boolean walletAccepts(Wallet wallet, String ccy) {
-        try {
-            if ("XRP".equalsIgnoreCase(ccy)) {
-                var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-                var result = xrplClient.accountInfo(requestParams);
-                return !result.accountData().flags().lsfDisallowXrp();
+        if ("XRP".equalsIgnoreCase(ccy)) {
+            var accountData = getAccountData(wallet);
+            if (accountData == null) {
+                return false;
             }
-            return false;
-        } catch (JsonRpcClientErrorException e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
-            return false;
+            return !accountData.flags().lsfDisallowXrp();
         }
+        return false;
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
@@ -303,9 +313,11 @@ public class JsonRpcApi implements TransactionSource {
     public void refreshBalance(Wallet wallet) {
         try {
             {
-                var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-                var result = xrplClient.accountInfo(requestParams);
-                wallet.getBalances().set(Money.of(result.accountData().balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+                accountDataCache.evict(wallet);
+                var accountData = getAccountData(wallet);
+                if (accountData != null) {
+                    wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+                }
             }
 
             for (var t : listTrustlines(wallet)) {
@@ -342,15 +354,15 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public String getAccountDomain(Wallet wallet) {
+        var accountData = getAccountData(wallet);
+        if (accountData == null) {
+            return null;
+        }
+        var hex = accountData.domain().orElse(null);
         try {
-            var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
-            var result = xrplClient.accountInfo(requestParams);
-            var hex = result.accountData().domain().orElse(null);
             return hex == null ? null : Utils.hexToString(hex);
         } catch (Exception e) {
-            if (!isAccountNotFound(e)) {
-                log.error(e.getMessage(), e);
-            }
+            log.error(e.getMessage(), e);
             return null;
         }
     }
