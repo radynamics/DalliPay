@@ -39,7 +39,7 @@ public class BalanceRefresher {
             return;
         }
 
-        ledger.refreshBalance(wallet);
+        ledger.refreshBalance(wallet, false);
         if (wallet.getBalances().isEmpty()) {
             return;
         }

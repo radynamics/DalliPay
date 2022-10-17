@@ -341,8 +341,11 @@ public class JsonRpcApi implements TransactionSource {
         return trx;
     }
 
-    public void refreshBalance(Wallet wallet) {
-        accountDataCache.evict(wallet);
+    public void refreshBalance(Wallet wallet, boolean useCache) {
+        if (!useCache) {
+            accountDataCache.evict(wallet);
+            accountTrustLineCache.evict(wallet);
+        }
         var accountData = getAccountData(wallet);
         if (accountData != null) {
             wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));

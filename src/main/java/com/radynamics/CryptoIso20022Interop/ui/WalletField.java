@@ -1,7 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,6 +107,13 @@ public class WalletField extends JPanel {
             return;
         }
 
+        ledger.refreshBalance(wallet, true);
+
+        var sb = new StringBuilder();
+        sb.append("=== Balances ===\n");
+        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), "\n"));
+        sb.append("\n");
+
         var infos = new ArrayList<WalletInfo>();
         for (var p : ledger.getInfoProvider()) {
             try {
@@ -115,7 +124,6 @@ public class WalletField extends JPanel {
         }
 
         String lastInfoProviderDisplayText = null;
-        var sb = new StringBuilder();
         for (var wi : infos) {
             var infoProviderDisplayText = wi.getProvider().getDisplayText();
             if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {

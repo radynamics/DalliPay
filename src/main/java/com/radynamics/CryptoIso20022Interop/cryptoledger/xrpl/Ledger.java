@@ -74,8 +74,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public void refreshBalance(Wallet wallet) {
-        api.refreshBalance(WalletConverter.from(wallet));
+    public void refreshBalance(Wallet wallet, boolean useCache) {
+        api.refreshBalance(WalletConverter.from(wallet), useCache);
     }
 
     @Override
