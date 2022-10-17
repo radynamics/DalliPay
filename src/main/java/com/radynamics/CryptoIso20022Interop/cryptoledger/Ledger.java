@@ -19,7 +19,7 @@ public interface Ledger {
 
     Wallet createWallet(String publicKey, String secret);
 
-    void refreshBalance(Wallet wallet);
+    void refreshBalance(Wallet wallet, boolean useCache);
 
     TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception;
 

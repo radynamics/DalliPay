@@ -19,7 +19,7 @@ public class BalanceRefresher {
                 continue;
             }
 
-            p.getLedger().refreshBalance(wallet);
+            p.getLedger().refreshBalance(wallet, false);
             if (wallet.getBalances().isEmpty()) {
                 continue;
             }

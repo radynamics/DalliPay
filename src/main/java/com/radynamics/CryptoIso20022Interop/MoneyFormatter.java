@@ -32,12 +32,16 @@ public class MoneyFormatter {
     }
 
     public static String formatFiat(Money[] amounts) {
+        return formatFiat(amounts, ", ");
+    }
+
+    public static String formatFiat(Money[] amounts, String delimiter) {
         var sb = new StringBuilder();
         var i = 0;
         for (var amt : amounts) {
             sb.append(MoneyFormatter.formatFiat(amt));
             if (i + 1 < amounts.length) {
-                sb.append(", ");
+                sb.append(delimiter);
             }
             i++;
         }
