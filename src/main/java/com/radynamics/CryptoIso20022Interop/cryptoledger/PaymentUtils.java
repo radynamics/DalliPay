@@ -10,6 +10,10 @@ import java.util.*;
 
 public class PaymentUtils {
     public static ArrayList<Wallet> distinctSendingWallets(Payment[] payments) {
+        return distinctSendingWallets(allTransactions(payments));
+    }
+
+    public static ArrayList<Wallet> distinctSendingWallets(Transaction[] payments) {
         var list = new ArrayList<Wallet>();
         for (var p : payments) {
             var existing = list.stream().anyMatch(w -> WalletCompare.isSame(p.getSenderWallet(), w));
@@ -18,6 +22,10 @@ public class PaymentUtils {
             }
         }
         return list;
+    }
+
+    private static Transaction[] allTransactions(Payment[] payments) {
+        return Arrays.stream(payments).map(Payment::getTransaction).toArray(Transaction[]::new);
     }
 
     public static Ledger[] distinctLedgers(Payment[] payments) {
@@ -43,6 +51,16 @@ public class PaymentUtils {
 
     public static ArrayList<Payment> fromSender(Wallet w, Payment[] payments) {
         var list = new ArrayList<Payment>();
+        for (var p : payments) {
+            if (WalletCompare.isSame(p.getSenderWallet(), w)) {
+                list.add(p);
+            }
+        }
+        return list;
+    }
+
+    public static ArrayList<Transaction> fromSender(Wallet w, Transaction[] payments) {
+        var list = new ArrayList<Transaction>();
         for (var p : payments) {
             if (WalletCompare.isSame(p.getSenderWallet(), w)) {
                 list.add(p);
