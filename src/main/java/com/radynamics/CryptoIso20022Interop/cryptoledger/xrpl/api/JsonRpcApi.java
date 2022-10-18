@@ -3,12 +3,11 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Cache;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
@@ -391,13 +390,18 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
-        var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
-        for (var t : transactions) {
-            try {
-                sequences = send(t, sequences);
-                ((Transaction) t).refreshTransmission();
-            } catch (Exception ex) {
-                ((Transaction) t).refreshTransmission(ex);
+        var sendingWallets = PaymentUtils.distinctSendingWallets(transactions);
+        // Process by sending wallet to keep sequence number handling simple (prevent terPRE_SEQ).
+        for (var sendingWallet : sendingWallets) {
+            var trxByWallet = PaymentUtils.fromSender(sendingWallet, transactions);
+            var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
+            for (var t : trxByWallet) {
+                try {
+                    sequences = send(t, sequences);
+                    ((Transaction) t).refreshTransmission();
+                } catch (Exception ex) {
+                    ((Transaction) t).refreshTransmission(ex);
+                }
             }
         }
     }
