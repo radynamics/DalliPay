@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.radynamics.CryptoIso20022Interop'
-version '0.9.1'
+version '0.9.2-multiccy-send-beta.1'
 
 repositories {
     mavenCentral()
