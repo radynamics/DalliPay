@@ -10,8 +10,6 @@ import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.ZonedDateTime;
-
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
     private WalletInfoProvider[] walletInfoProvider = new WalletInfoProvider[0];
@@ -84,7 +82,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
+    public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
         return new TransactionResult();
     }
 

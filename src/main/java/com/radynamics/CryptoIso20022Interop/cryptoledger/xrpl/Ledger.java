@@ -79,8 +79,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
-        return api.listPaymentsSent(WalletConverter.from(wallet), since, limit);
+    public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
+        return api.listPaymentsSent(WalletConverter.from(wallet), sinceDaysAgo, limit);
     }
 
     @Override

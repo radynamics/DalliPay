@@ -21,7 +21,7 @@ public interface Ledger {
 
     void refreshBalance(Wallet wallet, boolean useCache);
 
-    TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception;
+    TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception;
 
     TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception;
 

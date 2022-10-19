@@ -17,9 +17,21 @@ public class LedgerRangeConverter {
     final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
     private XrplClient xrplClient;
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
+    private LedgerAtTime latestLedgerFirstCall;
 
     public LedgerRangeConverter(XrplClient xrplClient) {
         this.xrplClient = xrplClient;
+    }
+
+    public LedgerIndex estimatedDaysAgo(long daysAgo) throws JsonRpcClientErrorException {
+        if (this.latestLedgerFirstCall == null) {
+            this.latestLedgerFirstCall = getEstimatedLatestLedger();
+        }
+
+        // Assuming average ledger close time
+        final int AVG_LEDGER_CLOSE_TIME_SEC = 4;
+        var estimatedPassedLedgers = ((60 / AVG_LEDGER_CLOSE_TIME_SEC) * 60 * 24 * daysAgo);
+        return latestLedgerFirstCall.getLedgerIndex().minus(UnsignedInteger.valueOf(estimatedPassedLedgers));
     }
 
     public LedgerIndex findOrNull(ZonedDateTime dt) throws JsonRpcClientErrorException {
@@ -31,8 +43,7 @@ public class LedgerRangeConverter {
         log.trace(String.format("Find ledger at %s", dt));
         var latestLedger = cache.find(dt);
         if (latestLedger == null) {
-            var latestLedgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.CLOSED).build());
-            latestLedger = cache.add(latestLedgerResult.ledger().closeTimeHuman().get(), latestLedgerResult.ledgerIndexSafe());
+            latestLedger = getEstimatedLatestLedger();
         }
         if (dt.isAfter(latestLedger.getPointInTime())) {
             log.trace(String.format("%s is after last ledger -> take last ledger at %s", dt, latestLedger.getPointInTime()));
@@ -69,6 +80,11 @@ public class LedgerRangeConverter {
         }
 
         return bestMatch;
+    }
+
+    private LedgerAtTime getEstimatedLatestLedger() throws JsonRpcClientErrorException {
+        var latestLedgerResult = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.CLOSED).build());
+        return cache.add(latestLedgerResult.ledger().closeTimeHuman().get(), latestLedgerResult.ledgerIndexSafe());
     }
 
     private LedgerAtTime get(LedgerIndex index, boolean searchEarlier) {

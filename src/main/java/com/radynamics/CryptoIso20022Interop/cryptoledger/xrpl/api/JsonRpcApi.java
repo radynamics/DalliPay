@@ -58,20 +58,21 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     @Override
-    public TransactionResult listPaymentsSent(Wallet wallet, ZonedDateTime since, int limit) throws Exception {
+    public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
+        var start = ledgerRangeConverter.estimatedDaysAgo(sinceDaysAgo);
         // Use endOfToday to ensure data until latest ledger is loaded.
-        var period = DateTimeRange.of(since, Utils.endOfToday());
-        var params = createAccountTransactionsRequestParams(wallet, period, null);
-        return listPayments(params, period, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
+        var end = Utils.endOfToday();
+        var params = createAccountTransactionsRequestParams(wallet, start, end, null);
+        return listPayments(params, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
     }
 
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period, null);
-        return listPayments(params, period, 200, (Payment p) -> StringUtils.equals(p.destination().value(), wallet.getPublicKey()));
+        return listPayments(params, 200, (Payment p) -> StringUtils.equals(p.destination().value(), wallet.getPublicKey()));
     }
 
-    private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, DateTimeRange period, int limit, Function<Payment, Boolean> include) throws Exception {
+    private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, int limit, Function<Payment, Boolean> include) throws Exception {
         var tr = new TransactionResult();
         var pageCounter = 0;
         var maxPages = 10;
@@ -88,10 +89,6 @@ public class JsonRpcApi implements TransactionSource {
                 }
 
                 var t = r.resultTransaction().transaction();
-                if (!period.isBetween(t.closeDateHuman().get())) {
-                    continue;
-                }
-
                 if (t.transactionType() == TransactionType.PAYMENT) {
                     var p = (Payment) t;
                     if (!include.apply(p)) {
@@ -167,16 +164,20 @@ public class JsonRpcApi implements TransactionSource {
             throw new LedgerException(String.format("Could not find ledger at %s", period.getStart()));
         }
 
+        return createAccountTransactionsRequestParams(wallet, start, period.getEnd(), marker);
+    }
+
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerIndex start, ZonedDateTime end, Marker marker) throws JsonRpcClientErrorException, LedgerException {
         var b = AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
                 .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()));
 
-        if (period.getEnd().isBefore(ZonedDateTime.now())) {
-            var end = ledgerRangeConverter.findOrNull(period.getEnd());
-            if (end == null) {
-                throw new LedgerException(String.format("Could not find ledger at %s", period.getEnd()));
+        if (end.isBefore(ZonedDateTime.now())) {
+            var endLedger = ledgerRangeConverter.findOrNull(end);
+            if (endLedger == null) {
+                throw new LedgerException(String.format("Could not find ledger at %s", end));
             }
-            b.ledgerIndexMaximum(LedgerIndexBound.of(end.unsignedIntegerValue().intValue()));
+            b.ledgerIndexMaximum(LedgerIndexBound.of(endLedger.unsignedIntegerValue().intValue()));
         }
         if (marker != null) {
             b.marker(marker);

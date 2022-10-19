@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationS
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -83,7 +84,8 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             var since = desired.isBefore(availableSince) ? availableSince : desired;
 
             // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
-            paymentHistory.load(ledger, wallet, Utils.endOfDay(since));
+            var sinceDaysAgo = Duration.between(Utils.endOfDay(since), ZonedDateTime.now()).toDays();
+            paymentHistory.load(ledger, wallet, sinceDaysAgo);
             senderPaymentHistory.put(key, paymentHistory);
         }
     }
