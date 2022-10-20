@@ -86,7 +86,7 @@ public class AccountMappingRepo implements AutoCloseable {
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
     }
 
-    public void saveOrUpdate(AccountMapping value) throws Exception {
+    public void saveOrUpdate(AccountMapping value) throws SQLException {
         String sql = "INSERT OR REPLACE INTO accountmapping (id, ledgerId, bankAccount, walletPublicKey) \n"
                 + "	    VALUES ((SELECT id FROM accountmapping WHERE id = ?), ?, ?, ?);";
         var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);

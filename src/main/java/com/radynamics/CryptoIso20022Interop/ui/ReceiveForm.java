@@ -20,6 +20,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExport;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtExportFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.CamtFormatHelper;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.PaymentValidator;
+import com.radynamics.CryptoIso20022Interop.transformation.AccountMappingSource;
+import com.radynamics.CryptoIso20022Interop.transformation.AccountMappingSourceException;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -302,6 +304,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (table.selectedPayments().length == 0) {
             return;
         }
+        AccountMappingSource accountMappingSource = null;
         try {
             if (!showExportForm()) {
                 return;
@@ -309,12 +312,14 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var w = camtExport.getWriter();
+            accountMappingSource = w.getTransformInstruction().getAccountMappingSource();
             try (var repo = new ConfigRepo()) {
                 w.getTransformInstruction().setBookingDateFormat(repo.getBookingDateFormat());
                 w.getTransformInstruction().setValutaDateFormat(repo.getValutaDateFormat());
                 w.getTransformInstruction().setCreditorReferenceIfMissing(repo.getCreditorReferenceIfMissing());
             }
             var camtConverter = camtExport.getConverter();
+            accountMappingSource.open();
             var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
@@ -325,6 +330,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             ExceptionDialog.show(this, e);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            try {
+                accountMappingSource.close();
+            } catch (AccountMappingSourceException e) {
+                ExceptionDialog.show(this, e);
+            }
         }
     }
 

@@ -14,6 +14,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.TestWalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
+import com.radynamics.CryptoIso20022Interop.transformation.AccountMappingSourceException;
 import com.radynamics.CryptoIso20022Interop.transformation.MemoryAccountMappingSource;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
@@ -103,7 +104,18 @@ public class TestFactory {
         var mapping = new AccountMapping(ti.getLedger().getId());
         mapping.setAccount(account);
         mapping.setWallet(ti.getLedger().createWallet(walletPublicKey, ""));
-        ti.getAccountMappingSource().add(mapping);
+        try {
+            ti.getAccountMappingSource().open();
+            ti.getAccountMappingSource().add(mapping);
+        } catch (AccountMappingSourceException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ti.getAccountMappingSource().close();
+            } catch (AccountMappingSourceException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static ZonedDateTime createCreationDate() {

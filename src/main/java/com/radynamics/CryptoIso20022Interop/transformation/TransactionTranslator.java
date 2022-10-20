@@ -9,8 +9,11 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TransactionTranslator {
+    private final static Logger log = LogManager.getLogger(TransactionTranslator.class);
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private Currency targetCcy;
@@ -25,37 +28,48 @@ public class TransactionTranslator {
     }
 
     public Payment[] apply(Payment[] transactions) {
-        for (var t : transactions) {
-            if (t.getSenderAccount() == null) {
-                t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
-            }
-            if (t.getReceiverAccount() == null) {
-                t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
-            }
-            if (t.getSenderWallet() == null) {
-                t.setSenderWallet(transformInstruction.getWalletOrNull(t.getSenderAccount()));
-            }
-            if (t.getReceiverWallet() == null) {
-                t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
-            }
+        try {
+            transformInstruction.getAccountMappingSource().open();
+            for (var t : transactions) {
+                if (t.getSenderAccount() == null) {
+                    t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
+                }
+                if (t.getReceiverAccount() == null) {
+                    t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
+                }
+                if (t.getSenderWallet() == null) {
+                    t.setSenderWallet(transformInstruction.getWalletOrNull(t.getSenderAccount()));
+                }
+                if (t.getReceiverWallet() == null) {
+                    t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
+                }
 
-            var targetCcy = getTargetCcy(t);
-            if (t.getAmountTransaction().getCcy().sameCode(targetCcy)) {
-                if (t.isAmountUnknown()) {
-                    t.setAmount(t.getAmountTransaction());
-                    t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
+                var targetCcy = getTargetCcy(t);
+                if (t.getAmountTransaction().getCcy().sameCode(targetCcy)) {
+                    if (t.isAmountUnknown()) {
+                        t.setAmount(t.getAmountTransaction());
+                        t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
+                    } else {
+                        t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
+                    }
                 } else {
-                    t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
+                    var ccyPair = t.isCcyUnknown()
+                            ? new CurrencyPair(t.getAmountTransaction().getCcy(), targetCcy)
+                            : t.createCcyPair();
+                    if (currencyConverter.has(ccyPair)) {
+                        t.setExchangeRate(currencyConverter.get(ccyPair));
+                    } else {
+                        t.setUserCcy(ccyPair.getSecond());
+                    }
                 }
-            } else {
-                var ccyPair = t.isCcyUnknown()
-                        ? new CurrencyPair(t.getAmountTransaction().getCcy(), targetCcy)
-                        : t.createCcyPair();
-                if (currencyConverter.has(ccyPair)) {
-                    t.setExchangeRate(currencyConverter.get(ccyPair));
-                } else {
-                    t.setUserCcy(ccyPair.getSecond());
-                }
+            }
+        } catch (AccountMappingSourceException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            try {
+                transformInstruction.getAccountMappingSource().close();
+            } catch (AccountMappingSourceException e) {
+                log.error(e.getMessage(), e);
             }
         }
 
@@ -67,7 +81,7 @@ public class TransactionTranslator {
 
     }
 
-    private Account getAccountOrNull(Wallet wallet) {
+    private Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException {
         if (wallet == null) {
             return null;
         }

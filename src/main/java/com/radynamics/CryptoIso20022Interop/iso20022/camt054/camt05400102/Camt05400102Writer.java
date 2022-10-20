@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.camt054.camt05400102.generated.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
+import com.radynamics.CryptoIso20022Interop.transformation.AccountMappingSourceException;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +72,7 @@ public class Camt05400102Writer implements Camt054Writer {
         return transformInstruction;
     }
 
-    private AccountNotification2 getNtfctnOrNull(Document d, Wallet receiver, String ccy) {
+    private AccountNotification2 getNtfctnOrNull(Document d, Wallet receiver, String ccy) throws AccountMappingSourceException {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
             if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, ccy))) {
                 return ntfctn;
@@ -80,7 +81,7 @@ public class Camt05400102Writer implements Camt054Writer {
         return null;
     }
 
-    private CashAccount20 createAcct(Wallet receiver, String ccy) {
+    private CashAccount20 createAcct(Wallet receiver, String ccy) throws AccountMappingSourceException {
         var acct = new CashAccount20();
         acct.setId(new AccountIdentification4Choice());
         var account = transformInstruction.getAccountOrNull(receiver);

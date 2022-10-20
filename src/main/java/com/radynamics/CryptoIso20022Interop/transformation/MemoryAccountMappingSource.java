@@ -39,4 +39,14 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
         }
         return null;
     }
+
+    @Override
+    public void open() {
+        // do nothing
+    }
+
+    @Override
+    public void close() {
+        // do nothing
+    }
 }

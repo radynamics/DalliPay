@@ -5,9 +5,13 @@ import com.radynamics.CryptoIso20022Interop.db.AccountMapping;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 
 public interface AccountMappingSource {
-    Wallet getWalletOrNull(Account account);
+    Wallet getWalletOrNull(Account account) throws AccountMappingSourceException;
 
-    Account getAccountOrNull(Wallet wallet);
+    Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException;
 
-    void add(AccountMapping mapping);
+    void add(AccountMapping mapping) throws AccountMappingSourceException;
+
+    void open() throws AccountMappingSourceException;
+
+    void close() throws AccountMappingSourceException;
 }

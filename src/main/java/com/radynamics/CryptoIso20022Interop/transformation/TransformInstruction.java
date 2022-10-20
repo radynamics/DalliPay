@@ -35,7 +35,7 @@ public class TransformInstruction {
         this.accountMappingSource = accountMappingSource;
     }
 
-    public Wallet getWalletOrNull(Account account) {
+    public Wallet getWalletOrNull(Account account) throws AccountMappingSourceException {
         if (account == null) {
             return null;
         }
@@ -47,7 +47,7 @@ public class TransformInstruction {
         return wallet;
     }
 
-    public Account getAccountOrNull(Wallet wallet) {
+    public Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException {
         return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet);
     }
 
