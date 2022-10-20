@@ -12,6 +12,10 @@ public class BalanceRefresher {
         refresh(payments, (Payment::getSenderWallet));
     }
 
+    public void refresh(Payment payment) {
+        refresh(new Payment[]{payment});
+    }
+
     public void refresh(Payment[] payments) {
         refresh(payments, (Payment::getSenderWallet));
         refresh(payments, (Payment::getReceiverWallet));
@@ -27,7 +31,7 @@ public class BalanceRefresher {
         loadOrGet(ledger, wallet, false);
     }
 
-    private void loadOrGet(Ledger ledger, Wallet wallet, boolean useCache) {
+    private synchronized void loadOrGet(Ledger ledger, Wallet wallet, boolean useCache) {
         if (!WalletValidator.isValidFormat(ledger, wallet)) {
             return;
         }

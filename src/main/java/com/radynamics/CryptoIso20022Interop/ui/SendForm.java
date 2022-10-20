@@ -32,8 +32,9 @@ import java.util.concurrent.Executors;
 
 public class SendForm extends JPanel implements MainFormPane {
     private final static Logger log = LogManager.getLogger(Database.class);
-    private TransformInstruction transformInstruction;
-    private CurrencyConverter currencyConverter;
+    private final TransformInstruction transformInstruction;
+    private final CurrencyConverter currencyConverter;
+    private final TransactionTranslator transactionTranslator;
     private final PaymentValidator validator = new PaymentValidator(new SenderHistoryValidator());
 
     private JLabel lblExchange;
@@ -50,6 +51,7 @@ public class SendForm extends JPanel implements MainFormPane {
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
 
         setupUI();
     }
@@ -134,7 +136,7 @@ public class SendForm extends JPanel implements MainFormPane {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator);
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator, transactionTranslator);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
@@ -170,8 +172,7 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void onWalletChanged(Payment p) {
         // Used transaction currency depends on sender/receiver wallets
-        var t = new TransactionTranslator(transformInstruction, currencyConverter);
-        t.applyUserCcy(p);
+        transactionTranslator.applyUserCcy(p);
     }
 
     private void onTxtInputChanged() {
@@ -193,12 +194,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 });
         Executors.newCachedThreadPool().submit(() -> {
             try {
-                var t = new TransactionTranslator(transformInstruction, currencyConverter);
-                payments = t.apply(reader.read(new FileInputStream(txtInput.getText())));
-
-                var br = new BalanceRefresher();
-                br.refresh(payments);
-                t.applyUserCcy(payments);
+                payments = transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())));
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -377,10 +373,6 @@ public class SendForm extends JPanel implements MainFormPane {
     private void load(Payment[] payments) {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
-        validator.getHistoryValidator().clearCache();
-        for (var p : payments) {
-            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
-        }
         loadTable(payments);
     }
 

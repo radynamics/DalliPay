@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.*;
 import org.apache.commons.lang3.StringUtils;
@@ -41,14 +42,14 @@ public class PaymentTable extends JPanel {
     private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator) {
+    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
         this.actor = actor;
         this.validator = validator;
 
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
-        model = new PaymentTableModel(exchangeRateLoader, validator);
+        model = new PaymentTableModel(exchangeRateLoader, validator, transactionTranslator);
         model.setActor(actor);
         model.addProgressListener(progress -> raiseProgress(progress));
         model.addTableModelListener(new TableModelListener() {

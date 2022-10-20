@@ -39,8 +39,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
-    private TransformInstruction transformInstruction;
-    private CurrencyConverter currencyConverter;
+    private final TransformInstruction transformInstruction;
+    private final CurrencyConverter currencyConverter;
+    private final TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
 
     private PaymentTable table;
@@ -64,6 +65,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
 
         setupUI();
     }
@@ -178,7 +180,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator());
+            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator(), transactionTranslator);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
@@ -406,13 +408,12 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         enableInputControls(false);
         lblLoading.showLoading();
         var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
-        var t = new TransactionTranslator(transformInstruction, currencyConverter);
-        t.setTargetCcy(targetCcy);
+        transactionTranslator.setTargetCcy(targetCcy);
         var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
 
         var cf = new CompletableFuture<TransactionResult>();
         cf.thenAccept(result -> {
-                    var payments = t.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
+                    var payments = transactionTranslator.apply(PaymentConverter.toPayment(result.transactions(), targetCcy));
                     loadTable(payments);
 
                     if (result.hasMarker()) {

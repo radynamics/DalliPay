@@ -1,15 +1,13 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.AsyncWalletInfoLoader;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
+import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +24,7 @@ public class PaymentTableModel extends AbstractTableModel {
     private Record[] data = new Record[0];
     private final HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
+    private final TransactionTranslator transactionTranslator;
     private Actor actor = Actor.Sender;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
@@ -45,9 +44,10 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator) {
+    public PaymentTableModel(HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         this.exchangeRateLoader = exchangeRateLoader;
         this.validator = validator;
+        this.transactionTranslator = transactionTranslator;
     }
 
     public int getColumnCount() {
@@ -201,9 +201,11 @@ public class PaymentTableModel extends AbstractTableModel {
         }
 
         validator.clearCache();
+        validator.getHistoryValidator().clearCache();
+        var br = new BalanceRefresher();
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : data) {
-            var future = loadAsync(p.payment);
+            var future = loadAsync(p.payment, br);
             future.thenAccept((result) -> {
                 synchronized (this) {
                     queue.remove(future);
@@ -216,7 +218,14 @@ public class PaymentTableModel extends AbstractTableModel {
         }
     }
 
-    private CompletableFuture<Payment> loadAsync(Payment p) {
+    private CompletableFuture<Payment> loadAsync(Payment p, BalanceRefresher br) {
+        var loadBalancesAndHistory = CompletableFuture.runAsync(() -> {
+            br.refresh(p);
+
+            transactionTranslator.applyUserCcy(p);
+            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
+        });
+
         var loadWalletInfo = loadWalletInfoAsync(p);
         var loadExchangeRate = new CompletableFuture<Void>();
         if (actor == Actor.Receiver) {
@@ -230,6 +239,7 @@ public class PaymentTableModel extends AbstractTableModel {
         var future = new CompletableFuture<Payment>();
         var finalLoadExchangeRate = loadExchangeRate;
         Executors.newCachedThreadPool().submit(() -> {
+            CompletableFuture.allOf(loadBalancesAndHistory).join();
             CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
             // Validation can start after loadExchangeRate completed.
             validateAsync(p).thenAccept((result) -> {
