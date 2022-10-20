@@ -185,7 +185,6 @@ public class SendForm extends JPanel implements MainFormPane {
                     load(result);
                 })
                 .whenComplete((unused, e) -> {
-                    lblLoading.hideLoading();
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
                         log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
