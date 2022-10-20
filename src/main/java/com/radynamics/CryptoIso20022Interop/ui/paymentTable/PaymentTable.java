@@ -50,8 +50,13 @@ public class PaymentTable extends JPanel {
 
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel(exchangeRateLoader, validator, transactionTranslator);
+        table = new JTable(model);
         model.setActor(actor);
-        model.addProgressListener(progress -> raiseProgress(progress));
+        model.addProgressListener(progress -> {
+            table.revalidate();
+            table.repaint();
+            raiseProgress(progress);
+        });
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -61,7 +66,6 @@ public class PaymentTable extends JPanel {
             }
         });
 
-        table = new JTable(model);
         table.setFillsViewportHeight(true);
         table.setDefaultRenderer(ValidationState.class, new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         table.setDefaultRenderer(TransmissionState.class, new TransmissionCellRenderer());
@@ -264,8 +268,6 @@ public class PaymentTable extends JPanel {
     public void load(Payment[] data) {
         this.data = data;
         model.load(toRecords(data));
-        table.revalidate();
-        table.repaint();
     }
 
     private Record[] toRecords(Payment[] data) {
