@@ -27,7 +27,7 @@ public class TransactionTranslator {
         return apply(new Payment[]{transaction});
     }
 
-    public Payment[] apply(Payment[] transactions) {
+    public synchronized Payment[] apply(Payment[] transactions) {
         try {
             transformInstruction.getAccountMappingSource().open();
             for (var t : transactions) {
