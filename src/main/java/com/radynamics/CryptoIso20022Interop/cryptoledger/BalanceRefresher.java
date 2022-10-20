@@ -19,15 +19,15 @@ public class BalanceRefresher {
 
     private void refresh(Payment[] payments, Function<Payment, Wallet> getWallet) {
         for (var p : payments) {
-            refresh(p.getLedger(), getWallet.apply(p));
+            loadOrGet(p.getLedger(), getWallet.apply(p), true);
         }
     }
 
     public void refresh(Ledger ledger, Wallet wallet) {
-        loadOrGet(ledger, wallet);
+        loadOrGet(ledger, wallet, false);
     }
 
-    private void loadOrGet(Ledger ledger, Wallet wallet) {
+    private void loadOrGet(Ledger ledger, Wallet wallet, boolean useCache) {
         if (!WalletValidator.isValidFormat(ledger, wallet)) {
             return;
         }
@@ -39,7 +39,7 @@ public class BalanceRefresher {
             return;
         }
 
-        ledger.refreshBalance(wallet, false);
+        ledger.refreshBalance(wallet, useCache);
         if (wallet.getBalances().isEmpty()) {
             return;
         }
