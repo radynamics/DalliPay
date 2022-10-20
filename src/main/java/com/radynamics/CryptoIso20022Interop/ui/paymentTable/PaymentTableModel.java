@@ -222,7 +222,10 @@ public class PaymentTableModel extends AbstractTableModel {
         var loadBalancesAndHistory = CompletableFuture.runAsync(() -> {
             br.refresh(p);
 
-            transactionTranslator.applyUserCcy(p);
+            // When fetching received payments transaction ccy must not be adjusted based on user ccy (pain.001).
+            if (actor == Actor.Sender) {
+                transactionTranslator.applyUserCcy(p);
+            }
             validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
         });
 
