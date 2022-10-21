@@ -58,6 +58,7 @@ public class PaymentTable extends JPanel {
         });
 
         table = new JTable(model);
+        table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
         table.setFillsViewportHeight(true);
         table.setDefaultRenderer(ValidationState.class, new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         table.setDefaultRenderer(TransmissionState.class, new TransmissionCellRenderer());
