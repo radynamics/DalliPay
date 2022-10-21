@@ -185,14 +185,13 @@ public class PaymentTable extends JPanel {
     private void onWalletEdited(Payment payment, TableCellListener tcl, ChangedValue changedValue) {
         // While sending payments user is able to change "Receiver from Input". Account is not changeable.
         var account = changedValue == ChangedValue.SenderWallet ? payment.getSenderAccount() : payment.getReceiverAccount();
-        var oldWallet = createWalletOrNull(tcl.getOldValue());
         var newWallet = createWalletOrNull(tcl.getNewValue());
 
         var mapping = new AccountMapping(payment.getLedger().getId());
         mapping.setAccount(account);
         try (var repo = new AccountMappingRepo()) {
             // User maps a wallet to an account number
-            mapping = repo.single(payment.getLedger().getId(), oldWallet).orElse(mapping);
+            mapping = repo.single(payment.getLedger().getId(), account).orElse(mapping);
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
@@ -224,7 +223,6 @@ public class PaymentTable extends JPanel {
     }
 
     private void onAccountEdited(Payment t, TableCellListener tcl, ChangedValue changedValue) {
-        var oldAccount = (Account) tcl.getOldValue();
         var newAccount = (Account) tcl.getNewValue();
         var wallet = changedValue == ChangedValue.SenderAccount ? t.getSenderWallet() : t.getReceiverWallet();
 
@@ -232,7 +230,7 @@ public class PaymentTable extends JPanel {
         mapping.setWallet(wallet);
         try (var repo = new AccountMappingRepo()) {
             // User maps an account number to a wallet
-            mapping = repo.single(t.getLedger().getId(), oldAccount).orElse(mapping);
+            mapping = repo.single(t.getLedger().getId(), wallet).orElse(mapping);
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
