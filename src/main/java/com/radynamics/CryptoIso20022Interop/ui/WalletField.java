@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -46,6 +48,17 @@ public class WalletField extends JPanel {
                         txt.putClientProperty("JComponent.outline", "error");
                         return false;
                     }
+                }
+            });
+            txt.addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    processFocusEvent(e);
+                }
+
+                @Override
+                public void focusLost(FocusEvent e) {
+                    processFocusEvent(e);
                 }
             });
             var c = new GridBagConstraints();

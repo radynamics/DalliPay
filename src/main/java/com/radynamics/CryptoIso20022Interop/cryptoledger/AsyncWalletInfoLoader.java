@@ -20,13 +20,18 @@ public class AsyncWalletInfoLoader {
         var completableFuture = new CompletableFuture<PaymentWalletInfo>();
 
         Executors.newCachedThreadPool().submit(() -> {
-            var aggregator = new WalletInfoAggregator(p.getLedger().getInfoProvider());
             completableFuture.complete(
-                    new PaymentWalletInfo(p, aggregator.getNameOrDomain(p.getSenderWallet()), aggregator.getNameOrDomain(p.getReceiverWallet())))
-            ;
+                    new PaymentWalletInfo(p, getNameOrDomain(p.getLedger(), p.getSenderWallet()), getNameOrDomain(p.getLedger(), p.getReceiverWallet())));
         });
 
         return completableFuture;
     }
 
+    private static final WalletInfo getNameOrDomain(Ledger ledger, Wallet wallet) {
+        if (wallet == null || !WalletValidator.isValidFormat(ledger, wallet)) {
+            return null;
+        }
+        var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
+        return aggregator.getNameOrDomain(wallet);
+    }
 }
