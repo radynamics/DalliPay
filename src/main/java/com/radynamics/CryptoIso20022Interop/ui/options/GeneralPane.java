@@ -138,15 +138,10 @@ public class GeneralPane extends JPanel {
             }
 
             frm = new LoginForm();
-            if (!frm.showNewPassword()) {
+            if (!frm.showNewPassword(this)) {
                 return;
             }
-            var newPassword = frm.getPassword();
-            if (!Database.isPasswordAcceptable(newPassword)) {
-                JOptionPane.showMessageDialog(this, "New password cannot be empty.");
-                return;
-            }
-            Database.changePassword(newPassword);
+            Database.changePassword(frm.getPassword());
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
