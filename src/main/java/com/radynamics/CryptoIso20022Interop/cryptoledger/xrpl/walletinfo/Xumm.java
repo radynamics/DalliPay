@@ -57,7 +57,9 @@ public class Xumm implements WalletInfoProvider {
             var thirdPartyProfiles = result.getJSONArray("thirdPartyProfiles");
             for (var i = 0; i < thirdPartyProfiles.length(); i++) {
                 var o = thirdPartyProfiles.getJSONObject(i);
-                list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), o.getString("accountAlias"), 40));
+                if (!o.isNull("accountAlias")) {
+                    list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), o.getString("accountAlias"), 40));
+                }
             }
         }
 
