@@ -157,7 +157,6 @@ public class PaymentTable extends JPanel {
     }
 
     private void onCellEdited(TableCellListener tcl) {
-        var cleanedInput = tcl.getNewValue().toString().trim();
         var row = tcl.getRow();
         var t = (Payment) model.getValueAt(row, table.getColumnModel().getColumnIndex(PaymentTableModel.COL_OBJECT));
 
@@ -188,7 +187,7 @@ public class PaymentTable extends JPanel {
         ChangedValue changedValue = null;
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
             changedValue = ChangedValue.SenderWallet;
-            mapping.setWallet(createWalletOrNull(cleanedInput));
+            mapping.setWallet(createWalletOrNull(tcl.getNewValue()));
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
             changedValue = ChangedValue.SenderAccount;
@@ -200,7 +199,7 @@ public class PaymentTable extends JPanel {
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_LEDGER)) {
             changedValue = ChangedValue.ReceiverWallet;
-            mapping.setWallet(createWalletOrNull(cleanedInput));
+            mapping.setWallet(createWalletOrNull(tcl.getNewValue()));
         }
 
         if (changedValue == null) {
@@ -236,7 +235,12 @@ public class PaymentTable extends JPanel {
         return Actor.Receiver;
     }
 
-    private Wallet createWalletOrNull(String text) {
+    private Wallet createWalletOrNull(Object value) {
+        if (value instanceof WalletCellValue) {
+            return ((WalletCellValue) value).getWallet();
+        }
+
+        var text = value.toString().trim();
         return StringUtils.isEmpty(text) ? null : transformInstruction.getLedger().createWallet(text, null);
     }
 
