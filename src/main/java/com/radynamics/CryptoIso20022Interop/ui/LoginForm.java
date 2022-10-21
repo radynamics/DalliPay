@@ -2,10 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.db.Database;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class LoginForm {
     private JPasswordField pf = new JPasswordField(20);
@@ -26,16 +24,17 @@ public class LoginForm {
         return showLogin();
     }
 
-    public boolean showNewPassword() {
+    public boolean showNewPassword(Component parentComponent) {
         if (!show("New password:", "Enter new password")) {
             return false;
         }
 
-        if (Database.isPasswordAcceptable(getPassword())) {
-            return true;
+        if (!Database.isPasswordAcceptable(getPassword())) {
+            JOptionPane.showMessageDialog(parentComponent, "You must define a password to continue.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     private boolean show(String labelText, String title) {

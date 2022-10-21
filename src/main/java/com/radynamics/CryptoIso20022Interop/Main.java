@@ -171,7 +171,7 @@ public class Main {
 
     private static boolean askNewPassword() {
         var frm = new LoginForm();
-        if (!frm.showNewPassword()) {
+        if (!frm.showNewPassword(null)) {
             return false;
         }
 
