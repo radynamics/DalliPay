@@ -7,8 +7,6 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 public class WalletCellEditor extends AbstractCellEditor implements TableCellEditor {
     private final WalletField component;
@@ -19,21 +17,6 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
         this.component = new WalletField(owner);
         this.component.setEditable(editable);
         this.component.setShowDetailVisible(true);
-        this.component.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                // do nothing
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (getCellEditorValue() != null) {
-                    stopCellEditing();
-                } else {
-                    cancelCellEditing();
-                }
-            }
-        });
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {

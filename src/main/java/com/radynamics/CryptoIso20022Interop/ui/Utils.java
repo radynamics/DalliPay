@@ -57,6 +57,11 @@ public final class Utils {
             public void mouseExited(MouseEvent e) {
                 owner.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                lbl.requestFocus();
+            }
         });
         return lbl;
     }
