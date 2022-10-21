@@ -34,7 +34,17 @@ public class Xumm implements WalletInfoProvider {
         try {
             result = load(wallet);
         } catch (IOException e) {
+            if (isTooManyRequests(e)) {
+                log.trace(e.getMessage(), e);
+                return new WalletInfo[0];
+            }
             throw new WalletInfoLookupException(e.getMessage(), e);
+        } catch (WalletInfoLookupException e) {
+            if (isTooManyRequests(e)) {
+                log.trace(e.getMessage(), e);
+                return new WalletInfo[0];
+            }
+            throw e;
         }
         if (result == null) {
             return new WalletInfo[0];
@@ -76,6 +86,12 @@ public class Xumm implements WalletInfoProvider {
         var infos = list.toArray(new WalletInfo[0]);
         cache.add(wallet, infos);
         return infos;
+    }
+
+    private static boolean isTooManyRequests(Exception e) {
+        // "Too may requests" can be thrown in own exception but also in openStream as IOException.
+        final String TOO_MANY_REQUESTS = "429";
+        return e.getMessage().contains(TOO_MANY_REQUESTS);
     }
 
     @Override
