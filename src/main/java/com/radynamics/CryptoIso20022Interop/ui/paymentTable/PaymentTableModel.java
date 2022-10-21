@@ -220,12 +220,14 @@ public class PaymentTableModel extends AbstractTableModel {
 
     private CompletableFuture<Payment> loadAsync(Payment p, BalanceRefresher br) {
         var loadBalancesAndHistory = CompletableFuture.runAsync(() -> {
+            // When fetching received payments following data is not needed and shouldn't be loaded for better performance.
+            if (actor != Actor.Sender) {
+                return;
+            }
             br.refresh(p);
 
             // When fetching received payments transaction ccy must not be adjusted based on user ccy (pain.001).
-            if (actor == Actor.Sender) {
-                transactionTranslator.applyUserCcy(p);
-            }
+            transactionTranslator.applyUserCcy(p);
             validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
         });
 
