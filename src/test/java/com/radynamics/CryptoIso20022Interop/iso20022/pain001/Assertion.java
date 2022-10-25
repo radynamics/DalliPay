@@ -1,10 +1,12 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.ReferenceType;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -83,6 +85,16 @@ public class Assertion {
         Assert.assertEquals(amtLedgerUnit, transaction.getAmountTransaction().getNumber());
         Assert.assertNotNull(transaction.getAmountTransaction().getCcy());
         Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCode());
+    }
+
+    public static void assertEqual(Money expected, Money actual) {
+        if (expected == null) {
+            Assertions.assertNull(actual);
+            return;
+        }
+
+        Assertions.assertEquals(expected.getNumber(), actual.getNumber());
+        Assertions.assertEquals(actual.getCcy(), actual.getCcy());
     }
 
     public static void assertEquals(Payment transaction, ExchangeRate expected) {

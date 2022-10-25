@@ -11,6 +11,8 @@ import java.util.Comparator;
 
 public class CurrencyRefresher {
     public void refresh(Payment p) {
+        if (p == null) throw new IllegalArgumentException("Parameter 'p' cannot be null");
+
         var senderValid = WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet());
         var receiverValid = WalletValidator.isValidFormat(p.getLedger(), p.getReceiverWallet());
 

@@ -105,7 +105,8 @@ public class Payment {
                 // Use ledger native currency if there is no specific issued currency
                 cryptoTrx.setAmount(Money.of(0, new Currency(cryptoTrx.getLedger().getNativeCcySymbol())));
             } else {
-                cryptoTrx.setAmount(Money.zero(cryptoTrx.getAmount()));
+                var amt = cryptoTrx.getLedger().getNativeCcySymbol().equals(ccy.getCode()) ? amount : 0;
+                cryptoTrx.setAmount(Money.of(amt, cryptoTrx.getAmount().getCcy()));
             }
             return;
         }
