@@ -43,6 +43,7 @@ public class SendConfirmationForm extends JDialog {
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
+        formAcceptCloseHandler.addFormActionListener(this::acceptDialog);
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -173,11 +174,7 @@ public class SendConfirmationForm extends JDialog {
             {
                 cmdSend = new JButton("Send");
                 cmdSend.setPreferredSize(new Dimension(150, 35));
-                cmdSend.addActionListener(e -> {
-                            setDialogAccepted(true);
-                            formAcceptCloseHandler.accept();
-                        }
-                );
+                cmdSend.addActionListener(e -> formAcceptCloseHandler.accept());
                 pnl.add(cmdSend);
             }
             {
@@ -189,6 +186,10 @@ public class SendConfirmationForm extends JDialog {
         }
 
         startTimeoutCountdown();
+    }
+
+    private void acceptDialog() {
+        setDialogAccepted(true);
     }
 
     private void refreshTotalFee() {

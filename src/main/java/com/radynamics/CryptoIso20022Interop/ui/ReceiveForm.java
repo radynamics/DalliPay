@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -45,6 +46,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private final CurrencyConverter currencyConverter;
     private final TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
+    private boolean isLoading;
 
     private PaymentTable table;
     private WalletField txtInput;
@@ -114,6 +116,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 txtInput = new WalletField(this);
+                txtInput.registerKeyboardAction(e -> load(), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setLedger(transformInstruction.getLedger());
@@ -403,6 +406,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
+        if (isLoading) {
+            return;
+        }
+
+        isLoading = true;
         var selectedTargetCcy = cboTargetCcy.getSelectedItem().toString();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
@@ -438,6 +446,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     }
                 })
                 .whenComplete((unused, e) -> {
+                    isLoading = false;
                     lblLoading.hideLoading();
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
