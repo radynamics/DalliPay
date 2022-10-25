@@ -304,12 +304,13 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (table.selectedPayments().length == 0) {
             return;
         }
+
+        if (!showExportForm()) {
+            return;
+        }
+
         AccountMappingSource accountMappingSource = null;
         try {
-            if (!showExportForm()) {
-                return;
-            }
-
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             var w = camtExport.getWriter();
             accountMappingSource = w.getTransformInstruction().getAccountMappingSource();
