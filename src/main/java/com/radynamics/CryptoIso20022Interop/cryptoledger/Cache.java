@@ -12,10 +12,15 @@ public class Cache<T> {
     private final HashMap<String, CacheEntry<T>> cache = new HashMap<>();
     private final String prefix;
 
-    private final Duration maxAge = Duration.ofSeconds(60);
+    private final Duration maxAge;
 
     public Cache(String prefix) {
+        this(prefix, Duration.ofSeconds(60));
+    }
+
+    public Cache(String prefix, Duration maxAge) {
         this.prefix = prefix;
+        this.maxAge = maxAge;
     }
 
     public void add(Wallet wallet, T data) {
@@ -49,6 +54,10 @@ public class Cache<T> {
         var oldSize = cache.size();
         cache.entrySet().removeIf(entry -> entry.getValue().getAge().toSeconds() > maxAge.toSeconds());
         log.trace(String.format("Removed %s items", oldSize - cache.size()));
+    }
+
+    public void clear() {
+        cache.clear();
     }
 
     @Override

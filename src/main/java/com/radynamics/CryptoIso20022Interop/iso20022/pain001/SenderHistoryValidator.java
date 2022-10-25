@@ -1,10 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentHistoryProvider;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -14,14 +11,17 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class SenderHistoryValidator implements WalletHistoryValidator {
-    private final Map<String, PaymentHistoryProvider> senderPaymentHistory = new HashMap<>();
+    private final Cache<PaymentHistoryProvider> cache;
     private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM);
+
+    public SenderHistoryValidator(NetworkInfo network) {
+        cache = new Cache<>(network.getUrl().toString(), ChronoUnit.FOREVER.getDuration());
+    }
 
     public ValidationResult[] validate(Payment[] payments) {
         var list = new ArrayList<ValidationResult>();
@@ -46,14 +46,13 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             return new ValidationResult[0];
         }
 
-        var key = createKey(p.getSenderWallet());
         synchronized (this) {
-            if (!senderPaymentHistory.containsKey(key)) {
+            if (!cache.isPresent(p.getSenderWallet())) {
                 loadHistory(ledger, p.getSenderWallet());
             }
         }
 
-        var paymentHistory = senderPaymentHistory.get(key);
+        var paymentHistory = cache.get(p.getSenderWallet());
         var similar = paymentHistory.oldestSimilarOrDefault(p);
         if (similar != null) {
             list.add(new ValidationResult(ValidationState.Warning, String.format("Similar payment sent to same receiver at %s.", df.format(DateTimeConvert.toUserTimeZone(similar.getBooked())))));
@@ -63,11 +62,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
     }
 
     public void clearCache() {
-        senderPaymentHistory.clear();
-    }
-
-    private String createKey(Wallet wallet) {
-        return wallet.getPublicKey();
+        cache.clear();
     }
 
     public void loadHistory(Ledger ledger, Wallet wallet) {
@@ -75,8 +70,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             return;
         }
 
-        var key = createKey(wallet);
-        if (!senderPaymentHistory.containsKey(key)) {
+        if (!cache.isPresent(wallet)) {
             var paymentHistory = ledger.getPaymentHistoryProvider();
 
             var desired = ZonedDateTime.now().minusDays(40);
@@ -86,7 +80,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
             var sinceDaysAgo = Duration.between(Utils.endOfDay(since), ZonedDateTime.now()).toDays();
             paymentHistory.load(ledger, wallet, sinceDaysAgo);
-            senderPaymentHistory.put(key, paymentHistory);
+            cache.add(wallet, paymentHistory);
         }
     }
 }

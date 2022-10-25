@@ -35,7 +35,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private final TransactionTranslator transactionTranslator;
-    private final PaymentValidator validator = new PaymentValidator(new SenderHistoryValidator());
+    private PaymentValidator validator;
 
     private JLabel lblExchange;
     private PaymentTable table;
@@ -52,6 +52,7 @@ public class SendForm extends JPanel implements MainFormPane {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
         this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
+        initPaymentValidator();
 
         setupUI();
     }
@@ -405,6 +406,11 @@ public class SendForm extends JPanel implements MainFormPane {
             return;
         }
 
+        initPaymentValidator();
         onTxtInputChanged();
+    }
+
+    private void initPaymentValidator() {
+        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
     }
 }
