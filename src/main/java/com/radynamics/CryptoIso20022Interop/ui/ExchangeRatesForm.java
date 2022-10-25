@@ -41,6 +41,7 @@ public class ExchangeRatesForm extends JDialog {
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
+        formAcceptCloseHandler.addFormActionListener(this::acceptDialog);
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -155,12 +156,7 @@ public class ExchangeRatesForm extends JDialog {
             {
                 var cmd = new JButton("OK");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> {
-                            apply();
-                            setDialogAccepted(true);
-                            formAcceptCloseHandler.accept();
-                        }
-                );
+                cmd.addActionListener(e -> formAcceptCloseHandler.accept());
                 pnl.add(cmd);
             }
             {
@@ -170,6 +166,11 @@ public class ExchangeRatesForm extends JDialog {
                 pnl.add(cmd);
             }
         }
+    }
+
+    private void acceptDialog() {
+        apply();
+        setDialogAccepted(true);
     }
 
     private void onSelectedExchangeChanged(ExchangeRateProvider exchange) {

@@ -32,6 +32,7 @@ public class ReceiveExportForm extends JDialog {
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
+        formAcceptCloseHandler.addFormActionListener(this::acceptDialog);
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -140,11 +141,7 @@ public class ReceiveExportForm extends JDialog {
             {
                 var cmd = new JButton("OK");
                 cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> {
-                            setDialogAccepted(true);
-                            formAcceptCloseHandler.accept();
-                        }
-                );
+                cmd.addActionListener(e -> formAcceptCloseHandler.accept());
                 pnl.add(cmd);
             }
             {
@@ -154,6 +151,10 @@ public class ReceiveExportForm extends JDialog {
                 pnl.add(cmd);
             }
         }
+    }
+
+    private void acceptDialog() {
+        setDialogAccepted(true);
     }
 
     private static int getNorthPad(int line) {
