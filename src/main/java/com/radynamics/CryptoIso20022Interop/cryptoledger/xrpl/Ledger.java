@@ -18,7 +18,6 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -109,14 +108,15 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         if (api.requiresDestinationTag(xrplWallet)) {
             list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
         }
-        if (!api.walletAccepts(xrplWallet, getNativeCcySymbol())) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Receiver wallet disallows receiving %s", getNativeCcySymbol())));
-        }
         if (api.isBlackholed(xrplWallet)) {
             list.add(new ValidationResult(ValidationState.Error, "Receiver wallet is blackholed. Amounts sent to this address will be lost."));
         }
 
         return list.toArray(new ValidationResult[0]);
+    }
+
+    public boolean walletAcceptsXrp(Wallet wallet) {
+        return api.walletAcceptsXrp(WalletConverter.from(wallet));
     }
 
     public NetworkInfo getNetwork() {
@@ -142,7 +142,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator() {
-        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.PaymentValidator(new TrustlineCache(this));
+        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.PaymentValidator(this, new TrustlineCache(this));
     }
 
     @Override
