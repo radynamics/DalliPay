@@ -27,6 +27,7 @@ import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
+import org.xrpl.xrpl4j.model.flags.Flags;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
@@ -440,7 +441,7 @@ public class JsonRpcApi implements TransactionSource {
         var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(t.getFee().getNumber().doubleValue()));
 
         // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
-        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, fee, memos);
+        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, t.getAmount().getCcy(), fee, memos);
 
         var signed = sign(prepared, sender);
 
@@ -473,7 +474,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount,
+                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount, Currency ccy,
                                    XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException {
         var requestParams = AccountInfoRequestParams.builder()
@@ -483,7 +484,7 @@ public class JsonRpcApi implements TransactionSource {
         var accountInfoResult = xrplClient.accountInfo(requestParams);
         var sequence = accountInfoResult.accountData().sequence().plus(accountSequenceOffset);
 
-        return Payment.builder()
+        var builder = Payment.builder()
                 .account(sender.classicAddress())
                 .amount(amount)
                 .addAllMemos(memos)
@@ -492,8 +493,11 @@ public class JsonRpcApi implements TransactionSource {
                 .sequence(sequence)
                 .fee(fee)
                 .signingPublicKey(sender.publicKey())
-                .lastLedgerSequence(lastLedgerSequence)
-                .build();
+                .lastLedgerSequence(lastLedgerSequence);
+        if (!ledger.getNativeCcySymbol().equals(ccy.getCode())) {
+            builder.flags(Flags.PaymentFlags.builder().tfPartialPayment(true).build());
+        }
+        return builder.build();
     }
 
     private SignedTransaction<Payment> sign(Payment prepared, org.xrpl.xrpl4j.wallet.Wallet sender) {
