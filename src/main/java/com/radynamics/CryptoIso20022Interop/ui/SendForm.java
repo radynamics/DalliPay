@@ -222,7 +222,7 @@ public class SendForm extends JPanel implements MainFormPane {
         try {
             try {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                var br = new BalanceRefresher();
+                var br = new BalanceRefresher(transformInstruction.getNetwork());
                 br.refreshAllSenderWallets(payments);
 
                 var ar = new AmountRefresher(payments);

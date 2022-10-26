@@ -199,7 +199,7 @@ public class PaymentTable extends JPanel {
         persistOrDelete(mapping);
 
         // Update all affected payments
-        var br = new BalanceRefresher();
+        var br = new BalanceRefresher(transformInstruction.getNetwork());
         var mi = new MappingInfo(mapping, changedValue);
         for (var p : data) {
             if (mi.apply(p)) {

@@ -202,7 +202,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
         validator.clearCache();
         validator.getHistoryValidator().clearCache();
-        var br = new BalanceRefresher();
+        var br = new BalanceRefresher(data[0].payment.getLedger().getNetwork());
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : data) {
             var future = loadAsync(p.payment, br);
