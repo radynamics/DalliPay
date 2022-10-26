@@ -49,6 +49,8 @@ public class TestLedger implements Ledger {
     @Override
     public Wallet createWallet(String publicKey, String secret) {
         return new Wallet() {
+            private final MoneyBag balances = new MoneyBag();
+
             @Override
             public String getPublicKey() {
                 return publicKey;
@@ -66,7 +68,7 @@ public class TestLedger implements Ledger {
 
             @Override
             public MoneyBag getBalances() {
-                return new MoneyBag();
+                return balances;
             }
 
             @Override
