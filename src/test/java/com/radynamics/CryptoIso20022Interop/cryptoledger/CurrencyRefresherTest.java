@@ -36,7 +36,7 @@ public class CurrencyRefresherTest {
         new CurrencyRefresher().refresh(p);
 
         Assertions.assertNull(p.getExchangeRate());
-        Assertion.assertEqual(amt, p.getAmountTransaction());
+        Assertion.assertEquals(amt, p.getAmountTransaction());
     }
 
     @ParameterizedTest
@@ -68,7 +68,7 @@ public class CurrencyRefresherTest {
         Assertions.assertNull(p.getExchangeRate());
         Assertions.assertEquals(20.0, p.getAmount());
         Assertions.assertEquals(userCcyCode, p.getUserCcyCodeOrEmpty());
-        Assertion.assertEqual(Money.of(0, new Currency("TEST")), p.getAmountTransaction());
+        Assertion.assertEquals(Money.of(0, new Currency("TEST")), p.getAmountTransaction());
     }
 
     private Currency createIssuedCcy(String ccyCode) {
@@ -102,7 +102,7 @@ public class CurrencyRefresherTest {
         Assertions.assertNull(p.getExchangeRate());
         Assertions.assertEquals(20.0, p.getAmount());
         Assertions.assertEquals("CCC", p.getUserCcyCodeOrEmpty());
-        Assertion.assertEqual(Money.of(20.0, ccyCCC), p.getAmountTransaction());
+        Assertion.assertEquals(Money.of(20.0, ccyCCC), p.getAmountTransaction());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class CurrencyRefresherTest {
         Assertions.assertNull(p.getExchangeRate());
         Assertions.assertEquals(20.0, p.getAmount());
         Assertions.assertEquals("CCC", p.getUserCcyCodeOrEmpty());
-        Assertion.assertEqual(Money.of(20.0, new Currency("CCC")), p.getAmountTransaction());
+        Assertion.assertEquals(Money.of(20.0, new Currency("CCC")), p.getAmountTransaction());
         // CCC_issuer2 has lower transfer fee
         Assertions.assertEquals("CCC_issuer2", p.getAmountTransaction().getCcy().getIssuer().getPublicKey());
     }

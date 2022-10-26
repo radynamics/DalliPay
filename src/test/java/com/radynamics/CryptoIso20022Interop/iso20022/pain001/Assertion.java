@@ -87,7 +87,7 @@ public class Assertion {
         Assert.assertEquals(ledgerCcy, transaction.getAmountTransaction().getCcy().getCode());
     }
 
-    public static void assertEqual(Money expected, Money actual) {
+    public static void assertEquals(Money expected, Money actual) {
         if (expected == null) {
             Assertions.assertNull(actual);
             return;
