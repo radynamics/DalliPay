@@ -29,12 +29,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     private static final String nativeCcySymbol = "XRP";
 
     public Ledger() {
-        walletInfoProvider = new WalletInfoProvider[]{
-                new CachedWalletInfoProvider(this, new WalletInfoProvider[]{
-                        new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this),
-                        new Xumm()}),
-                new TrustlineInfoProvider(new TrustlineCache(this))
-        };
     }
 
     @Override
@@ -147,6 +141,14 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
 
     @Override
     public WalletInfoProvider[] getInfoProvider() {
+        if (walletInfoProvider == null) {
+            walletInfoProvider = new WalletInfoProvider[]{
+                    new CachedWalletInfoProvider(this, new WalletInfoProvider[]{
+                            new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this),
+                            new Xumm()}),
+                    new TrustlineInfoProvider(new TrustlineCache(this))
+            };
+        }
         return walletInfoProvider;
     }
 
