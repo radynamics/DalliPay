@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.TestUtils;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Assertion;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestLedger;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
@@ -42,10 +43,10 @@ public class CurrencyRefresherTest {
     @ParameterizedTest
     @ValueSource(strings = {"AAA", "BBB", "CCC"})
     public void refreshNoCommonTrustlines(@NotNull String userCcyCode) {
-        var ccyAAA = createIssuedCcy("AAA");
-        var ccyBBB = createIssuedCcy("BBB");
-        var ccyCCC1 = createIssuedCcy("CCC", "CCC_issuer1");
-        var ccyCCC2 = createIssuedCcy("CCC", "CCC_issuer2");
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
+        var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
+        var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
 
         var senderWallet = ledger.createWallet("aaa", "");
         senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
@@ -71,19 +72,11 @@ public class CurrencyRefresherTest {
         Assertion.assertEquals(Money.of(0, new Currency("TEST")), p.getAmountTransaction());
     }
 
-    private Currency createIssuedCcy(String ccyCode) {
-        return createIssuedCcy(ccyCode, ccyCode + "_issuer");
-    }
-
-    private Currency createIssuedCcy(String ccyCode, String issuer) {
-        return new Currency(ccyCode, ledger.createWallet(issuer, ""));
-    }
-
     @Test
     public void refreshCommonTrustlines() {
-        var ccyAAA = createIssuedCcy("AAA");
-        var ccyBBB = createIssuedCcy("BBB");
-        var ccyCCC = createIssuedCcy("CCC");
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
+        var ccyCCC = TestUtils.createIssuedCcy(ledger, "CCC");
 
         var senderWallet = ledger.createWallet("aaa", "");
         senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
@@ -107,11 +100,11 @@ public class CurrencyRefresherTest {
 
     @Test
     public void refreshCommonTrustlinesTransferFee() {
-        var ccyAAA = createIssuedCcy("AAA");
-        var ccyBBB = createIssuedCcy("BBB");
-        var ccyCCC1 = createIssuedCcy("CCC", "CCC_issuer1");
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
+        var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
         ccyCCC1.setTransferFee(3);
-        var ccyCCC2 = createIssuedCcy("CCC", "CCC_issuer2");
+        var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
         ccyCCC2.setTransferFee(2);
 
         var senderWallet = ledger.createWallet("aaa", "");

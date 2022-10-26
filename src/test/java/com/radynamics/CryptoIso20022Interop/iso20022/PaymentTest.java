@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Assertion;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestLedger;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +68,21 @@ public class PaymentTest {
         Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
         Assertions.assertEquals(15.0, p.getAmountTransaction().getNumber());
         Assertions.assertEquals("TEST", p.getAmountTransaction().getCcy().getCode());
+    }
+
+    @Test
+    public void setAmountIssuedCcy() {
+        var ledger = new TestLedger();
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var p = new Payment(new TestTransaction(ledger, Money.of(10, ccyAAA)));
+        p.setExchangeRate(null);
+        p.setAmount(Money.of(10, ccyAAA));
+
+        Assertions.assertEquals(10, p.getAmount());
+        Assertions.assertEquals("AAA", p.getUserCcyCodeOrEmpty());
+        Assertion.assertEquals(Money.of(10.0, ccyAAA), p.getAmountTransaction());
+        Assertions.assertNull(p.getExchangeRate());
+        Assertions.assertFalse(p.isAmountUnknown());
     }
 
     @Test

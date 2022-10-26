@@ -23,9 +23,13 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     private Money fee;
 
     public TestTransaction(Ledger ledger, Double amt, String ccy) {
+        this(ledger, Money.of(amt, new Currency(ccy)));
+    }
+
+    public TestTransaction(Ledger ledger, Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
         this.ledger = ledger;
-        this.amt = Money.of(amt, new Currency(ccy));
+        this.amt = amt;
         this.fee = TestLedger.convertToNativeCcyAmount(10);
     }
 
