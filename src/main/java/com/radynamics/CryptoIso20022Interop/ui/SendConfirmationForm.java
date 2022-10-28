@@ -5,9 +5,7 @@ import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
-import com.radynamics.CryptoIso20022Interop.iso20022.Account;
-import com.radynamics.CryptoIso20022Interop.iso20022.Address;
-import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -165,6 +163,19 @@ public class SendConfirmationForm extends JDialog {
                 }
             });
             pnlFeeContent.add(lbl3);
+
+            var lbl4 = Utils.createLinkLabel(pnlContent, "explain...");
+            panel2Layout.putConstraint(SpringLayout.WEST, lbl4, 10, SpringLayout.EAST, lbl3);
+            panel2Layout.putConstraint(SpringLayout.NORTH, lbl4, 0, SpringLayout.NORTH, pnlFeeContent);
+            lbl4.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 1) {
+                        showFeeDetails();
+                    }
+                }
+            });
+            pnlFeeContent.add(lbl4);
         }
         {
             var pnl = new JPanel();
@@ -245,7 +256,10 @@ public class SendConfirmationForm extends JDialog {
     private void showFeeEdit() {
         var ledger = PaymentUtils.distinctLedgers(payments);
         for (var l : ledger) {
-            showFeeEdit(l, payments.length == 0 ? null : payments[0].getFee());
+            var ledgerTransactionFee = payments.length == 0
+                    ? null
+                    : FeeHelper.get(payments[0].getFees(), FeeType.LedgerTransactionFee).orElse(null);
+            showFeeEdit(l, ledgerTransactionFee);
         }
     }
 
@@ -316,6 +330,33 @@ public class SendConfirmationForm extends JDialog {
         layout.putConstraint(SpringLayout.EAST, lblFee, 0, SpringLayout.EAST, pnl);
 
         return pnl;
+    }
+
+    private void showFeeDetails() {
+        var sb = new StringBuilder();
+
+        for (var i = 0; i < payments.length; i++) {
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
+            var p = payments[i];
+            var paymentHeader = p.getReceiverAddress() == null
+                    ? AccountFormatter.format(p.getReceiverAccount())
+                    : AddressFormatter.formatSingleLine(p.getReceiverAddress());
+            sb.append(String.format("%s. %s, %s\n", i + 1, paymentHeader, AmountFormatter.formatAmtWithCcy(p)));
+            for (var fee : p.getFees()) {
+                sb.append(String.format("%s: %s\n", MoneyFormatter.formatLedger(fee.getAmount()), FeeHelper.getText(fee.getType())));
+            }
+        }
+
+        var textArea = new JTextArea(sb.toString());
+        textArea.setColumns(50);
+        textArea.setRows(20);
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
+        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), "Fees", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void startTimeoutCountdown() {

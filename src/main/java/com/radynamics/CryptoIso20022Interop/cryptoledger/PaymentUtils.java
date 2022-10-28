@@ -78,7 +78,9 @@ public class PaymentUtils {
         var sum = new MoneySums();
         for (var p : payments) {
             sum.plus(p.getAmountTransaction());
-            sum.plus(p.getFee());
+            for (var fee : p.getFees()) {
+                sum.plus(fee.getAmount());
+            }
         }
         return sum;
     }
@@ -127,7 +129,9 @@ public class PaymentUtils {
     private static MoneySums totalFees(Payment[] payments) {
         var sum = new MoneySums();
         for (var p : payments) {
-            sum.plus(p.getFee());
+            for (var fee : p.getFees()) {
+                sum.plus(fee.getAmount());
+            }
         }
         return sum;
     }

@@ -1,15 +1,14 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 
 public class Payment {
     private Transaction cryptoTrx;
@@ -251,8 +250,14 @@ public class Payment {
         return exchangeRate;
     }
 
-    public Money getFee() {
-        return cryptoTrx.getFee();
+    public Fee[] getFees() {
+        var list = new ArrayList<Fee>();
+        list.add(new Fee(cryptoTrx.getFee(), FeeType.LedgerTransactionFee));
+        var transferFee = cryptoTrx.getAmount().getCcy().getTransferFee();
+        if (transferFee != 0) {
+            list.add(new Fee(cryptoTrx.getAmount().multiply(transferFee), FeeType.CurrencyTransferFee));
+        }
+        return list.toArray(new Fee[0]);
     }
 
     public void setFee(Money value) {
