@@ -101,6 +101,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel1.setPreferredSize(new Dimension(500, getNorthPad(3) + 20));
         panel2.setPreferredSize(new Dimension(500, 500));
+        panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(500, 45));
 
