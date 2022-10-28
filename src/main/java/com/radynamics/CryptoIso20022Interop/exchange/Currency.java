@@ -42,6 +42,9 @@ public class Currency {
         this.transferFee = transferFee;
     }
 
+    /**
+     * Transfer fee as percentage value between 0 (0%, no fee) and 1 (100%) of a payment amount.
+     */
     public Double getTransferFee() {
         return transferFee;
     }
