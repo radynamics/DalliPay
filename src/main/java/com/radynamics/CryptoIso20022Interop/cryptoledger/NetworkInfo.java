@@ -56,7 +56,7 @@ public class NetworkInfo {
     }
 
     public ZonedDateTime historyAvailableSince() {
-        return isLivenet() ? ZonedDateTime.now().minusDays(40) : ZonedDateTime.now().minusDays(5);
+        return ZonedDateTime.now().minusDays(40);
     }
 
     public boolean isLivenet() {
