@@ -105,6 +105,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(500, 45));
 
+        pnlMain.registerKeyboardAction(e -> load(), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+
         {
             final int paddingWest = 120;
             Component anchorComponentTopLeft;
@@ -117,7 +119,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 txtInput = new WalletField(this);
-                txtInput.registerKeyboardAction(e -> load(), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 txtInput.setLedger(transformInstruction.getLedger());
@@ -176,6 +177,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(dtPickerEnd);
 
                 cmdRefresh = new JButton("Refresh");
+                cmdRefresh.setMnemonic(KeyEvent.VK_R);
                 cmdRefresh.setPreferredSize(new Dimension(150, 35));
                 cmdRefresh.addActionListener(e -> {
                     load();
@@ -196,6 +198,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
         {
             cmdExport = new JButton("Export...");
+            cmdExport.setMnemonic(KeyEvent.VK_E);
             cmdExport.setPreferredSize(new Dimension(150, 35));
             cmdExport.setEnabled(false);
             cmdExport.addActionListener(e -> {
@@ -305,7 +308,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportSelected() {
-        if (table.selectedPayments().length == 0) {
+        if (isLoading || table.selectedPayments().length == 0) {
             return;
         }
 

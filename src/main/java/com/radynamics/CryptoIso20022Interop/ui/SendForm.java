@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
@@ -150,6 +151,7 @@ public class SendForm extends JPanel implements MainFormPane {
         }
         {
             cmdSendPayments = new JButton("Send Payments");
+            cmdSendPayments.setMnemonic(KeyEvent.VK_S);
             cmdSendPayments.setPreferredSize(new Dimension(150, 35));
             cmdSendPayments.setEnabled(false);
             cmdSendPayments.addActionListener(e -> sendPayments());
@@ -212,7 +214,7 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void sendPayments() {
         var payments = table.selectedPayments();
-        if (payments.length == 0) {
+        if (!cmdSendPayments.isEnabled() || payments.length == 0) {
             return;
         }
 
