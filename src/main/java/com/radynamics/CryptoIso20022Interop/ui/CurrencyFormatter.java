@@ -1,18 +1,16 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.Iso4217CurrencyCode;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 
 import javax.swing.*;
 
 public class CurrencyFormatter {
-    private final WalletInfoAggregator walletInfoAggregator;
+    private final com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter currencyFormatter;
 
     public CurrencyFormatter(WalletInfoProvider[] infoProviders) {
-        this.walletInfoAggregator = new WalletInfoAggregator(infoProviders);
+        this.currencyFormatter = new com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter(infoProviders);
     }
 
     public void format(JLabel lbl, Currency ccy) {
@@ -21,13 +19,11 @@ public class CurrencyFormatter {
             return;
         }
 
-        var issuerText = ccy.getIssuer().getPublicKey();
-        var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getNameOrDomain(ccy.getIssuer());
-        if (wi != null) {
-            issuerText = WalletInfoFormatter.format(wi);
+        var tooltip = String.format("Issued by %s", currencyFormatter.formatIssuer(ccy));
+        if (ccy.getTransferFee() != 0) {
+            tooltip += "\nTransfer fee: " + com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter.formatTransferFee(ccy);
         }
-
-        lbl.setToolTipText(String.format("Issued by %s", issuerText));
+        lbl.setToolTipText(tooltip);
 
         if (Iso4217CurrencyCode.contains(ccy.getCode())) {
             lbl.setForeground(Consts.ColorIssuedFiatCcy);
