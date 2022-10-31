@@ -140,6 +140,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public PaymentPathFinder createPaymentPathFinder() {
+        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.paymentpath.PaymentPathFinder();
+    }
+
+    @Override
     public WalletInfoProvider[] getInfoProvider() {
         if (walletInfoProvider == null) {
             walletInfoProvider = new WalletInfoProvider[]{

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
+@Deprecated(since = "Use PaymentPathFinder instead")
 public class CurrencyRefresher {
     public void refresh(Payment p) {
         if (p == null) throw new IllegalArgumentException("Parameter 'p' cannot be null");

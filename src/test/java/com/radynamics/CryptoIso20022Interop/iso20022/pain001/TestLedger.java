@@ -129,6 +129,15 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public PaymentPathFinder createPaymentPathFinder() {
+        return (currencyConverter, p) -> {
+            var pp = new PaymentPath[1];
+            pp[0] = new LedgerNativeCcyPath(currencyConverter, new Currency(getNativeCcySymbol()));
+            return pp;
+        };
+    }
+
+    @Override
     public WalletInfoProvider[] getInfoProvider() {
         return walletInfoProvider;
     }

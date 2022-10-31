@@ -4,8 +4,6 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 
-import java.time.ZonedDateTime;
-
 public interface Ledger {
     LedgerId getId();
 
@@ -38,6 +36,8 @@ public interface Ledger {
     ExchangeRateProvider createHistoricExchangeRateSource();
 
     com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator createPaymentValidator();
+
+    PaymentPathFinder createPaymentPathFinder();
 
     WalletInfoProvider[] getInfoProvider();
 

@@ -1,6 +1,5 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.CurrencyRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -11,6 +10,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.OtherAccount;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
 
 public class TransactionTranslator {
     private final static Logger log = LogManager.getLogger(TransactionTranslator.class);
@@ -94,9 +95,13 @@ public class TransactionTranslator {
     }
 
     public void applyUserCcy(Payment[] payments) {
-        var cr = new CurrencyRefresher();
         for (var t : payments) {
-            cr.refresh(t);
+            var paths = t.getLedger().createPaymentPathFinder().find(currencyConverter, t);
+            if (paths.length == 0) {
+                continue;
+            }
+            Arrays.sort(paths, (a, b) -> Integer.compare(b.getRank(), a.getRank()));
+            paths[0].apply(t);
             if (t.getUserCcy().getIssuer() == null) {
                 apply(t);
             }
