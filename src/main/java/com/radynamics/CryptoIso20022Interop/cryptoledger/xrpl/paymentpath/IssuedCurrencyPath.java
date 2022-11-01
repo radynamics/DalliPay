@@ -42,7 +42,12 @@ public class IssuedCurrencyPath implements PaymentPath {
 
     @Override
     public String getDisplayText() {
-        return currencyFormatter.formatCcyAndIssuer(ccy);
+        var sb = new StringBuilder();
+        sb.append(currencyFormatter.formatCcyAndIssuer(ccy));
+        if (ccy.getTransferFee() != 0) {
+            sb.append(String.format(", %s", currencyFormatter.formatTransferFee(ccy)));
+        }
+        return sb.toString();
     }
 
     @Override
