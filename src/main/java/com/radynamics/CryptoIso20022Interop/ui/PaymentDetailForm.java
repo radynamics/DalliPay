@@ -324,7 +324,7 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight) {
-        return createRow(row, labelText, firstLine, secondLine, false, 0);
+        return createRow(row, labelText, firstLine, secondLine, growBottomRight, 0);
     }
 
     private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
