@@ -35,6 +35,10 @@ public class LedgerNativeCcyPath implements PaymentPath {
         return ccy.equals(p.getAmountTransaction().getCcy());
     }
 
+    public Currency getCcy() {
+        return ccy;
+    }
+
     @Override
     public String getDisplayText() {
         return ccy.getCode();

@@ -1,10 +1,13 @@
-package com.radynamics.CryptoIso20022Interop.cryptoledger;
+package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.paymentpath;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerNativeCcyPath;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.TestUtils;
-import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Assertion;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestLedger;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.TestTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -16,33 +19,44 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.HashMap;
 
-public class CurrencyRefresherTest {
+public class PaymentPathFinderTest {
     private final Ledger ledger = new TestLedger();
 
     @Test
-    public void refreshArgNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new CurrencyRefresher().refresh(null);
-        });
+    public void findArgsNull() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(null, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(new CurrencyConverter(), null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(null, new Payment(ledger.createTransaction())));
     }
 
     @ParameterizedTest
     @CsvSource({",", "aaa,", ",bbb"})
-    public void refreshWalletsNull(String senderWallet, String receiverWallet) {
+    public void findWalletsNull(String senderWallet, String receiverWallet) {
         var amt = Money.of(10.0, new Currency("TEST"));
         var p = new Payment(new TestTransaction(ledger, 10.0, "TEST"));
         p.setSenderWallet(senderWallet == null ? null : ledger.createWallet(senderWallet, ""));
         p.setReceiverWallet(receiverWallet == null ? null : ledger.createWallet(receiverWallet, ""));
         p.setAmount(amt);
-        new CurrencyRefresher().refresh(p);
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
-        Assertions.assertNull(p.getExchangeRate());
-        Assertion.assertEquals(amt, p.getAmountTransaction());
+        assertSingleLedgerNativeCcyPath(actual);
+    }
+
+    private void assertSingleLedgerNativeCcyPath(PaymentPath[] actual) {
+        Assertions.assertNotNull(actual);
+        Assertions.assertEquals(1, actual.length);
+        assertLedgerNativeCcyPath(actual[0]);
+    }
+
+    private void assertLedgerNativeCcyPath(PaymentPath actual) {
+        Assertions.assertNotNull(actual);
+        Assertions.assertInstanceOf(LedgerNativeCcyPath.class, actual);
+        Assertions.assertEquals(((LedgerNativeCcyPath) actual).getCcy(), new Currency("TEST"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"AAA", "BBB", "CCC"})
-    public void refreshNoCommonTrustlines(@NotNull String userCcyCode) {
+    public void findNoCommonTrustlines(@NotNull String userCcyCode) {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
@@ -64,16 +78,13 @@ public class CurrencyRefresherTest {
         map.put("BBB", ccyBBB);
         map.put("CCC", ccyCCC1);
         p.setAmount(Money.of(20.0, map.get(userCcyCode)));
-        new CurrencyRefresher().refresh(p);
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
-        Assertions.assertNull(p.getExchangeRate());
-        Assertions.assertEquals(20.0, p.getAmount());
-        Assertions.assertEquals(userCcyCode, p.getUserCcyCodeOrEmpty());
-        Assertion.assertEquals(Money.of(0, new Currency("TEST")), p.getAmountTransaction());
+        assertSingleLedgerNativeCcyPath(actual);
     }
 
     @Test
-    public void refreshCommonTrustlines() {
+    public void findCommonTrustlines() {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC = TestUtils.createIssuedCcy(ledger, "CCC");
@@ -90,16 +101,18 @@ public class CurrencyRefresherTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        new CurrencyRefresher().refresh(p);
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
-        Assertions.assertNull(p.getExchangeRate());
-        Assertions.assertEquals(20.0, p.getAmount());
-        Assertions.assertEquals("CCC", p.getUserCcyCodeOrEmpty());
-        Assertion.assertEquals(Money.of(20.0, ccyCCC), p.getAmountTransaction());
+        Assertions.assertEquals(2, actual.length);
+        assertLedgerNativeCcyPath(actual[0]);
+
+        Assertions.assertInstanceOf(IssuedCurrencyPath.class, actual[1]);
+        Assertions.assertEquals(((IssuedCurrencyPath) actual[1]).getCcy(), ccyCCC);
+        Assertions.assertEquals(actual[1].getRank(), 10);
     }
 
     @Test
-    public void refreshCommonTrustlinesTransferFee() {
+    public void findCommonTrustlinesTransferFee() {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
@@ -121,13 +134,23 @@ public class CurrencyRefresherTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        new CurrencyRefresher().refresh(p);
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
-        Assertions.assertNull(p.getExchangeRate());
-        Assertions.assertEquals(20.0, p.getAmount());
-        Assertions.assertEquals("CCC", p.getUserCcyCodeOrEmpty());
-        Assertion.assertEquals(Money.of(20.0, new Currency("CCC")), p.getAmountTransaction());
-        // CCC_issuer2 has lower transfer fee
-        Assertions.assertEquals("CCC_issuer2", p.getAmountTransaction().getCcy().getIssuer().getPublicKey());
+        Assertions.assertEquals(3, actual.length);
+        assertLedgerNativeCcyPath(actual[0]);
+
+        {
+            var actualPath = actual[1];
+            Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
+            // CCC_issuer2 has lower transfer fee
+            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC2);
+            Assertions.assertEquals(actualPath.getRank(), 10);
+        }
+        {
+            var actualPath = actual[2];
+            Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
+            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC1);
+            Assertions.assertEquals(actualPath.getRank(), 9);
+        }
     }
 }
