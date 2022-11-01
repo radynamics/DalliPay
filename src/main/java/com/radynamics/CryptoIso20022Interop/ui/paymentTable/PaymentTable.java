@@ -33,6 +33,7 @@ public class PaymentTable extends JPanel {
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
+    private final CurrencyConverter currencyConverter;
     private final Actor actor;
     private Payment[] data = new Payment[0];
     private PaymentValidator validator;
@@ -45,6 +46,7 @@ public class PaymentTable extends JPanel {
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         super(new GridLayout(1, 0));
         this.transformInstruction = transformInstruction;
+        this.currencyConverter = currencyConverter;
         this.actor = actor;
         this.validator = validator;
 
@@ -284,7 +286,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var frm = new PaymentDetailForm(obj, validator, getExchangeRateProvider());
+        var frm = new PaymentDetailForm(obj, validator, getExchangeRateProvider(), currencyConverter, actor);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(650, 430);
         frm.setModal(true);

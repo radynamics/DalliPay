@@ -16,6 +16,8 @@ public class CurrencyFormatter {
     public void format(JLabel lbl, Currency ccy) {
         // Native currencies like "XRP" don't have an issuer.
         if (ccy.getIssuer() == null) {
+            lbl.setToolTipText("");
+            lbl.setForeground(new JLabel().getForeground());
             return;
         }
 

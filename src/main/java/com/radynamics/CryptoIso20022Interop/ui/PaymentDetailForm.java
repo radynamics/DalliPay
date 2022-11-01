@@ -1,16 +1,21 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.alexandriasoftware.swing.JSplitButton;
+import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.CryptoIso20022Interop.DateTimeConvert;
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
+import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
+import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +26,8 @@ public class PaymentDetailForm extends JDialog {
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
     private final WalletInfoAggregator walletInfoAggregator;
+    private final CurrencyConverter currencyConverter;
+    private final Actor actor;
 
     private SpringLayout panel1Layout;
     private JPanel pnlContent;
@@ -29,15 +36,19 @@ public class PaymentDetailForm extends JDialog {
     private JLabel lblLedgerAmount;
     private MoneyLabel lblAmountText;
     private JLabel lblEditExchangeRate;
+    private JSplitButton cmdPaymentPath;
 
-    public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider) {
+    public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
         if (validator == null) throw new IllegalArgumentException("Parameter 'validator' cannot be null");
         if (exchangeRateProvider == null) throw new IllegalArgumentException("Parameter 'exchangeRateProvider' cannot be null");
+        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
         this.payment = payment;
         this.validator = validator;
         this.exchangeRateProvider = exchangeRateProvider;
         this.walletInfoAggregator = new WalletInfoAggregator(payment.getLedger().getInfoProvider());
+        this.currencyConverter = currencyConverter;
+        this.actor = actor;
 
         setupUI();
     }
@@ -100,7 +111,33 @@ public class PaymentDetailForm extends JDialog {
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
+                var pnlFirstLine = new JPanel();
+                pnlFirstLine.setLayout(new BoxLayout(pnlFirstLine, BoxLayout.LINE_AXIS));
                 lblAmountText = new MoneyLabel(payment.getLedger());
+                pnlFirstLine.add(lblAmountText);
+                pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
+                {
+                    JMenuItem selected = null;
+                    var popupMenu = new JPopupMenu();
+                    var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
+                    for (var path : availablePaths) {
+                        var item = new JMenuItem(path.getDisplayText());
+                        selected = path.isSet(payment) ? item : selected;
+                        popupMenu.add(item);
+                        item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
+                    }
+                    cmdPaymentPath = new JSplitButton();
+                    if (selected != null) {
+                        popupMenu.setSelected(selected);
+                        refreshPaymentPathText(selected.getText());
+                    }
+                    cmdPaymentPath.setVisible(actor == Actor.Sender);
+                    cmdPaymentPath.setEnabled(availablePaths.length > 1 && payment.getBooked() == null);
+                    cmdPaymentPath.setAlwaysPopup(true);
+                    cmdPaymentPath.setPopupMenu(popupMenu);
+                    cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
+                    pnlFirstLine.add(cmdPaymentPath);
+                }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
                 var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
@@ -119,7 +156,7 @@ public class PaymentDetailForm extends JDialog {
                     lblEditExchangeRate.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
                     secondLine.add(lblEditExchangeRate);
                 }
-                anchorComponentTopLeft = createRow(row++, "Amount:", lblAmountText, secondLine, false);
+                anchorComponentTopLeft = createRow(row++, "Amount:", pnlFirstLine, secondLine, false, 7);
             }
             {
                 var lbl = new WalletLabel();
@@ -199,6 +236,17 @@ public class PaymentDetailForm extends JDialog {
         }
     }
 
+    private void apply(PaymentPath path) {
+        path.apply(payment);
+        refreshPaymentPathText(path.getDisplayText());
+        refreshAmountsText();
+        setPaymentChanged(true);
+    }
+
+    private void refreshPaymentPathText(String selectedText) {
+        cmdPaymentPath.setText(String.format("send using %s", selectedText));
+    }
+
     private void refreshAmountsText() {
         lblAmountText.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
 
@@ -276,6 +324,10 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight) {
+        return createRow(row, labelText, firstLine, secondLine, false, 0);
+    }
+
+    private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
         var lbl = new JLabel(labelText);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
         panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(row), SpringLayout.NORTH, pnlContent);
@@ -292,7 +344,7 @@ public class PaymentDetailForm extends JDialog {
 
         if (secondLine != null) {
             panel1Layout.putConstraint(SpringLayout.WEST, secondLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-            panel1Layout.putConstraint(SpringLayout.NORTH, secondLine, getNorthPad(row) + 13, SpringLayout.NORTH, pnlContent);
+            panel1Layout.putConstraint(SpringLayout.NORTH, secondLine, getNorthPad(row) + 13 + secondLineNorthOffset, SpringLayout.NORTH, pnlContent);
             pnlContent.add(secondLine);
         }
 
