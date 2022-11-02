@@ -16,13 +16,13 @@ public class FeeRefresher {
     public void refresh() {
         var latestFees = getFeeSuggestions();
         for (var p : payments) {
-            p.setFee(latestFees.get(createKey(p)).getLow());
+            p.setLedgerTransactionFee(latestFees.get(createKey(p)).getLow());
         }
     }
 
     public void refresh(Money fee) {
         for (var p : payments) {
-            p.setFee(fee);
+            p.setLedgerTransactionFee(fee);
         }
     }
 

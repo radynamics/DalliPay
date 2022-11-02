@@ -47,7 +47,7 @@ public interface Transaction {
 
     Throwable getTransmissionError();
 
-    Money getFee();
+    Fee[] getFees();
 
-    void setFee(Money value);
+    void setLedgerTransactionFee(Money value);
 }

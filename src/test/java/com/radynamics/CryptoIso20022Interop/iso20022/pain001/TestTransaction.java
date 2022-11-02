@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Fee;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
@@ -127,12 +129,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
-    public Money getFee() {
-        return fee;
+    public Fee[] getFees() {
+        return new Fee[]{new Fee(fee, FeeType.LedgerTransactionFee)};
     }
 
     @Override
-    public void setFee(Money value) {
+    public void setLedgerTransactionFee(Money value) {
         fee = value;
     }
 

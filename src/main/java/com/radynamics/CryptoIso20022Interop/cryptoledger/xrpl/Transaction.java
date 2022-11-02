@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Fee;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
@@ -131,12 +133,18 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
-    public Money getFee() {
-        return fee;
+    public Fee[] getFees() {
+        var list = new ArrayList<Fee>();
+        list.add(new Fee(fee, FeeType.LedgerTransactionFee));
+        var transferFee = getAmount().getCcy().getTransferFee();
+        if (transferFee != 0) {
+            list.add(new Fee(getAmount().multiply(transferFee), FeeType.CurrencyTransferFee));
+        }
+        return list.toArray(new Fee[0]);
     }
 
     @Override
-    public void setFee(Money value) {
+    public void setLedgerTransactionFee(Money value) {
         if (!value.getCcy().getCode().equals(ledger.getNativeCcySymbol())) {
             throw new IllegalArgumentException(String.format("Currency of fee must be %s", ledger.getNativeCcySymbol()));
         }
