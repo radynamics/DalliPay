@@ -27,7 +27,6 @@ import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
-import org.xrpl.xrpl4j.model.flags.Flags;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
@@ -416,8 +415,6 @@ public class JsonRpcApi implements TransactionSource {
         }
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
-        var amount = toCurrencyAmount(t.getAmount());
-
         var memos = new ArrayList<MemoWrapper>();
         var memoData = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
         if (!StringUtils.isEmpty(memoData)) {
@@ -438,15 +435,8 @@ public class JsonRpcApi implements TransactionSource {
         }
         previousLastLedgerSequence = lastLedgerSequence;
 
-        var fee = XrpCurrencyAmount.ofXrp(BigDecimal.ZERO);
-        for (var f : t.getFees()) {
-            fee = f.getType() == FeeType.LedgerTransactionFee
-                    ? XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(f.getAmount().getNumber().doubleValue()))
-                    : fee;
-        }
-
         // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
-        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, amount, t.getAmount().getCcy(), fee, memos);
+        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
 
         var signed = sign(prepared, sender);
 
@@ -471,23 +461,30 @@ public class JsonRpcApi implements TransactionSource {
             throw new LedgerException(String.format("%s is considered an issued currency and therefore must have an issuer.", ccy.getCode()));
         }
 
+        // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
+        var scale = Math.pow(10, 15);
+        var amt = Math.round(amount.getNumber().doubleValue() * scale) / scale;
         return IssuedCurrencyAmount.builder()
                 .currency(ccy.getCode())
                 .issuer(Address.of(ccy.getIssuer().getPublicKey()))
-                .value(String.valueOf(amount.getNumber().doubleValue()))
+                .value(String.valueOf(amt))
                 .build();
     }
 
     private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, CurrencyAmount amount, Currency ccy,
-                                   XrpCurrencyAmount fee, Iterable<? extends MemoWrapper> memos)
-            throws JsonRpcClientErrorException {
+                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, Money amt, Currency ccy,
+                                   Fee[] fees, Iterable<? extends MemoWrapper> memos)
+            throws JsonRpcClientErrorException, LedgerException {
         var requestParams = AccountInfoRequestParams.builder()
                 .ledgerIndex(LedgerIndex.VALIDATED)
                 .account(sender.classicAddress())
                 .build();
         var accountInfoResult = xrplClient.accountInfo(requestParams);
         var sequence = accountInfoResult.accountData().sequence().plus(accountSequenceOffset);
+
+        var amount = toCurrencyAmount(amt);
+        var lederTransactionFee = FeeHelper.get(fees, FeeType.LedgerTransactionFee).orElseThrow();
+        var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
 
         var builder = Payment.builder()
                 .account(sender.classicAddress())
@@ -500,7 +497,10 @@ public class JsonRpcApi implements TransactionSource {
                 .signingPublicKey(sender.publicKey())
                 .lastLedgerSequence(lastLedgerSequence);
         if (!ledger.getNativeCcySymbol().equals(ccy.getCode())) {
-            builder.flags(Flags.PaymentFlags.builder().tfPartialPayment(true).build());
+            var transferFee = ccy.getTransferFeeAmount(amt);
+            // maximum including an additional tolerance
+            var sendMax = amt.plus(transferFee).plus(transferFee.multiply(0.01));
+            builder.sendMax(toCurrencyAmount(sendMax));
         }
         return builder.build();
     }

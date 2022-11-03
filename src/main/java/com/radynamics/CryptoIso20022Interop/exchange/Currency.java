@@ -49,6 +49,14 @@ public class Currency {
         return transferFee;
     }
 
+    /**
+     * Transfer fee as absolute amount value for a given amount to send.
+     */
+    public Money getTransferFeeAmount(Money sendingAmt) {
+        if (!equals(sendingAmt.getCcy())) throw new IllegalArgumentException(String.format("Parameter 'sendingAmt' must have ccy '%s'", this));
+        return sendingAmt.multiply(getTransferFee());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
