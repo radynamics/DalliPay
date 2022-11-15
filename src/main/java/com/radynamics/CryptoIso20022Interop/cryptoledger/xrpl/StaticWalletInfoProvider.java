@@ -24,6 +24,7 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
         known.put("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", createWalletInfos("Bitstamp"));
         known.put("rsoLo2S1kiGeCcn6hCUXVrCpGMWLrRrLZz", createWalletInfos("Sologenic"));
         known.put("rs5hzzF7RzdV2Ub7Fv14Z1ShjuCrnL7FEX", createWalletInfos("STASIS"));
+        known.put("rEaC7oNDB34K6CiSbSrA6xEPeVhXNgDZRY", createWalletInfos("Xago"));
     }
 
     private WalletInfo[] createWalletInfos(String name) {
