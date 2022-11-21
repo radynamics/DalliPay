@@ -25,11 +25,11 @@ dependencies {
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
 
-    compile group: 'org.xrpl', name: 'xrpl4j-address-codec', version: '2.3.0'
-    compile group: 'org.xrpl', name: 'xrpl4j-keypairs', version: '2.3.0'
-    compile group: 'org.xrpl', name: 'xrpl4j-model', version: '2.3.0'
-    compile group: 'org.xrpl', name: 'xrpl4j-client', version: '2.3.0'
-    compile group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.3.0'
+    compile group: 'org.xrpl', name: 'xrpl4j-address-codec', version: '2.5.1'
+    compile group: 'org.xrpl', name: 'xrpl4j-keypairs', version: '2.5.1'
+    compile group: 'org.xrpl', name: 'xrpl4j-model', version: '2.5.1'
+    compile group: 'org.xrpl', name: 'xrpl4j-client', version: '2.5.1'
+    compile group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.5.1'
 
     compile 'com.formdev:flatlaf:2.5'
     compile 'com.formdev:flatlaf-extras:2.5'
