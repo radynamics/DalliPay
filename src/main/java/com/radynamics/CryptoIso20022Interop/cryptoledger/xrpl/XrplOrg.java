@@ -23,7 +23,7 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
         } else if (network.isTestnet()) {
             this.baseUrl = "https://testnet.xrpl.org";
         } else {
-            this.baseUrl = String.format("https://sidechain.xrpl.org/%s", network.getUrl().host());
+            this.baseUrl = String.format("https://custom.xrpl.org/%s", network.getUrl().host());
         }
     }
 
