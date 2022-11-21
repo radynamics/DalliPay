@@ -113,4 +113,40 @@ public class Pain00100109ch03Test {
             }});
         }
     }
+
+    @Test
+    public void pain001ExamplePTS() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+
+        ExchangeRate[] rates = {
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+        };
+        var r = new Pain001Reader(ledger);
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100109/ch03/pain_001_Example_PT_S.xml")));
+
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(1, transactions.length);
+
+        var expectedSenderAddress = new Address("MUSTER AG");
+
+        var t = transactions[0];
+        assertNull(t.getId());
+        assertNull(t.getInvoiceId());
+        assertNotNull(t.getMessages());
+        Assertions.assertEquals(0, t.getMessages().length);
+        Assertions.assertEquals(1, t.getStructuredReferences().length);
+        Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
+        Assertions.assertEquals("RF712348231", t.getStructuredReferences()[0].getUnformatted());
+        Assertion.assertEqualsAccount(t, "CH5481230000001998736", "DE62007620110623852957");
+        Assertion.assertAmtCcy(t, 3421.0, "EUR", 3421.0, "TEST");
+        Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress);
+        Assertion.assertEquals(t.getReceiverAddress(), new Address("Peter Haller") {{
+            setStreet("Rosenauweg 4");
+            setCity("DE-80036 M\u00fcnchen");
+            setCountryShort("DE");
+        }});
+    }
 }
