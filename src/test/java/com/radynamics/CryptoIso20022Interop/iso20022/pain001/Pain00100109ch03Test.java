@@ -149,4 +149,84 @@ public class Pain00100109ch03Test {
             setCountryShort("DE");
         }});
     }
+
+    @Test
+    public void pain001ExamplePTXV1PTS() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+
+        ExchangeRate[] rates = {
+                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+                new ExchangeRate("EUR", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+        };
+        var r = new Pain001Reader(ledger);
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100109/ch03/pain_001_Example_PT_X_V1_PT_S.xml")));
+
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(3, transactions.length);
+
+        var expectedSenderAddress0 = new Address("MUSTER AG") {{
+            setCity("SELDWYLA");
+            setCountryShort("CH");
+        }};
+        var expectedSenderAddress1 = new Address("MUSTER AG");
+        {
+            var t = transactions[0];
+            assertNull(t.getId());
+            assertNull(t.getInvoiceId());
+            assertNotNull(t.getMessages());
+            Assertions.assertEquals(0, t.getMessages().length);
+            Assertions.assertEquals(1, t.getStructuredReferences().length);
+            Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
+            Assertions.assertEquals("RF4220210323103704APG0018", t.getStructuredReferences()[0].getUnformatted());
+            Assertion.assertEqualsAccount(t, "CH7280005000088877766", "CH5021977000004331346");
+            Assertion.assertAmtCcy(t, 3949.75, "USD", 3949.75, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress0);
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Peter Haller") {{
+                setStreet("Rosenauweg 4");
+                setZip("8036");
+                setCity("Z\u00fcrich");
+                setCountryShort("CH");
+            }});
+        }
+        {
+            var t = transactions[1];
+            assertNull(t.getId());
+            assertNull(t.getInvoiceId());
+            assertNotNull(t.getMessages());
+            Assertions.assertEquals(1, t.getMessages().length);
+            Assertions.assertEquals("Rechnung Nr. 408", t.getMessages()[0]);
+            Assertions.assertEquals(0, t.getStructuredReferences().length);
+            Assertion.assertEqualsAccount(t, "CH7280005000088877766", "CH4221988000009522865");
+            Assertion.assertAmtCcy(t, 8479.25, "EUR", 8479.25, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress1);
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Robert Scheider SA") {{
+                setStreet("Rue de la gare 24");
+                setZip("2501");
+                setCity("Biel");
+                setCountryShort("CH");
+            }});
+        }
+        {
+            var t = transactions[2];
+            assertNull(t.getId());
+            assertNull(t.getInvoiceId());
+            assertNotNull(t.getMessages());
+            Assertions.assertEquals(0, t.getMessages().length);
+            Assertions.assertEquals(1, t.getStructuredReferences().length);
+            Assertions.assertEquals(ReferenceType.Scor, t.getStructuredReferences()[0].getType());
+            Assertions.assertEquals("RF712348231", t.getStructuredReferences()[0].getUnformatted());
+            Assertion.assertEqualsAccount(t, "CH7280005000088877766", "DE62007620110623852957");
+            Assertion.assertAmtCcy(t, 3421.0, "EUR", 3421.0, "TEST");
+            Assertion.assertEquals(t.getSenderAddress(), expectedSenderAddress1);
+            Assertion.assertEquals(t.getReceiverAddress(), new Address("Peter Haller") {{
+                setStreet("Rosenauweg 4");
+                setZip("8036");
+                setCity("Z\u00fcrich");
+                setCountryShort("CH");
+            }});
+        }
+    }
 }
