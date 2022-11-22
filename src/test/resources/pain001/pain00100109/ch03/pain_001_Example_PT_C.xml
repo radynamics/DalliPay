@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09 pain.001.001.09.ch.03.xsd">
+	<CstmrCdtTrfInitn>
+		<GrpHdr>
+			<MsgId>MSG-08</MsgId>
+			<CreDtTm>2023-02-15T07:30:00</CreDtTm>
+			<NbOfTxs>1</NbOfTxs>
+			<CtrlSum>3421.00</CtrlSum>
+			<InitgPty>
+				<Nm>MUSTER AG</Nm>
+				<CtctDtls>
+					<Othr>
+						<ChanlTp>NAME</ChanlTp>
+						<Id>pay.4me</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>VRSN</ChanlTp>
+						<Id>2.8.1</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>PRVD</ChanlTp>
+						<Id>SuperPay AG</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>SPSV</ChanlTp>
+						<Id>2.0</Id>
+					</Othr>
+				</CtctDtls>
+			</InitgPty>
+		</GrpHdr>
+		<PmtInf>
+			<PmtInfId>PMTINF-01</PmtInfId>
+			<PmtMtd>CHK</PmtMtd>
+			<BtchBookg>true</BtchBookg>
+			<ReqdExctnDt>
+				<Dt>2023-02-18</Dt>
+			</ReqdExctnDt>
+			<Dbtr>
+				<Nm>MUSTER AG</Nm>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>CH5481230000001998736</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>RAIFCH22</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<CdtTrfTxInf>
+				<PmtId>
+					<InstrId>INSTRID-01-01</InstrId>
+					<EndToEndId>ENDTOENDID-001</EndToEndId>
+				</PmtId>
+				<Amt>
+					<InstdAmt Ccy="USD">3421.00</InstdAmt>
+				</Amt>
+				<Cdtr>
+					<Nm>Peter Fonda</Nm>
+					<PstlAdr>
+						<StrtNm>Saville Row</StrtNm>
+						<BldgNb>4</BldgNb>
+						<PstCd>EC2R WYK</PstCd>
+						<TwnNm>London</TwnNm>
+						<Ctry>GB</Ctry>
+					</PstlAdr>
+				</Cdtr>
+			</CdtTrfTxInf>
+		</PmtInf>
+	</CstmrCdtTrfInitn>
+</Document>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09 pain.001.001.09.ch.03.xsd">
+	<CstmrCdtTrfInitn>
+		<GrpHdr>
+			<MsgId>MSG-06-V2</MsgId>
+			<CreDtTm>2023-02-15T07:30:00</CreDtTm>
+			<NbOfTxs>1</NbOfTxs>
+			<CtrlSum>3421.00</CtrlSum>
+			<InitgPty>
+				<Nm>MUSTER AG</Nm>
+				<CtctDtls>
+					<Othr>
+						<ChanlTp>NAME</ChanlTp>
+						<Id>pay.4me</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>VRSN</ChanlTp>
+						<Id>2.8.1</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>PRVD</ChanlTp>
+						<Id>SuperPay AG</Id>
+					</Othr>
+					<Othr>
+						<ChanlTp>SPSV</ChanlTp>
+						<Id>2.0</Id>
+					</Othr>
+				</CtctDtls>
+			</InitgPty>
+		</GrpHdr>
+		<PmtInf>
+			<PmtInfId>PMTINF-01</PmtInfId>
+			<PmtMtd>TRF</PmtMtd>
+			<BtchBookg>true</BtchBookg>
+			<ReqdExctnDt>
+				<Dt>2023-02-18</Dt>
+			</ReqdExctnDt>
+			<Dbtr>
+				<Nm>MUSTER AG</Nm>
+				<PstlAdr>
+					<TwnNm>SELDWYLA</TwnNm>
+					<Ctry>CH</Ctry>
+				</PstlAdr>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>CH5481230000001998736</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>RAIFCH22</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<CdtTrfTxInf>
+				<PmtId>
+					<InstrId>INSTRID-01-01</InstrId>
+					<EndToEndId>ENDTOENDID-001</EndToEndId>
+					<UETR>a933b87d-7f97-4be7-95e4-d8d11dd9db3f</UETR>
+				</PmtId>
+				<Amt>
+					<InstdAmt Ccy="USD">3421.00</InstdAmt>
+				</Amt>
+				<CdtrAgt>
+					<FinInstnId>
+						<ClrSysMmbId>
+							<ClrSysId>
+								<Cd>CHP</Cd>
+							</ClrSysId>
+							<MmbId>BR004507</MmbId>
+						</ClrSysMmbId>
+						<Nm>UBS Ltd</Nm>
+						<PstlAdr>
+							<StrtNm>Finsbury Avenue</StrtNm>
+							<BldgNb>1</BldgNb>
+							<PstCd>EC2M 2PP</PstCd>
+							<TwnNm>London</TwnNm>
+							<Ctry>GB</Ctry>
+						</PstlAdr>
+					</FinInstnId>
+				</CdtrAgt>
+				<Cdtr>
+					<Nm>Peter Fonda</Nm>
+					<PstlAdr>
+						<StrtNm>Saville Row</StrtNm>
+						<BldgNb>4</BldgNb>
+						<PstCd>EC2R WYK</PstCd>
+						<TwnNm>London</TwnNm>
+						<Ctry>GB</Ctry>
+					</PstlAdr>
+				</Cdtr>
+				<CdtrAcct>
+					<Id>
+						<Othr>
+							<Id>474-8512-007</Id>
+						</Othr>
+					</Id>
+				</CdtrAcct>
+				<RmtInf>
+					<Strd>
+						<CdtrRefInf>
+							<Tp>
+								<CdOrPrtry>
+									<Cd>SCOR</Cd>
+								</CdOrPrtry>
+							</Tp>
+							<Ref>RF712348231</Ref>
+						</CdtrRefInf>
+					</Strd>
+				</RmtInf>
+			</CdtTrfTxInf>
+		</PmtInf>
+	</CstmrCdtTrfInitn>
+</Document>
