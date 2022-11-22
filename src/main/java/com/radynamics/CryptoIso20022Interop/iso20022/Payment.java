@@ -276,4 +276,8 @@ public class Payment {
     public CurrencyPair createCcyPair() {
         return new CurrencyPair(getAmountTransaction().getCcy(), getUserCcy());
     }
+
+    public boolean isSameCcy() {
+        return cryptoTrx.getAmount().getCcy().equals(getUserCcy());
+    }
 }

@@ -317,12 +317,20 @@ public class SendForm extends JPanel implements MainFormPane {
         var undefined = new HashMap<Payment, ExchangeRate>();
         var uniques = new HashMap<String, ExchangeRate>();
         for (var p : payments) {
+            if (p.isSameCcy()) {
+                continue;
+            }
             var r = p.getExchangeRate();
             if (r == null) {
                 r = ExchangeRate.Undefined(p.createCcyPair());
                 undefined.put(p, r);
             }
             uniques.put(r.getPair().getDisplayText(), r);
+        }
+
+        if (uniques.size() == 0) {
+            JOptionPane.showMessageDialog(this, "There are no payments requiring an exchange rate.", "No exchange rates required", JOptionPane.INFORMATION_MESSAGE);
+            return;
         }
 
         var frm = new ExchangeRatesForm(transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now());
