@@ -151,7 +151,7 @@ public class SendConfirmationForm extends JDialog {
             panel2Layout.putConstraint(SpringLayout.NORTH, lblFee, 0, SpringLayout.NORTH, pnlFeeContent);
             pnlFeeContent.add(lblFee);
 
-            var lbl3 = Utils.createLinkLabel(pnlContent, "edit...");
+            var lbl3 = Utils.createLinkLabel(pnlMain, "edit...");
             panel2Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblFee);
             panel2Layout.putConstraint(SpringLayout.NORTH, lbl3, 0, SpringLayout.NORTH, pnlFeeContent);
             lbl3.addMouseListener(new MouseAdapter() {
@@ -164,7 +164,7 @@ public class SendConfirmationForm extends JDialog {
             });
             pnlFeeContent.add(lbl3);
 
-            var lbl4 = Utils.createLinkLabel(pnlContent, "explain...");
+            var lbl4 = Utils.createLinkLabel(pnlMain, "explain...");
             panel2Layout.putConstraint(SpringLayout.WEST, lbl4, 10, SpringLayout.EAST, lbl3);
             panel2Layout.putConstraint(SpringLayout.NORTH, lbl4, 0, SpringLayout.NORTH, pnlFeeContent);
             lbl4.addMouseListener(new MouseAdapter() {
