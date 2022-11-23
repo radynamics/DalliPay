@@ -1,20 +1,12 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
-import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-
 public class PaymentWalletInfo {
-    private Payment payment;
     private WalletInfo senderInfo;
     private WalletInfo receiverInfo;
 
-    public PaymentWalletInfo(Payment payment, WalletInfo senderInfo, WalletInfo receiverInfo) {
-        this.payment = payment;
+    public PaymentWalletInfo(WalletInfo senderInfo, WalletInfo receiverInfo) {
         this.senderInfo = senderInfo;
         this.receiverInfo = receiverInfo;
-    }
-
-    public Payment getPayment() {
-        return payment;
     }
 
     public WalletInfo getSenderInfo() {

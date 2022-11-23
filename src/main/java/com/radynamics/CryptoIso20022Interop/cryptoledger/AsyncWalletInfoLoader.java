@@ -21,7 +21,7 @@ public class AsyncWalletInfoLoader {
 
         Executors.newCachedThreadPool().submit(() -> {
             completableFuture.complete(
-                    new PaymentWalletInfo(p, getNameOrDomain(p.getLedger(), p.getSenderWallet()), getNameOrDomain(p.getLedger(), p.getReceiverWallet())));
+                    new PaymentWalletInfo(getNameOrDomain(p.getLedger(), p.getSenderWallet()), getNameOrDomain(p.getLedger(), p.getReceiverWallet())));
         });
 
         return completableFuture;
