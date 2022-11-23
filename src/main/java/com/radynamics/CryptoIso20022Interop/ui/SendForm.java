@@ -365,7 +365,9 @@ public class SendForm extends JPanel implements MainFormPane {
         var ar = new AmountRefresher(payments);
         ar.refresh();
 
-        loadTable(payments);
+        for (var p : payments) {
+            table.refresh(p);
+        }
     }
 
     private boolean showConfirmationForm(Payment[] payments) {
