@@ -42,6 +42,7 @@ public class PaymentTable extends JPanel {
     private ArrayList<WalletChangedListener> receiverLedgerChangedListener = new ArrayList<>();
     private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
+    private final DataLoader dataLoader;
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         super(new GridLayout(1, 0));
@@ -51,10 +52,11 @@ public class PaymentTable extends JPanel {
         this.validator = validator;
 
         var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
-        model = new PaymentTableModel(exchangeRateLoader, validator, transactionTranslator);
+        model = new PaymentTableModel();
         table = new JTable(model);
         model.setActor(actor);
-        model.addProgressListener(progress -> {
+        dataLoader = new DataLoader(model, exchangeRateLoader, validator, transactionTranslator);
+        dataLoader.addProgressListener(progress -> {
             table.revalidate();
             table.repaint();
             raiseProgress(progress);
@@ -219,7 +221,7 @@ public class PaymentTable extends JPanel {
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + changedValue);
                 }
-                model.onAccountOrWalletsChanged(p);
+                dataLoader.onAccountOrWalletsChanged(p);
             }
         }
     }
@@ -243,7 +245,7 @@ public class PaymentTable extends JPanel {
         var mi = new MappingInfo(mapping, changedValue);
         for (var p : data) {
             if (mi.apply(p)) {
-                model.onAccountOrWalletsChanged(p);
+                dataLoader.onAccountOrWalletsChanged(p);
             }
         }
     }
@@ -268,7 +270,10 @@ public class PaymentTable extends JPanel {
 
     public void load(Payment[] data) {
         this.data = data;
-        model.load(toRecords(data));
+
+        var records = toRecords(data);
+        model.load(records);
+        dataLoader.loadAsync(records);
     }
 
     private Record[] toRecords(Payment[] data) {
@@ -320,6 +325,7 @@ public class PaymentTable extends JPanel {
         }
         raiseRefresh(t);
         model.onTransactionChanged(t);
+        dataLoader.onTransactionChanged(t);
     }
 
     private int getRow(Payment t) {

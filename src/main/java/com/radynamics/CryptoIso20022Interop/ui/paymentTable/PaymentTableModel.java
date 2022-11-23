@@ -1,33 +1,27 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
-import com.radynamics.CryptoIso20022Interop.exchange.HistoricExchangeRateLoader;
-import com.radynamics.CryptoIso20022Interop.iso20022.*;
-import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
+import com.radynamics.CryptoIso20022Interop.iso20022.Account;
+import com.radynamics.CryptoIso20022Interop.iso20022.AccountFactory;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
     private Record[] data = new Record[0];
-    private final HistoricExchangeRateLoader exchangeRateLoader;
-    private PaymentValidator validator;
-    private final TransactionTranslator transactionTranslator;
     private Actor actor = Actor.Sender;
-    private ArrayList<ProgressListener> progressListener = new ArrayList<>();
-    private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private boolean editable;
 
     public static final String COL_OBJECT = "object";
@@ -44,10 +38,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
 
-    public PaymentTableModel(HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator, TransactionTranslator transactionTranslator) {
-        this.exchangeRateLoader = exchangeRateLoader;
-        this.validator = validator;
-        this.transactionTranslator = transactionTranslator;
+    public PaymentTableModel() {
     }
 
     public int getColumnCount() {
@@ -190,93 +181,16 @@ public class PaymentTableModel extends AbstractTableModel {
         if (data == null) throw new IllegalArgumentException("Parameter 'data' cannot be null");
         this.data = data;
         fireTableDataChanged();
-
-        loadAsync();
     }
 
-    private void loadAsync() {
-        if (data.length == 0) {
-            raiseProgress(new Progress(0, 0));
-            return;
-        }
 
-        validator.clearCache();
-        validator.getHistoryValidator().clearCache();
-        var br = new BalanceRefresher(data[0].payment.getLedger().getNetwork());
-        var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
-        for (var p : data) {
-            var future = loadAsync(p.payment, br);
-            future.thenAccept((result) -> {
-                synchronized (this) {
-                    queue.remove(future);
-                    var total = data.length;
-                    var loaded = total - queue.size();
-                    raiseProgress(new Progress(loaded, total));
-                }
-            });
-            queue.add(future);
-        }
-    }
+    public void setValidationResults(Payment p, ValidationResult[] validationResults) {
+        var rowIndex = getRowIndex(p);
 
-    private CompletableFuture<Payment> loadAsync(Payment p, BalanceRefresher br) {
-        var loadBalancesAndHistory = CompletableFuture.runAsync(() -> {
-            // When fetching received payments following data is not needed and shouldn't be loaded for better performance.
-            if (actor != Actor.Sender) {
-                return;
-            }
-            br.refresh(p);
-
-            // When fetching received payments transaction ccy must not be adjusted based on user ccy (pain.001).
-            transactionTranslator.applyUserCcy(p);
-            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
-        });
-
-        var loadWalletInfo = loadWalletInfoAsync(p);
-        var loadExchangeRate = new CompletableFuture<Void>();
-        if (actor == Actor.Receiver) {
-            loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> {
-                setValueAt(t.getAmount(), getRowIndex(t), getColumnIndex(COL_AMOUNT));
-            });
-        } else {
-            loadExchangeRate.complete(null);
-        }
-
-        var future = new CompletableFuture<Payment>();
-        var finalLoadExchangeRate = loadExchangeRate;
-        Executors.newCachedThreadPool().submit(() -> {
-            CompletableFuture.allOf(loadBalancesAndHistory).join();
-            CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
-            // Validation can start after loadExchangeRate completed.
-            validateAsync(p).thenAccept((result) -> {
-                future.complete(p);
-            });
-        });
-        return future;
-    }
-
-    private CompletableFuture<Void> loadWalletInfoAsync(Payment p) {
-        return walletInfoLoader.load(p).thenAccept(result -> {
-            var item = data[getRowIndex(result.getPayment())];
-
-            var senderCellValue = new WalletCellValue(result.getPayment().getSenderWallet(), result.getSenderInfo());
-            // Don't use setValueAt to prevent event raising during async load.
-            item.setSenderLedger(senderCellValue);
-            var receiverCellValue = new WalletCellValue(result.getPayment().getReceiverWallet(), result.getReceiverInfo());
-            item.setReceiverLedger(receiverCellValue);
-        });
-    }
-
-    private CompletableFuture<Void> validateAsync(Payment payment) {
-        var av = new AsyncValidator(validator);
-        return av.validate(payment).thenAccept(result -> {
-            var rowIndex = getRowIndex(result.left);
-            var validationResults = result.right;
-
-            setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
-            var highestStatus = getHighestStatus(validationResults);
-            setValueAt(isSelected(result.left, highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
-            setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
-        });
+        setValueAt(validationResults, rowIndex, getColumnIndex(COL_VALIDATION_RESULTS));
+        var highestStatus = getHighestStatus(validationResults);
+        setValueAt(isSelected(p, highestStatus), rowIndex, getColumnIndex(COL_SELECTOR));
+        setValueAt(highestStatus, rowIndex, getColumnIndex(COL_STATUS));
     }
 
     private ValidationState getHighestStatus(ValidationResult[] results) {
@@ -325,18 +239,9 @@ public class PaymentTableModel extends AbstractTableModel {
         return (ValidationResult[]) getValueAt(row, getColumnIndex(COL_VALIDATION_RESULTS));
     }
 
-    public void onAccountOrWalletsChanged(Payment t) {
-        Executors.newCachedThreadPool().submit(() -> {
-            loadWalletInfoAsync(t).thenAccept((result) -> onTransactionChanged(t));
-        });
-    }
-
     public void onTransactionChanged(Payment t) {
         int row = getRowIndex(t);
         fireTableRowsUpdated(row, row);
-
-        validator.clearCache();
-        validateAsync(t);
     }
 
     public Actor getActor() {
@@ -356,16 +261,6 @@ public class PaymentTableModel extends AbstractTableModel {
         }
 
         throw new RuntimeException(String.format("Could not find row index for %s", t.getId()));
-    }
-
-    public void addProgressListener(ProgressListener l) {
-        progressListener.add(l);
-    }
-
-    private void raiseProgress(Progress progress) {
-        for (var l : progressListener) {
-            l.onProgress(progress);
-        }
     }
 
     public void setEditable(boolean editable) {
