@@ -230,6 +230,7 @@ public class SendConfirmationForm extends JDialog {
         var lblPayments = new JLabel(text);
         panel1Layout.putConstraint(SpringLayout.WEST, lblPayments, 30, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
         panel1Layout.putConstraint(SpringLayout.NORTH, lblPayments, padNorth, SpringLayout.NORTH, pnlContent);
+        panel1Layout.putConstraint(SpringLayout.EAST, lblPayments, 0, SpringLayout.EAST, pnlContent);
         pnlContent.add(lblPayments);
 
         return lbl;
