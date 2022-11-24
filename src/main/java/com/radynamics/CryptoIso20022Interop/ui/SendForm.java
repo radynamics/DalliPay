@@ -323,7 +323,6 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void showExchangeRateEdit() {
-        var undefined = new HashMap<Payment, ExchangeRate>();
         var uniques = new HashMap<String, ExchangeRate>();
         for (var p : payments) {
             if (p.isSameCcy()) {
@@ -332,7 +331,6 @@ public class SendForm extends JPanel implements MainFormPane {
             var r = p.getExchangeRate();
             if (r == null) {
                 r = ExchangeRate.Undefined(p.createCcyPair());
-                undefined.put(p, r);
             }
             uniques.put(r.getPair().getDisplayText(), r);
         }
@@ -363,8 +361,7 @@ public class SendForm extends JPanel implements MainFormPane {
         }
         refreshExchange();
         for (var ccyPairItem : uniques.entrySet()) {
-            for (var item : undefined.entrySet()) {
-                var p = item.getKey();
+            for (var p : payments) {
                 if (ccyPairItem.getKey().equals(p.createCcyPair().getDisplayText())) {
                     p.setExchangeRate(ccyPairItem.getValue());
                 }
