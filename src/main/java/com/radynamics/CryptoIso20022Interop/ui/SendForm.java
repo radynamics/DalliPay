@@ -218,24 +218,35 @@ public class SendForm extends JPanel implements MainFormPane {
             return;
         }
 
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            var br = new BalanceRefresher(transformInstruction.getNetwork());
+            br.refreshAllSenderWallets(payments);
+
+            var ar = new AmountRefresher(payments);
+            ar.refresh(transformInstruction.getExchangeRateProvider());
+            var fr = new FeeRefresher(payments);
+            fr.refresh();
+
+            // Ensure payments are still valid (ex changed exchange rates leading to not enough funds)
+            Executors.newCachedThreadPool().submit(() -> {
+                table.refresh(payments).thenRun(() -> sendPayments(table.selectedPayments()));
+            });
+        } finally {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+
+    private void sendPayments(Payment[] payments) {
+        if (payments.length == 0) {
+            return;
+        }
+
         if (!ValidationResultDialog.showErrorAndWarnings(this, table.getValidationResults(payments))) {
             return;
         }
 
         try {
-            try {
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                var br = new BalanceRefresher(transformInstruction.getNetwork());
-                br.refreshAllSenderWallets(payments);
-
-                var ar = new AmountRefresher(payments);
-                ar.refresh(transformInstruction.getExchangeRateProvider());
-                var fr = new FeeRefresher(payments);
-                fr.refresh();
-            } finally {
-                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            }
-
             if (!showConfirmationForm(payments)) {
                 return;
             }
@@ -252,9 +263,7 @@ public class SendForm extends JPanel implements MainFormPane {
             }
 
             transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
-            for (var p : payments) {
-                table.refresh(p);
-            }
+            table.refresh(payments);
         } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
         } finally {
@@ -365,9 +374,7 @@ public class SendForm extends JPanel implements MainFormPane {
         var ar = new AmountRefresher(payments);
         ar.refresh();
 
-        for (var p : payments) {
-            table.refresh(p);
-        }
+        table.refresh(payments);
     }
 
     private boolean showConfirmationForm(Payment[] payments) {

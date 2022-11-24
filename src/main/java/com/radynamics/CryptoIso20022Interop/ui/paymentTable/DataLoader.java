@@ -124,9 +124,9 @@ public class DataLoader {
         return Optional.empty();
     }
 
-    public void onTransactionChanged(Payment t) {
+    public CompletableFuture<Void> onTransactionChanged(Payment t) {
         validator.clearCache();
-        validateAsync(getRecord(t).orElseThrow());
+        return validateAsync(getRecord(t).orElseThrow());
     }
 
     public void addProgressListener(ProgressListener l) {

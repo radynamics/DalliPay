@@ -27,6 +27,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class PaymentTable extends JPanel {
     final static Logger log = LogManager.getLogger(PaymentTable.class);
@@ -317,15 +319,30 @@ public class PaymentTable extends JPanel {
         return model.getValidationResults(payments);
     }
 
-    public void refresh(Payment t) {
+    public CompletableFuture<Void> refresh(Payment[] payments) {
+        var list = new ArrayList<CompletableFuture<Void>>();
+        for (var p : payments) {
+            list.add(refresh(p));
+        }
+
+        var f = new CompletableFuture<Void>();
+        Executors.newCachedThreadPool().submit(() -> {
+            CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
+            f.complete(null);
+        });
+
+        return f;
+    }
+
+    public CompletableFuture<Void> refresh(Payment t) {
         var row = getRow(t);
         if (row == -1) {
             log.warn(String.format("Could not find %s in table.", t.getReceiverAccount().getUnformatted()));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         raiseRefresh(t);
         model.onTransactionChanged(t);
-        dataLoader.onTransactionChanged(t);
+        return dataLoader.onTransactionChanged(t);
     }
 
     private int getRow(Payment t) {
