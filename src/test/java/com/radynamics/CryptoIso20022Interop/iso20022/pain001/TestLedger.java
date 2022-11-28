@@ -10,6 +10,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
+
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
     private WalletInfoProvider[] walletInfoProvider = new WalletInfoProvider[0];
@@ -149,7 +151,12 @@ public class TestLedger implements Ledger {
 
     @Override
     public boolean isValidPublicKey(String publicKey) {
-        return true;
+        var map = new HashSet<String>();
+        map.add("aaa");
+        map.add("bbb");
+        map.add("rwYb1M4hZcSG6tcAuhvgEwSpsiACKv6BG8");
+        map.add("rNZtEviqTua4FcJebLkhq9hS7fkuxaodya");
+        return map.contains(publicKey);
     }
 
     @Override

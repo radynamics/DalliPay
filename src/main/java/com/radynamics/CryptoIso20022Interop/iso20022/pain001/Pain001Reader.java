@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
@@ -52,8 +53,10 @@ public class Pain001Reader {
 
                 var t = new Payment(ledger.createTransaction());
                 t.setSenderAccount(senderAccount);
+                t.setSenderWallet(toValidWalletOrNull(senderAccount));
                 t.setSenderAddress(senderAddress);
                 t.setReceiverAccount(receiverAccount);
+                t.setReceiverWallet(toValidWalletOrNull(receiverAccount));
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
@@ -92,6 +95,13 @@ public class Pain001Reader {
 
         log.trace(String.format("%s payments read from pain001", list.size()));
         return list.toArray(new Payment[0]);
+    }
+
+    private Wallet toValidWalletOrNull(Account account) {
+        if (account == null || !ledger.isValidPublicKey(account.getUnformatted())) {
+            return null;
+        }
+        return ledger.createWallet(account.getUnformatted(), null);
     }
 
     private Address getAddress(PartyIdentification32 obj) {

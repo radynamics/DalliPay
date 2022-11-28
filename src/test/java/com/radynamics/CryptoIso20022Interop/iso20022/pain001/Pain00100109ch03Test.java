@@ -268,4 +268,24 @@ public class Pain00100109ch03Test {
             setCountryShort("GB");
         }});
     }
+
+    @Test
+    public void pain001AcctWalletAddress() throws Exception {
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+
+        ExchangeRate[] rates = {
+                new ExchangeRate("USD", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+        };
+        var r = new Pain001Reader(ledger);
+        var tt = new TransactionTranslator(ti, new CurrencyConverter(rates));
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100109/ch03/pain_001_Example_AcctWalletAddress.xml")));
+
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(1, transactions.length);
+
+        var t = transactions[0];
+        Assertion.assertEqualsWallet(t, "rwYb1M4hZcSG6tcAuhvgEwSpsiACKv6BG8", "rNZtEviqTua4FcJebLkhq9hS7fkuxaodya");
+    }
 }

@@ -49,7 +49,7 @@ public class Assertion {
         }
     }
 
-    static void assertEqualsWallet(Payment t, String sender, String receiver) {
+    public static void assertEqualsWallet(Payment t, String sender, String receiver) {
         if (sender == null) {
             assertNull(t.getSenderWallet());
         } else {
