@@ -27,6 +27,7 @@ import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Locale;
@@ -53,7 +54,8 @@ public class Main {
             var from = getParam(args, "-from", start.format(DateFormatter)); // timerange in UTC
             var until = getParam(args, "-until", now.format(DateFormatter)); // timerange in UTC
             // TODO: validate format
-            var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), LocalDateTime.parse(until, DateFormatter));
+            var untilEndOfDay = com.radynamics.CryptoIso20022Interop.iso20022.Utils.endOfDay(LocalDateTime.parse(until, DateFormatter).atZone(ZoneId.systemDefault()));
+            var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), untilEndOfDay.toLocalDateTime());
 
             try {
                 if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
