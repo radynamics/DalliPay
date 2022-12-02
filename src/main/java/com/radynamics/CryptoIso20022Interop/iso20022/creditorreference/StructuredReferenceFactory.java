@@ -70,8 +70,16 @@ public final class StructuredReferenceFactory {
     }
 
     public static ReferenceType detectType(String ref) {
-        if (Iso11649Reference.isValid(ref)) {
+        if (ref == null) throw new IllegalArgumentException("Parameter 'ref' cannot be null");
+        if (ref.length() == 0) throw new IllegalArgumentException("Parameter 'ref' cannot be empty");
+
+        var unformatted = ref.replace(" ", "");
+        if (Iso11649Reference.isValid(unformatted)) {
             return ReferenceType.Scor;
+        }
+
+        if (SwissQrReference.isValid(unformatted)) {
+            return ReferenceType.SwissQrBill;
         }
 
         return ReferenceType.Isr;

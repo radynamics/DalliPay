@@ -48,10 +48,10 @@ public class Pain00100103Test {
         assertEquals(4, transactions.length);
 
         var expectedSenderAddress = new Address("MUSTER AG");
-        Assertion.assertEquals(transactions[0], "010832052", "receiver_010832052", 459.0, ReferenceType.Isr, "000000000000060029920346303");
+        Assertion.assertEquals(transactions[0], "010832052", "receiver_010832052", 459.0, ReferenceType.SwissQrBill, "000000000000060029920346303");
         Assertion.assertEquals(transactions[0].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[0].getReceiverAddress(), new Address("Settelen AG"));
-        Assertion.assertEquals(transactions[1], "010391391", "receiver_010391391", 3949.75, ReferenceType.Isr, "210000000003139471430009017");
+        Assertion.assertEquals(transactions[1], "010391391", "receiver_010391391", 3949.75, ReferenceType.SwissQrBill, "210000000003139471430009017");
         Assertion.assertEquals(transactions[1].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[1].getReceiverAddress(), new Address("Destination AG") {{
             setStreet("Zielstrasse 13");
@@ -59,13 +59,13 @@ public class Pain00100103Test {
             setCity("Bern");
             setCountryShort("CH");
         }});
-        Assertion.assertEquals(transactions[2], "010649858", "receiver_010649858", 2838.64, ReferenceType.Isr, "030015972590806420080020801");
+        Assertion.assertEquals(transactions[2], "010649858", "receiver_010649858", 2838.64, ReferenceType.SwissQrBill, "030015972590806420080020801");
         Assertion.assertEquals(transactions[2].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[2].getReceiverAddress(), new Address("Swisscom (Schweiz) AG") {{
             setStreet("Alte Tiefenaustrasse 6");
             setCity("3050 Bern");
         }});
-        Assertion.assertEquals(transactions[3], "032233441", "receiver_032233441", 1727.53, ReferenceType.Isr, "332015900002760103813712236");
+        Assertion.assertEquals(transactions[3], "032233441", "receiver_032233441", 1727.53, ReferenceType.SwissQrBill, "332015900002760103813712236");
         Assertion.assertEquals(transactions[3].getSenderAddress(), expectedSenderAddress);
         Assertion.assertEquals(transactions[3].getReceiverAddress(), new Address("Ingram Micro GmbH") {{
             setCity("6330 Cham");
