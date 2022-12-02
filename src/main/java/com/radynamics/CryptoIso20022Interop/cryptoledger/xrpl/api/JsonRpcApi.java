@@ -321,12 +321,14 @@ public class JsonRpcApi implements TransactionSource {
                 continue;
             }
             var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
-            for (var r : unwrappedMemo.structuredReferences()) {
-                trx.addStructuredReference(r);
-            }
             for (var ft : unwrappedMemo.freeTexts()) {
                 trx.addMessage(ft);
             }
+        }
+
+        var l = new StructuredReferenceLookup(t);
+        for (var r : l.find()) {
+            trx.addStructuredReference(r);
         }
 
         if (t.transactionType() == TransactionType.PAYMENT) {

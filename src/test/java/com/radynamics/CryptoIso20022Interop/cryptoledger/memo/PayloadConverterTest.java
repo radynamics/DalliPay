@@ -6,6 +6,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
@@ -42,14 +43,17 @@ public class PayloadConverterTest {
                 PayloadConverter.toMemo(refs.toArray(new StructuredReference[0]), new String[0]));
     }
 
-    @Test
-    public void fromMemoNull() {
-        assertNull(PayloadConverter.fromMemo(null));
+    @ParameterizedTest
+    @CsvSource(value = {"null", "''"}, nullValues = {"null"})
+    public void fromMemoNullOrEmpty(String value) {
+        var md = PayloadConverter.fromMemo(value);
+        assertNotNull(md);
+        assertEquals(0, md.structuredReferences().length);
+        assertEquals(0, md.freeTexts().length);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "",
             "test1",
             "{]",
             "{\"CdOrPrtry\":\"invalid\",\"v\":1}",

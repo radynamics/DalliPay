@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.memo;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReferenceFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,11 +43,11 @@ public final class PayloadConverter {
     public static MemoData fromMemo(String text) {
         try {
             return parse(text);
-        } catch (ParseException e) {
-            return null;
         } catch (Exception e) {
             var allFreeText = new MemoData();
-            allFreeText.add(text);
+            if (!StringUtils.isEmpty(text)) {
+                allFreeText.add(text);
+            }
             return allFreeText;
         }
     }
