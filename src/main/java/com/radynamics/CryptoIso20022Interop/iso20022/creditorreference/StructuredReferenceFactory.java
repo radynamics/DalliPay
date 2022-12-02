@@ -70,7 +70,7 @@ public final class StructuredReferenceFactory {
     }
 
     public static ReferenceType detectType(String ref) {
-        if (ref.toLowerCase().startsWith("RF")) {
+        if (Iso11649Reference.isValid(ref)) {
             return ReferenceType.Scor;
         }
 
