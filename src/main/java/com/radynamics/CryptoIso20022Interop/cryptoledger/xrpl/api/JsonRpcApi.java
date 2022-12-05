@@ -437,7 +437,6 @@ public class JsonRpcApi implements TransactionSource {
         }
         previousLastLedgerSequence = lastLedgerSequence;
 
-        // TODO: implement invoiceNo from t.getInvoiceId() (maybe also use structuredReference as invoiceNo)
         var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
 
         var signed = sign(prepared, sender);
