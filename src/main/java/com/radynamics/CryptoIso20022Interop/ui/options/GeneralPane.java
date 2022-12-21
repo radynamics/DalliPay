@@ -112,6 +112,8 @@ public class GeneralPane extends JPanel {
         sb.append("\n");
         sb.append("Semver4j, Copyright (c) 2015-present Vincent DURMONT, https://github.com/vdurmont/semver4j\n");
         sb.append("\n");
+        sb.append("Java WebSockets, MIT License, https://github.com/TooTallNate/Java-WebSocket\n");
+        sb.append("\n");
         sb.append("JUnit, Eclipse Public License - v 2.0, https://junit.org\n");
         sb.append("\n");
         sb.append("XMLUnit, Apache License 2.0, https://www.xmlunit.org\n");
