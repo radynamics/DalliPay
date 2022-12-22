@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
@@ -10,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.awt.*;
 import java.util.HashSet;
 
 public class TestLedger implements Ledger {
@@ -35,7 +37,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public void send(Transaction[] transactions) throws Exception {
+    public void send(Transaction[] transactions, TransactionSubmitter submitter) throws Exception {
         throw new NotImplementedException();
     }
 
@@ -167,5 +169,10 @@ public class TestLedger implements Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         return new NetworkInfo[0];
+    }
+
+    @Override
+    public TransactionSubmitter createTransactionSubmitter(Component parentComponent) {
+        throw new NotImplementedException();
     }
 }

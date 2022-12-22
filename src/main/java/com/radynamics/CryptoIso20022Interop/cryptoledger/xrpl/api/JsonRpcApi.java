@@ -5,10 +5,13 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.InternalSubmitter;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
@@ -19,17 +22,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
-import org.xrpl.xrpl4j.crypto.KeyMetadata;
-import org.xrpl.xrpl4j.crypto.PrivateKey;
-import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
-import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
-import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -389,7 +387,7 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
+    public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions, TransactionSubmitter submitter) throws Exception {
         var sendingWallets = PaymentUtils.distinctSendingWallets(transactions);
         // Process by sending wallet to keep sequence number handling simple (prevent terPRE_SEQ).
         for (var sendingWallet : sendingWallets) {
@@ -397,7 +395,7 @@ public class JsonRpcApi implements TransactionSource {
             var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
             for (var t : trxByWallet) {
                 try {
-                    sequences = send(t, sequences);
+                    sequences = send(t, sequences, submitter);
                     ((Transaction) t).refreshTransmission();
                 } catch (Exception ex) {
                     ((Transaction) t).refreshTransmission(ex);
@@ -406,15 +404,12 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    private ImmutablePair<UnsignedInteger, UnsignedInteger> send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences) throws Exception {
+    private ImmutablePair<UnsignedInteger, UnsignedInteger> send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences,
+                                                                 TransactionSubmitter submitter) throws Exception {
         var previousLastLedgerSequence = sequences.getLeft();
         var accountSequenceOffset = sequences.getRight();
 
-        var walletFactory = DefaultWalletFactory.getInstance();
-        var sender = walletFactory.fromSeed(t.getSenderWallet().getSecret(), network.isTestnet());
-        if (!StringUtils.equals(sender.classicAddress().value(), t.getSenderWallet().getPublicKey())) {
-            throw new LedgerException(String.format("Secret matches for sending wallet %s but expected was %s.", sender.classicAddress().value(), t.getSenderWallet().getPublicKey()));
-        }
+        var sender = Address.of(t.getSenderWallet().getPublicKey());
         var receiver = Address.of(t.getReceiverWallet().getPublicKey());
 
         var memos = new ArrayList<MemoWrapper>();
@@ -437,17 +432,13 @@ public class JsonRpcApi implements TransactionSource {
         }
         previousLastLedgerSequence = lastLedgerSequence;
 
-        var prepared = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
+        var builder = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
 
-        var signed = sign(prepared, sender);
-
-        var prelimResult = xrplClient.submit(signed);
-        if (!prelimResult.result().equalsIgnoreCase("tesSUCCESS")) {
-            throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
+        var transactionHash = submitter.submit(builder);
+        if (transactionHash != null) {
+            t.setId(transactionHash);
+            t.setBooked(ZonedDateTime.now());
         }
-
-        t.setId(signed.hash().value());
-        t.setBooked(ZonedDateTime.now());
 
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }
@@ -472,13 +463,13 @@ public class JsonRpcApi implements TransactionSource {
                 .build();
     }
 
-    private Payment preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                   org.xrpl.xrpl4j.wallet.Wallet sender, Address receiver, Money amt, Currency ccy,
-                                   Fee[] fees, Iterable<? extends MemoWrapper> memos)
+    private ImmutablePayment.Builder preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
+                                                    Address sender, Address receiver, Money amt, Currency ccy,
+                                                    Fee[] fees, Iterable<? extends MemoWrapper> memos)
             throws JsonRpcClientErrorException, LedgerException {
         var requestParams = AccountInfoRequestParams.builder()
                 .ledgerIndex(LedgerIndex.VALIDATED)
-                .account(sender.classicAddress())
+                .account(sender)
                 .build();
         var accountInfoResult = xrplClient.accountInfo(requestParams);
         var sequence = accountInfoResult.accountData().sequence().plus(accountSequenceOffset);
@@ -488,14 +479,13 @@ public class JsonRpcApi implements TransactionSource {
         var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
 
         var builder = Payment.builder()
-                .account(sender.classicAddress())
+                .account(sender)
                 .amount(amount)
                 .addAllMemos(memos)
                 // TODO: implement TAG
                 .destination(receiver)
                 .sequence(sequence)
                 .fee(fee)
-                .signingPublicKey(sender.publicKey())
                 .lastLedgerSequence(lastLedgerSequence);
         if (!ledger.getNativeCcySymbol().equals(ccy.getCode())) {
             var transferFee = ccy.getTransferFeeAmount(amt);
@@ -503,13 +493,10 @@ public class JsonRpcApi implements TransactionSource {
             var sendMax = amt.plus(transferFee).plus(transferFee.multiply(0.01));
             builder.sendMax(toCurrencyAmount(sendMax));
         }
-        return builder.build();
+        return builder;
     }
 
-    private SignedTransaction<Payment> sign(Payment prepared, org.xrpl.xrpl4j.wallet.Wallet sender) {
-        var privateKey = PrivateKey.fromBase16EncodedPrivateKey(sender.privateKey().get());
-        var signatureService = new SingleKeySignatureService(privateKey);
-
-        return signatureService.sign(KeyMetadata.EMPTY, prepared);
+    public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
+        return new InternalSubmitter(ledger, xrplClient, privateKeyProvider);
     }
 }

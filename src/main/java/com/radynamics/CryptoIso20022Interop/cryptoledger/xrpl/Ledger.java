@@ -3,9 +3,11 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.UserInputPrivateKeySource;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -18,6 +20,7 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -47,8 +50,8 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) throws Exception {
-        api.send(transactions);
+    public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions, TransactionSubmitter submitter) throws Exception {
+        api.send(transactions, submitter);
     }
 
     static Money dropsToXrp(long drops) {
@@ -197,5 +200,10 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"));
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"));
         return networks;
+    }
+
+    @Override
+    public TransactionSubmitter createTransactionSubmitter(Component parentComponent) {
+        return api.createTransactionSubmitter(new UserInputPrivateKeySource(parentComponent));
     }
 }

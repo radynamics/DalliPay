@@ -11,7 +11,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyPair;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -112,15 +111,6 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum);
                     var balanceText = MoneyFormatter.formatLedger(balance);
                     list.add(new ValidationResult(ValidationState.Error, String.format("Sum of payments from %s is %s and exceeds wallet balance of %s.", w.getPublicKey(), paymentsSumText, balanceText)));
-                }
-            }
-
-            if (StringUtils.isAllEmpty(w.getSecret())) {
-                list.add(new ValidationResult(ValidationState.Error, "Sender wallet secret (private Key) is missing."));
-            } else {
-                var vs = new WalletValidator(l).validateSecret(w);
-                if (vs != null) {
-                    list.add(vs);
                 }
             }
         }

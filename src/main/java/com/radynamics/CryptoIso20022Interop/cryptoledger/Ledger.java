@@ -1,8 +1,11 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+
+import java.awt.*;
 
 public interface Ledger {
     LedgerId getId();
@@ -11,7 +14,7 @@ public interface Ledger {
 
     Transaction createTransaction();
 
-    void send(Transaction[] transactions) throws Exception;
+    void send(Transaction[] transactions, TransactionSubmitter signer) throws Exception;
 
     FeeSuggestion getFeeSuggestion();
 
@@ -48,4 +51,6 @@ public interface Ledger {
     boolean isSecretValid(Wallet wallet);
 
     NetworkInfo[] getDefaultNetworkInfo();
+
+    TransactionSubmitter createTransactionSubmitter(Component parentComponent);
 }

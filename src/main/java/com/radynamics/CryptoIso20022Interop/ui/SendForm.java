@@ -1,7 +1,9 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.AmountRefresher;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeRefresher;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -26,7 +28,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -251,7 +252,9 @@ public class SendForm extends JPanel implements MainFormPane {
                 return;
             }
 
-            if (!askForPrivateKeyIfMissing(payments)) {
+            var submitter = transformInstruction.getLedger().createTransactionSubmitter(this);
+            var privateKeyProvider = submitter.getPrivateKeyProvider();
+            if (!privateKeyProvider.collect(payments)) {
                 return;
             }
 
@@ -262,60 +265,13 @@ public class SendForm extends JPanel implements MainFormPane {
                 return;
             }
 
-            transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments));
+            transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments), submitter);
             table.refresh(payments);
         } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
-    }
-
-    private boolean askForPrivateKeyIfMissing(Payment[] payments) {
-        var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
-        var privatKeyMissing = new ArrayList<Wallet>();
-        for (var w : sendingWallets) {
-            if (StringUtils.isAllEmpty(w.getSecret())) {
-                privatKeyMissing.add(w);
-            }
-        }
-        if (privatKeyMissing.size() == 0) {
-            return true;
-        }
-
-        for (var w : privatKeyMissing) {
-            var pnl = new JPanel();
-            pnl.setLayout(new GridLayout(2, 1));
-
-            var lbl = new JLabel(String.format("Enter secret / private Key for %s:", w.getPublicKey()));
-            pnl.add(lbl);
-            var pf = new JPasswordField();
-            pnl.add(pf);
-
-            var userOption = JOptionPane.showConfirmDialog(this, pnl, "Enter secret", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            var userInput = new String(pf.getPassword());
-            if (JOptionPane.OK_OPTION != userOption || StringUtils.isAllEmpty(userInput)) {
-                return false;
-            }
-
-            var ledger = PaymentUtils.getLedger(w, payments).orElseThrow();
-            var vs = new WalletValidator(ledger).validateSecret(ledger.createWallet(w.getPublicKey(), userInput));
-            if (vs != null) {
-                ValidationResultDialog.show(this, new ValidationResult[]{vs});
-                return false;
-            }
-
-            w.setSecret(userInput);
-
-            // Apply value to same but not equal instances.
-            for (var p : payments) {
-                if (WalletCompare.isSame(p.getSenderWallet(), w)) {
-                    p.getSenderWallet().setSecret(w.getSecret());
-                }
-            }
-        }
-
-        return true;
     }
 
     private void refreshExchange() {
