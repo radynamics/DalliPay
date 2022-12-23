@@ -11,13 +11,16 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class XummApi {
-    private final String accessToken;
+    private String accessToken;
     private final ArrayList<XummApiListener> listener = new ArrayList<>();
 
     private static final String baseUri = "https://xumm.app/api/v1/jwt";
 
+    public XummApi() {
+        this(null);
+    }
+
     public XummApi(String accessToken) {
-        if (accessToken == null) throw new IllegalArgumentException("Parameter 'accessToken' cannot be null");
         this.accessToken = accessToken;
     }
 
@@ -41,6 +44,8 @@ public class XummApi {
     }
 
     private JSONObject send(HttpRequest request) throws IOException, InterruptedException, XummException {
+        if (accessToken == null) throw new IllegalArgumentException("Parameter 'accessToken' cannot be null");
+
         var client = HttpClient.newHttpClient();
         var response = new JSONObject(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
         if (!response.isNull("error")) {
@@ -75,5 +80,10 @@ public class XummApi {
         for (var l : listener) {
             l.onAccessTokenExpired();
         }
+    }
+
+    public void setAccessToken(String accessToken) {
+        if (accessToken == null) throw new IllegalArgumentException("Parameter 'accessToken' cannot be null");
+        this.accessToken = accessToken;
     }
 }
