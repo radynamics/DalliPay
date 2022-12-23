@@ -280,4 +280,8 @@ public class Payment {
     public boolean isSameCcy() {
         return cryptoTrx.getAmount().getCcy().equals(getUserCcy());
     }
+
+    public boolean is(Transaction t) {
+        return cryptoTrx == t;
+    }
 }

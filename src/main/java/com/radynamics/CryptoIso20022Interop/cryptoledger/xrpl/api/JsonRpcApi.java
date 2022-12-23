@@ -396,7 +396,6 @@ public class JsonRpcApi implements TransactionSource {
             for (var t : trxByWallet) {
                 try {
                     sequences = send(t, sequences, submitter);
-                    ((Transaction) t).refreshTransmission();
                 } catch (Exception ex) {
                     ((Transaction) t).refreshTransmission(ex);
                 }
@@ -434,11 +433,12 @@ public class JsonRpcApi implements TransactionSource {
 
         var builder = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
 
-        var transactionHash = submitter.submit(builder);
-        if (transactionHash != null) {
+        submitter.submit(t, builder, (Function<String, Void>) transactionHash -> {
             t.setId(transactionHash);
             t.setBooked(ZonedDateTime.now());
-        }
+            ((Transaction) t).refreshTransmission();
+            return null;
+        });
 
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }

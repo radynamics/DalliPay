@@ -1,9 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
-import com.radynamics.CryptoIso20022Interop.cryptoledger.AmountRefresher;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.FeeRefresher;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -253,6 +251,17 @@ public class SendForm extends JPanel implements MainFormPane {
             }
 
             var submitter = transformInstruction.getLedger().createTransactionSubmitter(this);
+            submitter.addStateListener(new TransactionStateListener() {
+                @Override
+                public void onSuccess(Transaction t) {
+                    table.refresh(getPayment(t));
+                }
+
+                @Override
+                public void onFailure(Transaction t) {
+                    table.refresh(getPayment(t));
+                }
+            });
             var privateKeyProvider = submitter.getPrivateKeyProvider();
             if (!privateKeyProvider.collect(payments)) {
                 return;
@@ -266,12 +275,20 @@ public class SendForm extends JPanel implements MainFormPane {
             }
 
             transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments), submitter);
-            table.refresh(payments);
         } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
+    }
+
+    private Payment getPayment(Transaction t) {
+        for (var p : payments) {
+            if (p.is(t)) {
+                return p;
+            }
+        }
+        throw new RuntimeException("Could not find matching payment for transaction.");
     }
 
     private void refreshExchange() {
