@@ -5,13 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class XummSigner {
     private final static Logger log = LogManager.getLogger(XummSigner.class);
 
-    private final XummSigningObserver<JSONObject> observer = new XummSigningObserver<>();
+    private final XummApi api = new XummApi();
+    private final PollingObserver<JSONObject> observer = new PollingObserver<>(api);
     private final Storage storage = new MemoryStorage();
     private final String apiKey;
 
@@ -61,7 +62,7 @@ public class XummSigner {
 
     private void submitAndObserve(JSONObject json) {
         try {
-            var api = new XummApi(storage.getAccessToken());
+            api.setAccessToken(storage.getAccessToken());
             api.addListener(() -> {
                 log.info("Xumm accessToken expired.");
                 // Re-authenticate if used accessToken expired.
@@ -71,7 +72,7 @@ public class XummSigner {
 
             var sendResponse = api.submit(json);
 
-            observer.observe(json, URI.create(sendResponse.getJSONObject("refs").getString("websocket_status")));
+            observer.observe(json, UUID.fromString(sendResponse.getString("uuid")));
         } catch (IOException | InterruptedException | XummException e) {
             throw new RuntimeException(e);
         }
