@@ -47,7 +47,16 @@ public class XummApi {
         if (accessToken == null) throw new IllegalArgumentException("Parameter 'accessToken' cannot be null");
 
         var client = HttpClient.newHttpClient();
-        var response = new JSONObject(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
+        var responseText = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        JSONObject response;
+        try {
+            response = new JSONObject(responseText);
+        } catch (Exception e) {
+            var error = new JSONObject();
+            error.put("error", "Invalid JSON response: " + responseText);
+            throwException(error);
+            return null;
+        }
         if (!response.isNull("error")) {
             throwException(response);
         }
