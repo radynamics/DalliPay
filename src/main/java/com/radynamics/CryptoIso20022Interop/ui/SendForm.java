@@ -250,7 +250,8 @@ public class SendForm extends JPanel implements MainFormPane {
                 return;
             }
 
-            var submitter = transformInstruction.getLedger().createTransactionSubmitter(this);
+            var submitterFactory = transformInstruction.getLedger().createTransactionSubmitterFactory();
+            var submitter = submitterFactory.create("xummSigner", this);
             submitter.addStateListener(new TransactionStateListener() {
                 @Override
                 public void onSuccess(Transaction t) {

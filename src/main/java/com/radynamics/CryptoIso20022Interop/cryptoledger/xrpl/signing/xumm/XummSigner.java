@@ -26,6 +26,8 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
     private Storage storage = new MemoryStorage();
     private final String apiKey;
 
+    public final static String Id = "xummSigner";
+
     public XummSigner(String apiKey) {
         if (apiKey == null) throw new IllegalArgumentException("Parameter 'apiKey' cannot be null");
         this.apiKey = apiKey;

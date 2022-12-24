@@ -2,10 +2,9 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-
-import java.awt.*;
 
 public interface Ledger {
     LedgerId getId();
@@ -52,5 +51,5 @@ public interface Ledger {
 
     NetworkInfo[] getDefaultNetworkInfo();
 
-    TransactionSubmitter createTransactionSubmitter(Component parentComponent);
+    TransactionSubmitterFactory createTransactionSubmitterFactory();
 }

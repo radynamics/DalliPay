@@ -27,6 +27,8 @@ public class InternalSubmitter implements TransactionSubmitter<ImmutablePayment.
     private final PrivateKeyProvider privateKeyProvider;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
+    public final static String Id = "internalSubmitter";
+
     public InternalSubmitter(Ledger ledger, XrplClient xrplClient, PrivateKeyProvider privateKeyProvider) {
         this.ledger = ledger;
         this.xrplClient = xrplClient;

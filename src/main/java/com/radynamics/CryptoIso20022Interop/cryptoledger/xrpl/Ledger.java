@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
@@ -203,7 +204,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
-    public TransactionSubmitter createTransactionSubmitter(Component parentComponent) {
+    public TransactionSubmitterFactory createTransactionSubmitterFactory() {
+        return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.TransactionSubmitterFactory(this);
+    }
+
+    public TransactionSubmitter createInternalTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserInputPrivateKeySource(parentComponent));
     }
 }
