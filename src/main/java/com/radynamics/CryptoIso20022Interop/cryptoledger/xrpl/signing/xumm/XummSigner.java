@@ -13,7 +13,7 @@ public class XummSigner {
 
     private final XummApi api = new XummApi();
     private final PollingObserver<JSONObject> observer = new PollingObserver<>(api);
-    private final Storage storage = new MemoryStorage();
+    private Storage storage = new MemoryStorage();
     private final String apiKey;
 
     public XummSigner(String apiKey) {
@@ -76,6 +76,15 @@ public class XummSigner {
         } catch (IOException | InterruptedException | XummException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    public void setStorage(Storage storage) {
+        this.storage = storage;
     }
 
     public void addStateListener(StateListener<JSONObject> l) {

@@ -126,6 +126,14 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("lookupProviderId", value);
     }
 
+    public String getXummAccessToken() throws Exception {
+        return single("xummAccessToken").orElse(null);
+    }
+
+    public void setXummAccessToken(String value) throws Exception {
+        saveOrUpdate("xummAccessToken", value);
+    }
+
     private Optional<String> single(String key) throws Exception {
         var ps = conn.prepareStatement("SELECT value FROM config WHERE key = ?");
         ps.setString(1, key);
