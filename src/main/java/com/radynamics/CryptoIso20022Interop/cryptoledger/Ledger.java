@@ -1,7 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -12,8 +11,6 @@ public interface Ledger {
     String getNativeCcySymbol();
 
     Transaction createTransaction();
-
-    void send(Transaction[] transactions, TransactionSubmitter signer) throws Exception;
 
     FeeSuggestion getFeeSuggestion();
 

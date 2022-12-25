@@ -1,15 +1,15 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.google.common.primitives.UnsignedLong;
 import com.radynamics.CryptoIso20022Interop.DateTimeRange;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Cache;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.NetworkInfo;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.TransactionResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.memo.PayloadConverter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.InternalSubmitter;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
@@ -17,7 +17,6 @@ import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -25,7 +24,6 @@ import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
-import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
 
@@ -385,115 +383,6 @@ public class JsonRpcApi implements TransactionSource {
             log.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    public void send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions, TransactionSubmitter submitter) throws Exception {
-        var sendingWallets = PaymentUtils.distinctSendingWallets(transactions);
-        // Process by sending wallet to keep sequence number handling simple (prevent terPRE_SEQ).
-        for (var sendingWallet : sendingWallets) {
-            var trxByWallet = PaymentUtils.fromSender(sendingWallet, transactions);
-            var sequences = new ImmutablePair<>(UnsignedInteger.ZERO, UnsignedInteger.ZERO);
-            for (var t : trxByWallet) {
-                try {
-                    sequences = send(t, sequences, submitter);
-                } catch (Exception ex) {
-                    ((Transaction) t).refreshTransmission(ex);
-                }
-            }
-        }
-    }
-
-    private ImmutablePair<UnsignedInteger, UnsignedInteger> send(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences,
-                                                                 TransactionSubmitter submitter) throws Exception {
-        var previousLastLedgerSequence = sequences.getLeft();
-        var accountSequenceOffset = sequences.getRight();
-
-        var sender = Address.of(t.getSenderWallet().getPublicKey());
-        var receiver = Address.of(t.getReceiverWallet().getPublicKey());
-
-        var memos = new ArrayList<MemoWrapper>();
-        var memoData = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
-        if (!StringUtils.isEmpty(memoData)) {
-            memos.add(Convert.toMemoWrapper(memoData));
-        }
-
-        // Get the latest validated ledger index
-        var validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
-                .ledgerIndex()
-                .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
-
-        // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
-        var lastLedgerSequence = UnsignedInteger.valueOf(validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue());
-        if (previousLastLedgerSequence == UnsignedInteger.ZERO) {
-            accountSequenceOffset = UnsignedInteger.ZERO;
-        } else {
-            accountSequenceOffset = accountSequenceOffset.plus(UnsignedInteger.ONE);
-        }
-        previousLastLedgerSequence = lastLedgerSequence;
-
-        var builder = preparePayment(lastLedgerSequence, accountSequenceOffset, sender, receiver, t.getAmount(), t.getAmount().getCcy(), t.getFees(), memos);
-
-        submitter.submit(t, builder, (Function<String, Void>) transactionHash -> {
-            t.setId(transactionHash);
-            t.setBooked(ZonedDateTime.now());
-            ((Transaction) t).refreshTransmission();
-            return null;
-        });
-
-        return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
-    }
-
-    private CurrencyAmount toCurrencyAmount(Money amount) throws LedgerException {
-        var ccy = amount.getCcy();
-        if (ccy.getCode().equals(ledger.getNativeCcySymbol())) {
-            return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue()));
-        }
-
-        if (ccy.getIssuer() == null) {
-            throw new LedgerException(String.format("%s is considered an issued currency and therefore must have an issuer.", ccy.getCode()));
-        }
-
-        // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
-        var scale = Math.pow(10, 15);
-        var amt = Math.round(amount.getNumber().doubleValue() * scale) / scale;
-        return IssuedCurrencyAmount.builder()
-                .currency(ccy.getCode())
-                .issuer(Address.of(ccy.getIssuer().getPublicKey()))
-                .value(String.valueOf(amt))
-                .build();
-    }
-
-    private ImmutablePayment.Builder preparePayment(UnsignedInteger lastLedgerSequence, UnsignedInteger accountSequenceOffset,
-                                                    Address sender, Address receiver, Money amt, Currency ccy,
-                                                    Fee[] fees, Iterable<? extends MemoWrapper> memos)
-            throws JsonRpcClientErrorException, LedgerException {
-        var requestParams = AccountInfoRequestParams.builder()
-                .ledgerIndex(LedgerIndex.VALIDATED)
-                .account(sender)
-                .build();
-        var accountInfoResult = xrplClient.accountInfo(requestParams);
-        var sequence = accountInfoResult.accountData().sequence().plus(accountSequenceOffset);
-
-        var amount = toCurrencyAmount(amt);
-        var lederTransactionFee = FeeHelper.get(fees, FeeType.LedgerTransactionFee).orElseThrow();
-        var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
-
-        var builder = Payment.builder()
-                .account(sender)
-                .amount(amount)
-                .addAllMemos(memos)
-                // TODO: implement TAG
-                .destination(receiver)
-                .sequence(sequence)
-                .fee(fee)
-                .lastLedgerSequence(lastLedgerSequence);
-        if (!ledger.getNativeCcySymbol().equals(ccy.getCode())) {
-            var transferFee = ccy.getTransferFeeAmount(amt);
-            // maximum including an additional tolerance
-            var sendMax = amt.plus(transferFee).plus(transferFee.multiply(0.01));
-            builder.sendMax(toCurrencyAmount(sendMax));
-        }
-        return builder;
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {

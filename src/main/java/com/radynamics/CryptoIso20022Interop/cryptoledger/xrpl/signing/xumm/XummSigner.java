@@ -6,12 +6,14 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvi
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -34,11 +36,29 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
     }
 
     @Override
-    public void submit(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, ImmutablePayment.Builder builder, Function<String, Void> onSuccess) throws LedgerException {
+    public void submit(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) {
+        for (var trx : transactions) {
+            var t = (Transaction) trx;
+            try {
+                var builder = PaymentBuilder.builder().payment(t).build();
+                submit(t, builder, transactionHash -> {
+                    t.setId(transactionHash);
+                    t.setBooked(ZonedDateTime.now());
+                    t.refreshTransmission();
+                    return null;
+                });
+            } catch (LedgerException e) {
+                t.refreshTransmission(e);
+                raiseFailure(t);
+            }
+        }
+    }
+
+    private void submit(Transaction t, ImmutablePayment.Builder builder, Function<String, Void> onSuccess) throws LedgerException {
         observer.addStateListener(new StateListener<>() {
             @Override
             public void onExpired(JSONObject payload) {
-                ((Transaction) t).refreshTransmission(new XummException("Confirmation request expired"));
+                t.refreshTransmission(new XummException("Confirmation request expired"));
                 raiseFailure(t);
             }
 
@@ -50,13 +70,13 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
 
             @Override
             public void onRejected(JSONObject payload) {
-                ((Transaction) t).refreshTransmission(new XummException("Payment confirmation rejected"));
+                t.refreshTransmission(new XummException("Payment confirmation rejected"));
                 raiseFailure(t);
             }
 
             @Override
             public void onException(JSONObject payload, Exception e) {
-                ((Transaction) t).refreshTransmission(e);
+                t.refreshTransmission(e);
                 raiseFailure(t);
             }
         });
@@ -68,7 +88,7 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
         return new EmptyPrivateKeyProvider();
     }
 
-    private void submit(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, JSONObject json) {
+    private void submit(Transaction t, JSONObject json) {
         if (json == null) throw new IllegalArgumentException("Parameter 'json' cannot be null");
 
         var auth = new CompletableFuture<Void>();
@@ -93,24 +113,24 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
                 .whenComplete((result, throwable) -> observer.shutdown())
                 .exceptionally((e) -> {
                     log.error(e.getMessage(), e);
-                    ((Transaction) t).refreshTransmission(e);
+                    t.refreshTransmission(e);
                     raiseFailure(t);
                     return null;
                 });
     }
 
-    private CompletableFuture<Void> authenticate(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t) {
+    private CompletableFuture<Void> authenticate(Transaction t) {
         return XummPkce.authenticateAsync(apiKey, "CryptoIso20022Interop")
                 .thenAccept(storage::setAccessToken)
                 .exceptionally((e) -> {
                     log.error(e.getMessage(), e);
-                    ((Transaction) t).refreshTransmission(e);
+                    t.refreshTransmission(e);
                     raiseFailure(t);
                     return null;
                 });
     }
 
-    private void submitAndObserve(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t, JSONObject json) {
+    private void submitAndObserve(Transaction t, JSONObject json) {
         try {
             api.setAccessToken(storage.getAccessToken());
             api.addListener(() -> {

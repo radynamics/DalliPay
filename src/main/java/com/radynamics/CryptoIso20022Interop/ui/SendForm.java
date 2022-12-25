@@ -275,7 +275,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 return;
             }
 
-            transformInstruction.getLedger().send(PaymentConverter.toTransactions(payments), submitter);
+            submitter.submit(PaymentConverter.toTransactions(payments));
         } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
         } finally {
