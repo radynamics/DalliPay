@@ -28,15 +28,15 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-public class InternalSubmitter implements TransactionSubmitter<ImmutablePayment.Builder> {
+public class RpcSubmitter implements TransactionSubmitter<ImmutablePayment.Builder> {
     private final Ledger ledger;
     private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
-    public final static String Id = "internalSubmitter";
+    public final static String Id = "rpcSubmitter";
 
-    public InternalSubmitter(Ledger ledger, XrplClient xrplClient, PrivateKeyProvider privateKeyProvider) {
+    public RpcSubmitter(Ledger ledger, XrplClient xrplClient, PrivateKeyProvider privateKeyProvider) {
         this.ledger = ledger;
         this.xrplClient = xrplClient;
         this.privateKeyProvider = privateKeyProvider;

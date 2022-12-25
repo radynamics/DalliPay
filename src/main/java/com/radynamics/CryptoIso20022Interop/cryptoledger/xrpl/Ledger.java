@@ -203,7 +203,7 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return new com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.TransactionSubmitterFactory(this);
     }
 
-    public TransactionSubmitter createInternalTransactionSubmitter(Component parentComponent) {
+    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserInputPrivateKeySource(parentComponent));
     }
 }

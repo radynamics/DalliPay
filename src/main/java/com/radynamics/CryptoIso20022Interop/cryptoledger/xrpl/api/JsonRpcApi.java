@@ -11,7 +11,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvi
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.*;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.InternalSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
@@ -386,6 +386,6 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
-        return new InternalSubmitter(ledger, xrplClient, privateKeyProvider);
+        return new RpcSubmitter(ledger, xrplClient, privateKeyProvider);
     }
 }
