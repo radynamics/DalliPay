@@ -165,6 +165,10 @@ public class PaymentTableModel extends AbstractTableModel {
         if (!editable) {
             return false;
         }
+        var item = data[row];
+        if (item.payment.getTransmission() == TransmissionState.Waiting) {
+            return false;
+        }
         if (col == getColumnIndex(COL_SELECTOR)) {
             return isSelectable(getHighestStatus(getValidationResults(row)));
         }

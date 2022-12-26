@@ -8,6 +8,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
@@ -132,7 +133,7 @@ public class PaymentDetailForm extends JDialog {
                         refreshPaymentPathText(selected.getText());
                     }
                     cmdPaymentPath.setVisible(actor == Actor.Sender);
-                    cmdPaymentPath.setEnabled(availablePaths.length > 1 && payment.getBooked() == null);
+                    cmdPaymentPath.setEnabled(isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
                     cmdPaymentPath.setAlwaysPopup(true);
                     cmdPaymentPath.setPopupMenu(popupMenu);
                     cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
@@ -140,7 +141,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
-                var enabled = payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+                var enabled = isEditable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
                 lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
@@ -367,5 +368,9 @@ public class PaymentDetailForm extends JDialog {
 
     public boolean getPaymentChanged() {
         return paymentChanged;
+    }
+
+    private boolean isEditable() {
+        return payment.getTransmission() != TransmissionState.Waiting;
     }
 }
