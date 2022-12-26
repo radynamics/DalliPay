@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class XummApi {
+    private final static Logger log = LogManager.getLogger(XummApi.class);
+
     private String accessToken;
     private final ArrayList<XummApiListener> listener = new ArrayList<>();
 
@@ -52,14 +56,21 @@ public class XummApi {
         try {
             response = new JSONObject(responseText);
         } catch (Exception e) {
-            var error = new JSONObject();
-            error.put("error", "Invalid JSON response: " + responseText);
-            throwException(error);
-            return null;
+            var msg = String.format("Invalid JSON Xumm API response: %s", responseText);
+            if (msg.contains("JWT expired")) {
+                log.info(msg);
+                // ex "{"error":"JWT expired, request a new one using the `/authorize` endpoint"}"
+                raiseAccessTokenExpired();
+                return null;
+            }
+            throw new XummException(msg);
         }
-        if (!response.isNull("error")) {
-            throwException(response);
+
+        var error = response.optJSONObject("error");
+        if (error != null) {
+            throw new XummException(String.format("Xumm API error: %s, reference %s", error.getInt("code"), error.getString("reference")));
         }
+
         return response;
     }
 
@@ -69,16 +80,6 @@ public class XummApi {
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + accessToken);
-    }
-
-    private XummException throwException(JSONObject errorResponse) throws XummException {
-        var error = errorResponse.optJSONObject("error");
-        if (error == null) {
-            // ex "{"error":"JWT expired, request a new one using the `/authorize` endpoint"}"
-            raiseAccessTokenExpired();
-            throw new XummException(String.format("Xumm API error: %s", errorResponse.getString("error")));
-        }
-        throw new XummException(String.format("Xumm API error: %s, reference %s", error.getInt("code"), error.getString("reference")));
     }
 
     public void addListener(XummApiListener l) {

@@ -141,6 +141,9 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
             });
 
             var sendResponse = api.submit(json);
+            if (sendResponse == null) {
+                return;
+            }
 
             observer.observe(json, UUID.fromString(sendResponse.getString("uuid")));
         } catch (IOException | InterruptedException | XummException e) {

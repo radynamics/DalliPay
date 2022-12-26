@@ -35,7 +35,11 @@ public class PollingObserver<T> {
         var task = new TimerTask() {
             public void run() {
                 try {
-                    processResponse(o, api.status(o.payloadId));
+                    var response = api.status(o.payloadId);
+                    if (response == null) {
+                        return;
+                    }
+                    processResponse(o, response);
                 } catch (IOException | InterruptedException | XummException e) {
                     raiseException(o.payload, e);
                 }
