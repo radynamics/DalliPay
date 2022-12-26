@@ -100,7 +100,7 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
         }
 
         auth
-                .thenRun(() -> submitAndObserve(t, json))
+                .thenRunAsync(() -> submitAndObserve(t, json))
                 .thenRun(() -> {
                     try {
                         // Wait before stop observing
@@ -138,7 +138,7 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
                 log.info("Xumm accessToken expired.");
                 // Re-authenticate if used accessToken expired.
                 authenticate(t)
-                        .thenRun(() -> submitAndObserve(t, json));
+                        .thenRunAsync(() -> submitAndObserve(t, json));
             });
 
             var sendResponse = api.submit(json);
