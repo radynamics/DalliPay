@@ -12,6 +12,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
     private final static int HEIGHT = 16;
 
     private final static FlatSVGIcon pending = null;
+    private final static FlatSVGIcon waiting = new FlatSVGIcon("svg/waiting.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon success = new FlatSVGIcon("svg/success.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
 
@@ -25,6 +26,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setHorizontalAlignment(JLabel.CENTER);
         setIcon(getIconOrNull(transmission));
+        setToolTipText(getToolTipTextOrNull(transmission));
         return this;
     }
 
@@ -32,6 +34,9 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
         switch (value) {
             case Pending -> {
                 return pending;
+            }
+            case Waiting -> {
+                return waiting;
             }
             case Success -> {
                 return success;
@@ -41,5 +46,9 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
             }
             default -> throw new IllegalStateException("Unexpected value: " + value);
         }
+    }
+
+    private static String getToolTipTextOrNull(TransmissionState value) {
+        return value == TransmissionState.Waiting ? "Waiting..." : null;
     }
 }

@@ -254,6 +254,11 @@ public class SendForm extends JPanel implements MainFormPane {
             var submitter = submitterFactory.create("xummSigner", this);
             submitter.addStateListener(new TransactionStateListener() {
                 @Override
+                public void onProgressChanged(Transaction t) {
+                    table.refresh(getPayment(t));
+                }
+
+                @Override
                 public void onSuccess(Transaction t) {
                     table.refresh(getPayment(t));
                 }

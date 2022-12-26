@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.EmptyPrivateKey
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -145,6 +146,8 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
                 return;
             }
 
+            t.refreshTransmissionState(TransmissionState.Waiting);
+            raiseProgressChanged(t);
             observer.observe(json, UUID.fromString(sendResponse.getString("uuid")));
         } catch (IOException | InterruptedException | XummException e) {
             throw new RuntimeException(e);
@@ -164,13 +167,19 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
         stateListener.add(l);
     }
 
-    private void raiseSuccess(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t) {
+    private void raiseProgressChanged(Transaction t) {
+        for (var l : stateListener) {
+            l.onProgressChanged(t);
+        }
+    }
+
+    private void raiseSuccess(Transaction t) {
         for (var l : stateListener) {
             l.onSuccess(t);
         }
     }
 
-    private void raiseFailure(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction t) {
+    private void raiseFailure(Transaction t) {
         for (var l : stateListener) {
             l.onFailure(t);
         }
