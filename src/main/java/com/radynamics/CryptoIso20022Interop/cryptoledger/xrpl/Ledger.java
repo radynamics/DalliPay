@@ -50,6 +50,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         return new Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
 
+    @Override
+    public com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction getTransaction(String transactionId) {
+        return api.getTransaction(transactionId);
+    }
+
     static Money dropsToXrp(long drops) {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp(), new Currency(nativeCcySymbol));
     }

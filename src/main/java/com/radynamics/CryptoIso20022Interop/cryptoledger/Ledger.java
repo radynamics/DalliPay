@@ -12,6 +12,8 @@ public interface Ledger {
 
     Transaction createTransaction();
 
+    Transaction getTransaction(String transactionId);
+
     FeeSuggestion getFeeSuggestion();
 
     Wallet createWallet(String publicKey, String secret);

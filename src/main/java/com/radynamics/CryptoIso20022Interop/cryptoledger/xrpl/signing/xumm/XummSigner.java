@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.OnchainVerifier;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.EmptyPrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
@@ -28,6 +29,7 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
     private Storage storage = new MemoryStorage();
     private final String apiKey;
+    private OnchainVerifier verifier;
 
     public final static String Id = "xummSigner";
 
@@ -65,6 +67,12 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
 
             @Override
             public void onAccepted(JSONObject payload, String txid) {
+                if (verifier != null && !verifier.verify(txid, t)) {
+                    onSuccess.apply(txid);
+                    t.refreshTransmission(new XummException("Transaction was submitted but result on chain doesn't match sent payment. This may indicates a serious software issue or fraud."));
+                    raiseFailure(t);
+                    return;
+                }
                 onSuccess.apply(txid);
                 raiseSuccess(t);
             }
@@ -160,6 +168,14 @@ public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder
 
     public void setStorage(Storage storage) {
         this.storage = storage;
+    }
+
+    public OnchainVerifier getVerifier() {
+        return verifier;
+    }
+
+    public void setVerifier(OnchainVerifier verifier) {
+        this.verifier = verifier;
     }
 
     @Override

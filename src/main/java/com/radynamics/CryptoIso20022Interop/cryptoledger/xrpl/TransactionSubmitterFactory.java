@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl;
 
 import com.radynamics.CryptoIso20022Interop.Secrets;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.OnchainVerifier;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm.DatabaseStorage;
@@ -31,6 +32,7 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
                 }
                 var signer = new XummSigner(secrets.getXummApiKey());
                 signer.setStorage(new DatabaseStorage());
+                signer.setVerifier(new OnchainVerifier(ledger));
                 return signer;
             }
             default:

@@ -35,6 +35,11 @@ public class TestLedger implements Ledger {
         return new TestTransaction(this, 0d, getNativeCcySymbol());
     }
 
+    @Override
+    public Transaction getTransaction(String transactionId) {
+        return null;
+    }
+
     static Money convertToNativeCcyAmount(long amountSmallestUnit) {
         return Money.of(amountSmallestUnit / FACTOR, new Currency(nativeCcySymbol));
     }
