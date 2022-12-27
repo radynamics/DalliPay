@@ -56,19 +56,23 @@ public class XummApi {
         try {
             response = new JSONObject(responseText);
         } catch (Exception e) {
-            var msg = String.format("Invalid JSON Xumm API response: %s", responseText);
-            if (msg.contains("JWT expired")) {
-                log.info(msg);
-                // ex "{"error":"JWT expired, request a new one using the `/authorize` endpoint"}"
-                raiseAccessTokenExpired();
-                return null;
-            }
-            throw new XummException(msg);
+            throw new XummException(e.getMessage(), e);
         }
 
         var error = response.optJSONObject("error");
         if (error != null) {
             throw new XummException(String.format("Xumm API error: %s, reference %s", error.getInt("code"), error.getString("reference")));
+        }
+
+        var errorText = response.optString("error", null);
+        if (errorText != null) {
+            if (errorText.contains("JWT expired")) {
+                log.info(errorText);
+                // ex "{"error":"JWT expired, request a new one using the `/authorize` endpoint"}"
+                raiseAccessTokenExpired();
+                return null;
+            }
+            throw new XummException(String.format("Invalid JSON Xumm API response: %s", responseText));
         }
 
         return response;
