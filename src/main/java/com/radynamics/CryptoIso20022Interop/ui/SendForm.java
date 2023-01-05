@@ -361,9 +361,8 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private TransactionSubmitter showConfirmationForm(Ledger ledger, Payment[] payments) {
-        var submitterFactory = transformInstruction.getLedger().createTransactionSubmitterFactory();
-        var submitter = submitterFactory.create("xummSigner", this);
-
+        var submitter = ledger.createTransactionSubmitterFactory().getSuggested(this);
+        
         var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length, submitter);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 410);

@@ -50,4 +50,15 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
 
         return list.toArray(new TransactionSubmitter[0]);
     }
+
+    @Override
+    public TransactionSubmitter getSuggested(Component parentComponent) {
+        var all = all(parentComponent);
+        for (var s : all) {
+            if (s.getInfo().isRecommended()) {
+                return s;
+            }
+        }
+        return all.length == 0 ? null : all[0];
+    }
 }

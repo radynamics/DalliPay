@@ -6,4 +6,6 @@ public interface TransactionSubmitterFactory {
     TransactionSubmitter create(String id, Component parentComponent);
 
     TransactionSubmitter[] all(Component parentComponent);
+
+    TransactionSubmitter getSuggested(Component parentComponent);
 }
