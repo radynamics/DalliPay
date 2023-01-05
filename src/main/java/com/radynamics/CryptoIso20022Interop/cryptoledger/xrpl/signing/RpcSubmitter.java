@@ -49,6 +49,16 @@ public class RpcSubmitter implements TransactionSubmitter {
     }
 
     @Override
+    public String getId() {
+        return Id;
+    }
+
+    @Override
+    public Ledger getLedger() {
+        return ledger;
+    }
+
+    @Override
     public void submit(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions) {
         var sendingWallets = PaymentUtils.distinctSendingWallets(transactions);
         // Process by sending wallet to keep sequence number handling simple (prevent terPRE_SEQ).

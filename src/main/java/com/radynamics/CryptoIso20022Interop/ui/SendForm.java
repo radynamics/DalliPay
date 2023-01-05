@@ -254,9 +254,16 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void sendPayments(Ledger ledger, Payment[] payments) {
         try {
-            var submitter = showConfirmationForm(ledger, payments);
+            var submitter = showConfirmationForm(ledger, getLastUsedSubmitterOrDefault(ledger), payments);
             if (submitter == null) {
                 return;
+            }
+
+            try (var repo = new ConfigRepo()) {
+                repo.setLastUsedSubmitter(submitter);
+                repo.commit();
+            } catch (Exception e) {
+                ExceptionDialog.show(this, e);
             }
 
             submitter.addStateListener(new TransactionStateListener() {
@@ -293,6 +300,19 @@ public class SendForm extends JPanel implements MainFormPane {
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
+    }
+
+    private TransactionSubmitter getLastUsedSubmitterOrDefault(Ledger ledger) {
+        TransactionSubmitter submitter = null;
+        try (var repo = new ConfigRepo()) {
+            submitter = repo.getLastUsedSubmitter(this, ledger);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return submitter == null
+                ? ledger.createTransactionSubmitterFactory().getSuggested(this)
+                : submitter;
     }
 
     private Payment getPayment(Transaction t) {
@@ -360,9 +380,7 @@ public class SendForm extends JPanel implements MainFormPane {
         table.refresh(payments);
     }
 
-    private TransactionSubmitter showConfirmationForm(Ledger ledger, Payment[] payments) {
-        var submitter = ledger.createTransactionSubmitterFactory().getSuggested(this);
-        
+    private TransactionSubmitter showConfirmationForm(Ledger ledger, TransactionSubmitter submitter, Payment[] payments) {
         var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length, submitter);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 410);

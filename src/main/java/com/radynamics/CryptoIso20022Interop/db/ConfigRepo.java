@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Bithomp;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -12,6 +14,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 import okhttp3.HttpUrl;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -108,6 +111,22 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setLastUsedRpcUrl(HttpUrl value) throws Exception {
         saveOrUpdate("lastUsedRpcUrl", value == null ? "" : value.toString());
+    }
+
+    public TransactionSubmitter getLastUsedSubmitter(Component parentComponent, Ledger ledger) throws Exception {
+        var value = single(createLastUsedSubmitterKey(ledger)).orElse(null);
+        if (value == null) {
+            return null;
+        }
+        return ledger.createTransactionSubmitterFactory().create(value, parentComponent);
+    }
+
+    private static String createLastUsedSubmitterKey(Ledger ledger) {
+        return String.format("%s_lastUsedSubmitter", ledger.getId());
+    }
+
+    public void setLastUsedSubmitter(TransactionSubmitter submitter) throws Exception {
+        saveOrUpdate(createLastUsedSubmitterKey(submitter.getLedger()), submitter.getId());
     }
 
     public CamtFormat getDefaultExportFormat() throws Exception {

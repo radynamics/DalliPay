@@ -31,7 +31,7 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                var signer = new XummSigner(secrets.getXummApiKey());
+                var signer = new XummSigner(ledger, secrets.getXummApiKey());
                 signer.setStorage(new DatabaseStorage());
                 signer.setVerifier(new OnchainVerifier(ledger));
                 return signer;

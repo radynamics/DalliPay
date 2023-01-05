@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.OnchainVerifier;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.*;
@@ -26,14 +27,17 @@ public class XummSigner implements TransactionSubmitter {
     private final PollingObserver<JSONObject> observer = new PollingObserver<>(api);
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
+    private final Ledger ledger;
     private Storage storage = new MemoryStorage();
     private final String apiKey;
     private OnchainVerifier verifier;
 
     public final static String Id = "xummSigner";
 
-    public XummSigner(String apiKey) {
+    public XummSigner(Ledger ledger, String apiKey) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (apiKey == null) throw new IllegalArgumentException("Parameter 'apiKey' cannot be null");
+        this.ledger = ledger;
         this.apiKey = apiKey;
 
         info = new TransactionSubmitterInfo();
@@ -41,6 +45,16 @@ public class XummSigner implements TransactionSubmitter {
         info.setDescription("Use Xumm App on your smartphone to sign and send payments. All payments will need your confirmation in Xumm. Your private key and secrets are never exposed to this software.");
         info.setDetailUri(URI.create("https://xumm.app"));
         info.setRecommended(true);
+    }
+
+    @Override
+    public String getId() {
+        return Id;
+    }
+
+    @Override
+    public Ledger getLedger() {
+        return ledger;
     }
 
     @Override
