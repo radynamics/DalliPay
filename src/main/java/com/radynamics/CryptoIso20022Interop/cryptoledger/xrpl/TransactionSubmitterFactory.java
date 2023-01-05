@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm.XummS
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class TransactionSubmitterFactory implements com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory {
     private final Ledger ledger;
@@ -38,5 +39,15 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
             default:
                 throw new IllegalStateException("Unexpected value: " + id);
         }
+    }
+
+    @Override
+    public TransactionSubmitter[] all(Component parentComponent) {
+        var list = new ArrayList<TransactionSubmitter>();
+
+        list.add(create(RpcSubmitter.Id, parentComponent));
+        list.add(create(XummSigner.Id, parentComponent));
+
+        return list.toArray(new TransactionSubmitter[0]);
     }
 }
