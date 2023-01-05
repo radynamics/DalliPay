@@ -2,10 +2,7 @@ package com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.OnchainVerifier;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.EmptyPrivateKeyProvider;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.PaymentBuilder;
@@ -15,6 +12,7 @@ import org.json.JSONObject;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -26,6 +24,7 @@ public class XummSigner implements TransactionSubmitter {
 
     private final XummApi api = new XummApi();
     private final PollingObserver<JSONObject> observer = new PollingObserver<>(api);
+    private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
     private Storage storage = new MemoryStorage();
     private final String apiKey;
@@ -36,6 +35,12 @@ public class XummSigner implements TransactionSubmitter {
     public XummSigner(String apiKey) {
         if (apiKey == null) throw new IllegalArgumentException("Parameter 'apiKey' cannot be null");
         this.apiKey = apiKey;
+
+        info = new TransactionSubmitterInfo();
+        info.setTitle("Xumm");
+        info.setDescription("Use Xumm App on your smartphone to sign and send payments. All payments will need your confirmation in Xumm. Your private key and secrets are never exposed to this software.");
+        info.setDetailUri(URI.create("https://xumm.app"));
+        info.setRecommended(true);
     }
 
     @Override
@@ -95,6 +100,11 @@ public class XummSigner implements TransactionSubmitter {
     @Override
     public PrivateKeyProvider getPrivateKeyProvider() {
         return new EmptyPrivateKeyProvider();
+    }
+
+    @Override
+    public TransactionSubmitterInfo getInfo() {
+        return info;
     }
 
     private void submit(Transaction t, JSONObject json) {

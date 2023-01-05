@@ -10,5 +10,7 @@ public interface TransactionSubmitter {
 
     PrivateKeyProvider getPrivateKeyProvider();
 
+    TransactionSubmitterInfo getInfo();
+
     void addStateListener(TransactionStateListener l);
 }

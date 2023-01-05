@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -32,6 +33,7 @@ public class RpcSubmitter implements TransactionSubmitter {
     private final Ledger ledger;
     private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;
+    private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
     public final static String Id = "rpcSubmitter";
@@ -40,6 +42,10 @@ public class RpcSubmitter implements TransactionSubmitter {
         this.ledger = ledger;
         this.xrplClient = xrplClient;
         this.privateKeyProvider = privateKeyProvider;
+
+        info = new TransactionSubmitterInfo();
+        info.setTitle("Enter private key");
+        info.setDescription("Enter your private key manually in this software. Due security reasons this is not recommended for sending real money.");
     }
 
     @Override
@@ -136,6 +142,11 @@ public class RpcSubmitter implements TransactionSubmitter {
     @Override
     public PrivateKeyProvider getPrivateKeyProvider() {
         return privateKeyProvider;
+    }
+
+    @Override
+    public TransactionSubmitterInfo getInfo() {
+        return info;
     }
 
     @Override
