@@ -28,7 +28,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-public class RpcSubmitter implements TransactionSubmitter<ImmutablePayment.Builder> {
+public class RpcSubmitter implements TransactionSubmitter {
     private final Ledger ledger;
     private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;

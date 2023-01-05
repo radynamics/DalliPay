@@ -21,7 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class XummSigner implements TransactionSubmitter<ImmutablePayment.Builder> {
+public class XummSigner implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(XummSigner.class);
 
     private final XummApi api = new XummApi();
