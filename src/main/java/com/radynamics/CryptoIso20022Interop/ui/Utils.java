@@ -34,6 +34,15 @@ public final class Utils {
         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
     }
 
+    public static JTextArea formatLabel(JTextArea lbl) {
+        lbl.setEditable(false);
+        lbl.setHighlighter(null);
+        lbl.setLineWrap(true);
+        lbl.setWrapStyleWord(true);
+        lbl.setMargin(new Insets(0, 0, 0, 0));
+        return lbl;
+    }
+
     public static JLabel createLinkLabel(JComponent owner, String text) {
         return createLinkLabel(owner, text, true);
     }
