@@ -45,7 +45,7 @@ public class RpcSubmitter implements TransactionSubmitter {
 
         info = new TransactionSubmitterInfo();
         info.setTitle("Enter private key");
-        info.setDescription("Enter your private key manually in this software. Due security reasons this is not recommended for sending real money.");
+        info.setDescription("Enter your secret seed (sEdVa...) manually in this software. Due security reasons this is not recommended for sending real money.");
     }
 
     @Override
