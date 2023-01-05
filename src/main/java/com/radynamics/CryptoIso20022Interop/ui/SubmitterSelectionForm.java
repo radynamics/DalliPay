@@ -19,7 +19,7 @@ public class SubmitterSelectionForm extends JDialog {
     private final JPanel pnlContent;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
-    public SubmitterSelectionForm(TransactionSubmitter[] submitters) {
+    public SubmitterSelectionForm(TransactionSubmitter[] submitters, TransactionSubmitter selected) {
         if (submitters == null) throw new IllegalArgumentException("submitter 'selectedExchange' cannot be null");
 
         setTitle("Secrets handling");
@@ -90,7 +90,7 @@ public class SubmitterSelectionForm extends JDialog {
             var sorted = new ArrayList<>(List.of(submitters));
             sorted.sort((o1, o2) -> Boolean.compare(o2.getInfo().isRecommended(), o1.getInfo().isRecommended()));
             for (var s : sorted) {
-                create(s);
+                create(s, selected);
             }
             if (buttonGroup.getButtonCount() > 0 && buttonGroup.getSelection() == null) {
                 buttonGroup.setSelected(buttonGroup.getElements().nextElement().getModel(), true);
@@ -116,7 +116,7 @@ public class SubmitterSelectionForm extends JDialog {
         }
     }
 
-    private void create(TransactionSubmitter submitter) {
+    private void create(TransactionSubmitter submitter, TransactionSubmitter selected) {
         var info = submitter.getInfo();
 
         var title = info.getTitle();
@@ -168,7 +168,7 @@ public class SubmitterSelectionForm extends JDialog {
 
             mapping.put(rdo, submitter);
             buttonGroup.add(rdo);
-            rdo.setSelected(info.isRecommended());
+            rdo.setSelected(selected == null ? info.isRecommended() : info.getTitle().equals(selected.getInfo().getTitle()));
             rdo.setOpaque(true);
             rdo.putClientProperty("FlatLaf.styleClass", "h3");
         }

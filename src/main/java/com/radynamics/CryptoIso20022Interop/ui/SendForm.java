@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -253,12 +254,11 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void sendPayments(Ledger ledger, Payment[] payments) {
         try {
-            if (!showConfirmationForm(ledger, payments)) {
+            var submitter = showConfirmationForm(ledger, payments);
+            if (submitter == null) {
                 return;
             }
 
-            var submitterFactory = transformInstruction.getLedger().createTransactionSubmitterFactory();
-            var submitter = submitterFactory.create("xummSigner", this);
             submitter.addStateListener(new TransactionStateListener() {
                 @Override
                 public void onProgressChanged(Transaction t) {
@@ -360,17 +360,20 @@ public class SendForm extends JPanel implements MainFormPane {
         table.refresh(payments);
     }
 
-    private boolean showConfirmationForm(Ledger ledger, Payment[] payments) {
-        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length);
+    private TransactionSubmitter showConfirmationForm(Ledger ledger, Payment[] payments) {
+        var submitterFactory = transformInstruction.getLedger().createTransactionSubmitterFactory();
+        var submitter = submitterFactory.create("xummSigner", this);
+
+        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length, submitter);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(600, 360);
+        frm.setSize(600, 410);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);
         if (!frm.isDialogAccepted()) {
-            return false;
+            return null;
         }
-        return true;
+        return frm.getTransactionSubmitter();
     }
 
     private void load(Payment[] payments) {
