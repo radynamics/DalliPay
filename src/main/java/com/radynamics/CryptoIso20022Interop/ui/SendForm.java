@@ -245,8 +245,15 @@ public class SendForm extends JPanel implements MainFormPane {
             return;
         }
 
+        var ledgers = PaymentUtils.distinctLedgers(payments);
+        for (var l : ledgers) {
+            sendPayments(l, payments);
+        }
+    }
+
+    private void sendPayments(Ledger ledger, Payment[] payments) {
         try {
-            if (!showConfirmationForm(payments)) {
+            if (!showConfirmationForm(ledger, payments)) {
                 return;
             }
 
@@ -353,8 +360,8 @@ public class SendForm extends JPanel implements MainFormPane {
         table.refresh(payments);
     }
 
-    private boolean showConfirmationForm(Payment[] payments) {
-        var frm = new SendConfirmationForm(payments, transformInstruction.getExchangeRateProvider(), this.payments.length);
+    private boolean showConfirmationForm(Ledger ledger, Payment[] payments) {
+        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 360);
         frm.setModal(true);

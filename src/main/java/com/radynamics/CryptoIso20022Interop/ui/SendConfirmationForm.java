@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SendConfirmationForm extends JDialog {
+    private final Ledger ledger;
     private final Payment[] payments;
     private final ExchangeRateProvider provider;
     private int totalPaymentCount;
@@ -29,7 +30,8 @@ public class SendConfirmationForm extends JDialog {
     private JButton cmdSend;
     private JLabel lblFee;
 
-    public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount) {
+    public SendConfirmationForm(Ledger ledger, Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount) {
+        this.ledger = ledger;
         this.payments = payments;
         this.provider = provider;
         this.totalPaymentCount = totalPaymentCount;
@@ -208,15 +210,13 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private Component createRow(int row, Wallet sendingWallet, Account senderAccount, Address senderAddress, ArrayList<Payment> payments) {
-        Ledger l = payments.get(0).getLedger();
-
         var padNorth = row == 0 ? 20 : getNorthPad(row);
         var lbl = new WalletLabel();
         lbl.setWallet(sendingWallet)
-                .setLedger(l)
+                .setLedger(ledger)
                 .setAccount(senderAccount)
                 .setAddress(senderAddress)
-                .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()))
+                .setWalletInfoAggregator(new WalletInfoAggregator(ledger.getInfoProvider()))
                 .setInfoLineCount(2);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
         panel1Layout.putConstraint(SpringLayout.NORTH, lbl, padNorth, SpringLayout.NORTH, pnlContent);
@@ -255,17 +255,14 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void showFeeEdit() {
-        var ledger = PaymentUtils.distinctLedgers(payments);
-        for (var l : ledger) {
-            var ledgerTransactionFee = payments.length == 0
-                    ? null
-                    : FeeHelper.get(payments[0].getFees(), FeeType.LedgerTransactionFee).orElse(null);
-            showFeeEdit(l, ledgerTransactionFee);
-        }
+        var ledgerTransactionFee = payments.length == 0
+                ? null
+                : FeeHelper.get(payments[0].getFees(), FeeType.LedgerTransactionFee).orElse(null);
+        showFeeEdit(ledgerTransactionFee);
     }
 
-    private void showFeeEdit(Ledger l, Money currentFee) {
-        var fees = l.getFeeSuggestion();
+    private void showFeeEdit(Money currentFee) {
+        var fees = ledger.getFeeSuggestion();
 
         var pnl = new JPanel();
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
@@ -297,14 +294,7 @@ public class SendConfirmationForm extends JDialog {
             return;
         }
 
-        var affectedPayments = new ArrayList<Payment>();
-        for (var p : payments) {
-            if (p.getLedger().getId().textId().equals(l.getId().textId())) {
-                affectedPayments.add(p);
-            }
-        }
-
-        var fr = new FeeRefresher(affectedPayments.toArray(new Payment[0]));
+        var fr = new FeeRefresher(payments);
         if (rdoLow.isSelected()) {
             fr.refresh(fees.getLow());
         }
