@@ -245,7 +245,7 @@ public class SendConfirmationForm extends JDialog {
             pnlAmounts.add(p);
             p.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
-            p.add(new JLabel(PaymentUtils.sumString(payments)));
+            p.add(new JLabel(PaymentUtils.sumString(payments, true)));
             p.add(Box.createRigidArea(new Dimension(5, 0)));
             p.add(new JLabel(String.format("(%s payments)", payments.size())));
         }

@@ -85,14 +85,14 @@ public class PaymentUtils {
         return sum;
     }
 
-    public static String sumString(ArrayList<Payment> payments) {
-        return MoneyFormatter.formatFiat(Money.sort(sum(payments)));
+    public static String sumString(ArrayList<Payment> payments, boolean ignoreIssuer) {
+        return MoneyFormatter.formatFiat(Money.sort(sum(payments, ignoreIssuer)));
     }
 
-    public static Money[] sum(ArrayList<Payment> payments) {
+    public static Money[] sum(ArrayList<Payment> payments, boolean ignoreIssuer) {
         var sums = new MoneySums();
         for (var p : payments) {
-            sums.plus(Money.of(p.getAmount(), p.getUserCcy()));
+            sums.plus(Money.of(p.getAmount(), ignoreIssuer ? p.getUserCcy().withoutIssuer() : p.getUserCcy()));
         }
 
         return sums.sum();
