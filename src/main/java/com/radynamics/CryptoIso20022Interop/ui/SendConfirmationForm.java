@@ -257,8 +257,10 @@ public class SendConfirmationForm extends JDialog {
 
             var sums = Money.sort(Money.removeZero(PaymentUtils.sumLedgerUnit(payments).sum()));
             for (var amount : sums) {
-                var lbl = Utils.formatSecondaryInfo(new JLabel(MoneyFormatter.formatFiat(amount)));
-                lbl.setToolTipText(MoneyFormatter.formatLedger(amount));
+                var lbl = new MoneyLabel(l);
+                lbl.setAmount(amount);
+                lbl.setIssuerVisible(false);
+                lbl.formatAsSecondaryInfo();
                 p.add(lbl);
             }
         }
