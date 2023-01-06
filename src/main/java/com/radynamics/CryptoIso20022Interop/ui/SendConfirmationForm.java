@@ -217,27 +217,51 @@ public class SendConfirmationForm extends JDialog {
 
         pnlContent.add(Box.createRigidArea(new Dimension(0, ENTRY_VERTICAL_SPACING)));
 
-        var lbl = new WalletLabel();
-        lbl.setWallet(sendingWallet)
-                .setLedger(l)
-                .setAccount(senderAccount)
-                .setAddress(senderAddress)
-                .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()))
-                .setInfoLineCount(2);
-        panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnl);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 0, SpringLayout.NORTH, pnl);
-        pnl.add(lbl);
+        {
+            var lbl = new WalletLabel();
+            lbl.setWallet(sendingWallet)
+                    .setLedger(l)
+                    .setAccount(senderAccount)
+                    .setAddress(senderAddress)
+                    .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()))
+                    .setInfoLineCount(2);
+            panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnl);
+            panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 0, SpringLayout.NORTH, pnl);
+            pnl.add(lbl);
+        }
 
-        var sumsFiatText = PaymentUtils.sumString(payments);
-        var sums = PaymentUtils.sumLedgerUnit(payments);
-        var sumLedgerText = MoneyFormatter.formatFiat(Money.sort(Money.removeZero(sums.sum())));
-        var text = String.format("%s (%s, %s payments)", sumsFiatText, sumLedgerText, payments.size());
+        pnl.add(Box.createHorizontalGlue());
 
-        var lblPayments = new JLabel(text);
-        panel1Layout.putConstraint(SpringLayout.WEST, lblPayments, 30, SpringLayout.EAST, lbl);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lblPayments, 0, SpringLayout.NORTH, pnl);
-        panel1Layout.putConstraint(SpringLayout.EAST, lblPayments, 0, SpringLayout.EAST, pnl);
-        pnl.add(lblPayments);
+        var pnlAmounts = new JPanel();
+        pnlAmounts.setLayout(new BoxLayout(pnlAmounts, BoxLayout.Y_AXIS));
+        pnlAmounts.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        panel1Layout.putConstraint(SpringLayout.NORTH, pnlAmounts, 0, SpringLayout.NORTH, pnl);
+        panel1Layout.putConstraint(SpringLayout.EAST, pnlAmounts, 0, SpringLayout.EAST, pnl);
+        pnl.add(pnlAmounts);
+        {
+            var p = new JPanel();
+            var layout = new BoxLayout(p, BoxLayout.X_AXIS);
+            p.setLayout(layout);
+            pnlAmounts.add(p);
+            p.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+
+            p.add(new JLabel(PaymentUtils.sumString(payments)));
+            p.add(Box.createRigidArea(new Dimension(5, 0)));
+            p.add(new JLabel(String.format("(%s payments)", payments.size())));
+        }
+        {
+            var layout = new FlowLayout(FlowLayout.RIGHT, 5, 0);
+            var p = new JPanel();
+            p.setLayout(layout);
+            pnlAmounts.add(p);
+
+            var sums = Money.sort(Money.removeZero(PaymentUtils.sumLedgerUnit(payments).sum()));
+            for (var amount : sums) {
+                var lbl = Utils.formatSecondaryInfo(new JLabel(MoneyFormatter.formatFiat(amount)));
+                lbl.setToolTipText(MoneyFormatter.formatLedger(amount));
+                p.add(lbl);
+            }
+        }
     }
 
     private Account getSenderAccount(Collection<Payment> payments) {
