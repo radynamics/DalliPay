@@ -22,12 +22,13 @@ public class SendConfirmationForm extends JDialog {
     private int totalPaymentCount;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
-    private SpringLayout panel1Layout;
     private JPanel pnlContent;
-    private Component anchorComponentTopLeft;
     private boolean accepted;
     private JButton cmdSend;
     private JLabel lblFee;
+
+    private static final int ENTRY_VERTICAL_SPACING = 7;
+    private static final int ENTRY_HEIGHT = 45;
 
     public SendConfirmationForm(Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount) {
         this.payments = payments;
@@ -56,9 +57,8 @@ public class SendConfirmationForm extends JDialog {
         var panel1 = new JPanel();
         panel1.setBorder(innerBorder);
         panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
-        panel1Layout = new SpringLayout();
         pnlContent = new JPanel();
-        pnlContent.setLayout(panel1Layout);
+        pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.Y_AXIS));
         var panel2 = new JPanel();
         panel2.setBorder(innerBorder);
         panel2.setLayout(new BoxLayout(panel2, BoxLayout.X_AXIS));
@@ -70,7 +70,6 @@ public class SendConfirmationForm extends JDialog {
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 120));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
@@ -128,15 +127,14 @@ public class SendConfirmationForm extends JDialog {
         }
 
         {
-            int row = 0;
             var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
+            pnlContent.setPreferredSize(new Dimension(100, sendingWallets.size() * (ENTRY_HEIGHT + ENTRY_VERTICAL_SPACING)));
             for (var w : sendingWallets) {
                 var payments = PaymentUtils.fromSender(w, this.payments);
                 if (payments.size() == 0) {
                     continue;
                 }
-                var created = createRow(row++, w, getSenderAccount(payments), getSenderAddress(payments), payments);
-                anchorComponentTopLeft = anchorComponentTopLeft == null ? created : anchorComponentTopLeft;
+                createRow(w, getSenderAccount(payments), getSenderAddress(payments), payments);
             }
         }
         {
@@ -207,10 +205,18 @@ public class SendConfirmationForm extends JDialog {
         lblFee.setText(PaymentUtils.totalFeesText(payments, provider));
     }
 
-    private Component createRow(int row, Wallet sendingWallet, Account senderAccount, Address senderAddress, ArrayList<Payment> payments) {
+    private void createRow(Wallet sendingWallet, Account senderAccount, Address senderAddress, ArrayList<Payment> payments) {
         Ledger l = payments.get(0).getLedger();
 
-        var padNorth = row == 0 ? 20 : getNorthPad(row);
+        var panel1Layout = new SpringLayout();
+        var pnl = new JPanel();
+        pnl.setLayout(panel1Layout);
+        pnlContent.add(pnl);
+        pnl.setPreferredSize(new Dimension(Integer.MAX_VALUE, ENTRY_HEIGHT));
+        pnl.setMinimumSize(new Dimension(Integer.MAX_VALUE, ENTRY_HEIGHT));
+
+        pnlContent.add(Box.createRigidArea(new Dimension(0, ENTRY_VERTICAL_SPACING)));
+
         var lbl = new WalletLabel();
         lbl.setWallet(sendingWallet)
                 .setLedger(l)
@@ -218,9 +224,9 @@ public class SendConfirmationForm extends JDialog {
                 .setAddress(senderAddress)
                 .setWalletInfoAggregator(new WalletInfoAggregator(l.getInfoProvider()))
                 .setInfoLineCount(2);
-        panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, padNorth, SpringLayout.NORTH, pnlContent);
-        pnlContent.add(lbl);
+        panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnl);
+        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 0, SpringLayout.NORTH, pnl);
+        pnl.add(lbl);
 
         var sumsFiatText = PaymentUtils.sumString(payments);
         var sums = PaymentUtils.sumLedgerUnit(payments);
@@ -228,12 +234,10 @@ public class SendConfirmationForm extends JDialog {
         var text = String.format("%s (%s, %s payments)", sumsFiatText, sumLedgerText, payments.size());
 
         var lblPayments = new JLabel(text);
-        panel1Layout.putConstraint(SpringLayout.WEST, lblPayments, 30, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lblPayments, padNorth, SpringLayout.NORTH, pnlContent);
-        panel1Layout.putConstraint(SpringLayout.EAST, lblPayments, 0, SpringLayout.EAST, pnlContent);
-        pnlContent.add(lblPayments);
-
-        return lbl;
+        panel1Layout.putConstraint(SpringLayout.WEST, lblPayments, 30, SpringLayout.EAST, lbl);
+        panel1Layout.putConstraint(SpringLayout.NORTH, lblPayments, 0, SpringLayout.NORTH, pnl);
+        panel1Layout.putConstraint(SpringLayout.EAST, lblPayments, 0, SpringLayout.EAST, pnl);
+        pnl.add(lblPayments);
     }
 
     private Account getSenderAccount(Collection<Payment> payments) {
@@ -378,11 +382,6 @@ public class SendConfirmationForm extends JDialog {
             }
         };
         scheduler.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
-    }
-
-    private static int getNorthPad(int line) {
-        final var lineHeight = 70;
-        return line * lineHeight;
     }
 
     private void setDialogAccepted(boolean accepted) {
