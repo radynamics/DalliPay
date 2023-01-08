@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
@@ -17,6 +18,7 @@ public class MoneyLabel extends JPanel {
     private final JLabel detailLink;
     private Money value;
     private final Ledger ledger;
+    private boolean issuerVisible = true;
 
     public MoneyLabel(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
@@ -73,17 +75,34 @@ public class MoneyLabel extends JPanel {
         format();
     }
 
+    public void setIssuerVisible(boolean issuerVisible) {
+        this.issuerVisible = issuerVisible;
+        format();
+    }
+
+    public void formatAsSecondaryInfo() {
+        Utils.formatSecondaryInfo(amt);
+    }
+
     private boolean hasAmountIssuer() {
         return value != null && value.getCcy().getIssuer() != null;
     }
 
     private void format() {
-        detailLink.setVisible(hasAmountIssuer());
+        detailLink.setVisible(issuerVisible && hasAmountIssuer());
         if (value == null) {
             amt.setText("");
         }
         amt.setText(AmountFormatter.formatAmtWithCcy(value));
         var ccyFormatter = new CurrencyFormatter(ledger.getInfoProvider());
         ccyFormatter.format(amt, value.getCcy());
+
+        var toolTip = new StringBuilder();
+        toolTip.append(MoneyFormatter.formatLedger(value));
+        if (amt.getToolTipText().length() > 0) {
+            toolTip.append(System.lineSeparator());
+            toolTip.append(amt.getToolTipText());
+        }
+        amt.setToolTipText(toolTip.toString());
     }
 }
