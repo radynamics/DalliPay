@@ -48,7 +48,7 @@ public class SubmitterSelectionForm extends JDialog {
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 100));
+        pnlContent.setPreferredSize(new Dimension(100, 200));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
