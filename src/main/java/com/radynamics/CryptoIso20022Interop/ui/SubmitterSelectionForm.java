@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 
 import javax.swing.*;
@@ -204,6 +205,22 @@ public class SubmitterSelectionForm extends JDialog {
             lbl.setOpaque(true);
             lbl.addMouseListener(itemClickListener);
         }
+    }
+
+    static TransactionSubmitter showDialog(Component parentComponent, Ledger ledger, TransactionSubmitter selected) {
+        var submitterFactory = ledger.createTransactionSubmitterFactory();
+        var s = selected == null ? submitterFactory.getSuggested(parentComponent) : selected;
+        var frm = new SubmitterSelectionForm(submitterFactory.all(parentComponent), s);
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(520, 400);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(parentComponent);
+        frm.setVisible(true);
+        if (!frm.isDialogAccepted()) {
+            return null;
+        }
+
+        return frm.getSelected();
     }
 
     private void acceptDialog() {

@@ -254,7 +254,7 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void sendPayments(Ledger ledger, Payment[] payments) {
         try {
-            var submitter = showConfirmationForm(ledger, getLastUsedSubmitterOrDefault(ledger), payments);
+            var submitter = showConfirmationForm(ledger, getLastUsedSubmitter(ledger), payments);
             if (submitter == null) {
                 return;
             }
@@ -302,17 +302,13 @@ public class SendForm extends JPanel implements MainFormPane {
         }
     }
 
-    private TransactionSubmitter getLastUsedSubmitterOrDefault(Ledger ledger) {
-        TransactionSubmitter submitter = null;
+    private TransactionSubmitter getLastUsedSubmitter(Ledger ledger) {
         try (var repo = new ConfigRepo()) {
-            submitter = repo.getLastUsedSubmitter(this, ledger);
+            return repo.getLastUsedSubmitter(this, ledger);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
-        return submitter == null
-                ? ledger.createTransactionSubmitterFactory().getSuggested(this)
-                : submitter;
+        return null;
     }
 
     private Payment getPayment(Transaction t) {
@@ -390,7 +386,13 @@ public class SendForm extends JPanel implements MainFormPane {
         if (!frm.isDialogAccepted()) {
             return null;
         }
-        return frm.getTransactionSubmitter();
+
+        var selectedSubmitter = frm.getTransactionSubmitter();
+        if (selectedSubmitter == null) {
+            selectedSubmitter = SubmitterSelectionForm.showDialog(this, ledger, submitter);
+        }
+
+        return selectedSubmitter;
     }
 
     private void load(Payment[] payments) {

@@ -236,7 +236,7 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void refreshSigningText() {
-        lblSigningText.setText(String.format("Sign payments using '%s'", submitter.getInfo().getTitle()));
+        lblSigningText.setText(String.format("Sign payments using '%s'", submitter == null ? "unknown" : submitter.getInfo().getTitle()));
     }
 
     private void acceptDialog() {
@@ -421,17 +421,11 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void showSigningEdit() {
-        var frm = new SubmitterSelectionForm(ledger.createTransactionSubmitterFactory().all(this), submitter);
-        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(520, 400);
-        frm.setModal(true);
-        frm.setLocationRelativeTo(this);
-        frm.setVisible(true);
-        if (!frm.isDialogAccepted()) {
+        var submitter = SubmitterSelectionForm.showDialog(this, ledger, this.submitter);
+        if (submitter == null) {
             return;
         }
-
-        submitter = frm.getSelected();
+        this.submitter = submitter;
         refreshSigningText();
     }
 
