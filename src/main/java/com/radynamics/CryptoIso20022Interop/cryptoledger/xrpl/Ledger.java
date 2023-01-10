@@ -8,7 +8,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubm
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.JsonRpcApi;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.UserInputPrivateKeySource;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
@@ -209,6 +209,6 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
-        return api.createTransactionSubmitter(new UserInputPrivateKeySource(parentComponent));
+        return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }
 }

@@ -12,11 +12,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Hashtable;
 
-public class UserInputPrivateKeySource implements PrivateKeyProvider {
+public class UserDialogPrivateKeyProvider implements PrivateKeyProvider {
     private final Component parentComponent;
     private final Hashtable<String, String> privateKeyCache = new Hashtable<>();
 
-    public UserInputPrivateKeySource(Component parentComponent) {
+    public UserDialogPrivateKeyProvider(Component parentComponent) {
         this.parentComponent = parentComponent;
     }
 
