@@ -8,6 +8,7 @@ import org.xrpl.xrpl4j.model.transactions.Memo;
 
 public class PayloadConverter {
     static JSONObject toJson(ImmutablePayment payment) {
+        if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
         var json = new JSONObject();
 
         json.put("TransactionType", "Payment");
