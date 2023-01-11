@@ -12,3 +12,4 @@
 /bin/main/version.properties
 /cryptoIso20022Interop.db
 /packaging
+/src/main/resources/secrets.json
