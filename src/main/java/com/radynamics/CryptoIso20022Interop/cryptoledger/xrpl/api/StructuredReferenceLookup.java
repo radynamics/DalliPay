@@ -77,6 +77,9 @@ public class StructuredReferenceLookup {
         {
             for (var word : text.split(" ")) {
                 var candidate = StringUtils.deleteWhitespace(word);
+                if (candidate.length() == 0) {
+                    continue;
+                }
                 var type = StructuredReferenceFactory.detectType(candidate);
                 if (refType.contains(type)) {
                     return StructuredReferenceFactory.create(type, candidate);
