@@ -52,6 +52,13 @@ public class StructuredReferenceLookupTest {
             Assertions.assertEquals(ReferenceType.Scor, found[0].getType());
         }
         {
+            var p = preparePayment(new String[]{"a  b"})
+                    .build();
+
+            var found = new StructuredReferenceLookup(p).find();
+            Assertions.assertEquals(0, found.length);
+        }
+        {
             var p = preparePayment(new String[]{"any free text", "Invoice RF18000000000539007547034"})
                     .build();
 
