@@ -101,4 +101,27 @@ public class Camt05400109WriterTest {
             Assertions.assertEquals("XYZ", ntfctn.getNtry().get(0).getAmt().getCcy());
         }
     }
+
+    @Test
+    public void RmtInfUstrdLength() throws Exception {
+        var ledger = new TestLedger();
+        var ti = TestFactory.createTransformInstruction(ledger);
+        var w = new Camt05400109Writer(ti.getLedger(), ti, ProductVersion);
+        w.setIdGenerator(new FixedValueIdGenerator());
+        w.setCreationDate(TestFactory.createCreationDate());
+
+        var actual = (Document) w.createDocument(TestFactory.createTransactionsMaxRmtInfUstrd(ledger, ti));
+
+        Assertions.assertEquals(2, actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().size());
+        {
+            var ustrd = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().get(0).getNtryDtls().get(0).getTxDtls().get(0).getRmtInf().getUstrd();
+            Assertions.assertEquals(1, ustrd.size());
+            Assertions.assertEquals("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_01234567", ustrd.get(0));
+        }
+        {
+            var ustrd = actual.getBkToCstmrDbtCdtNtfctn().getNtfctn().get(0).getNtry().get(1).getNtryDtls().get(0).getTxDtls().get(0).getRmtInf().getUstrd();
+            Assertions.assertEquals(1, ustrd.size());
+            Assertions.assertEquals("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789 0123456789_0123456789_0123456789_0123456789_0123456789_01234567", ustrd.get(0));
+        }
+    }
 }
