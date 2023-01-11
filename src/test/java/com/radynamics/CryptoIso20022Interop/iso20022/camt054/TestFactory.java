@@ -54,10 +54,38 @@ public class TestFactory {
         var list = new ArrayList<Transaction>();
         list.add(TestFactory.createTransaction1(ledger));
         list.add(TestFactory.createTransaction1(ledger, 7777.77, "XYZ"));
+        return toPayments(ti, list);
+    }
 
+    private static Payment[] toPayments(TransformInstruction ti, ArrayList<Transaction> list) {
         var t = new TransactionTranslator(ti, new CurrencyConverter(ti.getExchangeRateProvider().latestRates()));
         final Currency ccyAsReceived = null;
         return t.apply(PaymentConverter.toPayment(list.toArray(new Transaction[0]), ccyAsReceived));
+    }
+
+    public static Payment[] createTransactionsMaxRmtInfUstrd(Ledger ledger, TransformInstruction ti) {
+        var list = new ArrayList<Transaction>();
+        {
+            var t = new TestTransaction(ledger, Money.of(100, new Currency("TEST")));
+            list.add(t);
+            t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
+            t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
+            t.setId("E43D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA");
+            t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
+            t.addMessage("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789");
+        }
+        {
+            var t = new TestTransaction(ledger, Money.of(100, new Currency("TEST")));
+            list.add(t);
+            t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
+            t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
+            t.setId("A13D83F7869885BFE92C29A6A7CF48F9B9B2FE1CEB95384707584A9DB3E288EA");
+            t.setBooked(LocalDateTime.of(2021, 02, 21, 9, 10, 11).atZone(ZoneId.systemDefault()));
+            t.addMessage("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789");
+            t.addMessage("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789");
+        }
+
+        return toPayments(ti, list);
     }
 
     private static Transaction createTransaction1(Ledger ledger) {

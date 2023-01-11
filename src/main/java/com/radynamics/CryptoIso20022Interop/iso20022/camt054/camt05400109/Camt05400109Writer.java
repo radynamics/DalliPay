@@ -167,7 +167,7 @@ public class Camt05400109Writer implements Camt054Writer {
 
         var sb = WriterHelper.getUstrd(trx);
         if (sb.length() > 0) {
-            txDtls.getRmtInf().getUstrd().add(sb.toString());
+            txDtls.getRmtInf().getUstrd().add(sb.length() <= 140 ? sb.toString() : sb.substring(0, 140));
         }
 
         return ntry;
