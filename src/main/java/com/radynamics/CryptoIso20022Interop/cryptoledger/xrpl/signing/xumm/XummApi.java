@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -51,7 +52,9 @@ public class XummApi {
         if (accessToken == null) throw new IllegalArgumentException("Parameter 'accessToken' cannot be null");
 
         var client = HttpClient.newHttpClient();
-        var responseText = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        var httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+        logRateLimit(httpResponse.headers());
+        var responseText = httpResponse.body();
         JSONObject response;
         try {
             response = new JSONObject(responseText);
@@ -76,6 +79,23 @@ public class XummApi {
         }
 
         return response;
+    }
+
+    private void logRateLimit(HttpHeaders headers) {
+        final String nameRemaining = "X-RateLimit-Remaining";
+        var remainingText = headers.firstValue(nameRemaining).orElse(null);
+        if (remainingText == null) {
+            log.warn(String.format("Header %s was not present in response.", nameRemaining));
+            return;
+        }
+
+        var limitText = headers.firstValue("X-RateLimit-Limit").orElse("0");
+        var msg = String.format("Remaining %s/%s calls within rateLimit.", remainingText, limitText);
+        if (Integer.parseInt(remainingText) >= 10) {
+            log.info(msg);
+            return;
+        }
+        log.warn(msg);
     }
 
     private HttpRequest.Builder createRequestBuilder(String path) {
