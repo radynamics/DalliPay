@@ -54,6 +54,7 @@ public class XummApi {
         var client = HttpClient.newHttpClient();
         var httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
         logRateLimit(httpResponse.headers());
+        handleStatusCode(httpResponse.statusCode());
         var responseText = httpResponse.body();
         JSONObject response;
         try {
@@ -96,6 +97,23 @@ public class XummApi {
             return;
         }
         log.warn(msg);
+    }
+
+    private void handleStatusCode(Integer statusCode) throws XummException {
+        var statusCodeText = statusCode.toString();
+        var msg = String.format("Xumm API responded HTTP status code %s.", statusCodeText);
+        if (statusCodeText.startsWith("2")) {
+            log.debug(msg);
+            return;
+        }
+
+        if (statusCodeText.startsWith("1") || statusCodeText.startsWith("3")) {
+            log.info(msg);
+            return;
+        }
+
+        // Could also be "429 Too many requests" due API rate limits.
+        throw new XummException(msg);
     }
 
     private HttpRequest.Builder createRequestBuilder(String path) {
