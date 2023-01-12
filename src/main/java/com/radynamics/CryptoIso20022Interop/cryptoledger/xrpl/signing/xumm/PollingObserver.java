@@ -41,6 +41,7 @@ public class PollingObserver<T> {
                     }
                     processResponse(o, response);
                 } catch (IOException | InterruptedException | XummException e) {
+                    stopObserving(o);
                     raiseException(o.payload, e);
                 }
             }
