@@ -46,6 +46,7 @@ public class Main {
         var networkId = getParam(args, "-n"); // livenet, testnet
         var configFilePath = getParam(args, "-c", "config.json");
         var db = getParam(args, "-db");
+        var password = getParam(args, "-p", null);
         Database.dbFile = db == null ? Database.defaultFile() : Path.of(db).toFile();
 
         try {
@@ -77,7 +78,7 @@ public class Main {
                 FlatLightLaf.setup();
 
                 var existsDb = Database.exists();
-                if (existsDb && !login()) {
+                if (existsDb && !login(password)) {
                     return;
                 }
 
@@ -161,7 +162,15 @@ public class Main {
         return t;
     }
 
-    private static boolean login() {
+    private static boolean login(String password) {
+        if (password != null) {
+            if (Database.isReadable(password)) {
+                Database.password = password;
+                return true;
+            }
+            return false;
+        }
+
         var frm = new LoginForm();
         if (!frm.showLogin()) {
             return false;
