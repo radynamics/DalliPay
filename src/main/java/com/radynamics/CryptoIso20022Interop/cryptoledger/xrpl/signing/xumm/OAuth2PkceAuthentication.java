@@ -27,9 +27,10 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
     private final String basePath;
     private final String clientId;
     private String scope;
-    private HttpServer httpServer;
-    private final PkceHttpHandler httpHandler = new PkceHttpHandler();
-    private String codeVerifier;
+    private static HttpServer httpServer;
+    private static PkceHttpHandler httpHandler;
+    private static String codeVerifier;
+
     private final ArrayList<OAuth2PkceAuthenticationListener> authenticationListener = new ArrayList<>();
     private final ArrayList<ExceptionListener> exceptionListener = new ArrayList<>();
     private final String address = "127.0.0.1";
@@ -42,7 +43,6 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
         if (clientId == null) throw new IllegalArgumentException("Parameter 'clientId' cannot be null");
         this.basePath = basePath;
         this.clientId = clientId;
-        httpHandler.addOAuth2PkceListener(this);
     }
 
     public void authenticate() {
@@ -128,11 +128,14 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
         return String.format("%s/%s", baseUri, path);
     }
 
-    private void startHttpServer() throws IOException {
-        if (httpServer != null) {
-            raiseException(new OAuth2Exception("Internal http server already running"));
+    private synchronized void startHttpServer() throws IOException {
+        if (isHttpServerRunning()) {
             return;
         }
+
+        codeVerifier = null;
+        httpHandler = new PkceHttpHandler();
+        httpHandler.addOAuth2PkceListener(this);
 
         httpServer = HttpServer.create(new InetSocketAddress(address, port), 0);
         httpServer.createContext("/" + httpHandler.AuthPath, httpHandler);
@@ -141,15 +144,21 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
         httpServer.start();
     }
 
-    private void stopHttpServer() {
-        if (httpServer == null) {
-            raiseException(new OAuth2Exception("Internal http server not running"));
+    private synchronized void stopHttpServer() {
+        if (!isHttpServerRunning()) {
             return;
         }
+
+        codeVerifier = null;
+        httpHandler = null;
 
         httpServer.stop(0);
         threadPoolExecutor.shutdown();
         httpServer = null;
+    }
+
+    private boolean isHttpServerRunning() {
+        return httpServer != null;
     }
 
     public void addOAuth2PkceAuthenticationListener(OAuth2PkceAuthenticationListener l) {

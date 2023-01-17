@@ -10,7 +10,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.api.PaymentBuilder
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,19 +17,19 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
-public class XummSigner implements TransactionSubmitter {
+public class XummSigner implements TransactionSubmitter, StateListener<Transaction> {
     private final static Logger log = LogManager.getLogger(XummSigner.class);
 
     private final XummApi api = new XummApi();
-    private final PollingObserver<JSONObject> observer = new PollingObserver<>(api);
+    private final PollingObserver<Transaction> observer = new PollingObserver<>(api);
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
     private final Ledger ledger;
     private Storage storage = new MemoryStorage();
     private final String apiKey;
     private OnchainVerifier verifier;
+    private CompletableFuture<Void> authentication;
 
     public final static String Id = "xummSigner";
 
@@ -39,6 +38,7 @@ public class XummSigner implements TransactionSubmitter {
         if (apiKey == null) throw new IllegalArgumentException("Parameter 'apiKey' cannot be null");
         this.ledger = ledger;
         this.apiKey = apiKey;
+        this.observer.addStateListener(this);
 
         info = new TransactionSubmitterInfo();
         info.setTitle("Xumm");
@@ -63,12 +63,7 @@ public class XummSigner implements TransactionSubmitter {
             var t = (Transaction) trx;
             try {
                 var builder = PaymentBuilder.builder().payment(t).build();
-                submit(t, builder, transactionHash -> {
-                    t.setId(transactionHash);
-                    t.setBooked(ZonedDateTime.now());
-                    t.refreshTransmission();
-                    return null;
-                });
+                submit(t, PayloadConverter.toJson(builder.build()));
             } catch (LedgerException e) {
                 t.refreshTransmission(e);
                 raiseFailure(t);
@@ -76,39 +71,37 @@ public class XummSigner implements TransactionSubmitter {
         }
     }
 
-    private void submit(Transaction t, ImmutablePayment.Builder builder, Function<String, Void> onSuccess) throws LedgerException {
-        observer.addStateListener(new StateListener<>() {
-            @Override
-            public void onExpired(JSONObject payload) {
-                t.refreshTransmission(new XummException("Confirmation request expired"));
-                raiseFailure(t);
-            }
+    @Override
+    public void onExpired(Transaction t) {
+        t.refreshTransmission(new XummException("Confirmation request expired"));
+        raiseFailure(t);
+    }
 
-            @Override
-            public void onAccepted(JSONObject payload, String txid) {
-                if (verifier != null && !verifier.verify(txid, t)) {
-                    onSuccess.apply(txid);
-                    t.refreshTransmission(new XummException("Transaction was submitted but result on chain doesn't match sent payment. This may indicates a serious software issue or fraud."));
-                    raiseFailure(t);
-                    return;
-                }
-                onSuccess.apply(txid);
-                raiseSuccess(t);
-            }
+    @Override
+    public void onAccepted(Transaction t, String txid) {
+        t.setId(txid);
+        t.setBooked(ZonedDateTime.now());
 
-            @Override
-            public void onRejected(JSONObject payload) {
-                t.refreshTransmission(new XummException("Payment confirmation rejected"));
-                raiseFailure(t);
-            }
+        if (verifier != null && !verifier.verify(txid, t)) {
+            t.refreshTransmission(new XummException("Transaction was submitted but result on chain doesn't match sent payment. This may indicates a serious software issue or fraud."));
+            raiseFailure(t);
+            return;
+        }
 
-            @Override
-            public void onException(JSONObject payload, Exception e) {
-                t.refreshTransmission(e);
-                raiseFailure(t);
-            }
-        });
-        submit(t, PayloadConverter.toJson(builder.build()));
+        t.refreshTransmission();
+        raiseSuccess(t);
+    }
+
+    @Override
+    public void onRejected(Transaction t) {
+        t.refreshTransmission(new XummException("Payment confirmation rejected"));
+        raiseFailure(t);
+    }
+
+    @Override
+    public void onException(Transaction t, Exception e) {
+        t.refreshTransmission(e);
+        raiseFailure(t);
     }
 
     @Override
@@ -152,15 +145,21 @@ public class XummSigner implements TransactionSubmitter {
                 });
     }
 
-    private CompletableFuture<Void> authenticate(Transaction t) {
-        return XummPkce.authenticateAsync(apiKey, "CryptoIso20022Interop")
+    private synchronized CompletableFuture<Void> authenticate(Transaction t) {
+        if (authentication != null) {
+            return authentication;
+        }
+
+        authentication = XummPkce.authenticateAsync(apiKey, "CryptoIso20022Interop")
                 .thenAccept(storage::setAccessToken)
                 .exceptionally((e) -> {
                     log.error(e.getMessage(), e);
                     t.refreshTransmission(e);
                     raiseFailure(t);
                     return null;
-                });
+                })
+                .whenComplete((unused, throwable) -> authentication = null);
+        return authentication;
     }
 
     private void submitAndObserve(Transaction t, JSONObject json) {
@@ -180,7 +179,7 @@ public class XummSigner implements TransactionSubmitter {
 
             t.refreshTransmissionState(TransmissionState.Waiting);
             raiseProgressChanged(t);
-            observer.observe(json, UUID.fromString(sendResponse.getString("uuid")));
+            observer.observe(t, UUID.fromString(sendResponse.getString("uuid")));
         } catch (IOException | InterruptedException | XummException e) {
             throw new RuntimeException(e);
         }
