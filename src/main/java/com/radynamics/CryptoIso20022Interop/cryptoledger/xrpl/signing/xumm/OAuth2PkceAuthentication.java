@@ -207,6 +207,10 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
             if ("GET".equals(httpExchange.getRequestMethod())) {
                 var requestParams = splitQuery(httpExchange.getRequestURI().getQuery());
                 if (uri.getPath().equals("/" + AuthPath)) {
+                    if (requestParams.containsKey("error")) {
+                        responseError(httpExchange, requestParams.get("error_description").get(0));
+                        return;
+                    }
                     var code = requestParams.get("code").get(0);
                     responseOk(httpExchange);
                     raiseAuthorizationCodeReceived(code);
@@ -218,6 +222,15 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
 
         private void responseOk(HttpExchange httpExchange) throws IOException {
             var responseText = "<!DOCTYPE html><html><body><h2>&#x2714; Successfully authorized</h2><p>Application has been successfully authorized. You can close this window at any time.</p></body></html>";
+            response(httpExchange, responseText);
+        }
+
+        private void responseError(HttpExchange httpExchange, String errorDescription) throws IOException {
+            var responseText = "<!DOCTYPE html><html><body><h2>&#x274C; Authorization rejected</h2><p>Application has not been authorized to proceed. You can close this window at any time.</p><p>Xumm response: " + errorDescription + "</p></body></html>";
+            response(httpExchange, responseText);
+        }
+
+        private void response(HttpExchange httpExchange, String responseText) throws IOException {
             httpExchange.sendResponseHeaders(200, responseText.length());
 
             var outputStream = httpExchange.getResponseBody();
