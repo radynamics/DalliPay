@@ -160,12 +160,13 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     public void refreshTransmission() {
-        refreshTransmission(null);
+        this.transmissionError = null;
+        refreshTransmissionState(StringUtils.isAllEmpty(getId()) ? TransmissionState.Error : TransmissionState.Success);
     }
 
     public void refreshTransmission(Throwable t) {
         this.transmissionError = t;
-        refreshTransmissionState(StringUtils.isAllEmpty(getId()) ? TransmissionState.Error : TransmissionState.Success);
+        refreshTransmissionState(TransmissionState.Error);
     }
 
     public void refreshTransmissionState(TransmissionState state) {
