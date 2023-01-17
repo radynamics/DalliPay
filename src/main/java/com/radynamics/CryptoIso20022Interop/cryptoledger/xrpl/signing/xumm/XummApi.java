@@ -82,7 +82,7 @@ public class XummApi {
         return response;
     }
 
-    private void logRateLimit(HttpHeaders headers) {
+    private void logRateLimit(HttpHeaders headers) throws XummException {
         final String nameRemaining = "X-RateLimit-Remaining";
         var remainingText = headers.firstValue(nameRemaining).orElse(null);
         if (remainingText == null) {
@@ -96,7 +96,14 @@ public class XummApi {
             log.info(msg);
             return;
         }
-        log.warn(msg);
+        if (Integer.parseInt(remainingText) > 0) {
+            log.warn(msg);
+            return;
+        }
+
+        var exceptionText = String.format("Xumm API call limit reached. %s", msg);
+        log.error(exceptionText);
+        throw new XummException(exceptionText);
     }
 
     private void handleStatusCode(Integer statusCode) throws XummException {
