@@ -153,6 +153,10 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("xummAccessToken", value);
     }
 
+    public Optional<Integer> getXummLocalHttpServerPort() throws Exception {
+        return single("xummLocalHttpServerPort").map(Integer::parseInt);
+    }
+
     private Optional<String> single(String key) throws Exception {
         var ps = conn.prepareStatement("SELECT value FROM config WHERE key = ?");
         ps.setString(1, key);

@@ -34,8 +34,8 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
     private final ArrayList<OAuth2PkceAuthenticationListener> authenticationListener = new ArrayList<>();
     private final ArrayList<ExceptionListener> exceptionListener = new ArrayList<>();
     private final String address = "127.0.0.1";
-    private final int port = 58890;
-    private final String baseUri = "http://" + address + ":" + port;
+    public static final int defaultPort = 58890;
+    private int port = defaultPort;
     private ThreadPoolExecutor threadPoolExecutor;
 
     public OAuth2PkceAuthentication(String basePath, String clientId) {
@@ -125,7 +125,11 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
     }
 
     private String createRedirectUri(String path) {
-        return String.format("%s/%s", baseUri, path);
+        return String.format("%s/%s", getBaseUri(), path);
+    }
+
+    private String getBaseUri() {
+        return "http://" + address + ":" + port;
     }
 
     private synchronized void startHttpServer() throws IOException {
@@ -193,6 +197,14 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     private class PkceHttpHandler implements HttpHandler {

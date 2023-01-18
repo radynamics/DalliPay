@@ -26,4 +26,14 @@ public class DatabaseStorage implements Storage {
             log.error(e.getMessage(), e);
         }
     }
+
+    @Override
+    public int getLocalHttpServerPort() {
+        try (var repo = new ConfigRepo()) {
+            return repo.getXummLocalHttpServerPort().orElse(XummPkce.defaultPort);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return XummPkce.defaultPort;
+        }
+    }
 }

@@ -12,4 +12,9 @@ public class MemoryStorage implements Storage {
     public void setAccessToken(String value) {
         accessToken = value;
     }
+
+    @Override
+    public int getLocalHttpServerPort() {
+        return XummPkce.defaultPort;
+    }
 }

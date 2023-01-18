@@ -26,11 +26,12 @@ public class XummPkce extends OAuth2PkceAuthentication {
         setScope("JavaPkce");
     }
 
-    public static CompletableFuture<String> authenticateAsync(String apiKey, String scope) {
+    public static CompletableFuture<String> authenticateAsync(String apiKey, String scope, int port) {
         var authentication = new CompletableFuture<String>();
         Executors.newCachedThreadPool().submit(() -> {
             var pkce = new XummPkce(apiKey);
             pkce.setScope(scope);
+            pkce.setPort(port);
             pkce.addExceptionListener(authentication::completeExceptionally);
             pkce.addOAuth2PkceAuthenticationListener(new OAuth2PkceAuthenticationListener() {
                 @Override
