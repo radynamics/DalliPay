@@ -121,7 +121,12 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         if (storage.getAccessToken() == null) {
             auth = authenticate(t);
         } else {
-            auth.complete(null);
+            var payload = JwtPayload.create(storage.getAccessToken());
+            if (payload != null && payload.expired()) {
+                auth = authenticate(t);
+            } else {
+                auth.complete(null);
+            }
         }
 
         auth
