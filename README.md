@@ -38,6 +38,7 @@ For better integration into business processes following console parameters are 
 -in             <file path>             Input pain.001 xml file containing payment instructions
 -wallet         <wallet address>        Wallet used as sender
 -n              test, live              Testnet or Livenet
+-p              <password>              Password for silent login. If not set a login screen is shown.
 
 Examples:
 - java -jar CryptoIso20022Interop.jar -a pain001ToCrypto -in C:\demo\UBS_20210603_00001.xml -n test
@@ -51,6 +52,7 @@ Examples:
 -n              test, live              Testnet or Livenet
 -from           20220521101200          Transactions from in format yyyyMMddHHmmss (last 7 days if omitted)
 -until          20220509070800          Transactions until in format yyyyMMddHHmmss (now if omitted)
+-p              <password>              Password for silent login. If not set a login screen is shown.
 
 Examples:
 - java -jar CryptoIso20022Interop.jar -a cryptoToCamt054 -out C:\temp\test.xml -wallet rPdvC6ccq8hCdPKSPJkPmyZ4Mi1oG2FFkT
