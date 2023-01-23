@@ -12,4 +12,5 @@
 /bin/main/version.properties
 /cryptoIso20022Interop.db
 /packaging
-/src/main/resources/secrets.json
+/src/main/java/com/radynamics/CryptoIso20022Interop/SecretsHelper.java
+/src/main/java/com/radynamics/CryptoIso20022Interop/SecretsProd.java

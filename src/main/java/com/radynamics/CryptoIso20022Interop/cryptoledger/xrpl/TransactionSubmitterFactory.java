@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm.Datab
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.xumm.XummSigner;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class TransactionSubmitterFactory implements com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory {
@@ -25,13 +24,11 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
                 return ledger.createRpcTransactionSubmitter(parentComponent);
             }
             case XummSigner.Id: {
-                var secrets = new Secrets();
-                try {
-                    secrets.read();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                var apiKey = Secrets.getXummApiKey();
+                if (apiKey == null) {
+                    throw new RuntimeException("No apiKey for Xumm available.");
                 }
-                var signer = new XummSigner(ledger, secrets.getXummApiKey());
+                var signer = new XummSigner(ledger, apiKey);
                 signer.setStorage(new DatabaseStorage());
                 signer.setVerifier(new OnchainVerifier(ledger));
                 return signer;
@@ -46,7 +43,9 @@ public class TransactionSubmitterFactory implements com.radynamics.CryptoIso2002
         var list = new ArrayList<TransactionSubmitter>();
 
         list.add(create(RpcSubmitter.Id, parentComponent));
-        list.add(create(XummSigner.Id, parentComponent));
+        if (Secrets.getXummApiKey() != null) {
+            list.add(create(XummSigner.Id, parentComponent));
+        }
 
         return list.toArray(new TransactionSubmitter[0]);
     }
