@@ -42,6 +42,7 @@ public class PayloadConverterTest {
         var json = PayloadConverter.toJson(builder.build());
 
         Assertions.assertEquals("Payment", json.getString("TransactionType"));
+        Assertions.assertEquals("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", json.getString("Account"));
         Assertions.assertEquals("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", json.getString("Destination"));
         if (destinationTag == null) {
             Assertions.assertNull(json.optJSONObject("Tag"));

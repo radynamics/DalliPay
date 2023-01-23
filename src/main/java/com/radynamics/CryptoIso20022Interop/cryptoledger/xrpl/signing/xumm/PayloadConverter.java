@@ -12,6 +12,7 @@ public class PayloadConverter {
         var json = new JSONObject();
 
         json.put("TransactionType", "Payment");
+        json.put("Account", payment.account().value());
         json.put("Destination", payment.destination().value());
         if (payment.destinationTag().isPresent()) {
             json.put("Tag", payment.destinationTag().get());
