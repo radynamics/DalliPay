@@ -52,6 +52,7 @@ public class Pain001Reader {
                 }
 
                 var t = new Payment(ledger.createTransaction());
+                t.setEndToEndId(cdtTrfTxInf.getPmtId().getEndToEndId());
                 t.setSenderAccount(senderAccount);
                 t.setSenderWallet(toValidWalletOrNull(senderAccount));
                 t.setSenderAddress(senderAddress);

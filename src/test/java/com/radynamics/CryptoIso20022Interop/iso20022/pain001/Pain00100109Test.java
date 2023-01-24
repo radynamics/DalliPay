@@ -43,6 +43,7 @@ public class Pain00100109Test {
             assertNull(t.getId());
             assertNull(t.getInvoiceId());
             assertNotNull(t.getMessages());
+            Assertions.assertEquals("Rente-EtE15052020-1014-4", t.getEndToEndId());
             Assertions.assertEquals(1, t.getMessages().length);
             Assertions.assertEquals("UEBERWEISUNG AUF DAS KONTO DES BEGU NSTIGTEN Zahlung lt. Avis", t.getMessages()[0]);
             Assertions.assertEquals(0, t.getStructuredReferences().length);

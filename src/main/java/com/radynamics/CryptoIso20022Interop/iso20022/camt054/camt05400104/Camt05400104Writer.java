@@ -136,8 +136,8 @@ public class Camt05400104Writer implements Camt054Writer {
         txDtls.setRefs(new TransactionReferences3());
         // Split due max allowed length of 35 per node (Max35Text)
         final int MAX_LEN = 35;
-        var idPart0 = trx.getId().substring(0, MAX_LEN);
-        var idPart1 = trx.getId().substring(MAX_LEN);
+        var idPart0 = trx.getEndToEndId().substring(0, MAX_LEN);
+        var idPart1 = trx.getEndToEndId().substring(MAX_LEN);
         txDtls.getRefs().setEndToEndId(idPart0);
         txDtls.getRefs().setMsgId(idPart1);
 

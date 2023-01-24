@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
+import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Xml;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.SenderHistoryValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
@@ -25,6 +26,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private Pain001Reader reader;
     private Payment[] payments = new Payment[0];
     private JButton cmdSendPayments;
+    private JButton cmdExport;
     private ProgressLabel lblLoading;
 
     public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
@@ -158,9 +161,17 @@ public class SendForm extends JPanel implements MainFormPane {
             panel3Layout.putConstraint(SpringLayout.EAST, cmdSendPayments, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdSendPayments);
 
+            cmdExport = new JButton("Export");
+            cmdExport.setMnemonic(KeyEvent.VK_E);
+            cmdExport.setPreferredSize(new Dimension(150, 35));
+            cmdExport.addActionListener(e -> export());
+            panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, cmdExport, 0, SpringLayout.VERTICAL_CENTER, cmdSendPayments);
+            panel3Layout.putConstraint(SpringLayout.EAST, cmdExport, -170, SpringLayout.EAST, cmdSendPayments);
+            panel3.add(cmdExport);
+
             lblLoading = new ProgressLabel();
             panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblLoading, 0, SpringLayout.VERTICAL_CENTER, cmdSendPayments);
-            panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdSendPayments);
+            panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
         }
@@ -207,6 +218,16 @@ public class SendForm extends JPanel implements MainFormPane {
         try (var repo = new ConfigRepo()) {
             repo.setDefaultInputDirectory(txtInput.getCurrentDirectory());
             repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+    }
+
+    private void export() {
+        try {
+            Pain001Xml.read(new FileInputStream(txtInput.getText()))
+                    .remove(table.unselectedPayments())
+                    .writeTo(com.radynamics.CryptoIso20022Interop.util.File.createWithTimeSuffix(new File(txtInput.getText())));
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }

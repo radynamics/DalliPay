@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 
 public class Payment {
     private Transaction cryptoTrx;
+    private String endToEndId;
     private Account senderAccount;
     private Account receiverAccount;
     private Address senderAddress;
@@ -210,6 +211,14 @@ public class Payment {
 
     public String getId() {
         return cryptoTrx.getId();
+    }
+
+    public String getEndToEndId() {
+        return endToEndId != null ? endToEndId : cryptoTrx.getId();
+    }
+
+    public void setEndToEndId(String endToEndId) {
+        this.endToEndId = endToEndId;
     }
 
     public StructuredReference[] getStructuredReferences() {

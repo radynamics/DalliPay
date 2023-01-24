@@ -27,6 +27,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -314,6 +315,18 @@ public class PaymentTable extends JPanel {
     public Payment[] selectedPayments() {
         return model.selectedPayments();
     }
+
+    public Payment[] unselectedPayments() {
+        var selected = selectedPayments();
+        var unselectedPayments = new ArrayList<Payment>();
+        for (var p : data) {
+            if (Arrays.stream(selected).noneMatch(o -> o == p)) {
+                unselectedPayments.add(p);
+            }
+        }
+        return unselectedPayments.toArray(new Payment[0]);
+    }
+
 
     public ValidationResult[] getValidationResults(Payment[] payments) {
         return model.getValidationResults(payments);
