@@ -13,7 +13,7 @@ public class CurrencyFormatter {
         this.currencyFormatter = new com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter(infoProviders);
     }
 
-    public void format(JLabel lbl, Currency ccy) {
+    public void format(JComponent lbl, Currency ccy) {
         // Native currencies like "XRP" don't have an issuer.
         if (ccy.getIssuer() == null) {
             lbl.setToolTipText("");
