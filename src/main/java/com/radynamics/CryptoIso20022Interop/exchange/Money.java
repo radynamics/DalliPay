@@ -75,6 +75,12 @@ public class Money {
         return Objects.equals(number, money.number) && Objects.equals(ccy, money.ccy);
     }
 
+    public boolean equalsIgnoringIssuer(Money o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return Objects.equals(number, o.number) && Objects.equals(ccy.withoutIssuer(), ccy.withoutIssuer());
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(number, ccy);

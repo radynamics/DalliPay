@@ -56,10 +56,15 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
 
             var nf = NumberFormat.getInstance(Locale.getDefault());
             // Eg: "1'000.50 USD"
-            var amt = nf.parse(words[0]);
+            var amt = nf.parse(words[0]).doubleValue();
             var ccy = new Currency(words[1]);
 
-            setAmount(Money.of(amt, ccy));
+            var m = Money.of(amt, ccy);
+            if (m.equalsIgnoringIssuer(getAmount())) {
+                return;
+            }
+
+            setAmount(m);
             raiseChanged();
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
