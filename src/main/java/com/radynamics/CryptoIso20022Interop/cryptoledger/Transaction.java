@@ -29,6 +29,8 @@ public interface Transaction {
 
     void addStructuredReference(StructuredReference structuredReference);
 
+    void setStructuredReference(StructuredReference[] structuredReferences);
+
     StructuredReference[] getStructuredReferences();
 
     void removeStructuredReferences(int index);
@@ -36,6 +38,8 @@ public interface Transaction {
     void addMessage(String message);
 
     String[] getMessages();
+
+    void setMessage(String[] messages);
 
     String getInvoiceId();
 

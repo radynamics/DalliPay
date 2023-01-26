@@ -51,7 +51,7 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
         for (var i = 0; i < results.length; i++) {
             sb.append(String.format("- %s", results[i].getMessage()));
             if (i < results.length - 1) {
-                sb.append("\n");
+                sb.append(System.lineSeparator());
             }
         }
         return sb.toString();

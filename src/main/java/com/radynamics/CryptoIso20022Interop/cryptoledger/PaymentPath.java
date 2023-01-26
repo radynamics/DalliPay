@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 public interface PaymentPath {
@@ -10,4 +11,6 @@ public interface PaymentPath {
     boolean isSet(Payment p);
 
     String getDisplayText();
+
+    Currency getCcy();
 }

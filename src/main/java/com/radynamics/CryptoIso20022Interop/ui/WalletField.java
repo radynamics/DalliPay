@@ -123,9 +123,9 @@ public class WalletField extends JPanel {
         ledger.refreshBalance(wallet, true);
 
         var sb = new StringBuilder();
-        sb.append("=== Balances ===\n");
-        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), "\n"));
-        sb.append("\n");
+        sb.append("=== Balances ===" + System.lineSeparator());
+        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), System.lineSeparator()));
+        sb.append(System.lineSeparator());
 
         var infos = new ArrayList<WalletInfo>();
         for (var p : ledger.getInfoProvider()) {
@@ -141,12 +141,12 @@ public class WalletField extends JPanel {
             var infoProviderDisplayText = wi.getProvider().getDisplayText();
             if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {
                 if (sb.length() > 0) {
-                    sb.append("\n");
+                    sb.append(System.lineSeparator());
                 }
-                sb.append(String.format("=== %s ===\n", infoProviderDisplayText));
+                sb.append(String.format("=== %s ===%s", infoProviderDisplayText, System.lineSeparator()));
             }
             var text = StringUtils.isEmpty(wi.getText()) ? "" : String.format("%s: ", wi.getText());
-            sb.append(String.format("%s%s\n", text, wi.getValue()));
+            sb.append(String.format("%s%s%s", text, wi.getValue(), System.lineSeparator()));
             lastInfoProviderDisplayText = infoProviderDisplayText;
         }
 

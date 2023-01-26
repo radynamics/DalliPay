@@ -17,7 +17,12 @@ public class PaymentPathFinder implements com.radynamics.CryptoIso20022Interop.c
 
         var list = new ArrayList<PaymentPath>();
 
-        list.add(new LedgerNativeCcyPath(currencyConverter, new Currency(p.getLedger().getNativeCcySymbol())));
+        var ledgerCcy = new Currency(p.getLedger().getNativeCcySymbol());
+        list.add(new LedgerNativeCcyPath(currencyConverter, ledgerCcy));
+
+        if (p.getUserCcy().equals(ledgerCcy)) {
+            return list.toArray(new PaymentPath[0]);
+        }
 
         var senderValid = WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet());
         var receiverValid = WalletValidator.isValidFormat(p.getLedger(), p.getReceiverWallet());

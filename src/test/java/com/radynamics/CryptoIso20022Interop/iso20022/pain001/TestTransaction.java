@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction {
     private String id;
@@ -90,6 +91,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
+    public void setStructuredReference(StructuredReference[] structuredReferences) {
+        references.clear();
+        references.addAll(List.of(structuredReferences));
+    }
+
+    @Override
     public StructuredReference[] getStructuredReferences() {
         return references.toArray(new StructuredReference[0]);
     }
@@ -102,6 +109,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     @Override
     public String[] getMessages() {
         return messages.toArray(new String[0]);
+    }
+
+    @Override
+    public void setMessage(String[] messages) {
+        this.messages.clear();
+        this.messages.addAll(List.of(messages));
     }
 
     @Override

@@ -26,6 +26,7 @@ public class IssuedCurrencyPath implements PaymentPath {
         return 10 - Math.max(rankDeduction, 0);
     }
 
+    @Override
     public Currency getCcy() {
         return ccy;
     }

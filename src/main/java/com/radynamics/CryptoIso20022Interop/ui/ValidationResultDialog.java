@@ -16,7 +16,7 @@ public class ValidationResultDialog {
 
         var sb = new StringBuilder();
         for (var vr : validations) {
-            sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
+            sb.append(String.format("- [%s] %s%s", vr.getStatus().name(), vr.getMessage(), System.lineSeparator()));
         }
         return sb.toString();
     }
@@ -36,7 +36,7 @@ public class ValidationResultDialog {
         }
 
         var sb = new StringBuilder();
-        sb.append("Do you want to continue?\n");
+        sb.append("Do you want to continue?" + System.lineSeparator());
         sb.append(toText(validationsToShow));
 
         return 0 == JOptionPane.showConfirmDialog(parentComponent, sb.toString(), "Warnings", JOptionPane.YES_NO_CANCEL_OPTION);

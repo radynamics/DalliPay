@@ -8,12 +8,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -35,7 +31,9 @@ public class PaymentDetailForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
-    private MoneyLabel lblAmountText;
+    private MoneyTextField txtAmount;
+    private StructuredReferencesTextArea txtStructuredReferences;
+    private JTextArea txtMessages;
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
 
@@ -61,7 +59,7 @@ public class PaymentDetailForm extends JDialog {
         var al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
+                accept();
             }
         };
         getRootPane().registerKeyboardAction(al, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -108,40 +106,29 @@ public class PaymentDetailForm extends JDialog {
         }
 
         {
-            int row = 0;
+            int northPad = 0;
+            final var lineHeight = 30;
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
                 var pnlFirstLine = new JPanel();
                 pnlFirstLine.setLayout(new BoxLayout(pnlFirstLine, BoxLayout.LINE_AXIS));
-                lblAmountText = new MoneyLabel(payment.getLedger());
-                pnlFirstLine.add(lblAmountText);
+                txtAmount = new MoneyTextField(payment.getLedger());
+                txtAmount.setEditable(false);
+                txtAmount.addChangedListener(() -> onAmountChanged());
+                pnlFirstLine.add(txtAmount);
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
                 {
-                    JMenuItem selected = null;
-                    var popupMenu = new JPopupMenu();
-                    var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
-                    for (var path : availablePaths) {
-                        var item = new JMenuItem(path.getDisplayText());
-                        selected = path.isSet(payment) ? item : selected;
-                        popupMenu.add(item);
-                        item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
-                    }
                     cmdPaymentPath = new JSplitButton();
-                    if (selected != null) {
-                        popupMenu.setSelected(selected);
-                        refreshPaymentPathText(selected.getText());
-                    }
+                    refreshPaymentPaths();
                     cmdPaymentPath.setVisible(actor == Actor.Sender);
-                    cmdPaymentPath.setEnabled(isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
                     cmdPaymentPath.setAlwaysPopup(true);
-                    cmdPaymentPath.setPopupMenu(popupMenu);
                     cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
                     pnlFirstLine.add(cmdPaymentPath);
                 }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
-                var enabled = isEditable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
+                var enabled = payment.isEditable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
                 lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
@@ -157,7 +144,8 @@ public class PaymentDetailForm extends JDialog {
                     lblEditExchangeRate.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
                     secondLine.add(lblEditExchangeRate);
                 }
-                anchorComponentTopLeft = createRow(row++, "Amount:", pnlFirstLine, secondLine, false, 7);
+                anchorComponentTopLeft = createRow(northPad, "Amount:", pnlFirstLine, secondLine, false, 7);
+                northPad += lineHeight + 4;
             }
             {
                 var lbl = new WalletLabel();
@@ -166,7 +154,8 @@ public class PaymentDetailForm extends JDialog {
                         .setAccount(payment.getSenderAccount())
                         .setAddress(payment.getSenderAddress())
                         .setWalletInfoAggregator(walletInfoAggregator);
-                createRow(row++, "Sender:", lbl, null, false);
+                createRow(northPad, "Sender:", lbl, null, false);
+                northPad += lineHeight;
             }
             {
                 var lbl = new WalletLabel();
@@ -175,7 +164,8 @@ public class PaymentDetailForm extends JDialog {
                         .setAccount(payment.getReceiverAccount())
                         .setAddress(payment.getReceiverAddress())
                         .setWalletInfoAggregator(walletInfoAggregator);
-                createRow(row++, "Receiver:", lbl, null, false);
+                createRow(northPad, "Receiver:", lbl, null, false);
+                northPad += lineHeight;
             }
             {
                 JLabel secondLine = null;
@@ -190,51 +180,93 @@ public class PaymentDetailForm extends JDialog {
                         }
                     });
                 }
-                createRow(row++, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getBooked())), secondLine);
+                createRow(northPad, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getBooked())), secondLine);
+                northPad += lineHeight;
             }
             {
-                var sb = new StringBuilder();
-                for (var ref : payment.getStructuredReferences()) {
-                    sb.append(String.format("%s\n", ref.getUnformatted()));
-                }
-                var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(row++, "References:", txt, null);
+                txtStructuredReferences = new StructuredReferencesTextArea();
+                formatTextArea(txtStructuredReferences, 1);
+                txtStructuredReferences.setValue(payment.getStructuredReferences());
+                txtStructuredReferences.setEditable(false);
+                createRow(northPad, "References:", new JScrollPane(txtStructuredReferences), null);
+                northPad += lineHeight;
             }
             {
-                var sb = new StringBuilder();
-                for (var m : payment.getMessages()) {
-                    sb.append(String.format("%s\n", m));
-                }
-                var txt = createTextArea(3, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(row++, "Messages:", txt, null);
-                row++;
+                txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
+                txtMessages.setEditable(false);
+                createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
+                northPad += lineHeight * 2;
             }
             {
                 var sb = new StringBuilder();
                 if (payment.getTransmissionError() != null) {
-                    sb.append(String.format("%s\n", payment.getTransmissionError().getMessage()));
+                    sb.append(String.format("%s%s", payment.getTransmissionError().getMessage(), System.lineSeparator()));
                 }
                 var validations = validator.validate(payment);
                 ValidationResultUtils.sortDescending(validations);
                 for (var vr : validations) {
-                    sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
+                    sb.append(String.format("- [%s] %s%s", vr.getStatus().name(), vr.getMessage(), System.lineSeparator()));
                 }
                 var pnl = new JPanel();
                 pnl.setLayout(new BorderLayout());
-                pnl.add(createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString())));
-                createRow(row++, "Issues:", pnl, null, true);
+                var txt = createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString()));
+                pnl.add(new JScrollPane(txt));
+                createRow(northPad, "Issues:", pnl, null, true);
+                northPad += lineHeight;
             }
         }
         {
             var cmd = new JButton("Close");
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
-                close();
+                accept();
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private void accept() {
+        applyUIValues();
+        close();
+    }
+
+    private void applyUIValues() {
+        payment.setStructuredReference(txtStructuredReferences.getValue());
+        payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
+    }
+
+    private void onAmountChanged() {
+        payment.setAmount(txtAmount.getAmount());
+        // Refresh paymentPath based on user entered currency. Eventually both sender/receiver use a common currency.
+        payment.refreshPaymentPath(currencyConverter);
+
+        // refresh all to set currently used as selected
+        refreshPaymentPaths();
+        var pair = new CurrencyPair(new Currency(payment.getLedger().getNativeCcySymbol()), payment.getUserCcy());
+        payment.setExchangeRate(ExchangeRate.getOrNull(exchangeRateProvider.latestRates(), pair));
+        refreshLedgerAmountsText();
+    }
+
+    private void refreshPaymentPaths() {
+        JMenuItem selected = null;
+        var popupMenu = new JPopupMenu();
+        var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
+        for (var path : availablePaths) {
+            var item = new JMenuItem(path.getDisplayText());
+            selected = path.isSet(payment) ? item : selected;
+            popupMenu.add(item);
+            item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
+        }
+
+        if (selected != null) {
+            popupMenu.setSelected(selected);
+            refreshPaymentPathText(selected.getText());
+        }
+
+        cmdPaymentPath.setEnabled(payment.isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
+        cmdPaymentPath.setPopupMenu(popupMenu);
     }
 
     private void apply(PaymentPath path) {
@@ -249,8 +281,11 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshAmountsText() {
-        lblAmountText.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
+        txtAmount.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
+        refreshLedgerAmountsText();
+    }
 
+    private void refreshLedgerAmountsText() {
         lblLedgerAmount.setVisible(!payment.isUserCcyEqualTransactionCcy());
         lblEditExchangeRate.setVisible(!payment.isUserCcyEqualTransactionCcy());
 
@@ -298,45 +333,51 @@ public class PaymentDetailForm extends JDialog {
         }
     }
 
-    private JScrollPane createTextArea(int rows, String text) {
-        var txt = new JTextArea(rows, 39);
-        txt.setLineWrap(true);
-        txt.setEditable(false);
+    private JTextArea createTextArea(int rows, String text) {
+        var txt = new JTextArea();
+        formatTextArea(txt, rows);
         txt.setText(text);
         txt.setCaretPosition(0);
-        return new JScrollPane(txt);
+        return txt;
+    }
+
+    private static void formatTextArea(JTextArea txt, int rows) {
+        txt.setRows(rows);
+        txt.setColumns(39);
+        txt.setLineWrap(true);
+        txt.setEditable(false);
     }
 
     private void close() {
         dispose();
     }
 
-    private Component createRow(int row, String labelText, Component firstLine, String contentSecondLine) {
+    private Component createRow(int northPad, String labelText, Component firstLine, String contentSecondLine) {
         JLabel secondLine = null;
         if (contentSecondLine != null) {
             secondLine = new JLabel(contentSecondLine);
             Utils.formatSecondaryInfo(secondLine);
         }
-        return createRow(row, labelText, firstLine, secondLine, false);
+        return createRow(northPad, labelText, firstLine, secondLine, false);
     }
 
-    private Component createRow(int row, String labelText, String contentFirstLine, Component secondLine) {
-        return createRow(row, labelText, new JLabel(contentFirstLine), secondLine, false);
+    private Component createRow(int northPad, String labelText, String contentFirstLine, Component secondLine) {
+        return createRow(northPad, labelText, new JLabel(contentFirstLine), secondLine, false);
     }
 
-    private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight) {
-        return createRow(row, labelText, firstLine, secondLine, growBottomRight, 0);
+    private Component createRow(int northPad, String labelText, Component firstLine, Component secondLine, boolean growBottomRight) {
+        return createRow(northPad, labelText, firstLine, secondLine, growBottomRight, 0);
     }
 
-    private Component createRow(int row, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
+    private Component createRow(int northPad, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
         var lbl = new JLabel(labelText);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
-        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(row), SpringLayout.NORTH, pnlContent);
+        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, northPad, SpringLayout.NORTH, pnlContent);
         lbl.setOpaque(true);
         pnlContent.add(lbl);
 
         panel1Layout.putConstraint(SpringLayout.WEST, firstLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-        panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, getNorthPad(row), SpringLayout.NORTH, pnlContent);
+        panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, northPad, SpringLayout.NORTH, pnlContent);
         if (growBottomRight) {
             panel1Layout.putConstraint(SpringLayout.EAST, pnlContent, 0, SpringLayout.EAST, firstLine);
             panel1Layout.putConstraint(SpringLayout.SOUTH, pnlContent, 0, SpringLayout.SOUTH, firstLine);
@@ -345,7 +386,7 @@ public class PaymentDetailForm extends JDialog {
 
         if (secondLine != null) {
             panel1Layout.putConstraint(SpringLayout.WEST, secondLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
-            panel1Layout.putConstraint(SpringLayout.NORTH, secondLine, getNorthPad(row) + 13 + secondLineNorthOffset, SpringLayout.NORTH, pnlContent);
+            panel1Layout.putConstraint(SpringLayout.NORTH, secondLine, northPad + 13 + secondLineNorthOffset, SpringLayout.NORTH, pnlContent);
             pnlContent.add(secondLine);
         }
 
@@ -357,20 +398,11 @@ public class PaymentDetailForm extends JDialog {
         return lbl;
     }
 
-    private static int getNorthPad(int line) {
-        final var lineHeight = 30;
-        return line * lineHeight;
-    }
-
     private void setPaymentChanged(boolean changed) {
         this.paymentChanged = changed;
     }
 
     public boolean getPaymentChanged() {
         return paymentChanged;
-    }
-
-    private boolean isEditable() {
-        return payment.getTransmission() != TransmissionState.Waiting;
     }
 }

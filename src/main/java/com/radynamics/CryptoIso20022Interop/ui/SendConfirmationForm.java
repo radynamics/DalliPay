@@ -398,15 +398,15 @@ public class SendConfirmationForm extends JDialog {
 
         for (var i = 0; i < payments.length; i++) {
             if (sb.length() > 0) {
-                sb.append("\n");
+                sb.append(System.lineSeparator());
             }
             var p = payments[i];
             var paymentHeader = p.getReceiverAddress() == null
                     ? AccountFormatter.format(p.getReceiverAccount())
                     : AddressFormatter.formatSingleLine(p.getReceiverAddress());
-            sb.append(String.format("%s. %s, %s\n", i + 1, paymentHeader, AmountFormatter.formatAmtWithCcy(p)));
+            sb.append(String.format("%s. %s, %s%s", i + 1, paymentHeader, AmountFormatter.formatAmtWithCcy(p), System.lineSeparator()));
             for (var fee : p.getFees()) {
-                sb.append(String.format("%s: %s\n", MoneyFormatter.formatLedger(fee.getAmount()), FeeHelper.getText(fee.getType())));
+                sb.append(String.format("%s: %s%s", MoneyFormatter.formatLedger(fee.getAmount()), FeeHelper.getText(fee.getType()), System.lineSeparator()));
             }
         }
 

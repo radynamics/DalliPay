@@ -13,7 +13,7 @@ public class CurrencyFormatter {
         this.currencyFormatter = new com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter(infoProviders);
     }
 
-    public void format(JLabel lbl, Currency ccy) {
+    public void format(JComponent lbl, Currency ccy) {
         // Native currencies like "XRP" don't have an issuer.
         if (ccy.getIssuer() == null) {
             lbl.setToolTipText("");
@@ -23,7 +23,7 @@ public class CurrencyFormatter {
 
         var tooltip = String.format("Issued by %s", currencyFormatter.formatIssuer(ccy));
         if (ccy.getTransferFee() != 0) {
-            tooltip += "\nTransfer fee: " + com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter.formatTransferFee(ccy);
+            tooltip += System.lineSeparator() + "Transfer fee: " + com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter.formatTransferFee(ccy);
         }
         lbl.setToolTipText(tooltip);
 
