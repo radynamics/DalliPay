@@ -75,6 +75,7 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
 
     public void setEditable(boolean editable) {
         ctrl.setEditable(editable);
+        ctrl.setFocusable(editable);
     }
 
     @Override
