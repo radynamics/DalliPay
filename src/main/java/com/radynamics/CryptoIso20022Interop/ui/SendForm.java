@@ -246,7 +246,9 @@ public class SendForm extends JPanel implements MainFormPane {
             if (failed.size() != 0) {
                 sb.append(" Following payments could not be included:" + System.lineSeparator());
                 for (var f : failed) {
-                    sb.append(String.format("- %s %s%s", f.getDisplayText(), AddressFormatter.formatSingleLine(f.getReceiverAddress()), System.lineSeparator()));
+                    // Manually created payments may don't have a receiver address.
+                    var receiverText = f.getReceiverAddress() == null ? "unknown" : AddressFormatter.formatSingleLine(f.getReceiverAddress());
+                    sb.append(String.format("- %s %s%s", f.getDisplayText(), receiverText, System.lineSeparator()));
                 }
             }
             JOptionPane.showMessageDialog(this, sb.toString(), "CryptoIso20022 Interop",
