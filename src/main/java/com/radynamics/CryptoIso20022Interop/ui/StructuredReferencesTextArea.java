@@ -16,27 +16,23 @@ public class StructuredReferencesTextArea extends JTextArea {
     }
 
     private String toText() {
-        var sb = new StringBuilder();
+        var lines = new ArrayList<String>();
         for (var ref : structuredReferences) {
-            sb.append(String.format("%s%s", ref.getUnformatted(), System.lineSeparator()));
+            lines.add(ref.getUnformatted());
         }
-        return Utils.removeEndingLineSeparator(sb.toString());
+        return Utils.toMultilineText(lines.toArray(new String[0]));
     }
 
     private StructuredReference[] fromText() {
-        var words = getText().split("\\r?\\n");
-        for (var i = 0; i < words.length; i++) {
-            words[i] = StringUtils.deleteWhitespace(words[i]);
-        }
-
         var refs = new ArrayList<StructuredReference>();
-        for (var word : words) {
-            if (word.length() == 0) {
+        for (var word : Utils.fromMultilineText(getText())) {
+            var unformattedRef = StringUtils.deleteWhitespace(word);
+            if (unformattedRef.length() == 0) {
                 continue;
             }
 
-            var type = StructuredReferenceFactory.detectType(word);
-            refs.add(StructuredReferenceFactory.create(type, word));
+            var type = StructuredReferenceFactory.detectType(unformattedRef);
+            refs.add(StructuredReferenceFactory.create(type, unformattedRef));
         }
 
         return refs.toArray(new StructuredReference[0]);

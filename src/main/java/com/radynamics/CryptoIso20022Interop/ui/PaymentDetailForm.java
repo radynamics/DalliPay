@@ -33,6 +33,7 @@ public class PaymentDetailForm extends JDialog {
     private JLabel lblLedgerAmount;
     private MoneyTextField txtAmount;
     private StructuredReferencesTextArea txtStructuredReferences;
+    private JTextArea txtMessages;
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
 
@@ -191,12 +192,9 @@ public class PaymentDetailForm extends JDialog {
                 northPad += lineHeight;
             }
             {
-                var sb = new StringBuilder();
-                for (var m : payment.getMessages()) {
-                    sb.append(String.format("%s%s", m, System.lineSeparator()));
-                }
-                var txt = createTextArea(3, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(northPad, "Messages:", new JScrollPane(txt), null);
+                txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
+                txtMessages.setEditable(false);
+                createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
                 northPad += lineHeight * 2;
             }
             {
@@ -233,9 +231,10 @@ public class PaymentDetailForm extends JDialog {
         applyUIValues();
         close();
     }
-    
+
     private void applyUIValues() {
         payment.setStructuredReference(txtStructuredReferences.getValue());
+        payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
     }
 
     private void onAmountChanged() {

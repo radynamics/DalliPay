@@ -79,6 +79,18 @@ public final class Utils {
         return text != null && text.endsWith(System.lineSeparator()) ? text.substring(0, text.lastIndexOf(System.lineSeparator())) : text;
     }
 
+    public static String toMultilineText(String[] lines) {
+        var sb = new StringBuilder();
+        for (var l : lines) {
+            sb.append(String.format("%s%s", l, System.lineSeparator()));
+        }
+        return removeEndingLineSeparator(sb.toString());
+    }
+
+    public static String[] fromMultilineText(String text) {
+        return text.split("\\r?\\n");
+    }
+
     public static JLabel formatSecondaryInfo(JLabel lbl) {
         lbl.putClientProperty("FlatLaf.styleClass", "small");
         lbl.setForeground(Consts.ColorSmallInfo);
