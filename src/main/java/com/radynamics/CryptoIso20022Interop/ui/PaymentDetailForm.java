@@ -184,7 +184,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 var sb = new StringBuilder();
                 for (var ref : payment.getStructuredReferences()) {
-                    sb.append(String.format("%s\n", ref.getUnformatted()));
+                    sb.append(String.format("%s%s", ref.getUnformatted(), System.lineSeparator()));
                 }
                 var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(northPad, "References:", txt, null);
@@ -193,7 +193,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 var sb = new StringBuilder();
                 for (var m : payment.getMessages()) {
-                    sb.append(String.format("%s\n", m));
+                    sb.append(String.format("%s%s", m, System.lineSeparator()));
                 }
                 var txt = createTextArea(3, Utils.removeEndingLineSeparator(sb.toString()));
                 createRow(northPad, "Messages:", txt, null);
@@ -202,12 +202,12 @@ public class PaymentDetailForm extends JDialog {
             {
                 var sb = new StringBuilder();
                 if (payment.getTransmissionError() != null) {
-                    sb.append(String.format("%s\n", payment.getTransmissionError().getMessage()));
+                    sb.append(String.format("%s%s", payment.getTransmissionError().getMessage(), System.lineSeparator()));
                 }
                 var validations = validator.validate(payment);
                 ValidationResultUtils.sortDescending(validations);
                 for (var vr : validations) {
-                    sb.append(String.format("- [%s] %s\n", vr.getStatus().name(), vr.getMessage()));
+                    sb.append(String.format("- [%s] %s%s", vr.getStatus().name(), vr.getMessage(), System.lineSeparator()));
                 }
                 var pnl = new JPanel();
                 pnl.setLayout(new BorderLayout());

@@ -23,7 +23,7 @@ public class CurrencyFormatter {
 
         var tooltip = String.format("Issued by %s", currencyFormatter.formatIssuer(ccy));
         if (ccy.getTransferFee() != 0) {
-            tooltip += "\nTransfer fee: " + com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter.formatTransferFee(ccy);
+            tooltip += System.lineSeparator() + "Transfer fee: " + com.radynamics.CryptoIso20022Interop.exchange.CurrencyFormatter.formatTransferFee(ccy);
         }
         lbl.setToolTipText(tooltip);
 

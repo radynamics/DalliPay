@@ -13,7 +13,7 @@ public final class ExceptionDialog {
 
     public static void show(Component parentComponent, Throwable e, String prefix) {
         var errorMsg = e.getMessage() == null || e.getMessage().length() == 0 ? "Unknown exception occured. See error logs for details" : e.getMessage();
-        var msg = StringUtils.isEmpty(prefix) ? errorMsg : String.format("%s\n%s", prefix, errorMsg);
+        var msg = StringUtils.isEmpty(prefix) ? errorMsg : String.format("%s%s%s", prefix, System.lineSeparator(), errorMsg);
         LogManager.getLogger(ExceptionDialog.class).error(msg, e);
         JOptionPane.showMessageDialog(parentComponent, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
