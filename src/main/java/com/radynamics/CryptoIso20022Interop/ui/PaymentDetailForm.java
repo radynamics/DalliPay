@@ -144,7 +144,7 @@ public class PaymentDetailForm extends JDialog {
                     secondLine.add(lblEditExchangeRate);
                 }
                 anchorComponentTopLeft = createRow(northPad, "Amount:", pnlFirstLine, secondLine, false, 7);
-                northPad += lineHeight;
+                northPad += lineHeight + 4;
             }
             {
                 var lbl = new WalletLabel();
