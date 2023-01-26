@@ -32,6 +32,7 @@ public class PaymentDetailForm extends JDialog {
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
     private MoneyTextField txtAmount;
+    private StructuredReferencesTextArea txtStructuredReferences;
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
 
@@ -57,7 +58,7 @@ public class PaymentDetailForm extends JDialog {
         var al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
+                accept();
             }
         };
         getRootPane().registerKeyboardAction(al, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -182,12 +183,11 @@ public class PaymentDetailForm extends JDialog {
                 northPad += lineHeight;
             }
             {
-                var sb = new StringBuilder();
-                for (var ref : payment.getStructuredReferences()) {
-                    sb.append(String.format("%s%s", ref.getUnformatted(), System.lineSeparator()));
-                }
-                var txt = createTextArea(1, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(northPad, "References:", txt, null);
+                txtStructuredReferences = new StructuredReferencesTextArea();
+                formatTextArea(txtStructuredReferences, 1);
+                txtStructuredReferences.setValue(payment.getStructuredReferences());
+                txtStructuredReferences.setEditable(false);
+                createRow(northPad, "References:", new JScrollPane(txtStructuredReferences), null);
                 northPad += lineHeight;
             }
             {
@@ -196,7 +196,7 @@ public class PaymentDetailForm extends JDialog {
                     sb.append(String.format("%s%s", m, System.lineSeparator()));
                 }
                 var txt = createTextArea(3, Utils.removeEndingLineSeparator(sb.toString()));
-                createRow(northPad, "Messages:", txt, null);
+                createRow(northPad, "Messages:", new JScrollPane(txt), null);
                 northPad += lineHeight * 2;
             }
             {
@@ -211,7 +211,8 @@ public class PaymentDetailForm extends JDialog {
                 }
                 var pnl = new JPanel();
                 pnl.setLayout(new BorderLayout());
-                pnl.add(createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString())));
+                var txt = createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString()));
+                pnl.add(new JScrollPane(txt));
                 createRow(northPad, "Issues:", pnl, null, true);
                 northPad += lineHeight;
             }
@@ -220,12 +221,21 @@ public class PaymentDetailForm extends JDialog {
             var cmd = new JButton("Close");
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
-                close();
+                accept();
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmd, 0, SpringLayout.EAST, panel3);
             panel3Layout.putConstraint(SpringLayout.SOUTH, cmd, 0, SpringLayout.SOUTH, panel3);
             panel3.add(cmd);
         }
+    }
+
+    private void accept() {
+        applyUIValues();
+        close();
+    }
+    
+    private void applyUIValues() {
+        payment.setStructuredReference(txtStructuredReferences.getValue());
     }
 
     private void onAmountChanged() {
@@ -324,13 +334,19 @@ public class PaymentDetailForm extends JDialog {
         }
     }
 
-    private JScrollPane createTextArea(int rows, String text) {
-        var txt = new JTextArea(rows, 39);
-        txt.setLineWrap(true);
-        txt.setEditable(false);
+    private JTextArea createTextArea(int rows, String text) {
+        var txt = new JTextArea();
+        formatTextArea(txt, rows);
         txt.setText(text);
         txt.setCaretPosition(0);
-        return new JScrollPane(txt);
+        return txt;
+    }
+
+    private static void formatTextArea(JTextArea txt, int rows) {
+        txt.setRows(rows);
+        txt.setColumns(39);
+        txt.setLineWrap(true);
+        txt.setEditable(false);
     }
 
     private void close() {
