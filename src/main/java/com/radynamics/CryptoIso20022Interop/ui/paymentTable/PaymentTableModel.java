@@ -166,7 +166,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return false;
         }
         var item = data[row];
-        if (item.payment.getTransmission() == TransmissionState.Waiting) {
+        if (!item.payment.isEditable()) {
             return false;
         }
         if (col == getColumnIndex(COL_SELECTOR)) {

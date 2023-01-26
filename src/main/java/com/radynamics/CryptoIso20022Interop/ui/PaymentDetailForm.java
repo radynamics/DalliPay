@@ -8,7 +8,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
 import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
@@ -127,7 +126,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
-                var enabled = isEditable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
+                var enabled = payment.isEditable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
                 lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
@@ -257,7 +256,7 @@ public class PaymentDetailForm extends JDialog {
             refreshPaymentPathText(selected.getText());
         }
 
-        cmdPaymentPath.setEnabled(isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
+        cmdPaymentPath.setEnabled(payment.isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
         cmdPaymentPath.setPopupMenu(popupMenu);
     }
 
@@ -390,9 +389,5 @@ public class PaymentDetailForm extends JDialog {
 
     public boolean getPaymentChanged() {
         return paymentChanged;
-    }
-
-    private boolean isEditable() {
-        return payment.getTransmission() != TransmissionState.Waiting;
     }
 }

@@ -299,4 +299,8 @@ public class Payment {
         setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
         pathSameCcyCode.apply(this);
     }
+
+    public boolean isEditable() {
+        return getTransmission() != TransmissionState.Waiting;
+    }
 }
