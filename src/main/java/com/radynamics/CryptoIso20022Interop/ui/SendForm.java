@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -31,9 +32,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class SendForm extends JPanel implements MainFormPane {
     private final static Logger log = LogManager.getLogger(Database.class);
@@ -163,7 +166,7 @@ public class SendForm extends JPanel implements MainFormPane {
             panel3Layout.putConstraint(SpringLayout.EAST, cmdSendPayments, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdSendPayments);
 
-            cmdExport = new JButton("Export");
+            cmdExport = new JButton("Export pending");
             cmdExport.setMnemonic(KeyEvent.VK_E);
             cmdExport.setPreferredSize(new Dimension(150, 35));
             cmdExport.addActionListener(e -> export());
@@ -230,7 +233,8 @@ public class SendForm extends JPanel implements MainFormPane {
             var failed = new ArrayList<Payment>();
             var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
             var countBefore = pain001.countCdtTrfTxInf();
-            for (var p : table.unselectedPayments()) {
+            var sent = Arrays.stream(payments).filter(o -> o.getTransmission() == TransmissionState.Success).collect(Collectors.toList());
+            for (var p : sent) {
                 if (pain001.isRemovable(p)) {
                     pain001.remove(p);
                 } else {
