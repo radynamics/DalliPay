@@ -59,14 +59,22 @@ public class Pain001Xml {
         return this;
     }
 
-    public Pain001Xml remove(Payment p) throws XPathExpressionException {
+    public boolean isRemovable(Payment p) throws XPathExpressionException {
+        return getCdtTrfTxInf(p) != null;
+    }
+
+    private Node getCdtTrfTxInf(Payment p) throws XPathExpressionException {
         var expression = createXPath().compile(String.format("//%s:EndToEndId[text()='%s']", nsPrefix, p.getEndToEndId()));
         var node = (Node) expression.evaluate(document, XPathConstants.NODE);
-        if (node == null) {
+        return node == null ? null : node.getParentNode().getParentNode();
+    }
+
+    public Pain001Xml remove(Payment p) throws XPathExpressionException {
+        var nodeCdtTrfTxInf = getCdtTrfTxInf(p);
+        if (nodeCdtTrfTxInf == null) {
             return this;
         }
 
-        var nodeCdtTrfTxInf = node.getParentNode().getParentNode();
         var nodePmtInf = (Element) nodeCdtTrfTxInf.getParentNode();
         nodePmtInf.removeChild(nodeCdtTrfTxInf);
 
@@ -105,6 +113,11 @@ public class Pain001Xml {
         var xpath = XPathFactory.newInstance().newXPath();
         xpath.setNamespaceContext(nsCtx);
         return xpath;
+    }
+
+    public int countCdtTrfTxInf() throws XPathExpressionException {
+        var expression = createXPath().compile(String.format("count(//%s:CdtTrfTxInf)", nsPrefix));
+        return ((Double) expression.evaluate(document, XPathConstants.NUMBER)).intValue();
     }
 
     public void writeTo(File file) throws TransformerException, IOException {

@@ -7,6 +7,7 @@ import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
@@ -29,6 +30,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -225,9 +227,30 @@ public class SendForm extends JPanel implements MainFormPane {
 
     private void export() {
         try {
-            Pain001Xml.read(new FileInputStream(txtInput.getText()))
-                    .remove(table.unselectedPayments())
-                    .writeTo(com.radynamics.CryptoIso20022Interop.util.File.createWithTimeSuffix(new File(txtInput.getText())));
+            var failed = new ArrayList<Payment>();
+            var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
+            var countBefore = pain001.countCdtTrfTxInf();
+            for (var p : table.unselectedPayments()) {
+                if (pain001.isRemovable(p)) {
+                    pain001.remove(p);
+                } else {
+                    failed.add(p);
+                }
+            }
+
+            var file = com.radynamics.CryptoIso20022Interop.util.File.createWithTimeSuffix(new File(txtInput.getText()));
+            pain001.writeTo(file);
+
+            var sb = new StringBuilder();
+            sb.append(String.format("Successfully exported %s/%s payments to %s.", pain001.countCdtTrfTxInf(), countBefore, file.getAbsolutePath()));
+            if (failed.size() != 0) {
+                sb.append(" Following payments could not be included:" + System.lineSeparator());
+                for (var f : failed) {
+                    sb.append(String.format("- %s %s%s", f.getDisplayText(), AddressFormatter.formatSingleLine(f.getReceiverAddress()), System.lineSeparator()));
+                }
+            }
+            JOptionPane.showMessageDialog(this, sb.toString(), "CryptoIso20022 Interop",
+                    failed.size() == 0 ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
