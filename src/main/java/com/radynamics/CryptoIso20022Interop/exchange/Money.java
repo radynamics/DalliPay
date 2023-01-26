@@ -78,7 +78,7 @@ public class Money {
     public boolean equalsIgnoringIssuer(Money o) {
         if (this == o) return true;
         if (o == null) return false;
-        return Objects.equals(number, o.number) && Objects.equals(ccy.withoutIssuer(), ccy.withoutIssuer());
+        return Objects.equals(number, o.number) && Objects.equals(ccy.withoutIssuer(), o.getCcy().withoutIssuer());
     }
 
     @Override
