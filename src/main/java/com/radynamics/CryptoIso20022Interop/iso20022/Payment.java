@@ -11,6 +11,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.Structure
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 public class Payment {
     private Transaction cryptoTrx;
@@ -283,5 +284,19 @@ public class Payment {
 
     public boolean is(Transaction t) {
         return cryptoTrx == t;
+    }
+
+    public void refreshPaymentPath(CurrencyConverter currencyConverter) {
+        var availablePaths = getLedger().createPaymentPathFinder().find(currencyConverter, this);
+        var pathSameCcyCode = Arrays.stream(availablePaths)
+                .filter(o -> o.getCcy().withoutIssuer().equals(getUserCcy()))
+                .findFirst()
+                .orElse(null);
+        if (pathSameCcyCode == null) {
+            return;
+        }
+
+        setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
+        pathSameCcyCode.apply(this);
     }
 }

@@ -10,10 +10,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
-import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
-import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
@@ -35,7 +32,7 @@ public class PaymentDetailForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
-    private MoneyLabel lblAmountText;
+    private MoneyTextField txtAmount;
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
 
@@ -114,28 +111,16 @@ public class PaymentDetailForm extends JDialog {
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
                 var pnlFirstLine = new JPanel();
                 pnlFirstLine.setLayout(new BoxLayout(pnlFirstLine, BoxLayout.LINE_AXIS));
-                lblAmountText = new MoneyLabel(payment.getLedger());
-                pnlFirstLine.add(lblAmountText);
+                txtAmount = new MoneyTextField(payment.getLedger());
+                txtAmount.setEditable(false);
+                txtAmount.addChangedListener(() -> onAmountChanged());
+                pnlFirstLine.add(txtAmount);
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
                 {
-                    JMenuItem selected = null;
-                    var popupMenu = new JPopupMenu();
-                    var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
-                    for (var path : availablePaths) {
-                        var item = new JMenuItem(path.getDisplayText());
-                        selected = path.isSet(payment) ? item : selected;
-                        popupMenu.add(item);
-                        item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
-                    }
                     cmdPaymentPath = new JSplitButton();
-                    if (selected != null) {
-                        popupMenu.setSelected(selected);
-                        refreshPaymentPathText(selected.getText());
-                    }
+                    refreshPaymentPaths();
                     cmdPaymentPath.setVisible(actor == Actor.Sender);
-                    cmdPaymentPath.setEnabled(isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
                     cmdPaymentPath.setAlwaysPopup(true);
-                    cmdPaymentPath.setPopupMenu(popupMenu);
                     cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
                     pnlFirstLine.add(cmdPaymentPath);
                 }
@@ -237,6 +222,38 @@ public class PaymentDetailForm extends JDialog {
         }
     }
 
+    private void onAmountChanged() {
+        payment.setAmount(txtAmount.getAmount());
+        // Refresh paymentPath based on user entered currency. Eventually both sender/receiver use a common currency.
+        payment.refreshPaymentPath(currencyConverter);
+
+        // refresh all to set currently used as selected
+        refreshPaymentPaths();
+        var pair = new CurrencyPair(new Currency(payment.getLedger().getNativeCcySymbol()), payment.getUserCcy());
+        payment.setExchangeRate(ExchangeRate.getOrNull(exchangeRateProvider.latestRates(), pair));
+        refreshLedgerAmountsText();
+    }
+
+    private void refreshPaymentPaths() {
+        JMenuItem selected = null;
+        var popupMenu = new JPopupMenu();
+        var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
+        for (var path : availablePaths) {
+            var item = new JMenuItem(path.getDisplayText());
+            selected = path.isSet(payment) ? item : selected;
+            popupMenu.add(item);
+            item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
+        }
+
+        if (selected != null) {
+            popupMenu.setSelected(selected);
+            refreshPaymentPathText(selected.getText());
+        }
+
+        cmdPaymentPath.setEnabled(isEditable() && availablePaths.length > 1 && payment.getBooked() == null);
+        cmdPaymentPath.setPopupMenu(popupMenu);
+    }
+
     private void apply(PaymentPath path) {
         path.apply(payment);
         refreshPaymentPathText(path.getDisplayText());
@@ -249,8 +266,11 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshAmountsText() {
-        lblAmountText.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
+        txtAmount.setAmount(Money.of(payment.getAmount(), payment.getUserCcy()));
+        refreshLedgerAmountsText();
+    }
 
+    private void refreshLedgerAmountsText() {
         lblLedgerAmount.setVisible(!payment.isUserCcyEqualTransactionCcy());
         lblEditExchangeRate.setVisible(!payment.isUserCcyEqualTransactionCcy());
 
