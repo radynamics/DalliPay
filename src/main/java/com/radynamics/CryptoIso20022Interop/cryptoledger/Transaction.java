@@ -29,6 +29,8 @@ public interface Transaction {
 
     void addStructuredReference(StructuredReference structuredReference);
 
+    void setStructuredReference(StructuredReference[] structuredReferences);
+
     StructuredReference[] getStructuredReferences();
 
     void removeStructuredReferences(int index);

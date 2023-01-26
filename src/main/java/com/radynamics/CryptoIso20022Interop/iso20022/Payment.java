@@ -245,6 +245,10 @@ public class Payment {
         cryptoTrx.addStructuredReference(structuredReference);
     }
 
+    public void setStructuredReference(StructuredReference[] structuredReferences) {
+        cryptoTrx.setStructuredReference(structuredReferences);
+    }
+
     public void addMessage(String message) {
         cryptoTrx.addMessage(message);
     }
