@@ -116,6 +116,12 @@ public class Transaction implements com.radynamics.CryptoIso20022Interop.cryptol
     }
 
     @Override
+    public void setMessage(String[] messages) {
+        this.messages.clear();
+        this.messages.addAll(List.of(messages));
+    }
+
+    @Override
     public String getInvoiceId() {
         return invoiceId;
     }

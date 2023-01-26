@@ -39,6 +39,8 @@ public interface Transaction {
 
     String[] getMessages();
 
+    void setMessage(String[] messages);
+
     String getInvoiceId();
 
     void setInvoiceId(String s);

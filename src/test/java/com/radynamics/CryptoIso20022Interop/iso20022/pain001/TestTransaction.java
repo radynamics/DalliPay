@@ -112,6 +112,12 @@ public class TestTransaction implements com.radynamics.CryptoIso20022Interop.cry
     }
 
     @Override
+    public void setMessage(String[] messages) {
+        this.messages.clear();
+        this.messages.addAll(List.of(messages));
+    }
+
+    @Override
     public String getInvoiceId() {
         return invoiceId;
     }
