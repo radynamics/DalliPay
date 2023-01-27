@@ -9,8 +9,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 public class AddressCellRenderer extends JLabel implements TableCellRenderer {
-    private final AddressFormatter af = new AddressFormatter();
-
     public AddressCellRenderer() {
         setOpaque(true);
     }
@@ -23,9 +21,9 @@ public class AddressCellRenderer extends JLabel implements TableCellRenderer {
             var r = new AccountCellRenderer();
             return r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
-        
+
         var obj = (Address) value;
-        setText(af.formatSingleLine(obj));
+        setText(AddressFormatter.formatSingleLine(obj));
         return this;
     }
 }
