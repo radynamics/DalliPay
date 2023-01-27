@@ -2,7 +2,6 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -10,11 +9,9 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 
 public class AmountCellRenderer extends JLabel implements TableCellRenderer {
-    private TransformInstruction transformInstruction;
-    private TableColumn objectColumn;
+    private final TableColumn objectColumn;
 
-    public AmountCellRenderer(TransformInstruction transformInstruction, TableColumn objectColumn) {
-        this.transformInstruction = transformInstruction;
+    public AmountCellRenderer(TableColumn objectColumn) {
         this.objectColumn = objectColumn;
 
         setOpaque(true);
