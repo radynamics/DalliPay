@@ -72,9 +72,7 @@ public class DataLoader {
         var loadWalletInfo = loadWalletInfoAsync(item);
         var loadExchangeRate = new CompletableFuture<Void>();
         if (model.getActor() == Actor.Receiver) {
-            loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> {
-                model.onTransactionChanged(p);
-            });
+            loadExchangeRate = exchangeRateLoader.loadAsync(p).thenAccept(t -> model.onTransactionChanged(p));
         } else {
             loadExchangeRate.complete(null);
         }
@@ -85,9 +83,7 @@ public class DataLoader {
             CompletableFuture.allOf(loadBalancesAndHistory).join();
             CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
             // Validation can start after loadExchangeRate completed.
-            validateAsync(item).thenAccept((result) -> {
-                future.complete(p);
-            });
+            validateAsync(item).thenAccept((result) -> future.complete(p));
         });
         return future;
     }
@@ -104,9 +100,7 @@ public class DataLoader {
 
     private CompletableFuture<Void> validateAsync(Record item) {
         var av = new AsyncValidator(validator);
-        return av.validate(item.payment).thenAccept(result -> {
-            model.setValidationResults(item.payment, result.right);
-        });
+        return av.validate(item.payment).thenAccept(result -> model.setValidationResults(item.payment, result.right));
     }
 
     public void onAccountOrWalletsChanged(Payment t) {
