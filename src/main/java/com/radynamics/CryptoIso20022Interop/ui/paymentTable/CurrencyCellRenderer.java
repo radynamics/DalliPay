@@ -11,7 +11,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 
 public class CurrencyCellRenderer extends JLabel implements TableCellRenderer {
-    private TableColumn objectColumn;
+    private final TableColumn objectColumn;
 
     public CurrencyCellRenderer(TableColumn objectColumn) {
         this.objectColumn = objectColumn;

@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.radynamics.CryptoIso20022Interop'
-version '1.1.0'
+version '1.2.0'
 
 repositories {
     mavenCentral()
