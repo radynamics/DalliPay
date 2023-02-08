@@ -3,6 +3,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,7 +84,7 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
         if (isInDocumentEventHandler) {
             return;
         }
-        ctrl.setText(text);
+        ctrl.setText(Payment.isAmountUnknown(getAmount()) ? "" : text);
     }
 
     public void addChangedListener(ChangedListener l) {
