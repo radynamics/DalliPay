@@ -1,25 +1,18 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
-import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class MoneyTextField extends MoneyControl<JTextField> implements DocumentListener {
-    private final static Logger log = LogManager.getLogger(MoneyTextField.class);
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
     private boolean isInDocumentEventHandler;
+    private final MoneyTextFieldInputValidator validator = new MoneyTextFieldInputValidator();
+    private final ValidationControlDecorator decorator = new ValidationControlDecorator(ctrl, validator);
 
     public MoneyTextField(Ledger ledger) {
         super(ledger, new JTextField());
@@ -46,29 +39,19 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
         try {
             isInDocumentEventHandler = true;
 
-            // Eg: "10.50 USD"
-            var words = ctrl.getText().split(" ");
-            for (var i = 0; i < words.length; i++) {
-                words[i] = StringUtils.deleteWhitespace(words[i]);
-            }
-            if (words.length != 2 || words[0].length() == 0 || words[1].length() == 0) {
+            var value = ctrl.getText();
+            decorator.update(value);
+            var m = validator.getValidOrNull(value);
+            if (m == null) {
                 return;
             }
 
-            var nf = NumberFormat.getInstance(Locale.getDefault());
-            // Eg: "1'000.50 USD"
-            var amt = nf.parse(words[0]).doubleValue();
-            var ccy = new Currency(words[1].toUpperCase());
-
-            var m = Money.of(amt, ccy);
             if (m.equalsIgnoringIssuer(getAmount())) {
                 return;
             }
 
             setAmount(m);
             raiseChanged();
-        } catch (ParseException e) {
-            log.error(e.getMessage(), e);
         } finally {
             isInDocumentEventHandler = false;
         }
