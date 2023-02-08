@@ -193,6 +193,7 @@ public class PaymentDetailForm extends JDialog {
             }
             {
                 txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
+                Utils.patchTabBehavior(txtMessages);
                 txtMessages.setEditable(false);
                 createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
                 northPad += lineHeight * 2;

@@ -124,4 +124,9 @@ public final class Utils {
     public static String toHexString(Color color) {
         return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
+
+    public static void patchTabBehavior(JTextArea c) {
+        c.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+        c.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
+    }
 }

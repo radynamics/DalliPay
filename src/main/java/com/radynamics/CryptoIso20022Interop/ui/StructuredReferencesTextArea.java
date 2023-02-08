@@ -13,6 +13,7 @@ public class StructuredReferencesTextArea extends JTextArea {
     private void refreshText() {
         setText(toText());
         setCaretPosition(0);
+        Utils.patchTabBehavior(this);
     }
 
     private String toText() {
