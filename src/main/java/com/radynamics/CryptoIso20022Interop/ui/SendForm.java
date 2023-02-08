@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.alexandriasoftware.swing.JSplitButton;
+import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
@@ -17,10 +19,12 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Xml;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.SenderHistoryValidator;
+import com.radynamics.CryptoIso20022Interop.transformation.FreeTextPaymentFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
+import com.radynamics.CryptoIso20022Interop.util.RequestFocusListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +56,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private FilePathField txtInput;
     private Pain001Reader reader;
     private Payment[] payments = new Payment[0];
-    private JButton cmdAdd;
+    private JSplitButton cmdAdd;
     private JButton cmdSendPayments;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
@@ -149,10 +153,24 @@ public class SendForm extends JPanel implements MainFormPane {
                 panel1.add(lbl3);
             }
             {
-                cmdAdd = new JButton("Add new...");
+                final String splitButtonText = "Add new...";
+                var popupMenu = new JPopupMenu();
+                {
+                    var item = new JMenuItem(splitButtonText);
+                    popupMenu.add(item);
+                    item.addActionListener((SplitButtonClickedActionListener) e -> addNewPayment());
+                }
+                {
+                    var item = new JMenuItem("Using free text / payment slip reader...");
+                    popupMenu.add(item);
+                    item.addActionListener((SplitButtonClickedActionListener) e -> addNewPaymentByFreeText());
+                }
+
+                cmdAdd = new JSplitButton(splitButtonText);
+                cmdAdd.setPopupMenu(popupMenu);
                 cmdAdd.setMnemonic(KeyEvent.VK_N);
                 cmdAdd.setPreferredSize(new Dimension(150, 35));
-                cmdAdd.addActionListener(e -> addNewPayment());
+                cmdAdd.addButtonClickedActionListener(e -> addNewPayment());
                 panel1Layout.putConstraint(SpringLayout.EAST, cmdAdd, 0, SpringLayout.EAST, panel1);
                 panel1Layout.putConstraint(SpringLayout.SOUTH, cmdAdd, 0, SpringLayout.SOUTH, panel1);
                 panel1.add(cmdAdd);
@@ -194,11 +212,39 @@ public class SendForm extends JPanel implements MainFormPane {
         }
     }
 
+    private void addNewPaymentByFreeText() {
+        var txt = new JTextArea();
+        Utils.patchTabBehavior(txt);
+        txt.setColumns(30);
+        txt.setRows(15);
+        txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
+        txt.addAncestorListener(new RequestFocusListener());
+        JOptionPane.showMessageDialog(this, new JScrollPane(txt), "Enter what you know or scan with a payment slip reader.", JOptionPane.PLAIN_MESSAGE);
+
+        if (txt.getText().length() == 0) {
+            return;
+        }
+
+        var o = new FreeTextPaymentFactory(transformInstruction.getLedger());
+        var payment = o.createOrNull(txt.getText());
+        if (payment == null) {
+            JOptionPane.showMessageDialog(this, "Could not create a payment by given text. Please try to create an empty payment instead.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        transactionTranslator.apply(new Payment[]{payment});
+        showNewPayment(payment);
+    }
+
     private void addNewPayment() {
         var ledger = transformInstruction.getLedger();
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
 
+        showNewPayment(payment);
+    }
+
+    private void showNewPayment(Payment payment) {
         var frm = PaymentDetailForm.showModal(this, payment, validator, transformInstruction.getExchangeRateProvider(), currencyConverter, Actor.Sender);
         if (frm.getPaymentChanged() && !payment.isAmountUnknown()) {
             var payments = Arrays.copyOf(this.payments, this.payments.length + 1);
