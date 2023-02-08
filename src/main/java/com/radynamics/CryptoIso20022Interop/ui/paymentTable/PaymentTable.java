@@ -204,12 +204,13 @@ public class PaymentTable extends JPanel {
         mapping.setWallet(newWallet);
         persistOrDelete(mapping);
 
-        // Update all affected payments
         var br = new BalanceRefresher(transformInstruction.getNetwork());
+        br.refresh(payment.getLedger(), newWallet);
+
+        // Update all affected payments
         var mi = new MappingInfo(mapping, changedValue);
         for (var p : data) {
             if (mi.apply(p)) {
-                br.refresh(p.getLedger(), newWallet);
                 switch (changedValue) {
                     case SenderWallet -> {
                         // Ensure a newly entered senderWallet's history is loaded for following validation calls.
