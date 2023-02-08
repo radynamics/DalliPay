@@ -454,6 +454,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private void enableInputControls(boolean enabled) {
         txtInput.setEnabled(enabled);
         table.setEditable(enabled);
+        cmdExport.setEnabled(enabled);
         cmdSendPayments.setEnabled(enabled);
     }
 
