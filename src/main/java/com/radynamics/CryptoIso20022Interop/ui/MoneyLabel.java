@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
+import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
 
 import javax.swing.*;
 
@@ -14,7 +16,7 @@ public class MoneyLabel extends MoneyControl<JLabel> {
     }
 
     @Override
-    protected void setText(String text) {
-        ctrl.setText(text);
+    protected void refreshText(Money value) {
+        ctrl.setText(AmountFormatter.formatAmtWithCcy(value));
     }
 }

@@ -6,7 +6,6 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
-import com.radynamics.CryptoIso20022Interop.iso20022.AmountFormatter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,10 +91,7 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
 
     private void format() {
         refreshIssuerLinkVisibility();
-        if (value == null) {
-            setText("");
-        }
-        setText(AmountFormatter.formatAmtWithCcy(value));
+        refreshText(value);
         var ccyFormatter = new CurrencyFormatter(ledger.getInfoProvider());
         ccyFormatter.format(ctrl, value.getCcy());
 
@@ -112,5 +108,5 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
         detailLink.setVisible(issuerVisible && hasAmountIssuer());
     }
 
-    protected abstract void setText(String text);
+    protected abstract void refreshText(Money value);
 }

@@ -1,6 +1,8 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 
 import javax.swing.*;
@@ -63,11 +65,11 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
     }
 
     @Override
-    protected void setText(String text) {
+    protected void refreshText(Money value) {
         if (isInDocumentEventHandler) {
             return;
         }
-        ctrl.setText(Payment.isAmountUnknown(getAmount()) ? "" : text);
+        ctrl.setText(Payment.isAmountUnknown(getAmount()) ? "" : MoneyFormatter.formatExact(value));
     }
 
     public void addChangedListener(ChangedListener l) {

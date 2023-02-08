@@ -19,6 +19,10 @@ public class MoneyFormatter {
         return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCode());
     }
 
+    public static String formatExact(Money amount) {
+        return formatFiat(amount.getNumber().toString(), amount.getCcy().getCode());
+    }
+
     public static String formatFiat(Money amount) {
         return formatFiat(Utils.createFormatFiat().format(amount.getNumber()), amount.getCcy().getCode());
     }
