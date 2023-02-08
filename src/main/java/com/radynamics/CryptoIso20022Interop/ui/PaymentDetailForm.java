@@ -52,6 +52,16 @@ public class PaymentDetailForm extends JDialog {
         setupUI();
     }
 
+    public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
+        var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor);
+        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frm.setSize(650, 435);
+        frm.setModal(true);
+        frm.setLocationRelativeTo(c);
+        frm.setVisible(true);
+        return frm;
+    }
+
     private void setupUI() {
         setTitle("Payment detail");
         setIconImage(Utils.getProductIcon());
@@ -114,7 +124,7 @@ public class PaymentDetailForm extends JDialog {
                 var pnlFirstLine = new JPanel();
                 pnlFirstLine.setLayout(new BoxLayout(pnlFirstLine, BoxLayout.LINE_AXIS));
                 txtAmount = new MoneyTextField(payment.getLedger());
-                txtAmount.setEditable(false);
+                txtAmount.setEditable(payment.isEditable());
                 txtAmount.addChangedListener(() -> onAmountChanged());
                 pnlFirstLine.add(txtAmount);
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -187,14 +197,14 @@ public class PaymentDetailForm extends JDialog {
                 txtStructuredReferences = new StructuredReferencesTextArea();
                 formatTextArea(txtStructuredReferences, 1);
                 txtStructuredReferences.setValue(payment.getStructuredReferences());
-                txtStructuredReferences.setEditable(false);
+                txtStructuredReferences.setEditable(payment.isEditable());
                 createRow(northPad, "References:", new JScrollPane(txtStructuredReferences), null);
                 northPad += lineHeight;
             }
             {
                 txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
                 Utils.patchTabBehavior(txtMessages);
-                txtMessages.setEditable(false);
+                txtMessages.setEditable(payment.isEditable());
                 createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
                 northPad += lineHeight * 2;
             }
@@ -229,13 +239,16 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void accept() {
-        applyUIValues();
+        if (payment.isEditable()) {
+            applyUIValues();
+        }
         close();
     }
 
     private void applyUIValues() {
         payment.setStructuredReference(txtStructuredReferences.getValue());
         payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
+        setPaymentChanged(true);
     }
 
     private void onAmountChanged() {

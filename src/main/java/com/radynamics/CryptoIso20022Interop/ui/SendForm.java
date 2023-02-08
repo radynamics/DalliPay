@@ -6,8 +6,10 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubm
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
+import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
@@ -50,6 +52,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private FilePathField txtInput;
     private Pain001Reader reader;
     private Payment[] payments = new Payment[0];
+    private JButton cmdAdd;
     private JButton cmdSendPayments;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
@@ -145,6 +148,15 @@ public class SendForm extends JPanel implements MainFormPane {
                 });
                 panel1.add(lbl3);
             }
+            {
+                cmdAdd = new JButton("Add new...");
+                cmdAdd.setMnemonic(KeyEvent.VK_N);
+                cmdAdd.setPreferredSize(new Dimension(150, 35));
+                cmdAdd.addActionListener(e -> addNewPayment());
+                panel1Layout.putConstraint(SpringLayout.EAST, cmdAdd, 0, SpringLayout.EAST, panel1);
+                panel1Layout.putConstraint(SpringLayout.SOUTH, cmdAdd, 0, SpringLayout.SOUTH, panel1);
+                panel1.add(cmdAdd);
+            }
         }
         {
             table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator, transactionTranslator);
@@ -179,6 +191,19 @@ public class SendForm extends JPanel implements MainFormPane {
             panel3Layout.putConstraint(SpringLayout.EAST, lblLoading, -20, SpringLayout.WEST, cmdExport);
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
+        }
+    }
+
+    private void addNewPayment() {
+        var ledger = transformInstruction.getLedger();
+        var payment = new Payment(ledger.createTransaction());
+        payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
+
+        var frm = PaymentDetailForm.showModal(this, payment, validator, transformInstruction.getExchangeRateProvider(), currencyConverter, Actor.Sender);
+        if (frm.getPaymentChanged() && !payment.isAmountUnknown()) {
+            var payments = Arrays.copyOf(this.payments, this.payments.length + 1);
+            payments[payments.length - 1] = payment;
+            load(payments);
         }
     }
 
@@ -453,6 +478,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private void enableInputControls(boolean enabled) {
         txtInput.setEnabled(enabled);
         table.setEditable(enabled);
+        cmdAdd.setEnabled(enabled);
         cmdExport.setEnabled(enabled);
         cmdSendPayments.setEnabled(enabled);
     }

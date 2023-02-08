@@ -224,8 +224,8 @@ public class PaymentTable extends JPanel {
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + changedValue);
                 }
-                dataLoader.onAccountOrWalletsChanged(p);
             }
+            dataLoader.onAccountOrWalletsChanged(p);
         }
     }
 
@@ -294,13 +294,7 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
-        var frm = new PaymentDetailForm(obj, validator, getExchangeRateProvider(), currencyConverter, actor);
-        frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(650, 435);
-        frm.setModal(true);
-        frm.setLocationRelativeTo(this);
-        frm.setVisible(true);
-
+        var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor);
         if (frm.getPaymentChanged()) {
             refresh(obj);
         }
