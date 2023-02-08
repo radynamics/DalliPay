@@ -316,6 +316,11 @@ public class SendForm extends JPanel implements MainFormPane {
                 ExceptionDialog.show(this, e);
             }
 
+            var results = validator.validate(payments);
+            if (!ValidationResultDialog.showErrorAndWarnings(this, results)) {
+                return;
+            }
+
             submitter.addStateListener(new TransactionStateListener() {
                 @Override
                 public void onProgressChanged(Transaction t) {
@@ -338,12 +343,6 @@ public class SendForm extends JPanel implements MainFormPane {
             }
 
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-            var results = validator.validate(payments);
-            if (!ValidationResultDialog.showErrorAndWarnings(this, results)) {
-                return;
-            }
-
             submitter.submit(PaymentConverter.toTransactions(payments));
         } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
