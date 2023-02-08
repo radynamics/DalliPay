@@ -76,7 +76,7 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
         this.value = value;
         format();
     }
-    
+
     public Money getAmount() {
         return value;
     }
