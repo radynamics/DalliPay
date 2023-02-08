@@ -161,7 +161,7 @@ public class Payment {
     }
 
     private static boolean isAmountUnknown(Number value) {
-        return value == UnknownAmount;
+        return value != null && Double.compare(value.doubleValue(), UnknownAmount) == 0;
     }
 
     public static boolean isAmountUnknown(Money value) {
