@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Bithomp;
 import com.radynamics.CryptoIso20022Interop.exchange.Coinbase;
@@ -127,6 +128,15 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setLastUsedSubmitter(TransactionSubmitter submitter) throws Exception {
         saveOrUpdate(createLastUsedSubmitterKey(submitter.getLedger()), submitter.getId());
+    }
+
+    public Wallet getDefaultSenderWallet(Ledger ledger) throws Exception {
+        var value = single(createDefaultSenderWalletKey(ledger)).orElse(null);
+        return value == null ? null : ledger.createWallet(value, null);
+    }
+
+    private static String createDefaultSenderWalletKey(Ledger ledger) {
+        return String.format("%s_defaultSenderWallet", ledger.getId());
     }
 
     public CamtFormat getDefaultExportFormat() throws Exception {

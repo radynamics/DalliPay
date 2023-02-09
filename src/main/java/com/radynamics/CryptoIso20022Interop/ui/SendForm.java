@@ -231,6 +231,7 @@ public class SendForm extends JPanel implements MainFormPane {
         }
 
         transactionTranslator.apply(new Payment[]{payment});
+        applyDefaultSenderWallet(payment);
         showNewPayment(payment);
     }
 
@@ -239,7 +240,16 @@ public class SendForm extends JPanel implements MainFormPane {
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
 
+        applyDefaultSenderWallet(payment);
         showNewPayment(payment);
+    }
+
+    private void applyDefaultSenderWallet(Payment payment) {
+        try (var repo = new ConfigRepo()) {
+            payment.setSenderWallet(repo.getDefaultSenderWallet(payment.getLedger()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private void showNewPayment(Payment payment) {
