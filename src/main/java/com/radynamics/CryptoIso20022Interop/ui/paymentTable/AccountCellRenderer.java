@@ -2,6 +2,8 @@ package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.AccountFormatter;
+import com.radynamics.CryptoIso20022Interop.iso20022.Address;
+import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -18,6 +20,8 @@ public class AccountCellRenderer extends JLabel implements TableCellRenderer {
 
         if (value instanceof Account) {
             setText(AccountFormatter.format((Account) value));
+        } else if (value instanceof Address) {
+            setText(AddressFormatter.formatSingleLine((Address) value));
         } else {
             setText(value.toString());
         }
