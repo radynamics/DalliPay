@@ -107,7 +107,7 @@ public class MainForm extends JFrame {
                     tabbedPane.setEnabledAt(2, false);
                 }
                 {
-                    optionsPanel = new OptionsForm();
+                    optionsPanel = new OptionsForm(transformInstruction.getLedger());
                     optionsPanel.addChangedListener(() -> {
                         transformInstruction.getHistoricExchangeRateSource().init();
                         receivingPanel.refreshTargetCcys();

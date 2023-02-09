@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.db;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.Bithomp;
@@ -131,12 +132,21 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public Wallet getDefaultSenderWallet(Ledger ledger) throws Exception {
-        var value = single(createDefaultSenderWalletKey(ledger)).orElse(null);
+        var value = single(createDefaultSenderWalletKey(ledger.getId())).orElse(null);
         return value == null ? null : ledger.createWallet(value, null);
     }
 
-    private static String createDefaultSenderWalletKey(Ledger ledger) {
-        return String.format("%s_defaultSenderWallet", ledger.getId());
+    public void setDefaultSenderWallet(LedgerId ledgerId, Wallet wallet) throws Exception {
+        var key = createDefaultSenderWalletKey(ledgerId);
+        if (wallet == null) {
+            delete(key);
+        } else {
+            saveOrUpdate(key, wallet.getPublicKey());
+        }
+    }
+
+    private static String createDefaultSenderWalletKey(LedgerId ledgerId) {
+        return String.format("%s_defaultSenderWallet", ledgerId);
     }
 
     public CamtFormat getDefaultExportFormat() throws Exception {
@@ -181,6 +191,14 @@ public class ConfigRepo implements AutoCloseable {
         ps.setString(1, key);
         ps.setString(2, key);
         ps.setString(3, value);
+
+        ps.executeUpdate();
+    }
+
+    private void delete(String key) throws SQLException {
+        String sql = "DELETE FROM config WHERE key = ?;";
+        var ps = conn.prepareStatement(sql);
+        ps.setString(1, key);
 
         ps.executeUpdate();
     }
