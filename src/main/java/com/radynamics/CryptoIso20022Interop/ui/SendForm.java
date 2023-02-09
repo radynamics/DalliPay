@@ -218,9 +218,8 @@ public class SendForm extends JPanel implements MainFormPane {
         txt.setRows(15);
         txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
         txt.addAncestorListener(new RequestFocusListener());
-        JOptionPane.showMessageDialog(this, new JScrollPane(txt), "Enter what you know or scan with a payment slip reader.", JOptionPane.PLAIN_MESSAGE);
-
-        if (txt.getText().length() == 0) {
+        var userOption = JOptionPane.showConfirmDialog(this, new JScrollPane(txt), "Enter what you know or scan with a payment slip reader.", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (JOptionPane.OK_OPTION != userOption || txt.getText().length() == 0) {
             return;
         }
 
