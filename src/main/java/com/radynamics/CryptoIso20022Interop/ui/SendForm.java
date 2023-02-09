@@ -153,10 +153,9 @@ public class SendForm extends JPanel implements MainFormPane {
                 panel1.add(lbl3);
             }
             {
-                final String splitButtonText = "Add new...";
                 var popupMenu = new JPopupMenu();
                 {
-                    var item = new JMenuItem(splitButtonText);
+                    var item = new JMenuItem("Manually...");
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> addNewPayment());
                 }
@@ -166,7 +165,7 @@ public class SendForm extends JPanel implements MainFormPane {
                     item.addActionListener((SplitButtonClickedActionListener) e -> addNewPaymentByFreeText());
                 }
 
-                cmdAdd = new JSplitButton(splitButtonText);
+                cmdAdd = new JSplitButton("Add new...");
                 cmdAdd.setPopupMenu(popupMenu);
                 cmdAdd.setMnemonic(KeyEvent.VK_N);
                 cmdAdd.setPreferredSize(new Dimension(150, 35));
@@ -228,7 +227,7 @@ public class SendForm extends JPanel implements MainFormPane {
         var o = new FreeTextPaymentFactory(transformInstruction.getLedger());
         var payment = o.createOrNull(txt.getText());
         if (payment == null) {
-            JOptionPane.showMessageDialog(this, "Could not create a payment by given text. Please try to create an empty payment instead.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Could not create a payment by given text. Please create a new payment manually instead.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
