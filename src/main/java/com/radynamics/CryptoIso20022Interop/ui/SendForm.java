@@ -8,10 +8,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubm
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
-import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
-import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
@@ -19,12 +17,10 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Xml;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.SenderHistoryValidator;
-import com.radynamics.CryptoIso20022Interop.transformation.FreeTextPaymentFactory;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
-import com.radynamics.CryptoIso20022Interop.util.RequestFocusListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,7 +153,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 {
                     var item = new JMenuItem("Manually...");
                     popupMenu.add(item);
-                    item.addActionListener((SplitButtonClickedActionListener) e -> addNewPayment());
+                    item.addActionListener((SplitButtonClickedActionListener) e -> addNewEmptyPayment());
                 }
                 {
                     var item = new JMenuItem("Using free text / payment slip reader...");
@@ -169,7 +165,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 cmdAdd.setPopupMenu(popupMenu);
                 cmdAdd.setMnemonic(KeyEvent.VK_N);
                 cmdAdd.setPreferredSize(new Dimension(150, 35));
-                cmdAdd.addButtonClickedActionListener(e -> addNewPayment());
+                cmdAdd.addButtonClickedActionListener(e -> addNewEmptyPayment());
                 panel1Layout.putConstraint(SpringLayout.EAST, cmdAdd, 0, SpringLayout.EAST, panel1);
                 panel1Layout.putConstraint(SpringLayout.SOUTH, cmdAdd, 0, SpringLayout.SOUTH, panel1);
                 panel1.add(cmdAdd);
@@ -212,53 +208,24 @@ public class SendForm extends JPanel implements MainFormPane {
     }
 
     private void addNewPaymentByFreeText() {
-        var txt = new JTextArea();
-        Utils.patchTabBehavior(txt);
-        txt.setColumns(30);
-        txt.setRows(15);
-        txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
-        txt.addAncestorListener(new RequestFocusListener());
-        var userOption = JOptionPane.showConfirmDialog(this, new JScrollPane(txt), "Enter what you know or scan with a payment slip reader.", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (JOptionPane.OK_OPTION != userOption || txt.getText().length() == 0) {
+        var mp = ManualPayment.createByFreeText(this, transformInstruction.getLedger(), transactionTranslator);
+        if (mp == null) {
             return;
         }
+        showNewPayment(mp);
+    }
 
-        var o = new FreeTextPaymentFactory(transformInstruction.getLedger());
-        var payment = o.createOrNull(txt.getText());
-        if (payment == null) {
-            JOptionPane.showMessageDialog(this, "Could not create a payment by given text. Please create a new payment manually instead.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+    private void addNewEmptyPayment() {
+        showNewPayment(ManualPayment.createEmpty(transformInstruction.getLedger()));
+    }
+
+    private void showNewPayment(ManualPayment mp) {
+        if (!mp.show(this, validator, transformInstruction.getExchangeRateProvider(), currencyConverter)) {
             return;
         }
-
-        transactionTranslator.apply(new Payment[]{payment});
-        applyDefaultSenderWallet(payment);
-        showNewPayment(payment);
-    }
-
-    private void addNewPayment() {
-        var ledger = transformInstruction.getLedger();
-        var payment = new Payment(ledger.createTransaction());
-        payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
-
-        applyDefaultSenderWallet(payment);
-        showNewPayment(payment);
-    }
-
-    private void applyDefaultSenderWallet(Payment payment) {
-        try (var repo = new ConfigRepo()) {
-            payment.setSenderWallet(repo.getDefaultSenderWallet(payment.getLedger()));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void showNewPayment(Payment payment) {
-        var frm = PaymentDetailForm.showModal(this, payment, validator, transformInstruction.getExchangeRateProvider(), currencyConverter, Actor.Sender);
-        if (frm.getPaymentChanged() && !payment.isAmountUnknown()) {
-            var payments = Arrays.copyOf(this.payments, this.payments.length + 1);
-            payments[payments.length - 1] = payment;
-            load(payments);
-        }
+        var payments = Arrays.copyOf(this.payments, this.payments.length + 1);
+        payments[payments.length - 1] = mp.getPayment();
+        load(payments);
     }
 
     private void onSenderWalletChanged(Payment p, Wallet newWallet) {
