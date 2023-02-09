@@ -159,7 +159,7 @@ public class MainForm extends JFrame {
             }
             transformInstruction.setNetwork(selected);
             refreshNetworkButton();
-            sendingPanel.reload();
+            sendingPanel.setNetwork(selected);
             saveLastUsedNetwork(selected);
         });
 

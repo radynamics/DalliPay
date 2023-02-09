@@ -16,10 +16,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SenderHistoryValidator implements WalletHistoryValidator {
-    private final Cache<PaymentHistoryProvider> cache;
+    private Cache<PaymentHistoryProvider> cache;
     private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM);
 
     public SenderHistoryValidator(NetworkInfo network) {
+        initCache(network);
+    }
+
+    private void initCache(NetworkInfo network) {
         cache = new Cache<>(network.getUrl().toString(), ChronoUnit.FOREVER.getDuration());
     }
 
@@ -63,6 +67,11 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
 
     public void clearCache() {
         cache.clear();
+    }
+
+    @Override
+    public void setNetwork(NetworkInfo networkInfo) {
+        initCache(networkInfo);
     }
 
     public void loadHistory(Ledger ledger, Wallet wallet) {

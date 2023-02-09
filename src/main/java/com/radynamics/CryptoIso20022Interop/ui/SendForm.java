@@ -21,7 +21,6 @@ import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +44,7 @@ public class SendForm extends JPanel implements MainFormPane {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private final TransactionTranslator transactionTranslator;
-    private PaymentValidator validator;
+    private final PaymentValidator validator;
 
     private JLabel lblExchange;
     private PaymentTable table;
@@ -64,7 +63,7 @@ public class SendForm extends JPanel implements MainFormPane {
         this.transformInstruction = transformInstruction;
         this.currencyConverter = currencyConverter;
         this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
-        initPaymentValidator();
+        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
 
         setupUI();
     }
@@ -522,17 +521,12 @@ public class SendForm extends JPanel implements MainFormPane {
         return "Send Payments";
     }
 
-    public void reload() {
-        if (StringUtils.isEmpty(txtInput.getText())) {
-            load(new Payment[0]);
-            return;
+    public void setNetwork(NetworkInfo networkInfo) {
+        validator.getHistoryValidator().setNetwork(networkInfo);
+
+        for (var p : payments) {
+            p.getLedger().setNetwork(networkInfo);
         }
-
-        initPaymentValidator();
-        onTxtInputChanged();
-    }
-
-    private void initPaymentValidator() {
-        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
+        load(payments);
     }
 }
