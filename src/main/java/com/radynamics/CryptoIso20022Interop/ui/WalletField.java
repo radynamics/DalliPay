@@ -23,6 +23,8 @@ public class WalletField extends JPanel {
     private JTextField txt;
     private JLabel lblShowDetail;
     private Ledger ledger;
+    private WalletFieldInputValidator validator;
+    private ValidationControlDecorator decorator;
 
     public WalletField(JComponent owner) {
         this.owner = owner;
@@ -40,14 +42,8 @@ public class WalletField extends JPanel {
                 @Override
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
-                    var result = StringUtils.isEmpty(text) ? null : new WalletValidator(ledger).validateFormat(ledger.createWallet(text, null));
-                    if (result == null) {
-                        txt.putClientProperty("JComponent.outline", null);
-                        return true;
-                    } else {
-                        txt.putClientProperty("JComponent.outline", "error");
-                        return false;
-                    }
+                    decorator.update(text);
+                    return validator.getValidOrNull(text) != null;
                 }
             });
             txt.addFocusListener(new FocusListener() {
@@ -171,6 +167,8 @@ public class WalletField extends JPanel {
 
     public void setLedger(Ledger ledger) {
         this.ledger = ledger;
+        validator = new WalletFieldInputValidator(ledger);
+        decorator = new ValidationControlDecorator(txt, validator);
     }
 
     public void setEditable(boolean b) {

@@ -6,7 +6,7 @@ public class ValidationControlDecorator {
     private final JComponent ctrl;
     private final InputControlValidator validator;
 
-    public ValidationControlDecorator(JComponent ctrl, MoneyTextFieldInputValidator validator) {
+    public ValidationControlDecorator(JComponent ctrl, InputControlValidator validator) {
         if (ctrl == null) throw new IllegalArgumentException("Parameter 'ctrl' cannot be null");
         if (validator == null) throw new IllegalArgumentException("Parameter 'validator' cannot be null");
         this.ctrl = ctrl;
