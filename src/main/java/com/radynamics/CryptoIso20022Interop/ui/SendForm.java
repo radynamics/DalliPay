@@ -225,7 +225,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
 
         payments.remove(p);
-        load(payments);
+        table.remove(p);
     }
 
     private void addNewPaymentByFreeText() {
@@ -243,9 +243,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private void showNewPayment(ManualPayment mp) {
         if (!mp.show(this, validator, transformInstruction.getExchangeRateProvider(), currencyConverter)) {
             return;
+
         }
         payments.add(mp.getPayment());
-        load(payments);
+        table.add(mp.getPayment());
     }
 
     @Override

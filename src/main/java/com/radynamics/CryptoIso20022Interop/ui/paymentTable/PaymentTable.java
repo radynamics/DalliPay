@@ -260,13 +260,27 @@ public class PaymentTable extends JPanel {
         model.load(records);
         dataLoader.loadAsync(records);
     }
+    
+    public void add(Payment p) {
+        var record = toRecord(p);
+        model.add(record);
+        dataLoader.loadAsync(record);
+    }
+
+    public void remove(Payment p) {
+        model.remove(p);
+    }
 
     private Record[] toRecords(Payment[] data) {
         var list = new ArrayList<Record>();
         for (var o : data) {
-            list.add(new Record(o));
+            list.add(toRecord(o));
         }
         return list.toArray(new Record[0]);
+    }
+
+    private Record toRecord(Payment p) {
+        return new Record(p);
     }
 
     private Payment getSelectedRow(JTable table) {

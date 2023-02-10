@@ -16,11 +16,12 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL, COL_REMOVE};
-    private Record[] data = new Record[0];
+    private final ArrayList<Record> data = new ArrayList<>();
     private Actor actor = Actor.Sender;
     private boolean editable;
 
@@ -47,7 +48,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return data.length;
+        return data.size();
     }
 
     public String getColumnName(int col) {
@@ -59,7 +60,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        var item = data[row];
+        var item = data.get(row);
         if (getColumnIndex(COL_OBJECT) == col) {
             return item.payment;
         } else if (getColumnIndex(COL_VALIDATION_RESULTS) == col) {
@@ -93,7 +94,7 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void setValueAt(Object value, int row, int col) {
-        var item = data[row];
+        var item = data.get(row);
         if (getColumnIndex(COL_VALIDATION_RESULTS) == col) {
             item.validationResults = (ValidationResult[]) value;
         } else if (getColumnIndex(COL_SELECTOR) == col) {
@@ -168,7 +169,7 @@ public class PaymentTableModel extends AbstractTableModel {
         if (!editable) {
             return false;
         }
-        var item = data[row];
+        var item = data.get(row);
         if (!item.payment.isEditable()) {
             return false;
         }
@@ -186,10 +187,22 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void load(Record[] data) {
         if (data == null) throw new IllegalArgumentException("Parameter 'data' cannot be null");
-        this.data = data;
+        this.data.clear();
+        this.data.addAll(List.of(data));
         fireTableDataChanged();
     }
 
+    public void add(Record r) {
+        if (r == null) throw new IllegalArgumentException("Parameter 'r' cannot be null");
+        this.data.add(r);
+        fireTableDataChanged();
+    }
+
+    public void remove(Payment p) {
+        if (p == null) throw new IllegalArgumentException("Parameter 'p' cannot be null");
+        this.data.remove(getRowIndex(p));
+        fireTableDataChanged();
+    }
 
     public void setValidationResults(Payment p, ValidationResult[] validationResults) {
         var rowIndex = getRowIndex(p);

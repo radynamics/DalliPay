@@ -9,6 +9,7 @@ import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,7 +22,7 @@ public class DataLoader {
     private final TransactionTranslator transactionTranslator;
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private final ArrayList<ProgressListener> progressListener = new ArrayList<>();
-    private Record[] payments = new Record[0];
+    private final ArrayList<Record> payments = new ArrayList<>();
 
     public DataLoader(PaymentTableModel model, HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         this.model = model;
@@ -31,7 +32,8 @@ public class DataLoader {
     }
 
     public void loadAsync(Record[] payments) {
-        this.payments = payments;
+        this.payments.clear();
+        this.payments.addAll(List.of(payments));
         if (payments.length == 0) {
             raiseProgress(new Progress(0, 0));
             return;
@@ -39,6 +41,15 @@ public class DataLoader {
 
         validator.clearCache();
         validator.getHistoryValidator().clearCache();
+        load(payments);
+    }
+
+    public void loadAsync(Record p) {
+        payments.add(p);
+        load(new Record[]{p});
+    }
+
+    private void load(Record[] payments) {
         var br = new BalanceRefresher(payments[0].payment.getLedger().getNetwork());
         var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : payments) {
