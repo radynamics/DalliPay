@@ -260,7 +260,7 @@ public class PaymentTable extends JPanel {
         model.load(records);
         dataLoader.loadAsync(records);
     }
-    
+
     public void add(Payment p) {
         var record = toRecord(p);
         model.add(record);
