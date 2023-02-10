@@ -16,6 +16,11 @@ public class FreeTextPaymentFactory {
             return null;
         }
 
+        if (LedgerWalletAddressPayment.matches(ledger, text)) {
+            var o = new LedgerWalletAddressPayment(ledger);
+            return o.createOrNull(text);
+        }
+
         if (SwissQrBillPayment.matches(text)) {
             var o = new SwissQrBillPayment(ledger);
             return o.createOrNull(text);
