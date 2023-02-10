@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.BalanceRefresher;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
@@ -70,6 +71,11 @@ public class ManualPayment {
             payment.setSenderWallet(repo.getDefaultSenderWallet(payment.getLedger()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+
+        if (payment.getSenderWallet() != null) {
+            var br = new BalanceRefresher(payment.getLedger().getNetwork());
+            br.refresh(payment);
         }
     }
 
