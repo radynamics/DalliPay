@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 
 public final class PaymentConverter {
@@ -15,6 +16,7 @@ public final class PaymentConverter {
     public static Payment toPayment(Transaction t, Currency targetCcy) {
         var p = new Payment(t);
         p.setUserCcy(targetCcy);
+        p.setOrigin(Origin.Ledger);
         return p;
     }
 

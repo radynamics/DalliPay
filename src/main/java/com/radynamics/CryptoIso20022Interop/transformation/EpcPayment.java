@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -47,6 +48,7 @@ public class EpcPayment {
         var amount = parseAmount(lines);
         payment.setAmount(amount != null ? amount : Money.zero(new Currency(ledger.getNativeCcySymbol())));
         payment.setReceiverAccount(new IbanAccount(lines[6]));
+        payment.setOrigin(Origin.Manual);
 
         if (lines[5].length() > 0) {
             payment.setReceiverAddress(new Address(lines[5]));

@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.*;
@@ -59,6 +60,7 @@ public class Pain001Reader {
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverWallet(toValidWalletOrNull(receiverAccount));
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
+                t.setOrigin(Origin.Pain001);
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {

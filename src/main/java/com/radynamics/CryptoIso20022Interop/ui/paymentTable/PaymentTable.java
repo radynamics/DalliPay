@@ -167,7 +167,10 @@ public class PaymentTable extends JPanel {
 
                 }
                 if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_REMOVE)) {
-                    raiseRemove(getSelectedRow(table));
+                    var p = getSelectedRow(table);
+                    if (p.getOrigin().isDeletable()) {
+                        raiseRemove(p);
+                    }
                     return;
                 }
             }

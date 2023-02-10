@@ -88,7 +88,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_DETAIL) == col) {
             return "detail...";
         } else if (getColumnIndex(COL_REMOVE) == col) {
-            return "";
+            return item.payment.getOrigin();
         }
         return null;
     }

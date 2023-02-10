@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.CurrencyConverter;
@@ -32,6 +33,7 @@ public class ManualPayment {
     public static ManualPayment createEmpty(Ledger ledger) {
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
+        payment.setOrigin(Origin.Manual);
 
         var o = new ManualPayment(payment, null);
         o.applyDefaultSenderWallet();

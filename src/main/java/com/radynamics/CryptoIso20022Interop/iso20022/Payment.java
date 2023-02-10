@@ -5,6 +5,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Fee;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.creditorreference.StructuredReference;
@@ -23,6 +24,7 @@ public class Payment {
     private Double amount = UnknownAmount;
     private Currency ccy = UnknownCCy;
     private ExchangeRate exchangeRate;
+    private Origin origin;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -319,5 +321,17 @@ public class Payment {
 
     public boolean isEditable() {
         return getTransmission() != TransmissionState.Waiting;
+    }
+
+    public Origin getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
+    }
+
+    public boolean isRemovable() {
+        return isEditable() && getTransmission() != TransmissionState.Success && getOrigin().isDeletable();
     }
 }

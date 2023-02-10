@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.transformation;
 
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
@@ -50,6 +51,7 @@ public class SwissQrBillPayment {
         var amount = parseAmount(lines);
         payment.setAmount(amount != null ? amount : Money.zero(new Currency(ledger.getNativeCcySymbol())));
         payment.setReceiverAccount(new IbanAccount(lines[3]));
+        payment.setOrigin(Origin.Manual);
 
         if (lines[5].length() > 0) {
             var a = new Address(lines[5]);

@@ -1,6 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -17,9 +18,11 @@ public class RemoveCellRenderer extends JLabel implements TableCellRenderer {
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        var origin = (Origin) value;
+
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         setHorizontalAlignment(JLabel.CENTER);
-        setIcon(delete);
+        setIcon(origin.isDeletable() ? delete : null);
         setToolTipText("Remove");
         return this;
     }
