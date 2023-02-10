@@ -18,6 +18,8 @@ import com.radynamics.CryptoIso20022Interop.iso20022.pain001.SenderHistoryValida
 import com.radynamics.CryptoIso20022Interop.transformation.TransactionTranslator;
 import com.radynamics.CryptoIso20022Interop.transformation.TransformInstruction;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
+import com.radynamics.CryptoIso20022Interop.ui.paymentTable.MappingChangedListener;
+import com.radynamics.CryptoIso20022Interop.ui.paymentTable.MappingInfo;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.PaymentTable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +40,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class SendForm extends JPanel implements MainFormPane {
+public class SendForm extends JPanel implements MainFormPane, MappingChangedListener {
     private final static Logger log = LogManager.getLogger(Database.class);
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
@@ -152,8 +154,7 @@ public class SendForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
-            table.addSenderLedgerChangedListener(this::onSenderWalletChanged);
-            table.addReceiverLedgerChangedListener(this::onReceiverWalletChanged);
+            table.addMappingChangedListener(this);
             table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
         }
@@ -182,17 +183,39 @@ public class SendForm extends JPanel implements MainFormPane {
         }
     }
 
-    private void onSenderWalletChanged(Payment p, Wallet newWallet) {
-        onWalletChanged(p);
+    @Override
+    public void onWalletChanged(MappingInfo mi) {
+        // Update all affected payments
+        for (var p : payments) {
+            if (mi.apply(p)) {
+                switch (mi.getChangedValue()) {
+                    case SenderWallet -> {
+                        // Ensure a newly entered senderWallet's history is loaded for following validation calls.
+                        if (mi.getMapping().isWalletPresentAndValid() && p.getSenderWallet() != null) {
+                            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
+                        }
+                    }
+                    case ReceiverWallet -> {
+                        // do nothing
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + mi.getChangedValue());
+                }
+
+                // Used transaction currency depends on sender/receiver wallets
+                transactionTranslator.applyUserCcy(p);
+                table.getDataLoader().onAccountOrWalletsChanged(p);
+            }
+        }
     }
 
-    private void onReceiverWalletChanged(Payment p, Wallet newWallet) {
-        onWalletChanged(p);
-    }
-
-    private void onWalletChanged(Payment p) {
-        // Used transaction currency depends on sender/receiver wallets
-        transactionTranslator.applyUserCcy(p);
+    @Override
+    public void onAccountChanged(MappingInfo mi) {
+        // Update all affected payments
+        for (var p : payments) {
+            if (mi.apply(p)) {
+                table.getDataLoader().onAccountOrWalletsChanged(p);
+            }
+        }
     }
 
     private void onTxtInputChanged() {

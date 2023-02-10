@@ -63,4 +63,12 @@ public class MappingInfo {
 
         return wallet.getPublicKey().equals(mapping.getWallet().getPublicKey());
     }
+
+    public AccountMapping getMapping() {
+        return mapping;
+    }
+
+    public ChangedValue getChangedValue() {
+        return changedValue;
+    }
 }

@@ -37,11 +37,9 @@ public class PaymentTable extends JPanel {
     private TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private final Actor actor;
-    private Payment[] data = new Payment[0];
     private PaymentValidator validator;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
-    private ArrayList<WalletChangedListener> senderLedgerChangedListener = new ArrayList<>();
-    private ArrayList<WalletChangedListener> receiverLedgerChangedListener = new ArrayList<>();
+    private final ArrayList<MappingChangedListener> mappingChangedListener = new ArrayList<>();
     private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
     private final DataLoader dataLoader;
@@ -207,26 +205,7 @@ public class PaymentTable extends JPanel {
         var br = new BalanceRefresher(transformInstruction.getNetwork());
         br.refresh(payment.getLedger(), newWallet);
 
-        // Update all affected payments
-        var mi = new MappingInfo(mapping, changedValue);
-        for (var p : data) {
-            if (mi.apply(p)) {
-                switch (changedValue) {
-                    case SenderWallet -> {
-                        // Ensure a newly entered senderWallet's history is loaded for following validation calls.
-                        if (mapping.isWalletPresentAndValid() && p.getSenderWallet() != null) {
-                            validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
-                        }
-                        raiseSenderLedgerChanged(p, p.getSenderWallet());
-                    }
-                    case ReceiverWallet -> {
-                        raiseReceiverLedgerChanged(p, p.getReceiverWallet());
-                    }
-                    default -> throw new IllegalStateException("Unexpected value: " + changedValue);
-                }
-                dataLoader.onAccountOrWalletsChanged(p);
-            }
-        }
+        raiseWalletMappingChanged(new MappingInfo(mapping, changedValue));
     }
 
     private void onAccountEdited(Payment t, TableCellListener tcl, ChangedValue changedValue) {
@@ -244,13 +223,7 @@ public class PaymentTable extends JPanel {
         mapping.setAccount(newAccount);
         persistOrDelete(mapping);
 
-        // Update all affected payments
-        var mi = new MappingInfo(mapping, changedValue);
-        for (var p : data) {
-            if (mi.apply(p)) {
-                dataLoader.onAccountOrWalletsChanged(p);
-            }
-        }
+        raiseAccountMappingChanged(new MappingInfo(mapping, changedValue));
     }
 
     private void persistOrDelete(AccountMapping mapping) {
@@ -272,8 +245,6 @@ public class PaymentTable extends JPanel {
     }
 
     public void load(Payment[] data) {
-        this.data = data;
-
         var records = toRecords(data);
         model.load(records);
         dataLoader.loadAsync(records);
@@ -386,27 +357,27 @@ public class PaymentTable extends JPanel {
         }
     }
 
-    public void addSenderLedgerChangedListener(WalletChangedListener l) {
-        senderLedgerChangedListener.add(l);
+    public void addMappingChangedListener(MappingChangedListener l) {
+        mappingChangedListener.add(l);
     }
 
-    private void raiseSenderLedgerChanged(Payment p, Wallet wallet) {
-        for (var l : senderLedgerChangedListener) {
-            l.onChanged(p, wallet);
+    private void raiseWalletMappingChanged(MappingInfo mi) {
+        for (var l : mappingChangedListener) {
+            l.onWalletChanged(mi);
         }
     }
 
-    public void addReceiverLedgerChangedListener(WalletChangedListener l) {
-        receiverLedgerChangedListener.add(l);
-    }
-
-    private void raiseReceiverLedgerChanged(Payment p, Wallet wallet) {
-        for (var l : receiverLedgerChangedListener) {
-            l.onChanged(p, wallet);
+    private void raiseAccountMappingChanged(MappingInfo mi) {
+        for (var l : mappingChangedListener) {
+            l.onAccountChanged(mi);
         }
     }
 
     public void setEditable(boolean editable) {
         model.setEditable(editable);
+    }
+
+    public DataLoader getDataLoader() {
+        return dataLoader;
     }
 }
