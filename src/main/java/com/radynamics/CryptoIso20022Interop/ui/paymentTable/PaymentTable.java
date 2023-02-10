@@ -42,6 +42,7 @@ public class PaymentTable extends JPanel {
     private final ArrayList<MappingChangedListener> mappingChangedListener = new ArrayList<>();
     private ArrayList<ChangedListener> selectorChangedListener = new ArrayList<>();
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
+    private final ArrayList<PaymentListener> paymentListener = new ArrayList<>();
     private final DataLoader dataLoader;
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
@@ -142,6 +143,10 @@ public class PaymentTable extends JPanel {
             var c = cb.forColumn(PaymentTableModel.COL_DETAIL).headerValue("").maxWidth(50).headerCenter().getColumn();
             c.setCellRenderer(new ShowDetailCellRenderer());
         }
+        {
+            var c = cb.forColumn(PaymentTableModel.COL_REMOVE).headerValue("").maxWidth(25).headerCenter().getColumn();
+            c.setCellRenderer(new RemoveCellRenderer());
+        }
 
         var owner = this;
         table.addMouseListener(new MouseAdapter() {
@@ -151,13 +156,19 @@ public class PaymentTable extends JPanel {
                     return;
                 }
 
-                var clickedColumn = table.getColumnModel().getColumn(table.columnAtPoint(e.getPoint()));
-                if (!StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_DETAIL)) {
+                if (e.getClickCount() != 1) {
                     return;
                 }
 
-                if (e.getClickCount() == 1) {
+                var clickedColumn = table.getColumnModel().getColumn(table.columnAtPoint(e.getPoint()));
+                if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_DETAIL)) {
                     showMore(getSelectedRow(table));
+                    return;
+
+                }
+                if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_REMOVE)) {
+                    raiseRemove(getSelectedRow(table));
+                    return;
                 }
             }
         });
@@ -348,6 +359,16 @@ public class PaymentTable extends JPanel {
     private void raiseRefresh(Payment p) {
         for (var l : refreshListener) {
             l.onRefresh(p);
+        }
+    }
+
+    public void addPaymentListener(PaymentListener l) {
+        paymentListener.add(l);
+    }
+
+    private void raiseRemove(Payment p) {
+        for (var l : paymentListener) {
+            l.onRemove(p);
         }
     }
 

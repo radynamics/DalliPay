@@ -35,8 +35,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -52,7 +52,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private PaymentTable table;
     private FilePathField txtInput;
     private Pain001Reader reader;
-    private Payment[] payments = new Payment[0];
+    private ArrayList<Payment> payments = new ArrayList<>();
     private JSplitButton cmdAdd;
     private JButton cmdSendPayments;
     private JButton cmdExport;
@@ -180,6 +180,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
+            table.addPaymentListener(p -> remove(p));
             table.addMappingChangedListener(this);
             table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
             panel2.add(table);
@@ -209,6 +210,24 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
     }
 
+    private void remove(Payment p) {
+        if (!p.isEditable() || p.getTransmission() == TransmissionState.Success) {
+            JOptionPane.showConfirmDialog(this, "Cannot remove payment because payment is not editable or has already been sent.", "Remove payment", JOptionPane.YES_NO_CANCEL_OPTION);
+            return;
+        }
+
+        var sb = new StringBuilder();
+        sb.append("Do you really want to remove following payment?" + System.lineSeparator());
+        sb.append(p.getDisplayText());
+        var ret = JOptionPane.showConfirmDialog(this, sb.toString(), "Remove payment", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (ret != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        payments.remove(p);
+        load(payments);
+    }
+
     private void addNewPaymentByFreeText() {
         var mp = ManualPayment.createByFreeText(this, transformInstruction.getLedger(), transactionTranslator);
         if (mp == null) {
@@ -225,8 +244,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         if (!mp.show(this, validator, transformInstruction.getExchangeRateProvider(), currencyConverter)) {
             return;
         }
-        var payments = Arrays.copyOf(this.payments, this.payments.length + 1);
-        payments[payments.length - 1] = mp.getPayment();
+        payments.add(mp.getPayment());
         load(payments);
     }
 
@@ -270,7 +288,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         enableInputControls(false);
         lblLoading.showLoading();
 
-        var cf = new CompletableFuture<Payment[]>();
+        var cf = new CompletableFuture<ArrayList<Payment>>();
         cf.thenAccept(result -> {
                     load(result);
                 })
@@ -283,7 +301,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 });
         Executors.newCachedThreadPool().submit(() -> {
             try {
-                payments = transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())));
+                payments.clear();
+                payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -303,7 +322,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             var failed = new ArrayList<Payment>();
             var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
             var countBefore = pain001.countCdtTrfTxInf();
-            var sent = Arrays.stream(payments).filter(o -> o.getTransmission() == TransmissionState.Success).collect(Collectors.toList());
+            var sent = payments.stream().filter(o -> o.getTransmission() == TransmissionState.Success).collect(Collectors.toList());
             for (var p : sent) {
                 if (pain001.isRemovable(p)) {
                     pain001.remove(p);
@@ -489,14 +508,15 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             }
         }
 
-        var ar = new AmountRefresher(payments);
+        var paymentArray = payments.toArray(new Payment[0]);
+        var ar = new AmountRefresher(paymentArray);
         ar.refresh();
 
-        table.refresh(payments);
+        table.refresh(paymentArray);
     }
 
     private TransactionSubmitter showConfirmationForm(Ledger ledger, TransactionSubmitter submitter, Payment[] payments) {
-        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.length, submitter);
+        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.size(), submitter);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 410);
         frm.setModal(true);
@@ -514,7 +534,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         return selectedSubmitter;
     }
 
-    private void load(Payment[] payments) {
+    private void load(ArrayList<Payment> payments) {
         if (payments == null) throw new IllegalArgumentException("Parameter 'payments' cannot be null");
         this.payments = payments;
         loadTable(payments);
@@ -528,8 +548,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         cmdSendPayments.setEnabled(enabled);
     }
 
-    private void loadTable(Payment[] payments) {
-        table.load(payments);
+    private void loadTable(ArrayList<Payment> payments) {
+        table.load(payments.toArray(new Payment[0]));
         cmdSendPayments.setEnabled(false);
     }
 

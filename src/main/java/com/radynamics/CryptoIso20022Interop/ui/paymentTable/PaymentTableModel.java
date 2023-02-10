@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
-            COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL};
+            COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL, COL_REMOVE};
     private Record[] data = new Record[0];
     private Actor actor = Actor.Sender;
     private boolean editable;
@@ -37,6 +37,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_CCY = "ccy";
     public static final String COL_TRX_STATUS = "transmissionStatus";
     public static final String COL_DETAIL = "detail";
+    public static final String COL_REMOVE = "remove";
 
     public PaymentTableModel() {
     }
@@ -85,6 +86,8 @@ public class PaymentTableModel extends AbstractTableModel {
             return item.payment.getTransmission();
         } else if (getColumnIndex(COL_DETAIL) == col) {
             return "detail...";
+        } else if (getColumnIndex(COL_REMOVE) == col) {
+            return "";
         }
         return null;
     }
