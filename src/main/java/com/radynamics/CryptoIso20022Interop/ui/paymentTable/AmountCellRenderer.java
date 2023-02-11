@@ -25,13 +25,9 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
 
         var obj = (Payment) table.getModel().getValueAt(row, objectColumn.getModelIndex());
         setText(AmountFormatter.formatAmt(obj));
+        setToolTipText("");
         if (obj.isAmountUnknown()) {
             setToolTipText("Not available due no exchange rate was found at this point in time.");
-            return this;
-        }
-
-        if (value == null) {
-            setToolTipText("loading...");
             return this;
         }
 
