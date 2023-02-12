@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class JsonRpcApi implements TransactionSource {
@@ -72,6 +73,26 @@ public class JsonRpcApi implements TransactionSource {
 
     private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, int limit, Function<Payment, Boolean> include) throws Exception {
         var tr = new TransactionResult();
+        loadTransactions(params, limit, tr, (org.xrpl.xrpl4j.model.transactions.Transaction t, CurrencyAmount deliveredAmount) -> {
+            if (t.transactionType() == TransactionType.PAYMENT) {
+                var p = (Payment) t;
+                if (!include.apply(p)) {
+                    return false;
+                }
+
+                deliveredAmount.handle(xrpCurrencyAmount -> {
+                    handleXrp(tr, p, xrpCurrencyAmount);
+                }, issuedCurrencyAmount -> {
+                    handleIssuedCurrency(tr, p, issuedCurrencyAmount);
+                });
+                return true;
+            }
+            return false;
+        });
+        return tr;
+    }
+
+    private void loadTransactions(ImmutableAccountTransactionsRequestParams.Builder params, int limit, TransactionResult tr, BiFunction<org.xrpl.xrpl4j.model.transactions.Transaction, CurrencyAmount, Boolean> include) throws Exception {
         var pageCounter = 0;
         var maxPages = 10;
         var result = xrplClient.accountTransactions(params.build());
@@ -79,37 +100,27 @@ public class JsonRpcApi implements TransactionSource {
             for (var r : result.transactions()) {
                 if (tr.transactions().length >= limit) {
                     tr.setHasMarker(true);
-                    return tr;
+                    return;
                 }
 
                 if (!r.metadata().isPresent() || !r.metadata().get().transactionResult().equalsIgnoreCase("tesSUCCESS")) {
                     continue;
                 }
 
-                var t = r.resultTransaction().transaction();
-                if (t.transactionType() == TransactionType.PAYMENT) {
-                    var p = (Payment) t;
-                    if (!include.apply(p)) {
-                        continue;
-                    }
-
-                    var deliveredAmount = r.metadata().get().deliveredAmount().get();
-                    deliveredAmount.handle(xrpCurrencyAmount -> {
-                        handleXrp(tr, p, xrpCurrencyAmount);
-                    }, issuedCurrencyAmount -> {
-                        handleIssuedCurrency(tr, p, issuedCurrencyAmount);
-                    });
+                var deliveredAmount = r.metadata().get().deliveredAmount().orElse(XrpCurrencyAmount.ofDrops(0));
+                if (!include.apply(r.resultTransaction().transaction(), deliveredAmount)) {
+                    continue;
                 }
             }
 
             if (pageCounter == 2 && tr.transactions().length == 0) {
                 tr.setHasNoTransactions(true);
-                return tr;
+                return;
             }
 
             if (!result.marker().isPresent()) {
                 tr.setHasMarker(false);
-                return tr;
+                return;
             }
             params.marker(result.marker().get());
             result = xrplClient.accountTransactions(params.build());
@@ -117,7 +128,6 @@ public class JsonRpcApi implements TransactionSource {
         }
 
         tr.setHasMaxPageCounterReached(pageCounter >= maxPages);
-        return tr;
     }
 
     private void handleXrp(TransactionResult tr, org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount amount) {
@@ -221,25 +231,26 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    public Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+    public com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+        var tr = new TransactionResult();
         var params = createAccountTransactionsRequestParams(wallet, period, null);
-        var result = xrplClient.accountTransactions(params.build());
-
-        var list = new ArrayList<Transaction>();
-        for (var r : result.transactions()) {
-            var t = r.resultTransaction().transaction();
+        final int limit = 200;
+        loadTransactions(params, limit, tr, (org.xrpl.xrpl4j.model.transactions.Transaction t, CurrencyAmount deliveredAmount) -> {
             if (!(t instanceof ImmutableTrustSet)) {
-                continue;
+                return false;
             }
             var trustSet = (ImmutableTrustSet) t;
             if (!trustSet.limitAmount().issuer().value().equals(ccyIssuer.getPublicKey()) || !trustSet.limitAmount().currency().equalsIgnoreCase(ccy)) {
-                continue;
+                return false;
             }
-            var deliveredAmount = r.metadata().get().deliveredAmount().orElse(XrpCurrencyAmount.ofDrops(0));
-            list.add(toTransaction(t, (XrpCurrencyAmount) deliveredAmount));
-        }
-
-        return list.toArray(new Transaction[0]);
+            try {
+                tr.add(toTransaction(t, XrpCurrencyAmount.ofDrops(0)));
+            } catch (DecoderException | UnsupportedEncodingException e) {
+                log.error(e.getMessage(), e);
+            }
+            return true;
+        });
+        return tr.transactions();
     }
 
     public boolean exists(Wallet wallet) {

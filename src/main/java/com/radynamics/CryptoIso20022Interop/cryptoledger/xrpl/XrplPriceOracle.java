@@ -75,7 +75,6 @@ public class XrplPriceOracle implements ExchangeRateProvider {
 
     @Override
     public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
-        var period = DateTimeRange.of(pointInTime.minusMinutes(50), pointInTime.plusMinutes(50));
         var targetCcy = pair.getFirstCode().equals("XRP") ? pair.getSecondCode() : pair.getFirstCode();
         var issuedCcy = issuedCurrencies.get(targetCcy);
         // Null when no oracle configuration is present for a given currency.
@@ -83,9 +82,10 @@ public class XrplPriceOracle implements ExchangeRateProvider {
             return null;
         }
 
-        Transaction[] transactions = new Transaction[0];
+        var transactions = new com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[0];
         try {
-            transactions = ledger.listTrustlineTransactions(issuedCcy.getReceiver(), period, issuedCcy.getIssuer(), targetCcy);
+            var initialOffsetMinutes = 1;
+            transactions = loadTransactions(issuedCcy.getReceiver(), pointInTime, initialOffsetMinutes, issuedCcy.getIssuer(), targetCcy);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -118,8 +118,20 @@ public class XrplPriceOracle implements ExchangeRateProvider {
         return new ExchangeRate(pair, rate, bestMatch.getBooked());
     }
 
-    private Transaction getBestMatch(Transaction[] transactions, ZonedDateTime pointInTime) {
-        Transaction best = transactions[0];
+    private com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] loadTransactions(Wallet receiver, ZonedDateTime pointInTime, int offsetMinutes, Wallet issuer, String targetCcy) throws Exception {
+        var period = DateTimeRange.of(pointInTime.minusMinutes(offsetMinutes), pointInTime.plusMinutes(offsetMinutes));
+        var transactions = ledger.listTrustlineTransactions(receiver, period, issuer, targetCcy);
+
+        final int abortAtOffset = 32;
+        if (transactions.length > 0 || offsetMinutes > abortAtOffset) {
+            return transactions;
+        }
+
+        return loadTransactions(receiver, pointInTime, offsetMinutes * 2, issuer, targetCcy);
+    }
+
+    private com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction getBestMatch(com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction[] transactions, ZonedDateTime pointInTime) {
+        var best = transactions[0];
 
         for (var t : transactions) {
             var gapBest = Duration.ofSeconds(ChronoUnit.SECONDS.between(pointInTime, best.getBooked()));
