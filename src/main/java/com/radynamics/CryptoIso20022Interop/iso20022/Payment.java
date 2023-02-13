@@ -1,10 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Fee;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Transaction;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.TransmissionState;
 import com.radynamics.CryptoIso20022Interop.exchange.*;
@@ -25,6 +22,7 @@ public class Payment {
     private Currency ccy = UnknownCCy;
     private ExchangeRate exchangeRate;
     private Origin origin;
+    private ExpectedCurrency expectedCcy;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -329,6 +327,14 @@ public class Payment {
 
     public void setOrigin(Origin origin) {
         this.origin = origin;
+    }
+
+    public ExpectedCurrency getExpectedCurrency() {
+        return expectedCcy;
+    }
+
+    public void setExpectedCurrency(ExpectedCurrency expectedCcy) {
+        this.expectedCcy = expectedCcy;
     }
 
     public boolean isRemovable() {

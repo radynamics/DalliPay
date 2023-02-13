@@ -34,8 +34,7 @@ public class TrustlineInfoProvider implements WalletInfoProvider {
     }
 
     private String toText(Wallet wallet) {
-        var wi = walletInfoAggregator.getNameOrDomain(wallet);
-        return wi == null ? wallet.getPublicKey() : WalletInfoFormatter.format(wi);
+        return WalletInfoFormatter.format(wallet, walletInfoAggregator.getNameOrDomain(wallet));
     }
 
     @Override

@@ -1,10 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.iso20022.pain001;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentUtils;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletCompare;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletValidator;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationState;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Validator;
@@ -73,6 +70,17 @@ public class PaymentValidator implements com.radynamics.CryptoIso20022Interop.is
         var ledgerSpecific = getOrCreateLedgerSpecific(t.getLedger());
         if (ledgerSpecific != null) {
             list.addAll(Arrays.asList(ledgerSpecific.validate(t)));
+        }
+
+        if (t.getExpectedCurrency() != null) {
+            var expected = t.getExpectedCurrency().getIssuer();
+            var actualCcy = t.getAmountTransaction().getCcy();
+            if (!WalletCompare.isSame(expected, actualCcy.getIssuer())) {
+                var aggregator = new WalletInfoAggregator(t.getLedger().getInfoProvider());
+                var issuerText = WalletInfoFormatter.format(expected, aggregator.getNameOrDomain(expected), true);
+                var msg = String.format("Receiver expects amounts in a currency issued by %s. Receiver maybe doesn't accept %s.", issuerText, actualCcy);
+                list.add(new ValidationResult(ValidationState.Info, msg));
+            }
         }
 
         return list.toArray(new ValidationResult[0]);

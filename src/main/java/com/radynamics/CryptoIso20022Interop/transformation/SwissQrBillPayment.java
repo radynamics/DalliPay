@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.transformation;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.ExpectedCurrency;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.Origin;
@@ -105,6 +106,9 @@ public class SwissQrBillPayment {
         }
 
         payment.setReceiverWallet(chosen.receiverWallet);
+        if (chosen.expectedCcyIssuer != null) {
+            payment.setExpectedCurrency(new ExpectedCurrency(chosen.expectedCcyIssuer));
+        }
 
         return payment;
     }
