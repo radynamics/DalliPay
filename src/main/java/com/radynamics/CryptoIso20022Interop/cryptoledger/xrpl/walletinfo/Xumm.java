@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -118,7 +119,7 @@ public class Xumm implements WalletInfoProvider {
         }
 
         var responseString = "";
-        var scanner = new Scanner(url.openStream());
+        var scanner = new Scanner(url.openStream(), StandardCharsets.UTF_8);
         while (scanner.hasNext()) {
             responseString += scanner.nextLine();
         }
