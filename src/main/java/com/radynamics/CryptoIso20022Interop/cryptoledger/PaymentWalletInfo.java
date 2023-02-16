@@ -1,19 +1,19 @@
 package com.radynamics.CryptoIso20022Interop.cryptoledger;
 
 public class PaymentWalletInfo {
-    private WalletInfo senderInfo;
-    private WalletInfo receiverInfo;
+    private final WalletInfo[] senderInfos;
+    private final WalletInfo[] receiverInfos;
 
-    public PaymentWalletInfo(WalletInfo senderInfo, WalletInfo receiverInfo) {
-        this.senderInfo = senderInfo;
-        this.receiverInfo = receiverInfo;
+    public PaymentWalletInfo(WalletInfo[] senderInfos, WalletInfo[] receiverInfos) {
+        this.senderInfos = senderInfos;
+        this.receiverInfos = receiverInfos;
     }
 
-    public WalletInfo getSenderInfo() {
-        return senderInfo;
+    public WalletInfo[] getSenderInfos() {
+        return senderInfos;
     }
 
-    public WalletInfo getReceiverInfo() {
-        return receiverInfo;
+    public WalletInfo[] getReceiverInfos() {
+        return receiverInfos;
     }
 }

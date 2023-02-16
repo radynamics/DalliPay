@@ -19,6 +19,22 @@ public class WalletInfoAggregator {
         this.providers = providers;
     }
 
+    public WalletInfo[] all(Wallet wallet) {
+        if (wallet == null) {
+            return new WalletInfo[0];
+        }
+
+        var list = new ArrayList<WalletInfo>();
+        for (var p : providers) {
+            try {
+                list.addAll(Arrays.asList(p.list(wallet)));
+            } catch (WalletInfoLookupException e) {
+                log.warn(e);
+            }
+        }
+        return list.toArray(new WalletInfo[0]);
+    }
+
     public WalletInfo getNameOrDomain(Wallet wallet) {
         if (wallet == null) {
             return null;
@@ -34,9 +50,13 @@ public class WalletInfoAggregator {
             }
         }
 
+        return getNameOrDomain(list.toArray(new WalletInfo[0]));
+    }
+
+    public static WalletInfo getNameOrDomain(WalletInfo[] walletInfos) {
         WalletInfo name = null;
         WalletInfo domain = null;
-        for (var wi : list) {
+        for (var wi : walletInfos) {
             if (wi.getType() == InfoType.Name) {
                 name = wi;
             }

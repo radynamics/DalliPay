@@ -2,6 +2,7 @@ package com.radynamics.CryptoIso20022Interop.ui;
 
 import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.*;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.InfoType;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -118,9 +120,18 @@ public class WalletField extends JPanel {
 
         ledger.refreshBalance(wallet, true);
 
+        var pnl = new JPanel();
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+
+        {
+            var lbl = new JLabel(wallet.getPublicKey());
+            lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
+            pnl.add(lbl);
+        }
+
         var sb = new StringBuilder();
         sb.append("=== Balances ===" + System.lineSeparator());
-        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), System.lineSeparator()));
+        sb.append(MoneyFormatter.formatFiat(Money.sort(Money.removeZero(wallet.getBalances().all())), System.lineSeparator()));
         sb.append(System.lineSeparator());
 
         var infos = new ArrayList<WalletInfo>();
@@ -133,6 +144,7 @@ public class WalletField extends JPanel {
         }
 
         String lastInfoProviderDisplayText = null;
+        boolean isFirstUrl = true;
         for (var wi : infos) {
             var infoProviderDisplayText = wi.getProvider().getDisplayText();
             if (!StringUtils.equals(lastInfoProviderDisplayText, infoProviderDisplayText)) {
@@ -141,10 +153,31 @@ public class WalletField extends JPanel {
                 }
                 sb.append(String.format("=== %s ===%s", infoProviderDisplayText, System.lineSeparator()));
             }
-            var text = StringUtils.isEmpty(wi.getText()) ? "" : String.format("%s: ", wi.getText());
-            sb.append(String.format("%s%s%s", text, wi.getValue(), System.lineSeparator()));
+            if (wi.getType() == InfoType.Url) {
+                var lbl = Utils.createLinkLabel(pnl, wi.getText() + "...");
+                if (isFirstUrl) {
+                    lbl.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+                    isFirstUrl = false;
+                }
+                lbl.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 1) {
+                            Utils.openBrowser(pnl, URI.create(wi.getValue()));
+                        }
+                    }
+                });
+                pnl.add(lbl);
+
+            } else {
+                var text = StringUtils.isEmpty(wi.getText()) ? "" : String.format("%s: ", wi.getText());
+                sb.append(String.format("%s%s%s", text, wi.getValue(), System.lineSeparator()));
+            }
             lastInfoProviderDisplayText = infoProviderDisplayText;
         }
+
+        // ScrollPane trick to force a top margin
+        pnl.add(new JLabel(" "));
 
         var textArea = new JTextArea(sb.toString());
         textArea.setColumns(50);
@@ -153,7 +186,8 @@ public class WalletField extends JPanel {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
-        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
+        pnl.add(new JScrollPane(textArea));
+        JOptionPane.showMessageDialog(this, pnl, wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void setText(String value) {

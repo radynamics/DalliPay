@@ -53,14 +53,21 @@ public class Xumm implements WalletInfoProvider {
 
         var list = new ArrayList<WalletInfo>();
 
-        list.add(new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80));
+        {
+            var wi = new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80);
+            wi.setVerified(true);
+            list.add(wi);
+        }
         if (result.has("xummProfile")) {
             var xummProfile = result.getJSONObject("xummProfile");
             if (!xummProfile.isNull("accountAlias")) {
                 list.add(new WalletInfo(this, "XUMM account alias", xummProfile.getString("accountAlias"), 50));
             }
             if (!xummProfile.isNull("ownerAlias")) {
-                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50));
+                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50, InfoType.Name));
+            }
+            if (!xummProfile.isNull("profileUrl")) {
+                list.add(new WalletInfo(this, "XUMM profile", xummProfile.getString("profileUrl"), 50, InfoType.Url));
             }
         }
 
@@ -77,10 +84,12 @@ public class Xumm implements WalletInfoProvider {
         if (result.has("globalid")) {
             var globalid = result.getJSONObject("globalid");
             if (!globalid.isNull("profileUrl")) {
-                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50));
+                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
-                list.add(new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60));
+                var wi = new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60);
+                wi.setVerified(true);
+                list.add(wi);
             }
         }
 

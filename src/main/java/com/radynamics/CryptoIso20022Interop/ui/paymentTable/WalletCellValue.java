@@ -4,23 +4,23 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 
 public class WalletCellValue {
-    private Wallet wallet;
-    private WalletInfo walletInfo;
+    private final Wallet wallet;
+    private final WalletInfo[] walletInfos;
 
     public WalletCellValue(Wallet wallet) {
-        this(wallet, null);
+        this(wallet, new WalletInfo[0]);
     }
 
-    public WalletCellValue(Wallet wallet, WalletInfo walletInfo) {
+    public WalletCellValue(Wallet wallet, WalletInfo[] walletInfos) {
         this.wallet = wallet;
-        this.walletInfo = walletInfo;
+        this.walletInfos = walletInfos;
     }
 
     public Wallet getWallet() {
         return wallet;
     }
 
-    public WalletInfo getWalletInfo() {
-        return walletInfo;
+    public WalletInfo[] getWalletInfos() {
+        return walletInfos;
     }
 }
