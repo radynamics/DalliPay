@@ -148,10 +148,7 @@ public class JsonRpcApi implements TransactionSource {
 
     private void handleIssuedCurrency(TransactionResult tr, org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) {
         try {
-            // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
-            final int ccyCodeStandardFormatLength = 3;
-            // trim() needed, due value is always 20 bytes, filled with 0.
-            var ccyCode = amount.currency().length() <= ccyCodeStandardFormatLength ? amount.currency() : Utils.hexToString(amount.currency()).trim();
+            var ccyCode = toCurrencyCode(amount.currency());
             var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
 
             var issuer = ledger.createWallet(amount.issuer().value(), "");
@@ -171,6 +168,18 @@ public class JsonRpcApi implements TransactionSource {
                     });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private static String toCurrencyCode(String currency) {
+        try {
+            // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
+            final int ccyCodeStandardFormatLength = 3;
+            // trim() needed, due value is always 20 bytes, filled with 0.
+            return currency.length() <= ccyCodeStandardFormatLength ? currency : Utils.hexToString(currency).trim();
+        } catch (DecoderException | UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+            return currency;
         }
     }
 
@@ -411,7 +420,7 @@ public class JsonRpcApi implements TransactionSource {
         for (var line : result.lines()) {
             var amt = Double.parseDouble(line.balance());
             var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
-            var ccy = new Currency(line.currency(), issuer);
+            var ccy = new Currency(toCurrencyCode(line.currency()), issuer);
             ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
             var balance = Money.of(amt, ccy);
             var lmt = Double.parseDouble(line.limit());
