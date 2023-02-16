@@ -53,7 +53,11 @@ public class Xumm implements WalletInfoProvider {
 
         var list = new ArrayList<WalletInfo>();
 
-        list.add(new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80));
+        {
+            var wi = new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80);
+            wi.setVerified(true);
+            list.add(wi);
+        }
         if (result.has("xummProfile")) {
             var xummProfile = result.getJSONObject("xummProfile");
             if (!xummProfile.isNull("accountAlias")) {
@@ -83,7 +87,9 @@ public class Xumm implements WalletInfoProvider {
                 list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
-                list.add(new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60));
+                var wi = new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60);
+                wi.setVerified(true);
+                list.add(wi);
             }
         }
 
