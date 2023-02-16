@@ -62,6 +62,9 @@ public class Xumm implements WalletInfoProvider {
             if (!xummProfile.isNull("ownerAlias")) {
                 list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50));
             }
+            if (!xummProfile.isNull("profileUrl")) {
+                list.add(new WalletInfo(this, "XUMM profile", xummProfile.getString("profileUrl"), 50, InfoType.Url));
+            }
         }
 
         if (result.has("thirdPartyProfiles")) {
@@ -77,7 +80,7 @@ public class Xumm implements WalletInfoProvider {
         if (result.has("globalid")) {
             var globalid = result.getJSONObject("globalid");
             if (!globalid.isNull("profileUrl")) {
-                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50));
+                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
                 list.add(new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60));
