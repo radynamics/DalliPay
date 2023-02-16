@@ -45,7 +45,7 @@ public class WalletField extends JPanel {
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
                     decorator.update(text);
-                    return validator.getValidOrNull(text) != null;
+                    return validator.isValid(text);
                 }
             });
             txt.addFocusListener(new FocusListener() {

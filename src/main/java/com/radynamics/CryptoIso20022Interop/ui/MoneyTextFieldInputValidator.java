@@ -13,8 +13,9 @@ import java.util.Locale;
 public class MoneyTextFieldInputValidator implements InputControlValidator {
     private final static Logger log = LogManager.getLogger(MoneyTextFieldInputValidator.class);
 
-    public Money getValidOrNull(Object value) {
-        return getValidOrNull((String) value);
+    @Override
+    public boolean isValid(Object value) {
+        return getValidOrNull((String) value) != null;
     }
 
     public Money getValidOrNull(String text) {

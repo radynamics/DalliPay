@@ -24,8 +24,7 @@ public class ValidationControlDecorator {
     }
 
     public void update(Object value) {
-        var m = validator.getValidOrNull(value);
-        if (m == null) {
+        if (!validator.isValid(value)) {
             showInvalid();
             return;
         }

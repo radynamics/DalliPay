@@ -16,8 +16,10 @@ public class WalletFieldInputValidator implements InputControlValidator {
         this.ledger = ledger;
     }
 
-    public Wallet getValidOrNull(Object value) {
-        return getValidOrNull((String) value);
+    @Override
+    public boolean isValid(Object value) {
+        var text = (String) value;
+        return StringUtils.isEmpty(text) || getValidOrNull(text) != null;
     }
 
     public Wallet getValidOrNull(String text) {
