@@ -64,7 +64,7 @@ public class Xumm implements WalletInfoProvider {
                 list.add(new WalletInfo(this, "XUMM account alias", xummProfile.getString("accountAlias"), 50));
             }
             if (!xummProfile.isNull("ownerAlias")) {
-                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50));
+                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50, InfoType.Name));
             }
             if (!xummProfile.isNull("profileUrl")) {
                 list.add(new WalletInfo(this, "XUMM profile", xummProfile.getString("profileUrl"), 50, InfoType.Url));
