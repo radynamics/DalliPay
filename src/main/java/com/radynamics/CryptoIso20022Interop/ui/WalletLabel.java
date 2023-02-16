@@ -7,10 +7,8 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
-import com.radynamics.CryptoIso20022Interop.iso20022.AccountFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Address;
-import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
-import org.apache.commons.lang3.StringUtils;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentFormatter;
 
 import javax.swing.*;
 
@@ -36,7 +34,7 @@ public class WalletLabel extends JPanel {
     }
 
     private void evaluate() {
-        firstLine.setText(getFirstLineText());
+        firstLine.setText(PaymentFormatter.singleLineText(account, address));
 
         var walletText = new WalletFormatter().format(wallet);
         if (wallet == null) {
@@ -87,26 +85,6 @@ public class WalletLabel extends JPanel {
         }
 
         return walletText;
-    }
-
-    private String getFirstLineText() {
-        var sb = new StringBuilder();
-
-        if (address != null) {
-            sb.append(AddressFormatter.formatSingleLine(address));
-        }
-
-        if (account == null && sb.length() > 0) {
-            return sb.toString();
-        }
-
-        var accountText = account == null || StringUtils.isEmpty(account.getUnformatted())
-                ? "Missing Account"
-                : AccountFormatter.format(account);
-        var template = sb.length() == 0 ? "%s" : " (%s)";
-        sb.append(String.format(template, accountText));
-
-        return sb.toString();
     }
 
     public WalletLabel setWallet(Wallet wallet) {

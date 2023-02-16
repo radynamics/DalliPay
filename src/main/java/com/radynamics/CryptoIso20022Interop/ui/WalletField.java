@@ -29,12 +29,16 @@ public class WalletField extends JPanel {
     private ValidationControlDecorator decorator;
 
     public WalletField(JComponent owner) {
+        this(owner, true);
+    }
+
+    public WalletField(JComponent owner, boolean verticalLabels) {
         this.owner = owner;
-        setupUI();
+        setupUI(verticalLabels);
         setShowDetailVisible(false);
     }
 
-    private void setupUI() {
+    private void setupUI(boolean verticalLabels) {
         setLayout(new GridBagLayout());
 
         {
@@ -69,7 +73,7 @@ public class WalletField extends JPanel {
         }
         {
             var pnl = new JPanel();
-            pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+            pnl.setLayout(new BoxLayout(pnl, verticalLabels ? BoxLayout.Y_AXIS : BoxLayout.X_AXIS));
 
             var c = new GridBagConstraints();
             c.insets = new Insets(0, 5, 0, 5);
@@ -81,6 +85,9 @@ public class WalletField extends JPanel {
             add(pnl, c);
             {
                 var lbl = Utils.createLinkLabel(owner, "find...");
+                if (!verticalLabels) {
+                    lbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+                }
                 pnl.add(lbl);
                 lbl.addMouseListener(new MouseAdapter() {
                     @Override
@@ -211,5 +218,17 @@ public class WalletField extends JPanel {
 
     public void setShowDetailVisible(boolean visible) {
         lblShowDetail.setVisible(visible);
+    }
+
+    public void setWallet(Wallet wallet) {
+        if (wallet == null) {
+            setText("");
+        } else {
+            setText(wallet.getPublicKey());
+        }
+    }
+
+    public Wallet getWallet() {
+        return validator.getValidOrNull(getText());
     }
 }

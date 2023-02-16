@@ -7,10 +7,10 @@ import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderException;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.PaymentPath;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResultUtils;
 import com.radynamics.CryptoIso20022Interop.exchange.*;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentValidator;
 import com.radynamics.CryptoIso20022Interop.ui.paymentTable.Actor;
 
@@ -22,7 +22,6 @@ public class PaymentDetailForm extends JDialog {
     private Payment payment;
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
-    private final WalletInfoAggregator walletInfoAggregator;
     private final CurrencyConverter currencyConverter;
     private final Actor actor;
 
@@ -32,6 +31,8 @@ public class PaymentDetailForm extends JDialog {
     private boolean paymentChanged;
     private JLabel lblLedgerAmount;
     private MoneyTextField txtAmount;
+    private WalletField txtSenderWallet;
+    private WalletField txtReceiverWallet;
     private StructuredReferencesTextArea txtStructuredReferences;
     private JTextArea txtMessages;
     private JLabel lblEditExchangeRate;
@@ -45,7 +46,6 @@ public class PaymentDetailForm extends JDialog {
         this.payment = payment;
         this.validator = validator;
         this.exchangeRateProvider = exchangeRateProvider;
-        this.walletInfoAggregator = new WalletInfoAggregator(payment.getLedger().getInfoProvider());
         this.currencyConverter = currencyConverter;
         this.actor = actor;
 
@@ -55,7 +55,7 @@ public class PaymentDetailForm extends JDialog {
     public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
         var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(650, 435);
+        frm.setSize(650, 475);
         frm.setModal(true);
         frm.setLocationRelativeTo(c);
         frm.setVisible(true);
@@ -118,6 +118,8 @@ public class PaymentDetailForm extends JDialog {
         {
             int northPad = 0;
             final var lineHeight = 30;
+            final var walletEditLineHeight = 45;
+            final var walletEditOffsetNorth = 5;
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
@@ -158,24 +160,24 @@ public class PaymentDetailForm extends JDialog {
                 northPad += lineHeight + 4;
             }
             {
-                var lbl = new WalletLabel();
-                lbl.setWallet(payment.getSenderWallet())
-                        .setLedger(payment.getLedger())
-                        .setAccount(payment.getSenderAccount())
-                        .setAddress(payment.getSenderAddress())
-                        .setWalletInfoAggregator(walletInfoAggregator);
-                createRow(northPad, "Sender:", lbl, null, false);
-                northPad += lineHeight;
+                var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getSenderAccount(), payment.getSenderAddress()));
+                txtSenderWallet = new WalletField(pnlMain, false);
+                txtSenderWallet.setLedger(payment.getLedger());
+                txtSenderWallet.setWallet(payment.getSenderWallet());
+                txtSenderWallet.setShowDetailVisible(true);
+                txtSenderWallet.setEditable(payment.isEditable());
+                createRow(northPad, "Sender:", lbl, txtSenderWallet, false, walletEditOffsetNorth);
+                northPad += walletEditLineHeight;
             }
             {
-                var lbl = new WalletLabel();
-                lbl.setWallet(payment.getReceiverWallet())
-                        .setLedger(payment.getLedger())
-                        .setAccount(payment.getReceiverAccount())
-                        .setAddress(payment.getReceiverAddress())
-                        .setWalletInfoAggregator(walletInfoAggregator);
-                createRow(northPad, "Receiver:", lbl, null, false);
-                northPad += lineHeight;
+                var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getReceiverAccount(), payment.getReceiverAddress()));
+                txtReceiverWallet = new WalletField(pnlMain, false);
+                txtReceiverWallet.setLedger(payment.getLedger());
+                txtReceiverWallet.setWallet(payment.getReceiverWallet());
+                txtReceiverWallet.setShowDetailVisible(true);
+                txtReceiverWallet.setEditable(payment.isEditable());
+                createRow(northPad, "Receiver:", lbl, txtReceiverWallet, false, walletEditOffsetNorth);
+                northPad += walletEditLineHeight;
             }
             {
                 JLabel secondLine = null;
@@ -246,6 +248,8 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void applyUIValues() {
+        payment.setSenderWallet(txtSenderWallet.getWallet());
+        payment.setReceiverWallet(txtReceiverWallet.getWallet());
         payment.setStructuredReference(txtStructuredReferences.getValue());
         payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
         setPaymentChanged(true);
