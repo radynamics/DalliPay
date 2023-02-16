@@ -1,5 +1,7 @@
 package com.radynamics.CryptoIso20022Interop.ui.paymentTable;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.ui.Consts;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
 
@@ -33,17 +35,31 @@ public class WalletCellRenderer extends JLabel implements TableCellRenderer {
         if (value instanceof WalletCellValue) {
             var cellValue = (WalletCellValue) value;
             wallet.setText(cellValue.getWallet() == null ? "" : cellValue.getWallet().getPublicKey());
-            var walletInfo = cellValue.getWalletInfo();
-            if (walletInfo == null) {
+            var walletInfos = cellValue.getWalletInfos();
+            var show = getToShow(walletInfos);
+            if (show == null) {
                 desc.setText("");
             } else {
-                desc.setText(String.format("%s %s", walletInfo.getText(), walletInfo.getValue()));
-                desc.setForeground(walletInfo.getVerified() ? descForegroundColor : Consts.ColorWarning);
+                desc.setText(String.format("%s %s", show.getText(), show.getValue()));
+                desc.setForeground(isTrustworthy(walletInfos) ? descForegroundColor : Consts.ColorWarning);
             }
         } else {
             wallet.setText((String) value);
             desc.setText("");
         }
         return pnl;
+    }
+
+    private static WalletInfo getToShow(WalletInfo[] walletInfos) {
+        return WalletInfoAggregator.getNameOrDomain(walletInfos);
+    }
+
+    private boolean isTrustworthy(WalletInfo[] walletInfos) {
+        for (var wi : walletInfos) {
+            if (wi.getVerified()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

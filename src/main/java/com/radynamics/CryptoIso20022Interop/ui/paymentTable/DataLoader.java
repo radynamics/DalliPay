@@ -90,10 +90,10 @@ public class DataLoader {
 
     private CompletableFuture<Void> loadWalletInfoAsync(Record item) {
         return walletInfoLoader.load(item.payment).thenAccept(result -> {
-            var senderCellValue = new WalletCellValue(item.payment.getSenderWallet(), result.getSenderInfo());
+            var senderCellValue = new WalletCellValue(item.payment.getSenderWallet(), result.getSenderInfos());
             // Don't use setValueAt to prevent event raising during async load.
             item.setSenderLedger(senderCellValue);
-            var receiverCellValue = new WalletCellValue(item.payment.getReceiverWallet(), result.getReceiverInfo());
+            var receiverCellValue = new WalletCellValue(item.payment.getReceiverWallet(), result.getReceiverInfos());
             item.setReceiverLedger(receiverCellValue);
         });
     }

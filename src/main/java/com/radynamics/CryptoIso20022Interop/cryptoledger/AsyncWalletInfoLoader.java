@@ -21,17 +21,17 @@ public class AsyncWalletInfoLoader {
 
         Executors.newCachedThreadPool().submit(() -> {
             completableFuture.complete(
-                    new PaymentWalletInfo(getNameOrDomain(p.getLedger(), p.getSenderWallet()), getNameOrDomain(p.getLedger(), p.getReceiverWallet())));
+                    new PaymentWalletInfo(all(p.getLedger(), p.getSenderWallet()), all(p.getLedger(), p.getReceiverWallet())));
         });
 
         return completableFuture;
     }
 
-    private static final WalletInfo getNameOrDomain(Ledger ledger, Wallet wallet) {
+    private static final WalletInfo[] all(Ledger ledger, Wallet wallet) {
         if (wallet == null || !WalletValidator.isValidFormat(ledger, wallet)) {
-            return null;
+            return new WalletInfo[0];
         }
         var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
-        return aggregator.getNameOrDomain(wallet);
+        return aggregator.all(wallet);
     }
 }
