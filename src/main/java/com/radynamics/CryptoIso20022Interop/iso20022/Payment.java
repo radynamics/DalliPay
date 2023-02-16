@@ -318,7 +318,7 @@ public class Payment {
     }
 
     public boolean isEditable() {
-        return getTransmission() != TransmissionState.Waiting;
+        return getOrigin() != Origin.Ledger && getTransmission() != TransmissionState.Waiting;
     }
 
     public Origin getOrigin() {
