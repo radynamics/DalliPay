@@ -335,7 +335,9 @@ public class PaymentTable extends JPanel {
             return CompletableFuture.completedFuture(null);
         }
         raiseRefresh(t);
-        model.onTransactionChanged(t);
+        // Ensure changed wallets are refreshed in dataLoader.loadWalletInfoAsync
+        dataLoader.onAccountOrWalletsChangedAsync(t)
+                .thenRun(() -> model.onTransactionChanged(t));
         return dataLoader.onTransactionChanged(t);
     }
 

@@ -116,8 +116,12 @@ public class DataLoader {
 
     public void onAccountOrWalletsChanged(Payment t) {
         Executors.newCachedThreadPool().submit(() -> {
-            loadWalletInfoAsync(getRecord(t).orElseThrow()).thenAccept((result) -> onTransactionChanged(t));
+            onAccountOrWalletsChangedAsync(t);
         });
+    }
+
+    public CompletableFuture<Void> onAccountOrWalletsChangedAsync(Payment t) {
+        return loadWalletInfoAsync(getRecord(t).orElseThrow()).thenAccept((result) -> onTransactionChanged(t));
     }
 
     private Optional<Record> getRecord(Payment payment) {
