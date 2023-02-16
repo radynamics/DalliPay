@@ -131,7 +131,7 @@ public class WalletField extends JPanel {
 
         var sb = new StringBuilder();
         sb.append("=== Balances ===" + System.lineSeparator());
-        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), System.lineSeparator()));
+        sb.append(MoneyFormatter.formatFiat(Money.sort(Money.removeZero(wallet.getBalances().all())), System.lineSeparator()));
         sb.append(System.lineSeparator());
 
         var infos = new ArrayList<WalletInfo>();
