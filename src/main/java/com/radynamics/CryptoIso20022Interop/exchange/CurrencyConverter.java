@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class CurrencyConverter {
     private final ExchangeRate[] rates;
 
-    public static final double PRECISION = 100000d;
+    public static final double PRECISION = 1000000000d;
 
     public CurrencyConverter() {
         this(new ExchangeRate[0]);
