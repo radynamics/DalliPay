@@ -141,7 +141,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
-                var enabled = PaymentEdit.is(payment).editable() && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
+                var enabled = PaymentEdit.is(payment).exchangeRateEditable();
                 lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);

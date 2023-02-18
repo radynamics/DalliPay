@@ -19,6 +19,15 @@ public class PaymentEdit {
         return payment.getOrigin() != Origin.Ledger && payment.getTransmission() != TransmissionState.Waiting;
     }
 
+    public boolean exchangeRateEditable() {
+        if (editable()) {
+            return true;
+        }
+
+        // Edit exchange rates before export is allowed
+        return payment.getOrigin() == Origin.Ledger && payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+    }
+
     public boolean removable() {
         return editable() && payment.getTransmission() != TransmissionState.Success && payment.getOrigin().isDeletable();
     }
