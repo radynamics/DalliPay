@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 
 public class WalletInfoAggregator {
@@ -54,18 +55,12 @@ public class WalletInfoAggregator {
     }
 
     public static WalletInfo getNameOrDomain(WalletInfo[] walletInfos) {
-        WalletInfo name = null;
-        WalletInfo domain = null;
-        for (var wi : walletInfos) {
-            if (wi.getType() == InfoType.Name) {
-                name = wi;
-            }
-            if (wi.getType() == InfoType.Domain) {
-                domain = wi;
-            }
-        }
+        var names = Arrays.stream(walletInfos).filter(o -> o.getType() == InfoType.Name);
+        var domains = Arrays.stream(walletInfos).filter(o -> o.getType() == InfoType.Domain);
 
-        return name != null ? name : domain;
+        var name = names.min(Comparator.comparing(WalletInfo::getImportance));
+        var domain = domains.min(Comparator.comparing(WalletInfo::getImportance));
+        return name.orElse(domain.orElse(null));
     }
 
     private WalletInfoProvider[] filterBy(InfoType[] infoTypes) {
