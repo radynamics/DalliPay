@@ -10,6 +10,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.iso20022.Account;
 import com.radynamics.CryptoIso20022Interop.iso20022.AccountFactory;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentEdit;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -170,7 +171,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return false;
         }
         var item = data.get(row);
-        if (!item.payment.isEditable()) {
+        if (!PaymentEdit.is(item.payment).editable()) {
             return false;
         }
         if (col == getColumnIndex(COL_SELECTOR)) {

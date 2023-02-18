@@ -13,6 +13,7 @@ import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRate;
 import com.radynamics.CryptoIso20022Interop.iso20022.AddressFormatter;
 import com.radynamics.CryptoIso20022Interop.iso20022.Payment;
 import com.radynamics.CryptoIso20022Interop.iso20022.PaymentConverter;
+import com.radynamics.CryptoIso20022Interop.iso20022.PaymentEdit;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Reader;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.Pain001Xml;
 import com.radynamics.CryptoIso20022Interop.iso20022.pain001.PaymentValidator;
@@ -211,7 +212,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void remove(Payment p) {
-        if (!p.isRemovable()) {
+        if (!PaymentEdit.is(p).removable()) {
             JOptionPane.showMessageDialog(this, "Cannot remove payment because payment is not editable, has already been sent or was not manually created.", "Remove payment", JOptionPane.INFORMATION_MESSAGE);
             return;
         }

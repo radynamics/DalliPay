@@ -317,10 +317,6 @@ public class Payment {
         pathSameCcyCode.apply(this);
     }
 
-    public boolean isEditable() {
-        return getOrigin() != Origin.Ledger && getTransmission() != TransmissionState.Waiting;
-    }
-
     public Origin getOrigin() {
         return origin;
     }
@@ -335,9 +331,5 @@ public class Payment {
 
     public void setExpectedCurrency(ExpectedCurrency expectedCcy) {
         this.expectedCcy = expectedCcy;
-    }
-
-    public boolean isRemovable() {
-        return isEditable() && getTransmission() != TransmissionState.Success && getOrigin().isDeletable();
     }
 }
