@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Xumm implements WalletInfoProvider {
@@ -60,14 +61,17 @@ public class Xumm implements WalletInfoProvider {
         }
         if (result.has("xummProfile")) {
             var xummProfile = result.getJSONObject("xummProfile");
-            if (!xummProfile.isNull("accountAlias")) {
-                list.add(new WalletInfo(this, "XUMM account alias", xummProfile.getString("accountAlias"), 50));
+            var accountAlias = get(xummProfile, "accountAlias").orElse(null);
+            if (accountAlias != null) {
+                list.add(new WalletInfo(this, "XUMM account alias", accountAlias, 50, InfoType.Name));
             }
-            if (!xummProfile.isNull("ownerAlias")) {
-                list.add(new WalletInfo(this, "XUMM owner alias", xummProfile.getString("ownerAlias"), 50, InfoType.Name));
+            var ownerAlias = get(xummProfile, "ownerAlias").orElse(null);
+            if (ownerAlias != null) {
+                list.add(new WalletInfo(this, "XUMM owner alias", ownerAlias, 60, InfoType.Name));
             }
-            if (!xummProfile.isNull("profileUrl")) {
-                list.add(new WalletInfo(this, "XUMM profile", xummProfile.getString("profileUrl"), 50, InfoType.Url));
+            var profileUrl = get(xummProfile, "profileUrl").orElse(null);
+            if (profileUrl != null) {
+                list.add(new WalletInfo(this, "XUMM profile", profileUrl, 50, InfoType.Url));
             }
         }
 
@@ -75,16 +79,18 @@ public class Xumm implements WalletInfoProvider {
             var thirdPartyProfiles = result.getJSONArray("thirdPartyProfiles");
             for (var i = 0; i < thirdPartyProfiles.length(); i++) {
                 var o = thirdPartyProfiles.getJSONObject(i);
-                if (!o.isNull("accountAlias")) {
-                    list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), o.getString("accountAlias"), 40));
+                var accountAlias = get(o, "accountAlias").orElse(null);
+                if (accountAlias != null) {
+                    list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), accountAlias, 40));
                 }
             }
         }
 
         if (result.has("globalid")) {
             var globalid = result.getJSONObject("globalid");
-            if (!globalid.isNull("profileUrl")) {
-                list.add(new WalletInfo(this, "GlobaliD profile URL", globalid.getString("profileUrl"), 50, InfoType.Url));
+            var profileUrl = get(globalid, "profileUrl").orElse(null);
+            if (profileUrl != null) {
+                list.add(new WalletInfo(this, "GlobaliD profile URL", profileUrl, 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
                 var wi = new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60);
@@ -96,6 +102,14 @@ public class Xumm implements WalletInfoProvider {
         var infos = list.toArray(new WalletInfo[0]);
         cache.add(wallet, infos);
         return infos;
+    }
+
+    private static Optional<String> get(JSONObject json, String param) {
+        if (json.isNull(param)) {
+            return Optional.empty();
+        }
+        var value = json.getString(param);
+        return value.length() > 0 ? Optional.of(value) : Optional.empty();
     }
 
     private static boolean isTooManyRequests(Exception e) {
