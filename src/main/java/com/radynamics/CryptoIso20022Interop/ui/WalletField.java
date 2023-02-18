@@ -161,21 +161,12 @@ public class WalletField extends JPanel {
                 sb.append(String.format("=== %s ===%s", infoProviderDisplayText, System.lineSeparator()));
             }
             if (wi.getType() == InfoType.Url) {
-                var lbl = Utils.createLinkLabel(pnl, wi.getText() + "...");
+                var lbl = createLinkLabel(wi);
                 if (isFirstUrl) {
                     lbl.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
                     isFirstUrl = false;
                 }
-                lbl.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        if (e.getClickCount() == 1) {
-                            Utils.openBrowser(pnl, URI.create(wi.getValue()));
-                        }
-                    }
-                });
                 pnl.add(lbl);
-
             } else {
                 var text = StringUtils.isEmpty(wi.getText()) ? "" : String.format("%s: ", wi.getText());
                 sb.append(String.format("%s%s%s", text, wi.getValue(), System.lineSeparator()));
@@ -195,6 +186,19 @@ public class WalletField extends JPanel {
         textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
         pnl.add(new JScrollPane(textArea));
         JOptionPane.showMessageDialog(this, pnl, wallet.getPublicKey(), JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private JLabel createLinkLabel(WalletInfo wi) {
+        var lbl = Utils.createLinkLabel(owner, wi.getText() + "...");
+        lbl.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
+                    Utils.openBrowser(owner, URI.create(wi.getValue()));
+                }
+            }
+        });
+        return lbl;
     }
 
     public void setText(String value) {
