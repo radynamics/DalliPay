@@ -35,13 +35,12 @@ public class WalletCellRenderer extends JLabel implements TableCellRenderer {
         if (value instanceof WalletCellValue) {
             var cellValue = (WalletCellValue) value;
             wallet.setText(cellValue.getWallet() == null ? "" : cellValue.getWallet().getPublicKey());
-            var walletInfos = cellValue.getWalletInfos();
-            var show = getToShow(walletInfos);
+            var show = getToShow(cellValue.getWalletInfos());
             if (show == null) {
                 desc.setText("");
             } else {
                 desc.setText(String.format("%s %s", show.getText(), show.getValue()));
-                desc.setForeground(isTrustworthy(walletInfos) ? descForegroundColor : Consts.ColorWarning);
+                desc.setForeground(show.getVerified() ? descForegroundColor : Consts.ColorWarning);
             }
         } else {
             wallet.setText((String) value);
@@ -52,14 +51,5 @@ public class WalletCellRenderer extends JLabel implements TableCellRenderer {
 
     private static WalletInfo getToShow(WalletInfo[] walletInfos) {
         return WalletInfoAggregator.getNameOrDomain(walletInfos);
-    }
-
-    private boolean isTrustworthy(WalletInfo[] walletInfos) {
-        for (var wi : walletInfos) {
-            if (wi.getVerified()) {
-                return true;
-            }
-        }
-        return false;
     }
 }
