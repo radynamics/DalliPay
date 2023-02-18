@@ -52,26 +52,34 @@ public class Xumm implements WalletInfoProvider {
             return new WalletInfo[0];
         }
 
+        var kycApproved = false;
         var list = new ArrayList<WalletInfo>();
 
         {
-            var wi = new WalletInfo(this, "KYC approved", result.getBoolean("kycApproved"), 80);
-            wi.setVerified(true);
+            kycApproved = result.getBoolean("kycApproved");
+            var wi = new WalletInfo(this, "KYC approved", kycApproved, 80);
+            wi.setVerified(kycApproved);
             list.add(wi);
         }
         if (result.has("xummProfile")) {
             var xummProfile = result.getJSONObject("xummProfile");
             var accountAlias = get(xummProfile, "accountAlias").orElse(null);
             if (accountAlias != null) {
-                list.add(new WalletInfo(this, "XUMM account alias", accountAlias, 50, InfoType.Name));
+                var wi = new WalletInfo(this, "XUMM account alias", accountAlias, 50, InfoType.Name);
+                wi.setVerified(kycApproved);
+                list.add(wi);
             }
             var ownerAlias = get(xummProfile, "ownerAlias").orElse(null);
             if (ownerAlias != null) {
-                list.add(new WalletInfo(this, "XUMM owner alias", ownerAlias, 60, InfoType.Name));
+                var wi = new WalletInfo(this, "XUMM owner alias", ownerAlias, 60, InfoType.Name);
+                wi.setVerified(kycApproved);
+                list.add(wi);
             }
             var profileUrl = get(xummProfile, "profileUrl").orElse(null);
             if (profileUrl != null) {
-                list.add(new WalletInfo(this, "XUMM profile", profileUrl, 50, InfoType.Url));
+                var wi = new WalletInfo(this, "XUMM profile", profileUrl, 50, InfoType.Url);
+                wi.setVerified(kycApproved);
+                list.add(wi);
             }
         }
 
