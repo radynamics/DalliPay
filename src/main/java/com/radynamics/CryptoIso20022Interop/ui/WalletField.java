@@ -160,7 +160,7 @@ public class WalletField extends JPanel {
                 }
                 sb.append(String.format("=== %s ===%s", infoProviderDisplayText, System.lineSeparator()));
             }
-            if (wi.getType() == InfoType.Url) {
+            if (wi.getType() == InfoType.Url || wi.getType() == InfoType.Domain) {
                 var lbl = createLinkLabel(wi);
                 if (isFirstUrl) {
                     lbl.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
@@ -189,12 +189,24 @@ public class WalletField extends JPanel {
     }
 
     private JLabel createLinkLabel(WalletInfo wi) {
-        var lbl = Utils.createLinkLabel(owner, wi.getText() + "...");
+        var text = wi.getText();
+        switch (wi.getType()) {
+            case Domain -> {
+                text = wi.getValue();
+                if (!wi.getVerified()) {
+                    text += " (unverified)";
+                }
+            }
+        }
+        var lbl = Utils.createLinkLabel(owner, text + "...");
         lbl.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
-                    Utils.openBrowser(owner, URI.create(wi.getValue()));
+                    var url = wi.getType() == InfoType.Domain
+                            ? "www." + wi.getValue()
+                            : wi.getValue();
+                    Utils.openBrowser(owner, URI.create(url));
                 }
             }
         });
