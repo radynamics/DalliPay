@@ -305,8 +305,8 @@ public class PaymentTable extends JPanel {
                 : transformInstruction.getHistoricExchangeRateSource();
     }
 
-    public Payment[] selectedPayments() {
-        return model.selectedPayments();
+    public Payment[] checkedPayments() {
+        return model.checkedPayments();
     }
 
     public ValidationResult[] getValidationResults(Payment[] payments) {

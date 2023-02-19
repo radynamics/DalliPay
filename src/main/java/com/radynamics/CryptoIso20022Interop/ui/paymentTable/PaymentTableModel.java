@@ -234,7 +234,7 @@ public class PaymentTableModel extends AbstractTableModel {
         return highestStatus != ValidationState.Error;
     }
 
-    public Payment[] selectedPayments() {
+    public Payment[] checkedPayments() {
         var list = new ArrayList<Payment>();
         for (var item : this.data) {
             if (item.selected) {
