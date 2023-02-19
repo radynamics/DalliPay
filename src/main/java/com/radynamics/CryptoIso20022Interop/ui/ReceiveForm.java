@@ -202,7 +202,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             cmdExport.setPreferredSize(new Dimension(150, 35));
             cmdExport.setEnabled(false);
             cmdExport.addActionListener(e -> {
-                exportSelected();
+                exportChecked();
             });
             panel3Layout.putConstraint(SpringLayout.EAST, cmdExport, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdExport);
@@ -307,7 +307,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         return line * lineHeight;
     }
 
-    private void exportSelected() {
+    private void exportChecked() {
         if (isLoading || table.checkedPayments().length == 0) {
             return;
         }
