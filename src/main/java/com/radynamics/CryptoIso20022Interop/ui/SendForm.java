@@ -103,6 +103,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         panel3.setPreferredSize(new Dimension(500, 45));
 
         pnlMain.registerKeyboardAction(e -> addNewPaymentByFreeText(), KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        pnlMain.registerKeyboardAction(e -> removeSelectedPayment(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         {
             final int paddingWest = 120;
@@ -209,6 +210,14 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             lblLoading.setOpaque(true);
             panel3.add(lblLoading);
         }
+    }
+
+    private void removeSelectedPayment() {
+        var selected = table.selectedPayments();
+        if (selected.length == 0) {
+            return;
+        }
+        remove(selected[0]);
     }
 
     private void remove(Payment p) {

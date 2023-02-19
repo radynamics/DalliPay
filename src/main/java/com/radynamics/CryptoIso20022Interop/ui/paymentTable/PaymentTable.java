@@ -309,6 +309,10 @@ public class PaymentTable extends JPanel {
         return model.checkedPayments();
     }
 
+    public Payment[] selectedPayments() {
+        return new Payment[]{getSelectedRow(table)};
+    }
+
     public ValidationResult[] getValidationResults(Payment[] payments) {
         return model.getValidationResults(payments);
     }
