@@ -120,12 +120,10 @@ public class WalletField extends JPanel {
     }
 
     private void showMore() {
-        var wallet = ledger.createWallet(getText(), "");
-        if (!WalletValidator.isValidFormat(ledger, wallet)) {
+        var wallet = getWallet();
+        if (wallet == null) {
             return;
         }
-
-        ledger.refreshBalance(wallet, true);
 
         var pnl = new JPanel();
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
@@ -245,6 +243,12 @@ public class WalletField extends JPanel {
     }
 
     public Wallet getWallet() {
-        return validator.getValidOrNull(getText());
+        var wallet = validator.getValidOrNull(getText());
+        if (wallet == null) {
+            return null;
+        }
+
+        ledger.refreshBalance(wallet, true);
+        return wallet;
     }
 }
