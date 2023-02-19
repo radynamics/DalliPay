@@ -155,7 +155,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 enableInputControls(progress.isFinished());
             });
             table.addMappingChangedListener(this);
-            table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.selectedPayments().length > 0));
+            table.addSelectorChangedListener(() -> cmdSendPayments.setEnabled(table.checkedPayments().length > 0));
             panel2.add(table);
         }
         {
@@ -286,7 +286,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void sendPayments() {
-        var payments = table.selectedPayments();
+        var payments = table.checkedPayments();
         if (!cmdSendPayments.isEnabled() || payments.length == 0) {
             return;
         }
@@ -303,7 +303,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
             // Ensure payments are still valid (ex changed exchange rates leading to not enough funds)
             Executors.newCachedThreadPool().submit(() -> {
-                table.refresh(payments).thenRun(() -> sendPayments(table.selectedPayments()));
+                table.refresh(payments).thenRun(() -> sendPayments(table.checkedPayments()));
             });
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

@@ -193,7 +193,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
-            table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.selectedPayments().length > 0));
+            table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
             panel2.add(table);
         }
         {
@@ -308,7 +308,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportSelected() {
-        if (isLoading || table.selectedPayments().length == 0) {
+        if (isLoading || table.checkedPayments().length == 0) {
             return;
         }
 
@@ -328,7 +328,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             }
             var camtConverter = camtExport.getConverter();
             accountMappingSource.open();
-            var s = camtConverter.toXml(w.createDocument(table.selectedPayments()));
+            var s = camtConverter.toXml(w.createDocument(table.checkedPayments()));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
             outputStream.close();
