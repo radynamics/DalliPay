@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfo;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.WalletInfoAggregator;
 import com.radynamics.CryptoIso20022Interop.ui.Consts;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
+import com.radynamics.CryptoIso20022Interop.ui.WalletInfoFormatter;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -36,12 +37,8 @@ public class WalletCellRenderer extends JLabel implements TableCellRenderer {
             var cellValue = (WalletCellValue) value;
             wallet.setText(cellValue.getWallet() == null ? "" : cellValue.getWallet().getPublicKey());
             var show = getToShow(cellValue.getWalletInfos());
-            if (show == null) {
-                desc.setText("");
-            } else {
-                desc.setText(String.format("%s %s", show.getText(), show.getValue()));
-                desc.setForeground(show.getVerified() ? descForegroundColor : Consts.ColorWarning);
-            }
+            desc.setText(WalletInfoFormatter.toText(show).orElse(""));
+            WalletInfoFormatter.format(desc, show, descForegroundColor);
         } else {
             wallet.setText((String) value);
             desc.setText("");

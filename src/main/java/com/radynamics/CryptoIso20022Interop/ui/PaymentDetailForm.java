@@ -119,7 +119,7 @@ public class PaymentDetailForm extends JDialog {
         {
             int northPad = 0;
             final var lineHeight = 30;
-            final var walletEditLineHeight = 45;
+            final var walletEditLineHeight = 55;
             final var walletEditOffsetNorth = 5;
             {
                 var secondLine = new JPanel();
@@ -166,6 +166,7 @@ public class PaymentDetailForm extends JDialog {
                 txtSenderWallet.setLedger(payment.getLedger());
                 txtSenderWallet.setWallet(payment.getSenderWallet());
                 txtSenderWallet.setShowDetailVisible(true);
+                txtSenderWallet.setInfoTextVisible(true);
                 txtSenderWallet.setEditable(PaymentEdit.is(payment).editable());
                 createRow(northPad, "Sender:", lbl, txtSenderWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;
@@ -176,6 +177,7 @@ public class PaymentDetailForm extends JDialog {
                 txtReceiverWallet.setLedger(payment.getLedger());
                 txtReceiverWallet.setWallet(payment.getReceiverWallet());
                 txtReceiverWallet.setShowDetailVisible(true);
+                txtReceiverWallet.setInfoTextVisible(true);
                 txtReceiverWallet.setEditable(PaymentEdit.is(payment).editable());
                 createRow(northPad, "Receiver:", lbl, txtReceiverWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;

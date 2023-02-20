@@ -24,6 +24,7 @@ public class WalletField extends JPanel {
     private final JComponent owner;
     private JTextField txt;
     private JLabel lblShowDetail;
+    private JLabel lblInfoText;
     private Ledger ledger;
     private WalletFieldInputValidator validator;
     private ValidationControlDecorator decorator;
@@ -36,6 +37,7 @@ public class WalletField extends JPanel {
         this.owner = owner;
         setupUI(verticalLabels);
         setShowDetailVisible(false);
+        setInfoTextVisible(false);
     }
 
     private void setupUI(boolean verticalLabels) {
@@ -49,6 +51,7 @@ public class WalletField extends JPanel {
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
                     decorator.update(text);
+                    updateInfoText(text);
                     return validator.isValid(text);
                 }
             });
@@ -107,6 +110,30 @@ public class WalletField extends JPanel {
                 });
             }
         }
+        {
+            lblInfoText = Utils.formatSecondaryInfo(new JLabel());
+
+            var c = new GridBagConstraints();
+            c.fill = GridBagConstraints.BOTH;
+            c.weightx = 1.0;
+            c.weighty = 0.5;
+            c.gridx = 0;
+            c.gridy = 1;
+            add(lblInfoText, c);
+        }
+    }
+
+    private void updateInfoText(String text) {
+        var wallet = validator.getValidOrNull(text);
+        if (wallet == null) {
+            lblInfoText.setText("Invalid wallet");
+            return;
+        }
+
+        var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
+        var wi = aggregator.getNameOrDomain(wallet);
+        lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse("No information available"));
+        WalletInfoFormatter.format(lblInfoText, wi);
     }
 
     private void lookup() {
@@ -232,6 +259,10 @@ public class WalletField extends JPanel {
 
     public void setShowDetailVisible(boolean visible) {
         lblShowDetail.setVisible(visible);
+    }
+
+    public void setInfoTextVisible(boolean visible) {
+        lblInfoText.setVisible(visible);
     }
 
     public void setWallet(Wallet wallet) {

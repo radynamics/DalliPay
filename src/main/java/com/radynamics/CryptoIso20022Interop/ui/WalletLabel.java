@@ -47,17 +47,11 @@ public class WalletLabel extends JPanel {
             balanceText = MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()));
         }
 
-        String walletInfoText = null;
         var wi = walletInfoAggregator == null ? null : walletInfoAggregator.getNameOrDomain(wallet);
-        if (wi != null) {
-            walletInfoText = String.format("%s %s", wi.getText(), wi.getValue());
-        }
+        String walletInfoText = WalletInfoFormatter.toText(wi).orElse(null);
 
         secondLine.setText(createText(walletText, balanceText, walletInfoText));
-        if (wi != null) {
-            secondLine.setForeground(wi.getVerified() ? secondLine.getForeground() : Consts.ColorWarning);
-            secondLine.setToolTipText(wi.getVerified() ? "" : String.format("%s not verified", wi.getText()));
-        }
+        WalletInfoFormatter.format(secondLine, wi);
     }
 
     private String createText(String walletText, String balanceText, String walletInfoText) {
