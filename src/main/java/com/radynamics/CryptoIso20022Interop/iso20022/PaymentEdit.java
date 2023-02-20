@@ -15,8 +15,12 @@ public class PaymentEdit {
         return new PaymentEdit(payment);
     }
 
+    private boolean transmitting() {
+        return payment.getTransmission() == TransmissionState.Waiting;
+    }
+
     public boolean editable() {
-        return payment.getOrigin() != Origin.Ledger && payment.getTransmission() != TransmissionState.Waiting;
+        return payment.getOrigin() != Origin.Ledger && !transmitting();
     }
 
     public boolean exchangeRateEditable() {
@@ -26,6 +30,10 @@ public class PaymentEdit {
 
         // Edit exchange rates before export is allowed
         return payment.getOrigin() == Origin.Ledger && payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+    }
+
+    public boolean accountMappingEditable() {
+        return !transmitting();
     }
 
     public boolean removable() {
