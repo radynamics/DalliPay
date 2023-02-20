@@ -71,6 +71,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
     }
 
     @Override
+    public Wallet createRandomWallet(HttpUrl faucetUrl) {
+        return api.createRandomWallet(faucetUrl);
+    }
+
+    @Override
     public void refreshBalance(Wallet wallet, boolean useCache) {
         api.refreshBalance(WalletConverter.from(wallet), useCache);
     }
@@ -201,6 +206,11 @@ public class Ledger implements com.radynamics.CryptoIso20022Interop.cryptoledger
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"));
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"));
         return networks;
+    }
+
+    @Override
+    public HttpUrl getDefaultFaucetUrl() {
+        return HttpUrl.get("https://faucet.altnet.rippletest.net");
     }
 
     @Override

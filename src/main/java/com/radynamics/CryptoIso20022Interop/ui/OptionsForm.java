@@ -1,5 +1,6 @@
 package com.radynamics.CryptoIso20022Interop.ui;
 
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.ui.options.GeneralPane;
 import com.radynamics.CryptoIso20022Interop.ui.options.ReceiverPane;
@@ -13,7 +14,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
     private final ReceiverPane receiverPane;
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
 
-    public OptionsForm() {
+    public OptionsForm(Ledger ledger) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         var pnlContent = new JPanel();
@@ -24,7 +25,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
-            generalPane = new GeneralPane();
+            generalPane = new GeneralPane(ledger);
             tabbedPane.addTab("General", generalPane);
             receiverPane = new ReceiverPane();
             tabbedPane.addTab("Receive", receiverPane);

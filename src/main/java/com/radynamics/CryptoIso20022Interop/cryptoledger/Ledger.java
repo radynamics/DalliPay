@@ -4,6 +4,7 @@ import com.radynamics.CryptoIso20022Interop.DateTimeRange;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.transaction.ValidationResult;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
+import okhttp3.HttpUrl;
 
 public interface Ledger {
     LedgerId getId();
@@ -17,6 +18,8 @@ public interface Ledger {
     FeeSuggestion getFeeSuggestion();
 
     Wallet createWallet(String publicKey, String secret);
+
+    Wallet createRandomWallet(HttpUrl faucetUrl);
 
     void refreshBalance(Wallet wallet, boolean useCache);
 
@@ -49,6 +52,8 @@ public interface Ledger {
     boolean isSecretValid(Wallet wallet);
 
     NetworkInfo[] getDefaultNetworkInfo();
+
+    HttpUrl getDefaultFaucetUrl();
 
     TransactionSubmitterFactory createTransactionSubmitterFactory();
 }

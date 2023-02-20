@@ -1,13 +1,16 @@
 package com.radynamics.CryptoIso20022Interop.ui.options;
 
+import com.radynamics.CryptoIso20022Interop.MoneyFormatter;
 import com.radynamics.CryptoIso20022Interop.VersionController;
-import com.radynamics.CryptoIso20022Interop.cryptoledger.LedgerId;
+import com.radynamics.CryptoIso20022Interop.cryptoledger.Ledger;
 import com.radynamics.CryptoIso20022Interop.cryptoledger.LookupProviderFactory;
 import com.radynamics.CryptoIso20022Interop.db.ConfigRepo;
 import com.radynamics.CryptoIso20022Interop.db.Database;
+import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.ui.ExceptionDialog;
 import com.radynamics.CryptoIso20022Interop.ui.LoginForm;
 import com.radynamics.CryptoIso20022Interop.ui.Utils;
+import okhttp3.HttpUrl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,11 +21,16 @@ import java.awt.event.MouseEvent;
 
 public class GeneralPane extends JPanel {
     private final static Logger log = LogManager.getLogger(GeneralPane.class);
+    private HttpUrl faucetUrl;
 
     private final SpringLayout contentLayout;
+    private final Ledger ledger;
     private JComboBox<String> cboExplorer;
 
-    public GeneralPane() {
+    public GeneralPane(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
+
         setPreferredSize(new Dimension(1000, 400));
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
@@ -71,15 +79,22 @@ public class GeneralPane extends JPanel {
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> onChangePassword());
                 builder.addRowContent(top, cmd);
-                top += 30;
+                top += 50;
+            }
+            {
+                builder.addRowLabel(top, "Free test wallet");
+                var cmd = new JButton("create...");
+                cmd.setPreferredSize(new Dimension(150, 35));
+                cmd.addActionListener(e -> onCreateTestWallet());
+                builder.addRowContent(top, cmd);
+                top += 50;
             }
         }
     }
 
     private void refreshExplorer() {
         cboExplorer.removeAllItems();
-        var ledgerId = LedgerId.Xrpl;
-        for (var id : LookupProviderFactory.allIds(ledgerId)) {
+        for (var id : LookupProviderFactory.allIds(ledger.getId())) {
             cboExplorer.addItem(id);
         }
     }
@@ -147,11 +162,40 @@ public class GeneralPane extends JPanel {
         }
     }
 
+    public void onCreateTestWallet() {
+        if (ledger.getNetwork().isLivenet()) {
+            JOptionPane.showMessageDialog(this, String.format("Cannot create test wallets on %s. Switch to TESTNET first.", ledger.getNetwork().getShortText()), ledger.getNetwork().getShortText(), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        var wallet = ledger.createRandomWallet(faucetUrl);
+
+        var sb = new StringBuilder();
+        sb.append("=== Wallet ===" + System.lineSeparator());
+        sb.append(String.format("Wallet: %s", wallet.getPublicKey()) + System.lineSeparator());
+        sb.append(String.format("Secret: %s", wallet.getSecret()) + System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append(String.format("Faucet: %s", faucetUrl) + System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append("=== Balances ===" + System.lineSeparator());
+        sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), System.lineSeparator()));
+
+        var txt = new JTextArea(sb.toString());
+        txt.setColumns(30);
+        txt.setRows(10);
+        txt.setEditable(false);
+        txt.setLineWrap(true);
+        txt.setWrapStyleWord(true);
+        txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
+        JOptionPane.showMessageDialog(this, new JScrollPane(txt), "Test wallet created", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     public void save(ConfigRepo repo) throws Exception {
         repo.setLookupProviderId(cboExplorer.getSelectedItem().toString());
     }
 
     public void load(ConfigRepo repo) throws Exception {
+        faucetUrl = repo.getFaucetUrl(ledger);
         cboExplorer.setSelectedItem(repo.getLookupProviderId());
     }
 }
