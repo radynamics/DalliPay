@@ -27,7 +27,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
-            generalPane = new GeneralPane();
+            generalPane = new GeneralPane(ledger);
             tabbedPane.addTab("General", generalPane);
             senderPane = new SenderPane(ledger);
             tabbedPane.addTab("Send", senderPane);

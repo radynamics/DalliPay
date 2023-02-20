@@ -8,10 +8,13 @@ import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.ExchangeRateProvider;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.EmptyPaymentValidator;
+import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.Random;
 
 public class TestLedger implements Ledger {
     private final static int FACTOR = 1000;
@@ -79,6 +82,17 @@ public class TestLedger implements Ledger {
                 return getId();
             }
         };
+    }
+
+    @Override
+    public Wallet createRandomWallet(HttpUrl faucetUrl) {
+        var r = new Random();
+
+        byte[] pk = new byte[10];
+        r.nextBytes(pk);
+        byte[] sk = new byte[10];
+        r.nextBytes(sk);
+        return createWallet(new String(pk, StandardCharsets.UTF_8), new String(sk, StandardCharsets.UTF_8));
     }
 
     @Override
@@ -168,6 +182,11 @@ public class TestLedger implements Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         return new NetworkInfo[0];
+    }
+
+    @Override
+    public HttpUrl getDefaultFaucetUrl() {
+        return null;
     }
 
     @Override

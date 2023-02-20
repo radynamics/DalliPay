@@ -177,6 +177,11 @@ public class ConfigRepo implements AutoCloseable {
         return single("xummLocalHttpServerPort").map(Integer::parseInt);
     }
 
+    public HttpUrl getFaucetUrl(Ledger ledger) throws Exception {
+        var value = single(String.format("%s_faucetUrl", ledger.getId())).orElse("");
+        return value.length() == 0 ? ledger.getDefaultFaucetUrl() : HttpUrl.get(value);
+    }
+
     private Optional<String> single(String key) throws Exception {
         var ps = conn.prepareStatement("SELECT value FROM config WHERE key = ?");
         ps.setString(1, key);

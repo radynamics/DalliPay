@@ -15,18 +15,22 @@ import com.radynamics.CryptoIso20022Interop.cryptoledger.xrpl.signing.RpcSubmitt
 import com.radynamics.CryptoIso20022Interop.exchange.Currency;
 import com.radynamics.CryptoIso20022Interop.exchange.Money;
 import com.radynamics.CryptoIso20022Interop.iso20022.Utils;
+import okhttp3.HttpUrl;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
+import org.xrpl.xrpl4j.client.faucet.FaucetClient;
+import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
+import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -447,5 +451,17 @@ public class JsonRpcApi implements TransactionSource {
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
         return new RpcSubmitter(ledger, xrplClient, privateKeyProvider);
+    }
+
+    public com.radynamics.CryptoIso20022Interop.cryptoledger.Wallet createRandomWallet(HttpUrl faucetUrl) {
+        var walletFactory = DefaultWalletFactory.getInstance();
+        var w = walletFactory.randomWallet(network.isTestnet());
+
+        var faucetClient = FaucetClient.construct(faucetUrl);
+        faucetClient.fundAccount(FundAccountRequest.of(w.wallet().classicAddress()));
+
+        var wallet = ledger.createWallet(w.wallet().classicAddress().value(), w.seed());
+        ledger.refreshBalance(wallet, false);
+        return wallet;
     }
 }
