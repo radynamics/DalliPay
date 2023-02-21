@@ -4,7 +4,7 @@
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n"/>
         </Console>
-        <RollingFile name="rollingFile" filename="logs/cryptoIso20022Interop.log" filepattern="logs/%d{YYYYMMddHHmmss}-cryptoIso20022Interop.log">
+        <RollingFile name="rollingFile" filename="logs/dallipay.log" filepattern="logs/%d{YYYYMMddHHmmss}-dallipay.log">
             <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10 MB" />
