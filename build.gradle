@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.radynamics.CryptoIso20022Interop'
+group 'com.radynamics.DalliPay'
 version '1.3.0'
 
 repositories {
@@ -79,7 +79,7 @@ classes {
 
 task createFatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'com.radynamics.CryptoIso20022Interop.Main'
+        attributes 'Main-Class': 'com.radynamics.DalliPay.Main'
     }
     archiveFileName = 'DalliPay.jar'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
