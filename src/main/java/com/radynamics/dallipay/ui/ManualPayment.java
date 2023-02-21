@@ -56,7 +56,7 @@ public class ManualPayment {
         var factory = new FreeTextPaymentFactory(ledger);
         var payment = factory.createOrNull(txt.getText());
         if (payment == null) {
-            JOptionPane.showMessageDialog(parentComponent, "Could not create a payment by given text. Please create a new payment manually instead.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(parentComponent, "Could not create a payment by given text. Please create a new payment manually instead.", "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return null;
         }
 

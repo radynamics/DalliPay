@@ -10,7 +10,7 @@ public class LoginForm {
     private JPasswordField pf = new JPasswordField(20);
 
     public boolean showLogin() {
-        return showLogin("Enter password", "Login CryptoIso20022Interop");
+        return showLogin("Enter password", "Login DalliPay");
     }
 
     public boolean showLogin(String labelText, String title) {
@@ -31,7 +31,7 @@ public class LoginForm {
         }
 
         if (!Database.isPasswordAcceptable(getPassword())) {
-            JOptionPane.showMessageDialog(parentComponent, "You must define a password to continue.", "CryptoIso20022 Interop", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(parentComponent, "You must define a password to continue.", "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 

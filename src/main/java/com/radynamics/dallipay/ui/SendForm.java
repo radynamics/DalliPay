@@ -355,7 +355,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                     sb.append(String.format("- %s %s%s", f.getDisplayText(), receiverText, System.lineSeparator()));
                 }
             }
-            JOptionPane.showMessageDialog(this, sb.toString(), "CryptoIso20022 Interop",
+            JOptionPane.showMessageDialog(this, sb.toString(), "DalliPay",
                     failed.size() == 0 ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);

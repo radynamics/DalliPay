@@ -41,7 +41,7 @@ public class OnlineUpdate {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new URL("https://www.radynamics.com/CryptoIso20022Interop/releases/update.xml").openStream());
+            Document doc = db.parse(new URL("https://www.dallipay.com/releases/update.xml").openStream());
 
             var xPath = XPathFactory.newInstance().newXPath();
             var version = xPath.evaluate("/item/version", doc);
