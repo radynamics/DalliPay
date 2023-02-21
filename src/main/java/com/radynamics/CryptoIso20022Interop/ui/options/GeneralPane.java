@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URI;
 
 public class GeneralPane extends JPanel {
     private final static Logger log = LogManager.getLogger(GeneralPane.class);
@@ -71,6 +72,18 @@ public class GeneralPane extends JPanel {
                     pnl.add(lbl);
                 }
                 builder.addRowContent(top, pnl);
+                top += 30;
+            }
+            {
+                builder.addRowLabel(top, "Website:");
+                var lbl = Utils.createLinkLabel(this, "www.dallipay.com");
+                lbl.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        Utils.openBrowser(lbl, URI.create("https://www.dallipay.com"));
+                    }
+                });
+                builder.addRowContent(top, lbl);
                 top += 30;
             }
             {
