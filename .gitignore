@@ -10,8 +10,8 @@
 /logs
 /src/main/resources/version.properties
 /bin/main/version.properties
-/cryptoIso20022Interop.db
+/dallipay.db
 /packaging
 /website
-/src/main/java/com/radynamics/CryptoIso20022Interop/SecretsHelper.java
-/src/main/java/com/radynamics/CryptoIso20022Interop/SecretsProd.java
+/src/main/java/com/radynamics/dallipay/SecretsHelper.java
+/src/main/java/com/radynamics/dallipay/SecretsProd.java
