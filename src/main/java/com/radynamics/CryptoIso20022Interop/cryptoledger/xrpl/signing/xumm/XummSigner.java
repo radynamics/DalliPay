@@ -155,7 +155,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
             return authentication;
         }
 
-        authentication = XummPkce.authenticateAsync(apiKey, "CryptoIso20022Interop", storage.getLocalHttpServerPort())
+        authentication = XummPkce.authenticateAsync(apiKey, "DalliPay", storage.getLocalHttpServerPort())
                 .thenAccept(storage::setAccessToken)
                 .exceptionally((e) -> {
                     log.error(e.getMessage(), e);

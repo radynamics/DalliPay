@@ -43,7 +43,7 @@ public class Camt05400102Writer implements Camt054Writer {
         d.getBkToCstmrDbtCdtNtfctn().setGrpHdr(new GroupHeader42());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgId(idGenerator.createMsgId());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setCreDtTm(Utils.toXmlDateTime(creationDate));
-        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setAddtlInf(String.format("CryptoIso20022Interop/%s", productVersion));
+        d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setAddtlInf(String.format("DalliPay/%s", productVersion));
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().setMsgPgntn(new Pagination());
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setPgNb("1");
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);

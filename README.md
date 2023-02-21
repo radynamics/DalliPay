@@ -1,4 +1,4 @@
-﻿# CryptoIso20022 Interop
+﻿# DalliPay
 
 This project enables interoperability between [ISO 20022](https://www.iso20022.org) file formats and cryptocurrency payments. It aims to facilitate sending and processing received crypto payments within existing financial software's ISO 20022 capabilities.
 
@@ -6,7 +6,7 @@ As a ***payer*** you can import pain.001 xml files and transform payment instruc
 
 As a ***payee*** you can fetch received cryptocurrency payments from your wallet and transform received payments into camt.054 xml format.
 
-Latest releases for various platforms are available in [releases](https://github.com/rsteimen/CryptoIso20022Interop/releases) section.
+Latest releases for various platforms are available in [releases](https://github.com/rsteimen/DalliPay/releases) section.
 
 #### Demo (YouTube)
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/-u307nu72SQ/0.jpg)](https://www.youtube.com/watch?v=-u307nu72SQ)
@@ -25,12 +25,12 @@ Following *camt.054 (received payments)* format versions are available for expor
 - camt.054.001.09
 
 ## Persisted data
-Your private key (wallet secret) is not persisted and only used while sending payments. Configuration and settings are stored in user.home/CryptoIso20022Interop or %APPDATA%\CryptoIso20022Interop on windows.
+Your private key (wallet secret) is not persisted and only used while sending payments. Configuration and settings are stored in user.home/DalliPay or %APPDATA%\DalliPay on windows.
 
 We are ***not able to restore your password*** for persisted data. Your persisted data will be lost.  
 ***Never send*** us or anyone else your private key (wallet secret). Doing so will allow the receiver to transfer all your funds.
 
-## CryptoIso20022Interop console parameters
+## DalliPay console parameters
 For better integration into business processes following console parameters are available.
 #### Sending payments (pain.001)
 ```
@@ -41,8 +41,8 @@ For better integration into business processes following console parameters are 
 -p              <password>              Password for silent login. If not set a login screen is shown.
 
 Examples:
-- java -jar CryptoIso20022Interop.jar -a pain001ToCrypto -in C:\demo\UBS_20210603_00001.xml -n test
-- CryptoIso20022Interop.exe -a pain001ToCrypto -in C:\demo\UBS_20210603_00001.xml -n test
+- java -jar DalliPay.jar -a pain001ToCrypto -in C:\demo\UBS_20210603_00001.xml -n test
+- DalliPay.exe -a pain001ToCrypto -in C:\demo\UBS_20210603_00001.xml -n test
 ```
 #### Receiving payments (camt.054)
 ```
@@ -55,8 +55,8 @@ Examples:
 -p              <password>              Password for silent login. If not set a login screen is shown.
 
 Examples:
-- java -jar CryptoIso20022Interop.jar -a cryptoToCamt054 -out C:\temp\test.xml -wallet rPdvC6ccq8hCdPKSPJkPmyZ4Mi1oG2FFkT
-- CryptoIso20022Interop.exe -a cryptoToCamt054 -out C:\temp\test.xml -wallet rPdvC6ccq8hCdPKSPJkPmyZ4Mi1oG2FFkT
+- java -jar DalliPay.jar -a cryptoToCamt054 -out C:\temp\test.xml -wallet rPdvC6ccq8hCdPKSPJkPmyZ4Mi1oG2FFkT
+- DalliPay.exe -a cryptoToCamt054 -out C:\temp\test.xml -wallet rPdvC6ccq8hCdPKSPJkPmyZ4Mi1oG2FFkT
 ```
 ## Run demo on Testnet
 #### Sending payments (pain.001)

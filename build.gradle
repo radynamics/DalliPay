@@ -81,7 +81,7 @@ task createFatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'com.radynamics.CryptoIso20022Interop.Main'
     }
-    archiveFileName = 'CryptoIso20022Interop.jar'
+    archiveFileName = 'DalliPay.jar'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     {
         exclude "META-INF/*.SF"

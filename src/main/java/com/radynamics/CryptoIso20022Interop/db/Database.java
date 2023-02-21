@@ -21,7 +21,7 @@ public class Database {
 
     public static File defaultFile() {
         var home = SystemUtils.IS_OS_WINDOWS ? System.getenv("APPDATA") : System.getProperty("user.home");
-        return Paths.get(home, "CryptoIso20022Interop", "cryptoIso20022Interop.db").toFile();
+        return Paths.get(home, "DalliPay", "dalliPay.db").toFile();
     }
 
     public static Connection connect() {

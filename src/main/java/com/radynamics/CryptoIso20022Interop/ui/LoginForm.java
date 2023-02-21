@@ -39,7 +39,7 @@ public class LoginForm {
     }
 
     private boolean show(String labelText, String title) {
-        var frm = new JFrame("CryptoIso20022Interop");
+        var frm = new JFrame("DalliPay");
         frm.setIconImage(Utils.getProductIcon());
         frm.setUndecorated(true);
         frm.setVisible(true);

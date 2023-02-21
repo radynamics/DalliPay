@@ -8,7 +8,7 @@
                 <PgNb>1</PgNb>
                 <LastPgInd>true</LastPgInd>
             </MsgPgntn>
-            <AddtlInf>CryptoIso20022Interop/0.1.2-SNAPSHOT</AddtlInf>
+            <AddtlInf>DalliPay/0.1.2-SNAPSHOT</AddtlInf>
         </GrpHdr>
         <Ntfctn>
             <Id>STMID-3d0fa2c1-b1e7-4e7e-ad21-7d16132470df</Id>

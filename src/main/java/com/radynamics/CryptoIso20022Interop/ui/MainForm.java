@@ -35,7 +35,7 @@ public class MainForm extends JFrame {
 
     private void setupUI() {
         var vc = new VersionController();
-        setTitle(String.format("CryptoIso20022Interop [%s]", vc.getVersion()));
+        setTitle(String.format("DalliPay [%s]", vc.getVersion()));
         setIconImage(Utils.getProductIcon());
 
         setJMenuBar(createMenuBar());
