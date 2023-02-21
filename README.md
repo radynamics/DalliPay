@@ -6,7 +6,7 @@ As a ***payer*** you can import pain.001 xml files and transform payment instruc
 
 As a ***payee*** you can fetch received cryptocurrency payments from your wallet and transform received payments into camt.054 xml format.
 
-Latest releases for various platforms are available in [releases](https://github.com/rsteimen/DalliPay/releases) section.
+Latest releases for various platforms are available in [releases](https://github.com/radynamics/DalliPay/releases) section.
 
 #### Demo (YouTube)
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/-u307nu72SQ/0.jpg)](https://www.youtube.com/watch?v=-u307nu72SQ)
