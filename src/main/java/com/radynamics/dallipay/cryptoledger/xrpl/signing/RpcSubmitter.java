@@ -13,6 +13,8 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.crypto.KeyMetadata;
@@ -30,6 +32,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 public class RpcSubmitter implements TransactionSubmitter {
+    private final static Logger log = LogManager.getLogger(RpcSubmitter.class);
     private final Ledger ledger;
     private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;
@@ -69,8 +72,9 @@ public class RpcSubmitter implements TransactionSubmitter {
                 var t = (Transaction) trx;
                 try {
                     sequences = submit(t, sequences);
-                } catch (Exception ex) {
-                    t.refreshTransmission(ex);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    t.refreshTransmission(e);
                     raiseFailure(t);
                 }
             }
