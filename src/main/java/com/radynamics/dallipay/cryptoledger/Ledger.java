@@ -4,6 +4,7 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
+import com.radynamics.dallipay.exchange.Money;
 import okhttp3.HttpUrl;
 
 public interface Ledger {
@@ -56,4 +57,6 @@ public interface Ledger {
     HttpUrl getDefaultFaucetUrl();
 
     TransactionSubmitterFactory createTransactionSubmitterFactory();
+
+    Money roundNativeCcy(Money amt);
 }

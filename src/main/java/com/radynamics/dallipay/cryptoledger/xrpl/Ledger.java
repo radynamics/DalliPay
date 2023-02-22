@@ -14,10 +14,12 @@ import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
 import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
 import org.xrpl.xrpl4j.model.transactions.Address;
+import org.xrpl.xrpl4j.model.transactions.CurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
@@ -216,6 +218,18 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.TransactionSubmitterFactory(this);
+    }
+
+    @Override
+    public Money roundNativeCcy(Money amt) {
+        if (!amt.getCcy().getCode().equals(getNativeCcySymbol())) {
+            throw new IllegalArgumentException(String.format("Currency must be %s instead of %s.", getNativeCcySymbol(), amt.getCcy()));
+        }
+
+        // Round to most accurate value supported by ledger.
+        var digits = String.valueOf(CurrencyAmount.ONE_XRP_IN_DROPS).toCharArray().length - 1;
+        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
+        return Money.of(rounded, amt.getCcy());
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {

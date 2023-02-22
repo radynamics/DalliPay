@@ -193,4 +193,9 @@ public class TestLedger implements Ledger {
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         throw new NotImplementedException();
     }
+
+    @Override
+    public Money roundNativeCcy(Money amt) {
+        return amt;
+    }
 }

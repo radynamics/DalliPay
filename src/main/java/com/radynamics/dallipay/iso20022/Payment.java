@@ -116,7 +116,7 @@ public class Payment {
 
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
-        cryptoTrx.setAmount(Money.of(amt, new Currency(cryptoTrx.getLedger().getNativeCcySymbol())));
+        cryptoTrx.setAmount(getLedger().roundNativeCcy(Money.of(amt, new Currency(cryptoTrx.getLedger().getNativeCcySymbol()))));
     }
 
     private void refreshAmount() {
