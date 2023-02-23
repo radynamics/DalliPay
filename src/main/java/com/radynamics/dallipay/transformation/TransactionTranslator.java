@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.transformation;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -11,6 +12,7 @@ import com.radynamics.dallipay.iso20022.Payment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TransactionTranslator {
@@ -18,6 +20,7 @@ public class TransactionTranslator {
     private final TransformInstruction transformInstruction;
     private final CurrencyConverter currencyConverter;
     private Currency targetCcy;
+    private ArrayList<Wallet> defaultSenderWallets = new ArrayList<>();
 
     public TransactionTranslator(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
@@ -39,7 +42,11 @@ public class TransactionTranslator {
                     t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
                 }
                 if (t.getSenderWallet() == null) {
-                    t.setSenderWallet(transformInstruction.getWalletOrNull(t.getSenderAccount()));
+                    var wallet = transformInstruction.getWalletOrNull(t.getSenderAccount());
+                    if (wallet == null) {
+                        wallet = getDefaultSenderWallet(t.getLedger());
+                    }
+                    t.setSenderWallet(wallet);
                 }
                 if (t.getReceiverWallet() == null) {
                     t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
@@ -110,5 +117,19 @@ public class TransactionTranslator {
 
     public void setTargetCcy(Currency targetCcy) {
         this.targetCcy = targetCcy;
+    }
+
+    public void setDefaultSenderWallet(Wallet wallet) {
+        defaultSenderWallets.removeIf(w -> w.getLedgerId().textId().equals(wallet.getLedgerId().textId()));
+        defaultSenderWallets.add(wallet);
+    }
+
+    private Wallet getDefaultSenderWallet(Ledger ledger) {
+        for (var w : defaultSenderWallets) {
+            if (w.getLedgerId().textId().equals(ledger.getId().textId())) {
+                return w;
+            }
+        }
+        return null;
     }
 }

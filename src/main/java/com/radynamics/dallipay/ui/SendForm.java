@@ -301,6 +301,15 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                     }
                 });
         Executors.newCachedThreadPool().submit(() -> {
+            try (var repo = new ConfigRepo()) {
+                var w = repo.getDefaultSenderWallet(reader.getLedger());
+                if (w != null) {
+                    transactionTranslator.setDefaultSenderWallet(w);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
             try {
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));

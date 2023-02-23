@@ -175,4 +175,8 @@ public class Pain001Reader {
         var jaxbUnmarshaller = ctx.createUnmarshaller();
         return (Document) jaxbUnmarshaller.unmarshal(xsr);
     }
+
+    public Ledger getLedger() {
+        return ledger;
+    }
 }
