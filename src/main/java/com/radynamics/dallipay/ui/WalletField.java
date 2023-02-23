@@ -147,7 +147,7 @@ public class WalletField extends JPanel {
     }
 
     private void showMore() {
-        var wallet = getWallet();
+        var wallet = getValidWallet();
         if (wallet == null) {
             return;
         }
@@ -273,7 +273,7 @@ public class WalletField extends JPanel {
         }
     }
 
-    public Wallet getWallet() {
+    public Wallet getValidWallet() {
         var wallet = validator.getValidOrNull(getText());
         if (wallet == null) {
             return null;
@@ -281,5 +281,14 @@ public class WalletField extends JPanel {
 
         ledger.refreshBalance(wallet, true);
         return wallet;
+    }
+
+    public Wallet getWallet() {
+        var valid = getValidWallet();
+        if (valid != null) {
+            return valid;
+        }
+
+        return getText().length() == 0 ? null : ledger.createWallet(txt.getText(), null);
     }
 }
