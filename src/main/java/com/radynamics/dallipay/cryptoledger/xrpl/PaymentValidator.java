@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 import com.radynamics.dallipay.exchange.Currency;
@@ -25,7 +26,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
     public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
 
-        if (t.getReceiverWallet() != null) {
+        if (WalletValidator.isValidFormat(t.getLedger(), t.getReceiverWallet())) {
             list.addAll(validateTrustlineLimit(t.getReceiverWallet(), t.getAmountTransaction()));
 
             var ccy = t.getAmountTransaction().getCcy();
