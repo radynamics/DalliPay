@@ -2,6 +2,7 @@ package com.radynamics.dallipay.ui.paymentTable;
 
 import com.radynamics.dallipay.cryptoledger.BalanceRefresher;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
@@ -201,9 +202,12 @@ public class PaymentTable extends JPanel {
     }
 
     private void onWalletEdited(Payment payment, TableCellListener tcl, ChangedValue changedValue) {
+        onWalletEdited(payment, createWalletOrNull(tcl.getNewValue()), changedValue);
+    }
+
+    private void onWalletEdited(Payment payment, Wallet newWallet, ChangedValue changedValue) {
         // While sending payments user is able to change "Receiver from Input". Account is not changeable.
         var account = changedValue == ChangedValue.SenderWallet ? payment.getSenderAccount() : payment.getReceiverAccount();
-        var newWallet = createWalletOrNull(tcl.getNewValue());
 
         var mapping = new AccountMapping(payment.getLedger().getId());
         mapping.setAccount(account);
@@ -302,8 +306,16 @@ public class PaymentTable extends JPanel {
     }
 
     private void showMore(Payment obj) {
+        var senderWallet = obj.getSenderWallet();
+        var receiverWallet = obj.getReceiverWallet();
         var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor);
         if (frm.getPaymentChanged()) {
+            if (!WalletCompare.isSame(senderWallet, obj.getSenderWallet())) {
+                onWalletEdited(obj, obj.getSenderWallet(), ChangedValue.SenderWallet);
+            }
+            if (!WalletCompare.isSame(receiverWallet, obj.getReceiverWallet())) {
+                onWalletEdited(obj, obj.getReceiverWallet(), ChangedValue.ReceiverWallet);
+            }
             refresh(obj);
         }
     }
