@@ -237,7 +237,16 @@ public class PaymentTable extends JPanel {
         mapping.setAccount(newAccount);
         persistOrDelete(mapping);
 
-        raiseAccountMappingChanged(new MappingInfo(mapping, changedValue));
+        accountMappingChanged(new MappingInfo(mapping, changedValue));
+    }
+
+    private void accountMappingChanged(MappingInfo mi) {
+        // Update all affected payments
+        for (var p : model.payments()) {
+            if (mi.apply(p)) {
+                getDataLoader().onAccountOrWalletsChanged(p);
+            }
+        }
     }
 
     private void persistOrDelete(AccountMapping mapping) {
@@ -402,12 +411,6 @@ public class PaymentTable extends JPanel {
     private void raiseWalletMappingChanged(MappingInfo mi) {
         for (var l : mappingChangedListener) {
             l.onWalletChanged(mi);
-        }
-    }
-
-    private void raiseAccountMappingChanged(MappingInfo mi) {
-        for (var l : mappingChangedListener) {
-            l.onAccountChanged(mi);
         }
     }
 

@@ -284,16 +284,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
     }
 
-    @Override
-    public void onAccountChanged(MappingInfo mi) {
-        // Update all affected payments
-        for (var p : payments) {
-            if (mi.apply(p)) {
-                table.getDataLoader().onAccountOrWalletsChanged(p);
-            }
-        }
-    }
-
     private void onTxtInputChanged() {
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         enableInputControls(false);

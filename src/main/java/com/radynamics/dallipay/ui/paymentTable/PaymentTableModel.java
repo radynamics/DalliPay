@@ -234,6 +234,14 @@ public class PaymentTableModel extends AbstractTableModel {
         return highestStatus != ValidationState.Error;
     }
 
+    public Payment[] payments() {
+        var list = new ArrayList<Payment>();
+        for (var item : this.data) {
+            list.add(item.payment);
+        }
+        return list.toArray(new Payment[0]);
+    }
+
     public Payment[] checkedPayments() {
         var list = new ArrayList<Payment>();
         for (var item : this.data) {
