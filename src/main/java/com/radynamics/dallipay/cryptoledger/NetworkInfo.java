@@ -49,7 +49,7 @@ public class NetworkInfo {
         if (isLivenet() && "main".equalsIgnoreCase(text)) {
             return true;
         }
-        if (isTestnet() && "test".equalsIgnoreCase(text)) {
+        if (isTestnet() && "testnet".equalsIgnoreCase(text)) {
             return true;
         }
         return false;
