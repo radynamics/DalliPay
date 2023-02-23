@@ -49,6 +49,10 @@ public class MappingInfo {
     }
 
     private boolean affected(Account account) {
+        if (mapping.getAccount() == null && account == null) {
+            return true;
+        }
+
         if (mapping.getAccount() == null || account == null) {
             return false;
         }
@@ -57,6 +61,10 @@ public class MappingInfo {
     }
 
     private boolean affected(Wallet wallet) {
+        if (mapping.getWallet() == null && wallet == null) {
+            return true;
+        }
+
         if (mapping.getWallet() == null || wallet == null) {
             return false;
         }
