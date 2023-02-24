@@ -56,7 +56,7 @@ public class PaymentDetailForm extends JDialog {
     public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
         var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(650, 475);
+        frm.setSize(650, 495);
         frm.setModal(true);
         frm.setLocationRelativeTo(c);
         frm.setVisible(true);
