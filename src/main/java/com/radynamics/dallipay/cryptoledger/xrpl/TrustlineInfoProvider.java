@@ -23,11 +23,15 @@ public class TrustlineInfoProvider implements WalletInfoProvider {
         var list = new ArrayList<WalletInfo>();
 
         for (var o : trustlineCache.get(WalletConverter.from(wallet))) {
-            var limitText = MoneyFormatter.formatFiat(o.getLimit());
+            var sb = new StringBuilder();
             var ccy = o.getLimit().getCcy();
+            sb.append(String.format("%s (%s)", ccy.getCode(), toText(ccy.getIssuer())));
+            sb.append(", limit: " + MoneyFormatter.formatFiat(o.getLimit()));
             var transferFeeText = CurrencyFormatter.formatTransferFee(ccy);
-            var value = String.format("%s (%s), limit: %s, transfer fee: %s", ccy.getCode(), toText(ccy.getIssuer()), limitText, transferFeeText);
-            list.add(new WalletInfo(this, "", value, 50));
+            if (transferFeeText.length() > 0) {
+                sb.append(", transfer fee: " + transferFeeText);
+            }
+            list.add(new WalletInfo(this, "", sb.toString(), 50));
         }
 
         return list.toArray(new WalletInfo[0]);
