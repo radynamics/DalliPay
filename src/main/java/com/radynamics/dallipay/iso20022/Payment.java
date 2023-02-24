@@ -87,9 +87,10 @@ public class Payment {
 
     public void setAmount(Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
-        this.amount = amt.getNumber().doubleValue();
-        this.ccy = amt.getCcy();
-        if (!UnknownAmount.equals(amt.getNumber())) {
+        var rounded = isLedgerCcy(amt.getCcy()) ? getLedger().roundNativeCcy(amt) : amt;
+        this.amount = rounded.getNumber().doubleValue();
+        this.ccy = rounded.getCcy();
+        if (!UnknownAmount.equals(rounded.getNumber())) {
             this.amountDefined = true;
         }
 
@@ -108,7 +109,7 @@ public class Payment {
                 // Use ledger native currency if there is no specific issued currency
                 cryptoTrx.setAmount(Money.of(0, new Currency(cryptoTrx.getLedger().getNativeCcySymbol())));
             } else {
-                var amt = cryptoTrx.getLedger().getNativeCcySymbol().equals(ccy.getCode()) ? amount : 0;
+                var amt = isLedgerCcy() ? amount : 0;
                 cryptoTrx.setAmount(Money.of(amt, cryptoTrx.getAmount().getCcy()));
             }
             return;
@@ -117,6 +118,14 @@ public class Payment {
         var cc = new CurrencyConverter(new ExchangeRate[]{exchangeRate});
         var amt = cc.convert(BigDecimal.valueOf(amount), exchangeRate.getPair().invert());
         cryptoTrx.setAmount(getLedger().roundNativeCcy(Money.of(amt, new Currency(cryptoTrx.getLedger().getNativeCcySymbol()))));
+    }
+
+    private boolean isLedgerCcy() {
+        return isLedgerCcy(ccy);
+    }
+
+    private boolean isLedgerCcy(Currency ccy) {
+        return cryptoTrx.getLedger().getNativeCcySymbol().equals(ccy.getCode());
     }
 
     private void refreshAmount() {
