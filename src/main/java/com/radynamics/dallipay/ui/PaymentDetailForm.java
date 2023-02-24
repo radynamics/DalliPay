@@ -20,7 +20,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class PaymentDetailForm extends JDialog {
-    private Payment payment;
+    private final Payment payment;
+    private PaymentEdit edit;
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
     private final CurrencyConverter currencyConverter;
@@ -50,6 +51,7 @@ public class PaymentDetailForm extends JDialog {
         this.currencyConverter = currencyConverter;
         this.actor = actor;
 
+        edit = PaymentEdit.create(payment);
         setupUI();
     }
 
@@ -127,7 +129,7 @@ public class PaymentDetailForm extends JDialog {
                 var pnlFirstLine = new JPanel();
                 pnlFirstLine.setLayout(new BoxLayout(pnlFirstLine, BoxLayout.LINE_AXIS));
                 txtAmount = new MoneyTextField(payment.getLedger());
-                txtAmount.setEditable(PaymentEdit.is(payment).editable());
+                txtAmount.setEditable(edit.editable());
                 txtAmount.addChangedListener(() -> onAmountChanged());
                 pnlFirstLine.add(txtAmount);
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -141,7 +143,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
-                var enabled = PaymentEdit.is(payment).exchangeRateEditable();
+                var enabled = edit.exchangeRateEditable();
                 lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
@@ -167,7 +169,7 @@ public class PaymentDetailForm extends JDialog {
                 txtSenderWallet.setWallet(payment.getSenderWallet());
                 txtSenderWallet.setShowDetailVisible(true);
                 txtSenderWallet.setInfoTextVisible(true);
-                txtSenderWallet.setEditable(PaymentEdit.is(payment).editable());
+                txtSenderWallet.setEditable(edit.editable());
                 createRow(northPad, "Sender:", lbl, txtSenderWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;
             }
@@ -178,7 +180,7 @@ public class PaymentDetailForm extends JDialog {
                 txtReceiverWallet.setWallet(payment.getReceiverWallet());
                 txtReceiverWallet.setShowDetailVisible(true);
                 txtReceiverWallet.setInfoTextVisible(true);
-                txtReceiverWallet.setEditable(PaymentEdit.is(payment).editable());
+                txtReceiverWallet.setEditable(edit.editable());
                 createRow(northPad, "Receiver:", lbl, txtReceiverWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;
             }
@@ -202,14 +204,14 @@ public class PaymentDetailForm extends JDialog {
                 txtStructuredReferences = new StructuredReferencesTextArea();
                 formatTextArea(txtStructuredReferences, 1);
                 txtStructuredReferences.setValue(payment.getStructuredReferences());
-                txtStructuredReferences.setEditable(PaymentEdit.is(payment).editable());
+                txtStructuredReferences.setEditable(edit.editable());
                 createRow(northPad, "References:", new JScrollPane(txtStructuredReferences), null);
                 northPad += lineHeight;
             }
             {
                 txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
                 Utils.patchTabBehavior(txtMessages);
-                txtMessages.setEditable(PaymentEdit.is(payment).editable());
+                txtMessages.setEditable(edit.editable());
                 createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
                 northPad += lineHeight * 2;
             }
@@ -244,7 +246,7 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void accept() {
-        if (PaymentEdit.is(payment).editable()) {
+        if (edit.editable()) {
             applyUIValues();
         }
         close();
@@ -286,7 +288,7 @@ public class PaymentDetailForm extends JDialog {
             refreshPaymentPathText(selected.getText());
         }
 
-        cmdPaymentPath.setEnabled(PaymentEdit.is(payment).editable() && availablePaths.length > 1 && payment.getBooked() == null);
+        cmdPaymentPath.setEnabled(edit.editable() && availablePaths.length > 1 && payment.getBooked() == null);
         cmdPaymentPath.setPopupMenu(popupMenu);
     }
 

@@ -221,7 +221,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void remove(Payment p) {
-        if (!PaymentEdit.is(p).removable()) {
+        if (!PaymentEdit.create(p).removable()) {
             JOptionPane.showMessageDialog(this, "Cannot remove payment because payment is not editable, has already been sent or was not manually created.", "Remove payment", JOptionPane.INFORMATION_MESSAGE);
             return;
         }

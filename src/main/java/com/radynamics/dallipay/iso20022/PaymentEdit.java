@@ -11,7 +11,7 @@ public class PaymentEdit {
         this.payment = payment;
     }
 
-    public static PaymentEdit is(Payment payment) {
+    public static PaymentEdit create(Payment payment) {
         return new PaymentEdit(payment);
     }
 

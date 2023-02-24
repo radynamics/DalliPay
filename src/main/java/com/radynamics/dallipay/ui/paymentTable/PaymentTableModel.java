@@ -171,7 +171,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return false;
         }
         var item = data.get(row);
-        if (!PaymentEdit.is(item.payment).accountMappingEditable()) {
+        if (!PaymentEdit.create(item.payment).accountMappingEditable()) {
             return false;
         }
         if (col == getColumnIndex(COL_SELECTOR)) {
