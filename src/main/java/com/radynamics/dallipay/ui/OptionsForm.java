@@ -23,16 +23,20 @@ public class OptionsForm extends JPanel implements MainFormPane {
         add(pnlContent, BorderLayout.CENTER);
         pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.Y_AXIS));
 
+        var border = BorderFactory.createEmptyBorder(10, 0, 0, 0);
         {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
             generalPane = new GeneralPane(ledger);
             tabbedPane.addTab("General", generalPane);
+            generalPane.setBorder(border);
             senderPane = new SenderPane(ledger);
             tabbedPane.addTab("Send", senderPane);
+            senderPane.setBorder(border);
             receiverPane = new ReceiverPane();
             tabbedPane.addTab("Receive", receiverPane);
+            receiverPane.setBorder(border);
         }
         {
             var buttonPane = new JPanel();
