@@ -229,7 +229,7 @@ public class WalletField extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
                     var url = wi.getType() == InfoType.Domain
-                            ? "www." + wi.getValue()
+                            ? "https://www." + wi.getValue()
                             : wi.getValue();
                     Utils.openBrowser(owner, URI.create(url));
                 }
