@@ -292,6 +292,10 @@ public class PaymentTableModel extends AbstractTableModel {
         throw new RuntimeException(String.format("Could not find row index for %s", t.getId()));
     }
 
+    public boolean getEditable() {
+        return editable;
+    }
+
     public void setEditable(boolean editable) {
         this.editable = editable;
     }

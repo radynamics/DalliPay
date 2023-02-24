@@ -308,7 +308,7 @@ public class PaymentTable extends JPanel {
     private void showMore(Payment obj) {
         var senderWallet = obj.getSenderWallet();
         var receiverWallet = obj.getReceiverWallet();
-        var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor);
+        var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor, model.getEditable());
         if (frm.getPaymentChanged()) {
             if (!WalletCompare.isSame(senderWallet, obj.getSenderWallet())) {
                 onWalletEdited(obj, obj.getSenderWallet(), ChangedValue.SenderWallet);

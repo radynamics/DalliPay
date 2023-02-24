@@ -84,7 +84,7 @@ public class ManualPayment {
     }
 
     public boolean show(Component parentComponent, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter) {
-        var frm = PaymentDetailForm.showModal(parentComponent, payment, validator, exchangeRateProvider, currencyConverter, Actor.Sender);
+        var frm = PaymentDetailForm.showModal(parentComponent, payment, validator, exchangeRateProvider, currencyConverter, Actor.Sender, true);
         return frm.getPaymentChanged() && !payment.isAmountUnknown();
     }
 

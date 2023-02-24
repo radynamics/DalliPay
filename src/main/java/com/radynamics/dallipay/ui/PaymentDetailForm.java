@@ -21,7 +21,7 @@ import java.awt.event.*;
 
 public class PaymentDetailForm extends JDialog {
     private final Payment payment;
-    private PaymentEdit edit;
+    private final PaymentEdit edit;
     private PaymentValidator validator;
     private ExchangeRateProvider exchangeRateProvider;
     private final CurrencyConverter currencyConverter;
@@ -40,7 +40,7 @@ public class PaymentDetailForm extends JDialog {
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
 
-    public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
+    public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
         if (validator == null) throw new IllegalArgumentException("Parameter 'validator' cannot be null");
         if (exchangeRateProvider == null) throw new IllegalArgumentException("Parameter 'exchangeRateProvider' cannot be null");
@@ -52,11 +52,12 @@ public class PaymentDetailForm extends JDialog {
         this.actor = actor;
 
         edit = PaymentEdit.create(payment);
+        edit.setEditable(editable);
         setupUI();
     }
 
-    public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor) {
-        var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor);
+    public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
+        var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor, editable);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(650, 495);
         frm.setModal(true);

@@ -5,6 +5,7 @@ import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 
 public class PaymentEdit {
     private final Payment payment;
+    private boolean editable = true;
 
     private PaymentEdit(Payment payment) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -20,10 +21,14 @@ public class PaymentEdit {
     }
 
     public boolean editable() {
-        return payment.getOrigin() != Origin.Ledger && !transmitting();
+        return editable && payment.getOrigin() != Origin.Ledger && !transmitting();
     }
 
     public boolean exchangeRateEditable() {
+        if (!editable) {
+            return false;
+        }
+
         if (editable()) {
             return true;
         }
@@ -33,10 +38,14 @@ public class PaymentEdit {
     }
 
     public boolean accountMappingEditable() {
-        return !transmitting();
+        return editable && !transmitting();
     }
 
     public boolean removable() {
         return editable() && payment.getTransmission() != TransmissionState.Success && payment.getOrigin().isDeletable();
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 }
