@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class MoneyTextField extends MoneyControl<JTextField> implements DocumentListener {
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
     private boolean isInDocumentEventHandler;
+    private boolean isInRefreshText;
     private final MoneyTextFieldInputValidator validator = new MoneyTextFieldInputValidator();
     private final ValidationControlDecorator decorator = new ValidationControlDecorator(ctrl, validator);
 
@@ -43,12 +44,14 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
 
             var value = ctrl.getText();
             decorator.update(value);
+
             var m = validator.getValidOrNull(value);
             if (m == null) {
                 return;
             }
 
-            if (m.equalsIgnoringIssuer(getAmount())) {
+            // Setting a rounded text in refreshText can be unequal.
+            if (m.equalsIgnoringIssuer(getAmount()) || isInRefreshText) {
                 return;
             }
 
@@ -69,7 +72,20 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
         if (isInDocumentEventHandler) {
             return;
         }
-        ctrl.setText(Payment.isAmountUnknown(getAmount()) ? "" : MoneyFormatter.formatExact(value));
+        if (Payment.isAmountUnknown(getAmount())) {
+            ctrl.setText("");
+            return;
+        }
+
+        try {
+            isInRefreshText = true;
+            var formatted = getLedger().getNativeCcySymbol().equals(value.getCcy().getCode())
+                    ? MoneyFormatter.formatExact(value)
+                    : MoneyFormatter.formatFiat(value);
+            ctrl.setText(formatted);
+        } finally {
+            isInRefreshText = false;
+        }
     }
 
     public void addChangedListener(ChangedListener l) {

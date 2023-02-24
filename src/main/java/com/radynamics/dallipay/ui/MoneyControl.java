@@ -109,4 +109,8 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
     }
 
     protected abstract void refreshText(Money value);
+
+    protected Ledger getLedger() {
+        return ledger;
+    }
 }
