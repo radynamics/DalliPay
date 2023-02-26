@@ -244,7 +244,7 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
 
         private String createText(String title, String desc) {
             var sb = new StringBuilder();
-            sb.append("<!DOCTYPE html><html><body><h2>&#x2714; ");
+            sb.append("<!DOCTYPE html><html><body><h2>");
             sb.append(title);
             sb.append("</h2><p>");
             sb.append(desc);
