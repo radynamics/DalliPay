@@ -13,7 +13,7 @@ public class RowContentBuilder {
     }
 
     void addRowContent(int top, Component component) {
-        final int paddingWest = 150;
+        final int paddingWest = 175;
         contentLayout.putConstraint(SpringLayout.WEST, component, paddingWest, SpringLayout.WEST, container);
         contentLayout.putConstraint(SpringLayout.NORTH, component, top, SpringLayout.NORTH, container);
         container.add(component);
