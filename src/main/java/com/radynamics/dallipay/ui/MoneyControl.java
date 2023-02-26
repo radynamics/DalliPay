@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ResourceBundle;
 
 public abstract class MoneyControl<T extends JComponent> extends JPanel {
     protected final T ctrl;
@@ -19,12 +20,14 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
     private final Ledger ledger;
     private boolean issuerVisible = true;
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public MoneyControl(Ledger ledger, T ctrl) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (ctrl == null) throw new IllegalArgumentException("Parameter 'ctrl' cannot be null");
         this.ledger = ledger;
         this.ctrl = ctrl;
-        detailLink = Utils.createLinkLabel(this, "show issuer...");
+        detailLink = Utils.createLinkLabel(this, res.getString("showIssuer"));
         detailLink.putClientProperty("FlatLaf.styleClass", "small");
         detailLink.setVisible(false);
         setupUI();
