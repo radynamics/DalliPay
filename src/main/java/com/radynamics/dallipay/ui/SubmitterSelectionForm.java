@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class SubmitterSelectionForm extends JDialog {
     private final Hashtable<JRadioButton, TransactionSubmitter> mapping = new Hashtable<>();
@@ -20,10 +21,12 @@ public class SubmitterSelectionForm extends JDialog {
     private final JPanel pnlContent;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+
     public SubmitterSelectionForm(TransactionSubmitter[] submitters, TransactionSubmitter selected) {
         if (submitters == null) throw new IllegalArgumentException("submitter 'selectedExchange' cannot be null");
 
-        setTitle("Secrets handling");
+        setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
@@ -81,7 +84,7 @@ public class SubmitterSelectionForm extends JDialog {
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
                 {
-                    var lbl = new JLabel("How would you like to submit your payments? You can change this at any time later.");
+                    var lbl = new JLabel(res.getString("desc"));
                     pnlLine.add(lbl);
                 }
             }
@@ -109,7 +112,7 @@ public class SubmitterSelectionForm extends JDialog {
                 pnl.add(cmd);
             }
             {
-                var cmd = new JButton("Cancel");
+                var cmd = new JButton(res.getString("cancel"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
@@ -122,7 +125,7 @@ public class SubmitterSelectionForm extends JDialog {
 
         var title = info.getTitle();
         if (info.isRecommended()) {
-            title = String.format("%s (Recommended)", title);
+            title = String.format("%s (" + res.getString("recommended") + ")", title);
         }
         var rdo = new JRadioButton(title);
 
