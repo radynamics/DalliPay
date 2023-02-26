@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class ExchangeRatesForm extends JDialog {
     private ExchangeRateProvider selectedExchange;
@@ -25,6 +26,8 @@ public class ExchangeRatesForm extends JDialog {
     private JComboBox<ExchangeRateProvider> cboExchange;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+
     public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
@@ -37,7 +40,7 @@ public class ExchangeRatesForm extends JDialog {
     }
 
     private void setupUI() {
-        setTitle("Exchange rates");
+        setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
@@ -95,7 +98,7 @@ public class ExchangeRatesForm extends JDialog {
                 pnlLine.setLayout(new BoxLayout(pnlLine, BoxLayout.X_AXIS));
                 pnl.add(pnlLine, BorderLayout.WEST);
                 {
-                    var lbl = Utils.createLinkLabel(pnlMain, "Refresh");
+                    var lbl = Utils.createLinkLabel(pnlMain, res.getString("refresh"));
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -107,7 +110,7 @@ public class ExchangeRatesForm extends JDialog {
                     pnlLine.add(lbl);
                 }
                 {
-                    var lbl = new JLabel(" exchange rates from ");
+                    var lbl = new JLabel(" " + res.getString("fxRateFrom") + " ");
                     pnlLine.add(lbl);
                 }
                 {
@@ -135,7 +138,7 @@ public class ExchangeRatesForm extends JDialog {
                     pnlLine.add(cboExchange);
                 }
                 {
-                    var lbl = new JLabel(" if possible");
+                    var lbl = new JLabel(" " + res.getString("ifPossible"));
                     pnlLine.add(lbl);
                 }
             }
@@ -160,7 +163,7 @@ public class ExchangeRatesForm extends JDialog {
                 pnl.add(cmd);
             }
             {
-                var cmd = new JButton("Cancel");
+                var cmd = new JButton(res.getString("cancel"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);

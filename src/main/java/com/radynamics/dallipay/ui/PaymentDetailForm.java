@@ -333,7 +333,7 @@ public class PaymentDetailForm extends JDialog {
 
         var frm = new ExchangeRatesForm(exchangeRateProvider, new ExchangeRate[]{rate}, rate.getPointInTime());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(400, 300);
+        frm.setSize(500, 300);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);
