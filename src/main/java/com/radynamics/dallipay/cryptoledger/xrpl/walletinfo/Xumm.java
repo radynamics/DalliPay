@@ -60,7 +60,7 @@ public class Xumm implements WalletInfoProvider {
 
         {
             kycApproved = result.getBoolean("kycApproved");
-            var wi = new WalletInfo(this, res.getString("kycApproved"), kycApproved, 80);
+            var wi = new WalletInfo(this, res.getString("kycApproved"), toText(kycApproved), 80);
             wi.setVerified(kycApproved);
             list.add(wi);
         }
@@ -104,7 +104,7 @@ public class Xumm implements WalletInfoProvider {
                 list.add(new WalletInfo(this, res.getString("globalIdProfile"), profileUrl, 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
-                var wi = new WalletInfo(this, res.getString("globalIdSufficientTrust"), globalid.getBoolean("sufficientTrust"), 60);
+                var wi = new WalletInfo(this, res.getString("globalIdSufficientTrust"), toText(globalid.getBoolean("sufficientTrust")), 60);
                 wi.setVerified(true);
                 list.add(wi);
             }
@@ -113,6 +113,10 @@ public class Xumm implements WalletInfoProvider {
         var infos = list.toArray(new WalletInfo[0]);
         cache.add(wallet, infos);
         return infos;
+    }
+
+    private String toText(boolean value) {
+        return value ? res.getString("yes") : res.getString("no");
     }
 
     private static Optional<String> get(JSONObject json, String param) {
