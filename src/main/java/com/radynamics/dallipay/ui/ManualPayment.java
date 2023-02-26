@@ -19,11 +19,14 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class ManualPayment {
     private final static Logger log = LogManager.getLogger(ManualPayment.class);
     private final Payment payment;
     private final TransactionTranslator transactionTranslator;
+
+    private static final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     private ManualPayment(Payment payment, TransactionTranslator transactionTranslator) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -48,7 +51,7 @@ public class ManualPayment {
         txt.setRows(15);
         txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
         txt.addAncestorListener(new RequestFocusListener());
-        var userOption = JOptionPane.showConfirmDialog(parentComponent, new JScrollPane(txt), "Enter what you know or scan with a payment slip reader.", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        var userOption = JOptionPane.showConfirmDialog(parentComponent, new JScrollPane(txt), res.getString("manualPayment.freeText"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (JOptionPane.OK_OPTION != userOption || txt.getText().length() == 0) {
             return null;
         }
@@ -56,7 +59,7 @@ public class ManualPayment {
         var factory = new FreeTextPaymentFactory(ledger);
         var payment = factory.createOrNull(txt.getText());
         if (payment == null) {
-            JOptionPane.showMessageDialog(parentComponent, "Could not create a payment by given text. Please create a new payment manually instead.", "DalliPay", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(parentComponent, res.getString("manualPayment.failed"), "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return null;
         }
 

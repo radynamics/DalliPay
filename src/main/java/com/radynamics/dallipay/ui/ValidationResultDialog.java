@@ -5,8 +5,11 @@ import com.radynamics.dallipay.cryptoledger.transaction.ValidationResultUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class ValidationResultDialog {
+    private static final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public static void show(Component parentComponent, ValidationResult[] validations) {
         JOptionPane.showMessageDialog(parentComponent, toText(validations), "Error", JOptionPane.ERROR_MESSAGE);
     }
@@ -36,9 +39,9 @@ public class ValidationResultDialog {
         }
 
         var sb = new StringBuilder();
-        sb.append("Do you want to continue?" + System.lineSeparator());
+        sb.append(res.getString("wantToContinue") + System.lineSeparator());
         sb.append(toText(validationsToShow));
 
-        return 0 == JOptionPane.showConfirmDialog(parentComponent, sb.toString(), "Warnings", JOptionPane.YES_NO_CANCEL_OPTION);
+        return 0 == JOptionPane.showConfirmDialog(parentComponent, sb.toString(), res.getString("warnings"), JOptionPane.YES_NO_CANCEL_OPTION);
     }
 }

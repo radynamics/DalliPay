@@ -5,8 +5,11 @@ import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class WalletInfoFormatter {
+    private static final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public static void format(JLabel lbl, WalletInfo wi) {
         format(lbl, wi, lbl.getForeground());
     }
@@ -17,7 +20,7 @@ public class WalletInfoFormatter {
             lbl.setToolTipText("");
         } else {
             lbl.setForeground(wi.getVerified() ? foregroundColor : Consts.ColorWarning);
-            lbl.setToolTipText(wi.getVerified() ? "" : String.format("%s not verified", wi.getText()));
+            lbl.setToolTipText(wi.getVerified() ? "" : String.format(res.getString("notVerified"), wi.getText()));
         }
     }
 

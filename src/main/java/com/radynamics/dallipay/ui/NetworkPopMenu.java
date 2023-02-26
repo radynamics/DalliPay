@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class NetworkPopMenu {
     private final JPopupMenu popupMenu = new JPopupMenu();
@@ -18,10 +19,12 @@ public class NetworkPopMenu {
 
     private final ArrayList<ChangedListener> changedListener = new ArrayList<>();
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public NetworkPopMenu(NetworkInfo[] networks) {
         var index = 0;
         for (var network : networks) {
-            addEntry(network, String.format("%s network", network.getShortText()), index++);
+            addEntry(network, String.format(res.getString("network"), network.getShortText()), index++);
         }
 
         {
@@ -97,7 +100,7 @@ public class NetworkPopMenu {
             }
         }
 
-        var text = network.getId() == null ? network.getUrl().toString() : String.format("%s network", network.getShortText());
+        var text = network.getId() == null ? network.getUrl().toString() : String.format(res.getString("network"), network.getShortText());
         var item = addEntryAtEnd(network, text);
         onNetworkChanged(item);
     }

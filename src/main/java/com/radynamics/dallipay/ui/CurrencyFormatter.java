@@ -5,9 +5,12 @@ import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
 import com.radynamics.dallipay.exchange.Currency;
 
 import javax.swing.*;
+import java.util.ResourceBundle;
 
 public class CurrencyFormatter {
     private final com.radynamics.dallipay.exchange.CurrencyFormatter currencyFormatter;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public CurrencyFormatter(WalletInfoProvider[] infoProviders) {
         this.currencyFormatter = new com.radynamics.dallipay.exchange.CurrencyFormatter(infoProviders);
@@ -21,9 +24,9 @@ public class CurrencyFormatter {
             return;
         }
 
-        var tooltip = String.format("Issued by %s", currencyFormatter.formatIssuer(ccy));
+        var tooltip = String.format(res.getString("issuedBy"), currencyFormatter.formatIssuer(ccy));
         if (ccy.getTransferFee() != 0) {
-            tooltip += System.lineSeparator() + "Transfer fee: " + com.radynamics.dallipay.exchange.CurrencyFormatter.formatTransferFee(ccy);
+            tooltip += System.lineSeparator() + res.getString("transferfee") + " " + com.radynamics.dallipay.exchange.CurrencyFormatter.formatTransferFee(ccy);
         }
         lbl.setToolTipText(tooltip);
 
