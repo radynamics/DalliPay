@@ -16,6 +16,7 @@ import com.radynamics.dallipay.update.OnlineUpdate;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
 
@@ -25,6 +26,8 @@ public class MainForm extends JFrame {
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
     private JSplitButton cmdNetwork;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public MainForm(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
@@ -95,12 +98,12 @@ public class MainForm extends JFrame {
                     sendingPanel = new SendForm(transformInstruction, new CurrencyConverter(provider.latestRates()));
                     sendingPanel.setBorder(mainContentBorder);
                     sendingPanel.setReader(new Pain001Reader(transformInstruction.getLedger()));
-                    tabbedPane.addTab("Send", sendingPanel);
+                    tabbedPane.addTab(res.getString("send"), sendingPanel);
                 }
                 {
                     receivingPanel = new ReceiveForm(transformInstruction, new CurrencyConverter());
                     receivingPanel.setBorder(mainContentBorder);
-                    tabbedPane.addTab("Receive", receivingPanel);
+                    tabbedPane.addTab(res.getString("receive"), receivingPanel);
                 }
                 {
                     tabbedPane.addTab("", new JPanel());
@@ -113,7 +116,7 @@ public class MainForm extends JFrame {
                         receivingPanel.refreshTargetCcys();
                     });
                     optionsPanel.setBorder(mainContentBorder);
-                    tabbedPane.addTab("Options", optionsPanel);
+                    tabbedPane.addTab(res.getString("options"), optionsPanel);
                     optionsPanel.load();
                 }
             }
@@ -133,7 +136,7 @@ public class MainForm extends JFrame {
                 var icon = new FlatSVGIcon("svg/update.svg", 16, 16);
                 icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorAccent));
                 cmdUpdate.setIcon(icon);
-                var text = String.format("Update to newer version %s available", updateInfo.getVersion());
+                var text = String.format(res.getString("updateAvailable"), updateInfo.getVersion());
                 cmdUpdate.setToolTipText(text);
                 cmdUpdate.setButtonType(FlatButton.ButtonType.toolBarButton);
                 cmdUpdate.setFocusable(false);
@@ -143,7 +146,7 @@ public class MainForm extends JFrame {
                 menuBar.add(cmdUpdate);
                 menuBar.updateUI();
 
-                int ret = JOptionPane.showConfirmDialog(this, String.format("%s. Do you want to update now?", text), "Update", JOptionPane.YES_NO_CANCEL_OPTION);
+                int ret = JOptionPane.showConfirmDialog(this, text, "Update", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
                     Utils.openBrowser(this, updateInfo.getUri());
                 }
@@ -180,7 +183,7 @@ public class MainForm extends JFrame {
         var networkInfo = transformInstruction.getNetwork();
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format("Currently using %s network (%s)", networkInfo.getShortText(), networkInfo.getUrl()));
+        cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), networkInfo.getUrl()));
     }
 
     private void saveLastUsedNetwork(NetworkInfo selected) {

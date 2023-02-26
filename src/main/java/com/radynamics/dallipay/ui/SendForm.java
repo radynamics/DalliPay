@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -58,6 +59,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private JButton cmdSendPayments;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -109,7 +112,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
-                var lbl = new JLabel("Input:");
+                var lbl = new JLabel(res.getString("input"));
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 0, SpringLayout.NORTH, panel1);
@@ -128,7 +131,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 panel1.add(txtInput);
             }
             {
-                var lbl = new JLabel("Exchange rates:");
+                var lbl = new JLabel(res.getString("exchangeRate"));
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 30, SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
@@ -140,7 +143,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblExchange, 30, SpringLayout.NORTH, panel1);
                 panel1.add(lblExchange);
 
-                var lbl3 = Utils.createLinkLabel(this, "edit...");
+                var lbl3 = Utils.createLinkLabel(this, res.getString("edit"));
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblExchange);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 30, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {
@@ -156,17 +159,17 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             {
                 var popupMenu = new JPopupMenu();
                 {
-                    var item = new JMenuItem("Manually...");
+                    var item = new JMenuItem(res.getString("newManually"));
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> addNewEmptyPayment());
                 }
                 {
-                    var item = new JMenuItem("Using free text / payment slip reader...");
+                    var item = new JMenuItem(res.getString("newFreeText"));
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> addNewPaymentByFreeText());
                 }
 
-                cmdAdd = new JSplitButton("Add new...");
+                cmdAdd = new JSplitButton(res.getString("newAdd"));
                 cmdAdd.setPopupMenu(popupMenu);
                 cmdAdd.setMnemonic(KeyEvent.VK_N);
                 cmdAdd.setPreferredSize(new Dimension(150, 35));
@@ -188,7 +191,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             panel2.add(table);
         }
         {
-            cmdSendPayments = new JButton("Send Payments");
+            cmdSendPayments = new JButton(res.getString("sendPayments"));
             cmdSendPayments.setMnemonic(KeyEvent.VK_S);
             cmdSendPayments.setPreferredSize(new Dimension(150, 35));
             cmdSendPayments.setEnabled(false);
@@ -196,7 +199,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             panel3Layout.putConstraint(SpringLayout.EAST, cmdSendPayments, 0, SpringLayout.EAST, panel3);
             panel3.add(cmdSendPayments);
 
-            cmdExport = new JButton("Export pending");
+            cmdExport = new JButton(res.getString("exportPending"));
             cmdExport.setMnemonic(KeyEvent.VK_E);
             cmdExport.setPreferredSize(new Dimension(150, 35));
             cmdExport.addActionListener(e -> export());
@@ -222,14 +225,14 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private void remove(Payment p) {
         if (!PaymentEdit.create(p).removable()) {
-            JOptionPane.showMessageDialog(this, "Cannot remove payment because payment is not editable, has already been sent or was not manually created.", "Remove payment", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, res.getString("cannotRemove"), res.getString("removeTitle"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         var sb = new StringBuilder();
-        sb.append("Do you really want to remove following payment?" + System.lineSeparator());
+        sb.append(res.getString("removeConfirm") + System.lineSeparator());
         sb.append(p.getDisplayText());
-        var ret = JOptionPane.showConfirmDialog(this, sb.toString(), "Remove payment", JOptionPane.YES_NO_CANCEL_OPTION);
+        var ret = JOptionPane.showConfirmDialog(this, sb.toString(), res.getString("removeTitle"), JOptionPane.YES_NO_CANCEL_OPTION);
         if (ret != JOptionPane.YES_OPTION) {
             return;
         }
@@ -297,7 +300,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
                         log.error(String.format("Could not read payments from %s", txtInput.getText()), e);
-                        ExceptionDialog.show(this, e, "Could not read payments from ISO 20022 pain.001 file.");
+                        ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
                     }
                 });
         Executors.newCachedThreadPool().submit(() -> {
@@ -345,12 +348,12 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             pain001.writeTo(file);
 
             var sb = new StringBuilder();
-            sb.append(String.format("Successfully exported %s/%s payments to %s.", pain001.countCdtTrfTxInf(), countBefore, file.getAbsolutePath()));
+            sb.append(String.format(res.getString("exportPaymentsSuccess"), pain001.countCdtTrfTxInf(), countBefore, file.getAbsolutePath()));
             if (failed.size() != 0) {
-                sb.append(" Following payments could not be included:" + System.lineSeparator());
+                sb.append(" " + res.getString("exportPaymentsIgnored") + System.lineSeparator());
                 for (var f : failed) {
                     // Manually created payments may don't have a receiver address.
-                    var receiverText = f.getReceiverAddress() == null ? "unknown" : AddressFormatter.formatSingleLine(f.getReceiverAddress());
+                    var receiverText = f.getReceiverAddress() == null ? res.getString("unknown") : AddressFormatter.formatSingleLine(f.getReceiverAddress());
                     sb.append(String.format("- %s %s%s", f.getDisplayText(), receiverText, System.lineSeparator()));
                 }
             }
@@ -486,7 +489,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
 
         if (uniques.size() == 0) {
-            JOptionPane.showMessageDialog(this, "There are no payments requiring an exchange rate.", "No exchange rates required", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, res.getString("exchangeRateNoPayments"), res.getString("exchangeRateNoPaymentsTitle"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -573,7 +576,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     @Override
     public String getTitle() {
-        return "Send Payments";
+        return res.getString("title");
     }
 
     public void setNetwork(NetworkInfo networkInfo) {
