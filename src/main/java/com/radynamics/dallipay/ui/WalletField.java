@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 
 public class WalletField extends JPanel {
     private final static Logger log = LogManager.getLogger(WalletField.class);
@@ -28,6 +29,8 @@ public class WalletField extends JPanel {
     private Ledger ledger;
     private WalletFieldInputValidator validator;
     private ValidationControlDecorator decorator;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public WalletField(JComponent owner) {
         this(owner, true);
@@ -87,7 +90,7 @@ public class WalletField extends JPanel {
             c.gridy = 0;
             add(pnl, c);
             {
-                var lbl = Utils.createLinkLabel(owner, "find...");
+                var lbl = Utils.createLinkLabel(owner, res.getString("find"));
                 if (!verticalLabels) {
                     lbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
                 }
@@ -100,7 +103,7 @@ public class WalletField extends JPanel {
                 });
             }
             {
-                lblShowDetail = Utils.createLinkLabel(owner, "detail...");
+                lblShowDetail = Utils.createLinkLabel(owner, res.getString("detail"));
                 pnl.add(lblShowDetail);
                 lblShowDetail.addMouseListener(new MouseAdapter() {
                     @Override
@@ -126,13 +129,13 @@ public class WalletField extends JPanel {
     private void updateInfoText(String text) {
         var wallet = validator.getValidOrNull(text);
         if (wallet == null) {
-            lblInfoText.setText("Invalid wallet");
+            lblInfoText.setText(res.getString("invalidWallet"));
             return;
         }
 
         var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
         var wi = aggregator.getNameOrDomain(wallet);
-        lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse("No information available"));
+        lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse(res.getString("noInfo")));
         WalletInfoFormatter.format(lblInfoText, wi);
     }
 
@@ -162,7 +165,7 @@ public class WalletField extends JPanel {
         }
 
         var sb = new StringBuilder();
-        sb.append("=== Balances ===" + System.lineSeparator());
+        sb.append("=== " + res.getString("balances") + " ===" + System.lineSeparator());
         sb.append(MoneyFormatter.formatFiat(Money.sort(Money.removeZero(wallet.getBalances().all())), System.lineSeparator()));
         sb.append(System.lineSeparator());
 
@@ -219,7 +222,7 @@ public class WalletField extends JPanel {
             case Domain -> {
                 text = wi.getValue();
                 if (!wi.getVerified()) {
-                    text += " (unverified)";
+                    text += " " + res.getString("unverified");
                 }
             }
         }

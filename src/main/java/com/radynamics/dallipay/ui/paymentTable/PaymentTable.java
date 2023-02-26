@@ -28,6 +28,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -45,6 +46,8 @@ public class PaymentTable extends JPanel {
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
     private final ArrayList<PaymentListener> paymentListener = new ArrayList<>();
     private final DataLoader dataLoader;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
         super(new GridLayout(1, 0));
@@ -104,11 +107,11 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new ValidationStateCellRenderer(table.getColumn(PaymentTableModel.COL_VALIDATION_RESULTS)));
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_SENDER_LEDGER).headerValue("Sender Wallet").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_SENDER_LEDGER).headerValue(res.getString("senderWallet")).width(200).getColumn();
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue("Sender Account").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue(res.getString("senderAccount")).width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
             if (actor == Actor.Sender) {
@@ -116,23 +119,23 @@ public class PaymentTable extends JPanel {
             }
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue("Receiver Account").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue(res.getString("receiverAccount")).width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue("Receiver Wallet").width(200).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_LEDGER).headerValue(res.getString("receiverWallet")).width(200).getColumn();
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue("Booked").width(90).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue(res.getString("booked")).width(90).getColumn();
             c.setCellRenderer(new DateTimeCellRenderer());
             if (model.getActor() == Actor.Sender) {
                 cb.hide();
             }
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_AMOUNT).headerValue("Amount").width(100).headerRigth().getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_AMOUNT).headerValue(res.getString("amount")).width(100).headerRigth().getColumn();
             c.setCellRenderer(new AmountCellRenderer(table.getColumn(PaymentTableModel.COL_OBJECT)));
         }
         {

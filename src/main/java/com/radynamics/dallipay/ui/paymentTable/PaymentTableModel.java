@@ -18,6 +18,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class PaymentTableModel extends AbstractTableModel {
     private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
@@ -25,6 +26,8 @@ public class PaymentTableModel extends AbstractTableModel {
     private final ArrayList<Record> data = new ArrayList<>();
     private Actor actor = Actor.Sender;
     private boolean editable;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public static final String COL_OBJECT = "object";
     public static final String COL_VALIDATION_RESULTS = "validationResults";
@@ -87,7 +90,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_TRX_STATUS) == col) {
             return item.payment.getTransmission();
         } else if (getColumnIndex(COL_DETAIL) == col) {
-            return "detail...";
+            return res.getString("detail");
         } else if (getColumnIndex(COL_REMOVE) == col) {
             return item.payment.getOrigin();
         }
