@@ -14,11 +14,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 
 public class Xumm implements WalletInfoProvider {
     final static Logger log = LogManager.getLogger(WalletInfoProvider.class);
     private final Cache<WalletInfo[]> cache = new Cache<>("");
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     @Override
     public WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException {
@@ -57,7 +60,7 @@ public class Xumm implements WalletInfoProvider {
 
         {
             kycApproved = result.getBoolean("kycApproved");
-            var wi = new WalletInfo(this, "KYC approved", kycApproved, 80);
+            var wi = new WalletInfo(this, res.getString("kycApproved"), kycApproved, 80);
             wi.setVerified(kycApproved);
             list.add(wi);
         }
@@ -65,19 +68,19 @@ public class Xumm implements WalletInfoProvider {
             var xummProfile = result.getJSONObject("xummProfile");
             var accountAlias = get(xummProfile, "accountAlias").orElse(null);
             if (accountAlias != null) {
-                var wi = new WalletInfo(this, "XUMM account alias", accountAlias, 50, InfoType.Name);
+                var wi = new WalletInfo(this, res.getString("xummAccountAlias"), accountAlias, 50, InfoType.Name);
                 wi.setVerified(kycApproved);
                 list.add(wi);
             }
             var ownerAlias = get(xummProfile, "ownerAlias").orElse(null);
             if (ownerAlias != null) {
-                var wi = new WalletInfo(this, "XUMM owner alias", ownerAlias, 60, InfoType.Name);
+                var wi = new WalletInfo(this, res.getString("xummOwnerAlias"), ownerAlias, 60, InfoType.Name);
                 wi.setVerified(kycApproved);
                 list.add(wi);
             }
             var profileUrl = get(xummProfile, "profileUrl").orElse(null);
             if (profileUrl != null) {
-                var wi = new WalletInfo(this, "XUMM profile", profileUrl, 50, InfoType.Url);
+                var wi = new WalletInfo(this, res.getString("xummProfile"), profileUrl, 50, InfoType.Url);
                 wi.setVerified(kycApproved);
                 list.add(wi);
             }
@@ -89,7 +92,7 @@ public class Xumm implements WalletInfoProvider {
                 var o = thirdPartyProfiles.getJSONObject(i);
                 var accountAlias = get(o, "accountAlias").orElse(null);
                 if (accountAlias != null) {
-                    list.add(new WalletInfo(this, String.format("%s account alias", o.getString("source")), accountAlias, 40));
+                    list.add(new WalletInfo(this, String.format(res.getString("accountAlias"), o.getString("source")), accountAlias, 40));
                 }
             }
         }
@@ -98,10 +101,10 @@ public class Xumm implements WalletInfoProvider {
             var globalid = result.getJSONObject("globalid");
             var profileUrl = get(globalid, "profileUrl").orElse(null);
             if (profileUrl != null) {
-                list.add(new WalletInfo(this, "GlobaliD profile URL", profileUrl, 50, InfoType.Url));
+                list.add(new WalletInfo(this, res.getString("globalIdProfile"), profileUrl, 50, InfoType.Url));
             }
             if (!globalid.isNull("sufficientTrust")) {
-                var wi = new WalletInfo(this, "GlobaliD sufficient trust", globalid.getBoolean("sufficientTrust"), 60);
+                var wi = new WalletInfo(this, res.getString("globalIdSufficientTrust"), globalid.getBoolean("sufficientTrust"), 60);
                 wi.setVerified(true);
                 list.add(wi);
             }
