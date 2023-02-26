@@ -212,6 +212,8 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
 
         private final String AuthPath = "auth";
 
+        private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
+
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             var uri = httpExchange.getRequestURI();
@@ -233,13 +235,21 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
         }
 
         private void responseOk(HttpExchange httpExchange) throws IOException {
-            var responseText = "<!DOCTYPE html><html><body><h2>&#x2714; Successfully authorized</h2><p>Application has been successfully authorized. You can close this window at any time.</p></body></html>";
-            response(httpExchange, responseText);
+            response(httpExchange, createText(res.getString("pkceHttpHandler.ok.title"), res.getString("pkceHttpHandler.ok.desc")));
         }
 
         private void responseError(HttpExchange httpExchange, String errorDescription) throws IOException {
-            var responseText = "<!DOCTYPE html><html><body><h2>&#x274C; Authorization rejected</h2><p>Application has not been authorized to proceed. You can close this window at any time.</p><p>Xumm response: " + errorDescription + "</p></body></html>";
-            response(httpExchange, responseText);
+            response(httpExchange, createText(res.getString("pkceHttpHandler.error.title"), String.format(res.getString("pkceHttpHandler.error.desc"), errorDescription)));
+        }
+
+        private String createText(String title, String desc) {
+            var sb = new StringBuilder();
+            sb.append("<!DOCTYPE html><html><body><h2>&#x2714; ");
+            sb.append(title);
+            sb.append("</h2><p>");
+            sb.append(desc);
+            sb.append("</p></body></html>");
+            return sb.toString();
         }
 
         private void response(HttpExchange httpExchange, String responseText) throws IOException {

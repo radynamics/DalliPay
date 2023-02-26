@@ -30,6 +30,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class RpcSubmitter implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(RpcSubmitter.class);
@@ -39,6 +40,8 @@ public class RpcSubmitter implements TransactionSubmitter {
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
+
     public final static String Id = "rpcSubmitter";
 
     public RpcSubmitter(Ledger ledger, XrplClient xrplClient, PrivateKeyProvider privateKeyProvider) {
@@ -47,8 +50,8 @@ public class RpcSubmitter implements TransactionSubmitter {
         this.privateKeyProvider = privateKeyProvider;
 
         info = new TransactionSubmitterInfo();
-        info.setTitle("Enter private key");
-        info.setDescription("Enter your secret seed (sEdVa...) manually in this software. Due security reasons this is not recommended for sending real money.");
+        info.setTitle(res.getString("rpc.title"));
+        info.setDescription(res.getString("rpc.desc"));
     }
 
     @Override

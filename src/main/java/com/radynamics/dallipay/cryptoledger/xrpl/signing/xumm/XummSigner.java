@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,6 +34,8 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
 
     public final static String Id = "xummSigner";
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
+
     public XummSigner(Ledger ledger, String apiKey) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (apiKey == null) throw new IllegalArgumentException("Parameter 'apiKey' cannot be null");
@@ -41,8 +44,8 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         this.observer.addStateListener(this);
 
         info = new TransactionSubmitterInfo();
-        info.setTitle("Xumm");
-        info.setDescription("Use Xumm App on your smartphone to sign and send payments. All payments will need your confirmation in Xumm. Your private key and secrets are never exposed to this software.");
+        info.setTitle(res.getString("xumm.title"));
+        info.setDescription(res.getString("xumm.desc"));
         info.setDetailUri(URI.create("https://xumm.app"));
         info.setRecommended(true);
     }
@@ -73,7 +76,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
 
     @Override
     public void onExpired(Transaction t) {
-        t.refreshTransmission(new XummException("Confirmation request expired"));
+        t.refreshTransmission(new XummException(res.getString("xumm.expired")));
         raiseFailure(t);
     }
 
@@ -83,7 +86,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         t.setBooked(ZonedDateTime.now());
 
         if (verifier != null && !verifier.verify(txid, t)) {
-            t.refreshTransmission(new XummException("Transaction was submitted but result on chain doesn't match sent payment. This may indicates a serious software issue or fraud."));
+            t.refreshTransmission(new XummException(res.getString("xumm.verifyFailed")));
             raiseFailure(t);
             return;
         }
@@ -94,7 +97,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
 
     @Override
     public void onRejected(Transaction t) {
-        t.refreshTransmission(new XummException("Payment confirmation rejected"));
+        t.refreshTransmission(new XummException(res.getString("xumm.rejected")));
         raiseFailure(t);
     }
 
