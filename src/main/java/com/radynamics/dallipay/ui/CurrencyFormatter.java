@@ -26,7 +26,7 @@ public class CurrencyFormatter {
 
         var tooltip = String.format(res.getString("issuedBy"), currencyFormatter.formatIssuer(ccy));
         if (ccy.getTransferFee() != 0) {
-            tooltip += System.lineSeparator() + res.getString("transferfee") + " " + com.radynamics.dallipay.exchange.CurrencyFormatter.formatTransferFee(ccy);
+            tooltip += System.lineSeparator() + res.getString("transferFee") + ": " + com.radynamics.dallipay.exchange.CurrencyFormatter.formatTransferFee(ccy);
         }
         lbl.setToolTipText(tooltip);
 

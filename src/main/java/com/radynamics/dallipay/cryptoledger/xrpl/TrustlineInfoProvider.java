@@ -8,10 +8,13 @@ import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupExce
 import com.radynamics.dallipay.exchange.CurrencyFormatter;
 
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class TrustlineInfoProvider implements WalletInfoProvider {
     private final TrustlineCache trustlineCache;
     private final WalletInfoAggregator walletInfoAggregator;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public TrustlineInfoProvider(TrustlineCache cache) {
         this.trustlineCache = cache;
@@ -26,10 +29,10 @@ public class TrustlineInfoProvider implements WalletInfoProvider {
             var sb = new StringBuilder();
             var ccy = o.getLimit().getCcy();
             sb.append(String.format("%s (%s)", ccy.getCode(), toText(ccy.getIssuer())));
-            sb.append(", limit: " + MoneyFormatter.formatFiat(o.getLimit()));
+            sb.append(String.format(", %s: %s", res.getString("limit"), MoneyFormatter.formatFiat(o.getLimit())));
             var transferFeeText = CurrencyFormatter.formatTransferFee(ccy);
             if (transferFeeText.length() > 0) {
-                sb.append(", transfer fee: " + transferFeeText);
+                sb.append(String.format(", %s: %s", res.getString("transferFee"), transferFeeText));
             }
             list.add(new WalletInfo(this, "", sb.toString(), 50));
         }
