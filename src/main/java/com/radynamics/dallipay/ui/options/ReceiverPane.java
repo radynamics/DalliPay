@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 
 public class ReceiverPane extends JPanel {
     final static Logger log = LogManager.getLogger(ReceiverPane.class);
@@ -21,6 +22,8 @@ public class ReceiverPane extends JPanel {
     private final JComboBox<DateFormat> cboValutaFormat;
     private final JTextField txtCreditorReference;
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
+
     public ReceiverPane() {
         setPreferredSize(new Dimension(1000, 400));
         contentLayout = new SpringLayout();
@@ -31,29 +34,29 @@ public class ReceiverPane extends JPanel {
             final var topOffset = 5;
             var top = topOffset;
             {
-                builder.addRowLabel(top, "XRPL price oracle:");
+                builder.addRowLabel(top, res.getString("xrplPriceOracle"));
                 builder.addRowContent(top, xrplPriceOracleEditor);
                 top += 140;
             }
             {
-                var lbl = builder.addRowLabel(top, "Export");
+                var lbl = builder.addRowLabel(top, res.getString("export"));
                 lbl.putClientProperty("FlatLaf.styleClass", "h3");
                 top += 40;
             }
             {
-                builder.addRowLabel(top, "Booking date format:");
+                builder.addRowLabel(top, res.getString("bookingFormat"));
                 cboBookingFormat = createCboDateFormat();
                 builder.addRowContent(top, cboBookingFormat);
                 top += 30;
             }
             {
-                builder.addRowLabel(top, "Valuta date format:");
+                builder.addRowLabel(top, res.getString("valutaFormat"));
                 cboValutaFormat = createCboDateFormat();
                 builder.addRowContent(top, cboValutaFormat);
                 top += 30;
             }
             {
-                builder.addRowLabel(top, "Creditor reference if empty:");
+                builder.addRowLabel(top, res.getString("refNoIfEmpty"));
                 txtCreditorReference = new JTextField();
                 txtCreditorReference.setPreferredSize(new Dimension(160, 24));
                 builder.addRowContent(top, txtCreditorReference);

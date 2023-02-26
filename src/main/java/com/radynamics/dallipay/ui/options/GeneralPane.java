@@ -19,6 +19,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.ResourceBundle;
 
 public class GeneralPane extends JPanel {
     private final static Logger log = LogManager.getLogger(GeneralPane.class);
@@ -27,6 +28,8 @@ public class GeneralPane extends JPanel {
     private final SpringLayout contentLayout;
     private final Ledger ledger;
     private JComboBox<String> cboExplorer;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
     public GeneralPane(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
@@ -41,7 +44,7 @@ public class GeneralPane extends JPanel {
             final var topOffset = 5;
             var top = topOffset;
             {
-                builder.addRowLabel(top, "Explorer:");
+                builder.addRowLabel(top, res.getString("explorer"));
                 cboExplorer = new JComboBox<>();
                 cboExplorer.setRenderer(new DefaultListCellRenderer() {
                     @Override
@@ -55,14 +58,14 @@ public class GeneralPane extends JPanel {
                 top += 30;
             }
             {
-                builder.addRowLabel(top, "Version:");
+                builder.addRowLabel(top, res.getString("version"));
                 var pnl = new JPanel();
                 {
                     var vc = new VersionController();
                     pnl.add(new JLabel(vc.getVersion()));
                 }
                 {
-                    var lbl = Utils.createLinkLabel(this, "show licenses...");
+                    var lbl = Utils.createLinkLabel(this, res.getString("showLicenses"));
                     lbl.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -75,7 +78,7 @@ public class GeneralPane extends JPanel {
                 top += 30;
             }
             {
-                builder.addRowLabel(top, "Website:");
+                builder.addRowLabel(top, res.getString("website"));
                 var lbl = Utils.createLinkLabel(this, "www.dallipay.com");
                 lbl.addMouseListener(new MouseAdapter() {
                     @Override
@@ -87,16 +90,16 @@ public class GeneralPane extends JPanel {
                 top += 30;
             }
             {
-                builder.addRowLabel(top, "Database password");
-                var cmd = new JButton("change...");
+                builder.addRowLabel(top, res.getString("dbPassword"));
+                var cmd = new JButton(res.getString("change"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> onChangePassword());
                 builder.addRowContent(top, cmd);
                 top += 50;
             }
             {
-                builder.addRowLabel(top, "Free test wallet");
-                var cmd = new JButton("create...");
+                builder.addRowLabel(top, res.getString("testWallet"));
+                var cmd = new JButton(res.getString("create"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> onCreateTestWallet());
                 builder.addRowContent(top, cmd);
@@ -151,17 +154,17 @@ public class GeneralPane extends JPanel {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
-        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), "Used libraries", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), res.getString("usedlibraries"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void onChangePassword() {
         try {
             var frm = new LoginForm();
-            if (!frm.showLogin("Current password", "Change password")) {
+            if (!frm.showLogin(res.getString("currentPassword"), res.getString("changePassword"))) {
                 return;
             }
             if (!Database.isReadable(frm.getPassword())) {
-                JOptionPane.showMessageDialog(this, "Invalid password");
+                JOptionPane.showMessageDialog(this, res.getString("invalidPassword"));
                 return;
             }
 
@@ -177,7 +180,7 @@ public class GeneralPane extends JPanel {
 
     public void onCreateTestWallet() {
         if (ledger.getNetwork().isLivenet()) {
-            JOptionPane.showMessageDialog(this, String.format("Cannot create test wallets on %s. Switch to TESTNET first.", ledger.getNetwork().getShortText()), ledger.getNetwork().getShortText(), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, String.format(res.getString("createTestWalletFailed"), ledger.getNetwork().getShortText()), ledger.getNetwork().getShortText(), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -186,11 +189,11 @@ public class GeneralPane extends JPanel {
         var sb = new StringBuilder();
         sb.append("=== Wallet ===" + System.lineSeparator());
         sb.append(String.format("Wallet: %s", wallet.getPublicKey()) + System.lineSeparator());
-        sb.append(String.format("Secret: %s", wallet.getSecret()) + System.lineSeparator());
+        sb.append(String.format("%s: %s", res.getString("secret"), wallet.getSecret()) + System.lineSeparator());
         sb.append(System.lineSeparator());
         sb.append(String.format("Faucet: %s", faucetUrl) + System.lineSeparator());
         sb.append(System.lineSeparator());
-        sb.append("=== Balances ===" + System.lineSeparator());
+        sb.append("=== " + res.getString("balances") + " ===" + System.lineSeparator());
         sb.append(MoneyFormatter.formatFiat(Money.sort(wallet.getBalances().all()), System.lineSeparator()));
 
         var txt = new JTextArea(sb.toString());
@@ -200,7 +203,7 @@ public class GeneralPane extends JPanel {
         txt.setLineWrap(true);
         txt.setWrapStyleWord(true);
         txt.setSize(txt.getPreferredSize().width, txt.getPreferredSize().height);
-        JOptionPane.showMessageDialog(this, new JScrollPane(txt), "Test wallet created", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(txt), res.getString("testWalletCreated"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void save(ConfigRepo repo) throws Exception {

@@ -9,12 +9,15 @@ import com.radynamics.dallipay.ui.options.SenderPane;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class OptionsForm extends JPanel implements MainFormPane {
     private final GeneralPane generalPane;
     private final SenderPane senderPane;
     private final ReceiverPane receiverPane;
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
     public OptionsForm(Ledger ledger) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -29,13 +32,13 @@ public class OptionsForm extends JPanel implements MainFormPane {
             pnlContent.add(tabbedPane);
 
             generalPane = new GeneralPane(ledger);
-            tabbedPane.addTab("General", generalPane);
+            tabbedPane.addTab(res.getString("general"), generalPane);
             generalPane.setBorder(border);
             senderPane = new SenderPane(ledger);
-            tabbedPane.addTab("Send", senderPane);
+            tabbedPane.addTab(res.getString("send"), senderPane);
             senderPane.setBorder(border);
             receiverPane = new ReceiverPane();
-            tabbedPane.addTab("Receive", receiverPane);
+            tabbedPane.addTab(res.getString("receive"), receiverPane);
             receiverPane.setBorder(border);
         }
         {
@@ -48,7 +51,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
 
             var buttonSize = new Dimension(150, 35);
             {
-                var cmd = new JButton("Save");
+                var cmd = new JButton(res.getString("save"));
                 cmd.setMinimumSize(buttonSize);
                 cmd.setPreferredSize(buttonSize);
                 cmd.setMaximumSize(buttonSize);
@@ -70,7 +73,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
         }
 
         raiseChanged();
-        JOptionPane.showMessageDialog(this, "Settings saved successfully.", "Saved", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, res.getString("saveSuccess"), res.getString("saved"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void load() {
@@ -85,7 +88,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
 
     @Override
     public String getTitle() {
-        return "Options";
+        return res.getString("options");
     }
 
     public void addChangedListener(ChangedListener l) {

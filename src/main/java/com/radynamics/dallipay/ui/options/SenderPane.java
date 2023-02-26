@@ -7,11 +7,14 @@ import com.radynamics.dallipay.ui.WalletField;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class SenderPane extends JPanel {
     private final Ledger ledger;
     private final SpringLayout contentLayout;
     private final WalletField txtDefaultSenderWallet;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
     public SenderPane(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
@@ -26,7 +29,7 @@ public class SenderPane extends JPanel {
             final var topOffset = 5;
             var top = topOffset;
             {
-                builder.addRowLabel(top, String.format("Default %s Sender wallet:", ledger.getId().textId().toUpperCase(Locale.ROOT)));
+                builder.addRowLabel(top, String.format(res.getString("defaultSenderWallet"), ledger.getId().textId().toUpperCase(Locale.ROOT)));
                 txtDefaultSenderWallet = new WalletField(this);
                 txtDefaultSenderWallet.setLedger(this.ledger);
                 txtDefaultSenderWallet.setPreferredSize(new Dimension(300, 24));

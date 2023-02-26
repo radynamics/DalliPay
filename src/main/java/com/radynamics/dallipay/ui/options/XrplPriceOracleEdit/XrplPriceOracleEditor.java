@@ -11,20 +11,23 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class XrplPriceOracleEditor extends JPanel {
     private final JTable table;
     private final IssuedCurrencyTableModel model = new IssuedCurrencyTableModel();
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public XrplPriceOracleEditor() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         table = new JTable(model);
         var cb = new TableColumnBuilder(table);
-        cb.forColumn(IssuedCurrencyTableModel.COL_FROM).width(45).headerValue("From");
-        cb.forColumn(IssuedCurrencyTableModel.COL_TO).width(45).headerValue("To");
-        cb.forColumn(IssuedCurrencyTableModel.COL_ISSUER).width(300).headerValue("Issuer");
-        cb.forColumn(IssuedCurrencyTableModel.COL_RECEIVER).width(300).headerValue("Receiver");
+        cb.forColumn(IssuedCurrencyTableModel.COL_FROM).width(45).headerValue(res.getString("from"));
+        cb.forColumn(IssuedCurrencyTableModel.COL_TO).width(45).headerValue(res.getString("to"));
+        cb.forColumn(IssuedCurrencyTableModel.COL_ISSUER).width(300).headerValue(res.getString("issuer"));
+        cb.forColumn(IssuedCurrencyTableModel.COL_RECEIVER).width(300).headerValue(res.getString("receiver"));
 
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -50,7 +53,7 @@ public class XrplPriceOracleEditor extends JPanel {
                     popupMenu.add(item);
                     item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsRadyamics()));
                 }
-                var cmd = new JSplitButton("default");
+                var cmd = new JSplitButton(res.getString("default"));
                 cmd.setAlwaysPopup(true);
                 cmd.setPopupMenu(popupMenu);
                 cmd.setPreferredSize(new Dimension(90, 21));
