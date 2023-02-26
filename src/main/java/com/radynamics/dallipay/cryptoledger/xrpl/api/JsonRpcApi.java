@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -50,6 +51,8 @@ public class JsonRpcApi implements TransactionSource {
     private final LedgerRangeConverter ledgerRangeConverter;
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
@@ -190,7 +193,7 @@ public class JsonRpcApi implements TransactionSource {
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
         var start = ledgerRangeConverter.findOrNull(period.getStart());
         if (start == null) {
-            throw new LedgerException(String.format("Could not find ledger at %s", period.getStart()));
+            throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), period.getStart()));
         }
 
         return createAccountTransactionsRequestParams(wallet, start, period.getEnd(), marker);
@@ -204,7 +207,7 @@ public class JsonRpcApi implements TransactionSource {
         if (end.isBefore(ZonedDateTime.now())) {
             var endLedger = ledgerRangeConverter.findOrNull(end);
             if (endLedger == null) {
-                throw new LedgerException(String.format("Could not find ledger at %s", end));
+                throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), end));
             }
             b.ledgerIndexMaximum(LedgerIndexBound.of(endLedger.unsignedIntegerValue().intValue()));
         }
