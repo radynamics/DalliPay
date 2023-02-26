@@ -18,6 +18,7 @@ import com.radynamics.dallipay.ui.paymentTable.Actor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ResourceBundle;
 
 public class PaymentDetailForm extends JDialog {
     private final Payment payment;
@@ -39,6 +40,8 @@ public class PaymentDetailForm extends JDialog {
     private JTextArea txtMessages;
     private JLabel lblEditExchangeRate;
     private JSplitButton cmdPaymentPath;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public PaymentDetailForm(Payment payment, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
@@ -67,7 +70,7 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void setupUI() {
-        setTitle("Payment detail");
+        setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
         var al = new ActionListener() {
@@ -145,7 +148,7 @@ public class PaymentDetailForm extends JDialog {
                 lblLedgerAmount = Utils.formatSecondaryInfo(new JLabel());
 
                 var enabled = edit.exchangeRateEditable();
-                lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "edit...", enabled));
+                lblEditExchangeRate = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, res.getString("edit"), enabled));
                 refreshAmountsText();
                 secondLine.add(lblLedgerAmount);
                 {
@@ -160,7 +163,7 @@ public class PaymentDetailForm extends JDialog {
                     lblEditExchangeRate.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
                     secondLine.add(lblEditExchangeRate);
                 }
-                anchorComponentTopLeft = createRow(northPad, "Amount:", pnlFirstLine, secondLine, false, 7);
+                anchorComponentTopLeft = createRow(northPad, res.getString("amount"), pnlFirstLine, secondLine, false, 7);
                 northPad += lineHeight + 4;
             }
             {
@@ -171,7 +174,7 @@ public class PaymentDetailForm extends JDialog {
                 txtSenderWallet.setShowDetailVisible(true);
                 txtSenderWallet.setInfoTextVisible(true);
                 txtSenderWallet.setEditable(edit.editable());
-                createRow(northPad, "Sender:", lbl, txtSenderWallet, false, walletEditOffsetNorth);
+                createRow(northPad, res.getString("sender"), lbl, txtSenderWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;
             }
             {
@@ -182,13 +185,13 @@ public class PaymentDetailForm extends JDialog {
                 txtReceiverWallet.setShowDetailVisible(true);
                 txtReceiverWallet.setInfoTextVisible(true);
                 txtReceiverWallet.setEditable(edit.editable());
-                createRow(northPad, "Receiver:", lbl, txtReceiverWallet, false, walletEditOffsetNorth);
+                createRow(northPad, res.getString("receiver"), lbl, txtReceiverWallet, false, walletEditOffsetNorth);
                 northPad += walletEditLineHeight;
             }
             {
                 JLabel secondLine = null;
                 if (payment.getId() != null) {
-                    secondLine = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, "show ledger transaction..."));
+                    secondLine = formatSecondLineLinkLabel(Utils.createLinkLabel(pnlContent, res.getString("showLedgerTrx")));
                     secondLine.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -198,7 +201,7 @@ public class PaymentDetailForm extends JDialog {
                         }
                     });
                 }
-                createRow(northPad, "Booked:", payment.getBooked() == null ? "unknown" : Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getBooked())), secondLine);
+                createRow(northPad, res.getString("booked"), payment.getBooked() == null ? res.getString("unknown") : Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getBooked())), secondLine);
                 northPad += lineHeight;
             }
             {
@@ -206,14 +209,14 @@ public class PaymentDetailForm extends JDialog {
                 formatTextArea(txtStructuredReferences, 1);
                 txtStructuredReferences.setValue(payment.getStructuredReferences());
                 txtStructuredReferences.setEditable(edit.editable());
-                createRow(northPad, "References:", new JScrollPane(txtStructuredReferences), null);
+                createRow(northPad, res.getString("references"), new JScrollPane(txtStructuredReferences), null);
                 northPad += lineHeight;
             }
             {
                 txtMessages = createTextArea(3, Utils.toMultilineText(payment.getMessages()));
                 Utils.patchTabBehavior(txtMessages);
                 txtMessages.setEditable(edit.editable());
-                createRow(northPad, "Messages:", new JScrollPane(txtMessages), null);
+                createRow(northPad, res.getString("messages"), new JScrollPane(txtMessages), null);
                 northPad += lineHeight * 2;
             }
             {
@@ -230,12 +233,12 @@ public class PaymentDetailForm extends JDialog {
                 pnl.setLayout(new BorderLayout());
                 var txt = createTextArea(3, sb.length() == 0 ? "" : Utils.removeEndingLineSeparator(sb.toString()));
                 pnl.add(new JScrollPane(txt));
-                createRow(northPad, "Issues:", pnl, null, true);
+                createRow(northPad, res.getString("issues"), pnl, null, true);
                 northPad += lineHeight;
             }
         }
         {
-            var cmd = new JButton("Close");
+            var cmd = new JButton(res.getString("close"));
             cmd.setPreferredSize(new Dimension(150, 35));
             cmd.addActionListener(e -> {
                 accept();
@@ -301,7 +304,7 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshPaymentPathText(String selectedText) {
-        cmdPaymentPath.setText(String.format("send using %s", selectedText));
+        cmdPaymentPath.setText(String.format(res.getString("sendUsing"), selectedText));
     }
 
     private void refreshAmountsText() {
@@ -315,17 +318,17 @@ public class PaymentDetailForm extends JDialog {
 
         var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {
-            lblLedgerAmount.setText(String.format("%s, missing exchange rate", amtLedgerText));
+            lblLedgerAmount.setText(String.format("%s, " + res.getString("missingFxRate"), amtLedgerText));
             return;
         }
 
-        var fxRateText = "unknown";
-        var fxRateAtText = "unknown";
+        var fxRateText = res.getString("unknown");
+        var fxRateAtText = res.getString("unknown");
         if (!payment.isAmountUnknown()) {
             fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
             fxRateAtText = Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getExchangeRate().getPointInTime()));
         }
-        lblLedgerAmount.setText(String.format("%s with exchange rate %s at %s", amtLedgerText, fxRateText, fxRateAtText));
+        lblLedgerAmount.setText(String.format(res.getString("withFxRateOf"), amtLedgerText, fxRateText, fxRateAtText));
     }
 
     private void showExchangeRateEdit() {
