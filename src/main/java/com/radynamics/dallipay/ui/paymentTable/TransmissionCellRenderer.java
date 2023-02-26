@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class TransmissionCellRenderer extends JLabel implements TableCellRenderer {
     private final static int WIDTH = 16;
@@ -15,6 +16,8 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
     private final static FlatSVGIcon waiting = new FlatSVGIcon("svg/waiting.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon success = new FlatSVGIcon("svg/success.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public TransmissionCellRenderer() {
         setOpaque(true);
@@ -48,7 +51,7 @@ public class TransmissionCellRenderer extends JLabel implements TableCellRendere
         }
     }
 
-    private static String getToolTipTextOrNull(TransmissionState value) {
-        return value == TransmissionState.Waiting ? "Waiting..." : null;
+    private String getToolTipTextOrNull(TransmissionState value) {
+        return value == TransmissionState.Waiting ? res.getString("waiting") : null;
     }
 }

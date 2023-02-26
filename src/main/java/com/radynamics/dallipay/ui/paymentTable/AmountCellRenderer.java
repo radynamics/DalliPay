@@ -7,9 +7,12 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class AmountCellRenderer extends JLabel implements TableCellRenderer {
     private final TableColumn objectColumn;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public AmountCellRenderer(TableColumn objectColumn) {
         this.objectColumn = objectColumn;
@@ -27,7 +30,7 @@ public class AmountCellRenderer extends JLabel implements TableCellRenderer {
         setText(AmountFormatter.formatAmt(obj));
         setToolTipText("");
         if (obj.isAmountUnknown()) {
-            setToolTipText("Not available due no exchange rate was found at this point in time.");
+            setToolTipText(res.getString("naNoFxRateFound"));
             return this;
         }
 

@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class ValidationStateCellRenderer extends JLabel implements TableCellRenderer {
     private TableColumn validationResultsColumn;
@@ -20,6 +21,8 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
     private final static FlatSVGIcon info = new FlatSVGIcon("svg/informationDialog.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon warning = new FlatSVGIcon("svg/warningDialog.svg", WIDTH, HEIGHT);
     private final static FlatSVGIcon error = new FlatSVGIcon("svg/errorDialog.svg", WIDTH, HEIGHT);
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public ValidationStateCellRenderer(TableColumn validationResultsColumn) {
         this.validationResultsColumn = validationResultsColumn;
@@ -33,7 +36,7 @@ public class ValidationStateCellRenderer extends JLabel implements TableCellRend
         if (value == null) {
             setText("...");
             setIcon(null);
-            setToolTipText("Validating...");
+            setToolTipText(res.getString("validating"));
             return this;
         }
 
