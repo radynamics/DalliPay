@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public class ReceiveExportForm extends JDialog {
     private SpringLayout panel1Layout;
@@ -19,6 +20,8 @@ public class ReceiveExportForm extends JDialog {
 
     private static final Map<CamtFormat, String> formatMapping = new LinkedHashMap<>();
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+
     public ReceiveExportForm() {
         formatMapping.put(CamtFormat.Camt05400109, "camt.054 Version 09");
         formatMapping.put(CamtFormat.Camt05400104, "camt.054 Version 04");
@@ -28,7 +31,7 @@ public class ReceiveExportForm extends JDialog {
     }
 
     private void setupUI() {
-        setTitle("Export");
+        setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
@@ -83,7 +86,7 @@ public class ReceiveExportForm extends JDialog {
             }
             {
                 var lbl = new JLabel();
-                lbl.setText("Export received payments.");
+                lbl.setText(res.getString("desc"));
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.WEST);
             }
@@ -93,7 +96,7 @@ public class ReceiveExportForm extends JDialog {
             int line = 0;
             int padValueCtrl = 110;
             {
-                var lbl = new JLabel("File:");
+                var lbl = new JLabel(res.getString("file"));
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(line), SpringLayout.NORTH, pnlContent);
@@ -109,7 +112,7 @@ public class ReceiveExportForm extends JDialog {
                 line++;
             }
             {
-                var lbl = new JLabel("Payment format:");
+                var lbl = new JLabel(res.getString("format"));
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(line), SpringLayout.NORTH, pnlContent);
@@ -145,7 +148,7 @@ public class ReceiveExportForm extends JDialog {
                 pnl.add(cmd);
             }
             {
-                var cmd = new JButton("Cancel");
+                var cmd = new JButton(res.getString("cancel"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
