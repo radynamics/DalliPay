@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,8 @@ public class SendConfirmationForm extends JDialog {
     private JLabel lblFee;
     private JLabel lblSigningText;
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+
     private static final int ENTRY_VERTICAL_SPACING = 7;
     private static final int ENTRY_HEIGHT = 45;
 
@@ -44,7 +47,7 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void setupUI() {
-        setTitle("Confirm Payments");
+        setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
@@ -119,7 +122,7 @@ public class SendConfirmationForm extends JDialog {
             }
             {
                 var lbl = new JLabel();
-                lbl.setText("Please review following summary before sending. Sent payments cannot be reversed.");
+                lbl.setText(res.getString("pleaseReview"));
                 lbl.setOpaque(true);
                 pnl.add(lbl, BorderLayout.WEST);
             }
@@ -135,7 +138,7 @@ public class SendConfirmationForm extends JDialog {
                     }
                     pnlInfo.add(Box.createRigidArea(new Dimension(5, 0)));
                     {
-                        var lbl = new JLabel(String.format("Selected %s payments of %s available.", payments.length, totalPaymentCount));
+                        var lbl = new JLabel(String.format(res.getString("selectXofY"), payments.length, totalPaymentCount));
                         lbl.setOpaque(true);
                         pnlInfo.add(lbl);
                     }
@@ -155,7 +158,7 @@ public class SendConfirmationForm extends JDialog {
             }
         }
         {
-            var lblFeeText = new JLabel("Total expected Transaction fee");
+            var lblFeeText = new JLabel(res.getString("totalExpectedFee"));
             panel2Layout.putConstraint(SpringLayout.WEST, lblFeeText, 0, SpringLayout.WEST, pnlFeeContent);
             panel2Layout.putConstraint(SpringLayout.NORTH, lblFeeText, 0, SpringLayout.NORTH, pnlFeeContent);
             pnlFeeContent.add(lblFeeText);
@@ -166,7 +169,7 @@ public class SendConfirmationForm extends JDialog {
             panel2Layout.putConstraint(SpringLayout.NORTH, lblFee, 0, SpringLayout.NORTH, pnlFeeContent);
             pnlFeeContent.add(lblFee);
 
-            var lbl3 = Utils.createLinkLabel(pnlMain, "edit...");
+            var lbl3 = Utils.createLinkLabel(pnlMain, res.getString("edit"));
             panel2Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblFee);
             panel2Layout.putConstraint(SpringLayout.NORTH, lbl3, 0, SpringLayout.NORTH, pnlFeeContent);
             lbl3.addMouseListener(new MouseAdapter() {
@@ -179,7 +182,7 @@ public class SendConfirmationForm extends JDialog {
             });
             pnlFeeContent.add(lbl3);
 
-            var lbl4 = Utils.createLinkLabel(pnlMain, "explain...");
+            var lbl4 = Utils.createLinkLabel(pnlMain, res.getString("explain"));
             panel2Layout.putConstraint(SpringLayout.WEST, lbl4, 10, SpringLayout.EAST, lbl3);
             panel2Layout.putConstraint(SpringLayout.NORTH, lbl4, 0, SpringLayout.NORTH, pnlFeeContent);
             lbl4.addMouseListener(new MouseAdapter() {
@@ -198,7 +201,7 @@ public class SendConfirmationForm extends JDialog {
             panelSigningLayout.putConstraint(SpringLayout.NORTH, lblSigningText, 0, SpringLayout.NORTH, pnlSigningContent);
             pnlSigningContent.add(lblSigningText);
 
-            var lbl3 = Utils.createLinkLabel(pnlMain, "edit...");
+            var lbl3 = Utils.createLinkLabel(pnlMain, res.getString("edit"));
             panelSigningLayout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblSigningText);
             panelSigningLayout.putConstraint(SpringLayout.NORTH, lbl3, 0, SpringLayout.NORTH, pnlSigningContent);
             lbl3.addMouseListener(new MouseAdapter() {
@@ -219,13 +222,13 @@ public class SendConfirmationForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, pnl, 0, SpringLayout.SOUTH, panel3);
             panel3.add(pnl);
             {
-                cmdSend = new JButton("Send");
+                cmdSend = new JButton(res.getString("send"));
                 cmdSend.setPreferredSize(new Dimension(150, 35));
                 cmdSend.addActionListener(e -> formAcceptCloseHandler.accept());
                 pnl.add(cmdSend);
             }
             {
-                var cmd = new JButton("Cancel");
+                var cmd = new JButton(res.getString("cancel"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> formAcceptCloseHandler.close());
                 pnl.add(cmd);
@@ -236,7 +239,7 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void refreshSigningText() {
-        lblSigningText.setText(String.format("Sign payments using '%s'", submitter == null ? "unknown" : submitter.getInfo().getTitle()));
+        lblSigningText.setText(String.format(res.getString("signUsing"), submitter == null ? res.getString("unknown") : submitter.getInfo().getTitle()));
     }
 
     private void acceptDialog() {
@@ -287,7 +290,7 @@ public class SendConfirmationForm extends JDialog {
 
             p.add(new JLabel(PaymentUtils.sumString(payments, true)));
             p.add(Box.createRigidArea(new Dimension(5, 0)));
-            p.add(new JLabel(String.format("(%s payments)", payments.size())));
+            p.add(new JLabel(String.format("(%s " + res.getString("payments") + ")", payments.size())));
         }
         {
             var layout = new FlowLayout(FlowLayout.RIGHT, 5, 0);
@@ -341,11 +344,11 @@ public class SendConfirmationForm extends JDialog {
         pnl.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
 
         var group = new ButtonGroup();
-        var rdoLow = new JRadioButton("Low");
+        var rdoLow = new JRadioButton(res.getString("fees.low"));
         group.add(rdoLow);
-        var rdoMedium = new JRadioButton("Medium");
+        var rdoMedium = new JRadioButton(res.getString("fees.medium"));
         group.add(rdoMedium);
-        var rdoHigh = new JRadioButton("High");
+        var rdoHigh = new JRadioButton(res.getString("fees.high"));
         group.add(rdoHigh);
 
         rdoLow.setSelected(currentFee == null || fees.getLow().equals(currentFee));
@@ -358,8 +361,8 @@ public class SendConfirmationForm extends JDialog {
 
         var optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
-        var ret = JOptionPane.showOptionDialog(this, pnl, "Fee per transaction",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"OK", "Cancel"}, "OK");
+        var ret = JOptionPane.showOptionDialog(this, pnl, res.getString("feePerTrx"),
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"OK", res.getString("cancel")}, "OK");
         if (ret != JOptionPane.OK_OPTION) {
             return;
         }
@@ -417,7 +420,7 @@ public class SendConfirmationForm extends JDialog {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setSize(textArea.getPreferredSize().width, textArea.getPreferredSize().height);
-        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), "Fees", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(textArea), res.getString("fees.title"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void showSigningEdit() {
@@ -435,11 +438,11 @@ public class SendConfirmationForm extends JDialog {
             int countdown = 60;
 
             public void run() {
-                cmdSend.setText(String.format("Send [%ss] ", countdown));
+                cmdSend.setText(String.format(res.getString("send") + " [%ss] ", countdown));
 
                 countdown--;
                 if (countdown < 0) {
-                    cmdSend.setText("Send");
+                    cmdSend.setText(res.getString("send"));
                     // Ensure user doesn't use outdated exchange rates (ex. let UI open for an hour).
                     cmdSend.setEnabled(false);
                     scheduler.shutdown();
