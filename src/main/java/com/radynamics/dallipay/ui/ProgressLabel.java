@@ -3,10 +3,13 @@ package com.radynamics.dallipay.ui;
 import com.radynamics.dallipay.ui.paymentTable.Progress;
 
 import javax.swing.*;
+import java.util.ResourceBundle;
 
 public class ProgressLabel extends JLabel {
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public void showLoading() {
-        setText("Loading, please wait...");
+        setText(res.getString("loadingPleaseWait"));
     }
 
     public void hideLoading() {
@@ -17,7 +20,7 @@ public class ProgressLabel extends JLabel {
         if (progress.isFinished()) {
             hideLoading();
         } else {
-            setText(String.format("Loaded %s / %s...", progress.getCount(), progress.getTotal()));
+            setText(String.format(res.getString("loadingX"), progress.getCount(), progress.getTotal()));
         }
     }
 }
