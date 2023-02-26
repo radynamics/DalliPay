@@ -14,10 +14,13 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 
 public class SenderHistoryValidator implements WalletHistoryValidator {
     private Cache<PaymentHistoryProvider> cache;
     private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM);
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
     public SenderHistoryValidator(NetworkInfo network) {
         initCache(network);
@@ -59,7 +62,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
         var paymentHistory = cache.get(p.getSenderWallet());
         var similar = paymentHistory.oldestSimilarOrDefault(p);
         if (similar != null) {
-            list.add(new ValidationResult(ValidationState.Warning, String.format("Similar payment sent to same receiver at %s.", df.format(DateTimeConvert.toUserTimeZone(similar.getBooked())))));
+            list.add(new ValidationResult(ValidationState.Warning, String.format(res.getString("similarPaymentSent"), df.format(DateTimeConvert.toUserTimeZone(similar.getBooked())))));
         }
 
         return list.toArray(new ValidationResult[0]);

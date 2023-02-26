@@ -6,11 +6,14 @@ import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
 
 import java.util.HashMap;
+import java.util.ResourceBundle;
 
 public class StaticWalletInfoProvider implements WalletInfoProvider {
     private final Ledger ledger;
 
     private final HashMap<String, WalletInfo[]> known = new HashMap<>();
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public StaticWalletInfoProvider(Ledger ledger) {
         this.ledger = ledger;
@@ -41,7 +44,7 @@ public class StaticWalletInfoProvider implements WalletInfoProvider {
 
     @Override
     public String getDisplayText() {
-        return "Static information";
+        return res.getString("staticinformation");
     }
 
     @Override

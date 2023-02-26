@@ -4,9 +4,12 @@ import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class WalletValidator {
     private Ledger ledger;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
     public WalletValidator(Ledger ledger) {
         this.ledger = ledger;
@@ -22,7 +25,7 @@ public class WalletValidator {
         }
 
         if (!ledger.exists(wallet)) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("%s wallet doesn't exist.", senderOrReceiver)));
+            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("walletDoestExist"), senderOrReceiver)));
         }
 
         return list.toArray(new ValidationResult[0]);
@@ -41,12 +44,12 @@ public class WalletValidator {
         var prefix = senderOrReceiver == null ? "" : String.format("%s ", senderOrReceiver);
         return wallet != null && ledger.isValidPublicKey(wallet.getPublicKey())
                 ? null
-                : new ValidationResult(ValidationState.Error, String.format("%sCryptocurrency wallet isn't a valid address.", prefix));
+                : new ValidationResult(ValidationState.Error, String.format(res.getString("walletInvalid"), prefix));
     }
 
     public ValidationResult validateSecret(Wallet wallet) {
         return ledger.isSecretValid(wallet)
                 ? null
-                : new ValidationResult(ValidationState.Error, String.format("Wallet secret (private Key) for %s is not valid or doesn't match it's public key.", wallet.getPublicKey()));
+                : new ValidationResult(ValidationState.Error, String.format(res.getString("walletSecretInvalid"), wallet.getPublicKey()));
     }
 }

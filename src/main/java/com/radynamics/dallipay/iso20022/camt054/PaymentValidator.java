@@ -10,22 +10,25 @@ import com.radynamics.dallipay.ui.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 
 public class PaymentValidator implements com.radynamics.dallipay.iso20022.PaymentValidator {
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
+
     public ValidationResult[] validate(Payment t) {
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
 
         if (t.getSenderAccount() == null || t.getSenderAccount().getUnformatted().length() == 0) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Sender account is missing")));
+            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderAccountMissing"))));
         } else {
             if (t.getSenderAccount().getUnformatted().equalsIgnoreCase(t.getSenderWallet().getPublicKey())) {
-                list.add(new ValidationResult(ValidationState.Info, String.format("No Account/IBAN defined for this CryptoCurrency Wallet and therefore Wallet address is exported.")));
+                list.add(new ValidationResult(ValidationState.Info, String.format(res.getString("noAccountDefined"))));
             }
         }
 
         if (t.isAmountUnknown()) {
-            list.add(new ValidationResult(ValidationState.Error, String.format("Amount is unknown due no exchange rate was found at %s.", Utils.createFormatDate().format(t.getBooked()))));
+            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("amountUnknown"), Utils.createFormatDate().format(t.getBooked()))));
         }
 
         return list.toArray(new ValidationResult[0]);

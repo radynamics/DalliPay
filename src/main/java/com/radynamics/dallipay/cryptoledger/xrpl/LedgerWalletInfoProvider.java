@@ -7,9 +7,12 @@ import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class LedgerWalletInfoProvider implements WalletInfoProvider {
     private Ledger ledger;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public LedgerWalletInfoProvider(Ledger ledger) {
         this.ledger = ledger;
@@ -36,7 +39,7 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
 
     @Override
     public String getDisplayText() {
-        return String.format("Ledger values (%s)", ledger.getId());
+        return String.format(res.getString("ledgerValues"), ledger.getId());
     }
 
     @Override

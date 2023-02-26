@@ -26,6 +26,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -33,6 +34,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private JsonRpcApi api;
 
     private static final String nativeCcySymbol = "XRP";
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
     public Ledger() {
     }
@@ -111,10 +114,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         var xrplWallet = WalletConverter.from(wallet);
 
         if (api.requiresDestinationTag(xrplWallet)) {
-            list.add(new ValidationResult(ValidationState.Error, "Receiver wallet requires destination tag."));
+            list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletDestTag")));
         }
         if (api.isBlackholed(xrplWallet)) {
-            list.add(new ValidationResult(ValidationState.Error, "Receiver wallet is blackholed. Amounts sent to this address will be lost."));
+            list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletBlackholed")));
         }
 
         return list.toArray(new ValidationResult[0]);

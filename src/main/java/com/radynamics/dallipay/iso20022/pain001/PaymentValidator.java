@@ -17,6 +17,8 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
     private final WalletHistoryValidator historyValidator;
     private final ArrayList<Pair<Ledger, com.radynamics.dallipay.iso20022.PaymentValidator>> ledgerSpecificValidators = new ArrayList<>();
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
+
     public PaymentValidator(WalletHistoryValidator historyValidator) {
         this.historyValidator = historyValidator;
     }
@@ -27,7 +29,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
 
         var wv = new WalletValidator(t.getLedger());
         if (t.getReceiverWallet() != null) {
-            var walletValidations = wv.validate(t.getReceiverWallet(), "Receiver");
+            var walletValidations = wv.validate(t.getReceiverWallet(), res.getString("receiver"));
             list.addAll(Arrays.asList(walletValidations));
 
             if (walletValidations.length == 0) {
@@ -36,22 +38,22 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         }
 
         if (t.getSenderWallet() == null) {
-            list.add(new ValidationResult(ValidationState.Error, "Sender wallet is missing."));
+            list.add(new ValidationResult(ValidationState.Error, res.getString("senderWalletMissing")));
         } else {
-            var walletValidations = wv.validate(t.getSenderWallet(), "Sender");
+            var walletValidations = wv.validate(t.getSenderWallet(), res.getString("sender"));
             list.addAll(Arrays.asList(walletValidations));
 
             if (walletValidations.length == 0) {
                 if (WalletCompare.isSame(t.getSenderWallet(), t.getReceiverWallet())) {
-                    list.add(new ValidationResult(ValidationState.Error, "Sender wallet is same as receiver wallet."));
+                    list.add(new ValidationResult(ValidationState.Error, res.getString("senderWalletSameAsReceiver")));
                 }
 
                 var ccy = t.getAmountTransaction().getCcy();
                 var currentBalance = t.getSenderWallet().getBalances().get(ccy).orElse(null);
                 if (currentBalance == null) {
-                    list.add(new ValidationResult(ValidationState.Error, String.format("Sender wallet balance doesn't hold %s.", ccy.getCode())));
+                    list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderDoesntHold"), ccy.getCode())));
                 } else if (currentBalance.lessThan(t.getAmountTransaction())) {
-                    list.add(new ValidationResult(ValidationState.Error, String.format("Sender wallet balance %s is too low.", MoneyFormatter.formatFiat(currentBalance))));
+                    list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderBalanceTooLow"), MoneyFormatter.formatFiat(currentBalance))));
                 }
             }
 
@@ -60,11 +62,11 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
 
         if (t.getExchangeRate() == null && !t.isUserCcyEqualTransactionCcy()) {
             var pair = new CurrencyPair(t.getAmountTransaction().getCcy().getCode(), t.getUserCcyCodeOrEmpty());
-            list.add(new ValidationResult(ValidationState.Error, String.format("No exchange rate for %s available.", pair.getDisplayText())));
+            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("missingFxRate"), pair.getDisplayText())));
         }
 
         if (t.getStructuredReferences().length == 0) {
-            list.add(new ValidationResult(ValidationState.Info, String.format("Remittance info is missing. Receiver won't be able to match awaited payment exactly.")));
+            list.add(new ValidationResult(ValidationState.Info, String.format(res.getString("missingRemittanceInfo"))));
         }
 
         var ledgerSpecific = getOrCreateLedgerSpecific(t.getLedger());
@@ -78,7 +80,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
             if (!WalletCompare.isSame(expected, actualCcy.getIssuer())) {
                 var aggregator = new WalletInfoAggregator(t.getLedger().getInfoProvider());
                 var issuerText = WalletInfoFormatter.format(expected, aggregator.getNameOrDomain(expected), true);
-                var msg = String.format("Receiver expects amounts in a currency issued by %s. Receiver maybe doesn't accept %s.", issuerText, actualCcy);
+                var msg = String.format(res.getString("receiverExpectsAmtInCcy"), issuerText, actualCcy);
                 list.add(new ValidationResult(ValidationState.Info, msg));
             }
         }
@@ -118,7 +120,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
                 if (balance.lessThan(paymentsSum)) {
                     var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum);
                     var balanceText = MoneyFormatter.formatLedger(balance);
-                    list.add(new ValidationResult(ValidationState.Error, String.format("Sum of payments from %s is %s and exceeds wallet balance of %s.", w.getPublicKey(), paymentsSumText, balanceText)));
+                    list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("paymentSumExeeds"), w.getPublicKey(), paymentsSumText, balanceText)));
                 }
             }
         }
@@ -141,7 +143,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         for (var key : unique.keySet()) {
             var count = unique.get(key).size();
             if (count > 1) {
-                list.add(new ValidationResult(ValidationState.Warning, String.format("Receiver wallet %s is defined for %s different sender names.", key, count)));
+                list.add(new ValidationResult(ValidationState.Warning, String.format(res.getString("sameReceiverWalletDifferentSender"), key, count)));
             }
         }
 

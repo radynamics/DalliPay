@@ -10,10 +10,13 @@ import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.pain001.WalletHistoryValidator;
 
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class PaymentValidator implements com.radynamics.dallipay.iso20022.PaymentValidator {
     private final Ledger ledger;
     private final TrustlineCache trustlineCache;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
     public PaymentValidator(Ledger ledger, TrustlineCache cache) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
@@ -31,7 +34,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
 
             var ccy = t.getAmountTransaction().getCcy();
             if (!walletAccepts(t.getReceiverWallet(), ccy)) {
-                list.add(new ValidationResult(ValidationState.Error, String.format("Receiver wallet does not accept %s", ccy.getCode())));
+                list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("receiverWalletDoesntAccept"), ccy.getCode())));
             }
         }
 
@@ -50,7 +53,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
             var current = wallet.getBalances().get(ccy).orElseThrow();
             var afterwards = current.plus(sendingAmt);
             if (t.getLimit().lessThan(afterwards)) {
-                list.add(new ValidationResult(ValidationState.Error, String.format("Receiver's limit for %s would be exceeded with this payment. Receiver must increase limit first.", ccy.getCode())));
+                list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("receiverTrustlineLimit"), ccy.getCode())));
             }
         }
         return list;

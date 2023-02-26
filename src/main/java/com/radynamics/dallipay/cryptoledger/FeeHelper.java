@@ -4,8 +4,11 @@ import com.radynamics.dallipay.exchange.Money;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 public final class FeeHelper {
+    private static final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public static Optional<Money> get(Fee[] fees, FeeType type) {
         for (var f : fees) {
             if (f.getType() == type) {
@@ -17,8 +20,8 @@ public final class FeeHelper {
 
     public static String getText(FeeType type) {
         var map = new HashMap<FeeType, String>();
-        map.put(FeeType.LedgerTransactionFee, "Network transaction fee (editable)");
-        map.put(FeeType.CurrencyTransferFee, "Transfer fee by used currency issuer");
-        return map.getOrDefault(type, "unknown");
+        map.put(FeeType.LedgerTransactionFee, res.getString("feeHelper.ledgerFee"));
+        map.put(FeeType.CurrencyTransferFee, res.getString("feeHelper.ccyTransferFee"));
+        return map.getOrDefault(type, res.getString("unknown"));
     }
 }
