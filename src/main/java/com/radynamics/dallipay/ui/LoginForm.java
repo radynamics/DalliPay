@@ -5,12 +5,15 @@ import com.radynamics.dallipay.util.RequestFocusListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 public class LoginForm {
     private JPasswordField pf = new JPasswordField(20);
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+
     public boolean showLogin() {
-        return showLogin("Enter password", "Login DalliPay");
+        return showLogin(res.getString("enterPassword"), "Login DalliPay");
     }
 
     public boolean showLogin(String labelText, String title) {
@@ -26,12 +29,12 @@ public class LoginForm {
     }
 
     public boolean showNewPassword(Component parentComponent) {
-        if (!show("New password:", "Enter new password")) {
+        if (!show(res.getString("newPassword"), res.getString("newPasswordTitle"))) {
             return false;
         }
 
         if (!Database.isPasswordAcceptable(getPassword())) {
-            JOptionPane.showMessageDialog(parentComponent, "You must define a password to continue.", "DalliPay", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(parentComponent, res.getString("mustEnterPassword"), "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 
