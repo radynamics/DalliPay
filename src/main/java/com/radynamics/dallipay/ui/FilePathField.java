@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class FilePathField extends JPanel {
     private JTextField txt;
@@ -16,6 +17,8 @@ public class FilePathField extends JPanel {
     private JComponent owner;
     private boolean validateExists;
     private File currentDirectory;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public FilePathField(JComponent owner) {
         this.owner = owner;
@@ -75,7 +78,7 @@ public class FilePathField extends JPanel {
             add(txt, c);
         }
         {
-            var lbl = Utils.createLinkLabel(owner, "browse...");
+            var lbl = Utils.createLinkLabel(owner, res.getString("browse"));
             lbl.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -96,7 +99,7 @@ public class FilePathField extends JPanel {
 
     private void showFileChooser() {
         var fc = new JFileChooser();
-        var xmlFilter = new FileTypeFilter(".xml", "ISO 20022 Payment files");
+        var xmlFilter = new FileTypeFilter(".xml", res.getString("fileTypeText"));
         fc.addChoosableFileFilter(xmlFilter);
         fc.setFileFilter(xmlFilter);
         if (getText().length() > 0) {
