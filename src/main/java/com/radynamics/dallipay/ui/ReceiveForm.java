@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -62,6 +63,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private JLabel lblInfoText;
     private final JLabel lblUsingExchangeRatesFrom = new JLabel();
     private final JLabel lblUsingExchangeRatesFromSource = new JLabel();
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         super(new GridLayout(1, 0));
@@ -111,7 +114,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             final int paddingWest = 120;
             Component anchorComponentTopLeft;
             {
-                var lbl = new JLabel("Receiver Wallet:");
+                var lbl = new JLabel(res.getString("receiverWallet"));
                 anchorComponentTopLeft = lbl;
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(0), SpringLayout.NORTH, panel1);
@@ -125,7 +128,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(txtInput);
             }
             {
-                var lbl = new JLabel("Target currency:");
+                var lbl = new JLabel(res.getString("targetCcy"));
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(1), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
@@ -143,7 +146,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(cboTargetCcy);
 
 
-                lblUsingExchangeRatesFrom.setText(" using exchange rates from ");
+                lblUsingExchangeRatesFrom.setText(" " + res.getString("usingFxRatesFrom") + " ");
                 panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFrom, 0, SpringLayout.EAST, cboTargetCcy);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFrom, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFrom);
@@ -154,7 +157,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lblUsingExchangeRatesFromSource);
             }
             {
-                var lbl = new JLabel("Payments between:");
+                var lbl = new JLabel(res.getString("paymentsBetween"));
                 panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(2), SpringLayout.NORTH, panel1);
                 lbl.setOpaque(true);
@@ -165,7 +168,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerStart, getNorthPad(2), SpringLayout.NORTH, panel1);
                 panel1.add(dtPickerStart);
 
-                var lblEnd = new JLabel("and");
+                var lblEnd = new JLabel(res.getString("and"));
                 panel1Layout.putConstraint(SpringLayout.WEST, lblEnd, 10, SpringLayout.EAST, dtPickerStart);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblEnd, getNorthPad(2), SpringLayout.NORTH, panel1);
                 lblEnd.setOpaque(true);
@@ -176,7 +179,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, dtPickerEnd, getNorthPad(2), SpringLayout.NORTH, panel1);
                 panel1.add(dtPickerEnd);
 
-                cmdRefresh = new JButton("Refresh");
+                cmdRefresh = new JButton(res.getString("refresh"));
                 cmdRefresh.setMnemonic(KeyEvent.VK_R);
                 cmdRefresh.setPreferredSize(new Dimension(150, 35));
                 cmdRefresh.addActionListener(e -> {
@@ -197,7 +200,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             panel2.add(table);
         }
         {
-            cmdExport = new JButton("Export...");
+            cmdExport = new JButton(res.getString("export"));
             cmdExport.setMnemonic(KeyEvent.VK_E);
             cmdExport.setPreferredSize(new Dimension(150, 35));
             cmdExport.setEnabled(false);
@@ -333,7 +336,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             s.writeTo(outputStream);
             outputStream.close();
 
-            JOptionPane.showMessageDialog(table, String.format("Successfully exported to %s", targetFileName));
+            JOptionPane.showMessageDialog(table, String.format(res.getString("exportSuccess"), targetFileName));
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         } finally {
@@ -373,7 +376,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return false;
         }
         if (frm.getOutputFile().length() == 0) {
-            JOptionPane.showMessageDialog(this, "Please enter an export file path to export received payments.");
+            JOptionPane.showMessageDialog(this, res.getString("exportEnterPath"));
             return false;
         }
 
@@ -422,8 +425,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             var supportedPairs = transformInstruction.getHistoricExchangeRateSource().getSupportedPairs();
             if (!ccyPair.isOneToOne() && !CurrencyPair.contains(supportedPairs, ccyPair)) {
                 JOptionPane.showMessageDialog(this,
-                        String.format("%s does not support exchange rates for %s", transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
-                        "Currency not supported", JOptionPane.INFORMATION_MESSAGE);
+                        String.format(res.getString("doesNotSupportFxRate"), transformInstruction.getHistoricExchangeRateSource().getDisplayText(), ccyPair.getDisplayText()),
+                        res.getString("doesNotSupportFxRateTitle"), JOptionPane.INFORMATION_MESSAGE);
             }
         }
 
@@ -440,11 +443,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     loadTable(payments);
 
                     if (result.hasMarker()) {
-                        showInfo("More data would have been available, but was not loaded. Please change your filter.");
+                        showInfo(res.getString("hasMarker"));
                     } else if (result.hasMaxPageCounterReached()) {
-                        showInfo("Maximum paging limit reached. Please change your filter.");
+                        showInfo(res.getString("maxPageCounter"));
                     } else if (result.hasNoTransactions()) {
-                        showInfo("No payments found while paging. Please change your filter.");
+                        showInfo(res.getString("noTrx"));
                     } else {
                         hideInfo();
                     }
@@ -493,6 +496,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     @Override
     public String getTitle() {
-        return "Receive Payments";
+        return res.getString("title");
     }
 }
