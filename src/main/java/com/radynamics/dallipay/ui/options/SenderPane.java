@@ -32,7 +32,7 @@ public class SenderPane extends JPanel {
                 builder.addRowLabel(top, String.format(res.getString("defaultSenderWallet"), ledger.getId().textId().toUpperCase(Locale.ROOT)));
                 txtDefaultSenderWallet = new WalletField(this);
                 txtDefaultSenderWallet.setLedger(this.ledger);
-                txtDefaultSenderWallet.setPreferredSize(new Dimension(300, 24));
+                txtDefaultSenderWallet.setPreferredSize(new Dimension(330, 24));
                 builder.addRowContent(top, txtDefaultSenderWallet);
                 top += 30;
             }
