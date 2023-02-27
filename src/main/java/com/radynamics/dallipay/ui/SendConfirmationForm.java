@@ -96,9 +96,9 @@ public class SendConfirmationForm extends JDialog {
         pnlMain.add(panelSigning);
         pnlMain.add(panel3);
 
-        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 80));
-        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
+        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 110));
+        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 110));
         panel2.setMinimumSize(new Dimension(Integer.MAX_VALUE, 30));
         panel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         panel2.setPreferredSize(new Dimension(Integer.MAX_VALUE, 30));
