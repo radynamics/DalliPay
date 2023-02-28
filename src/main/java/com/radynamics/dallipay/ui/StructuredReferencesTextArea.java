@@ -1,14 +1,21 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.swing.*;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
-public class StructuredReferencesTextArea extends JTextArea {
+public class StructuredReferencesTextArea extends PlaceholderTextArea {
     private StructuredReference[] structuredReferences = new StructuredReference[0];
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
+    public StructuredReferencesTextArea() {
+        putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("structuredReferencesTextArea.placeholderText"));
+    }
 
     private void refreshText() {
         setText(toText());
