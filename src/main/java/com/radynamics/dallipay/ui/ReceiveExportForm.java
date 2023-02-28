@@ -103,7 +103,7 @@ public class ReceiveExportForm extends JDialog {
                 lbl.setOpaque(true);
                 pnlContent.add(lbl);
 
-                txtOutputFile = new FilePathField(pnlContent);
+                txtOutputFile = new FilePathField();
                 txtOutputFile.setValidateExists(false);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtOutputFile, padValueCtrl, SpringLayout.WEST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtOutputFile, getNorthPad(line), SpringLayout.NORTH, pnlContent);

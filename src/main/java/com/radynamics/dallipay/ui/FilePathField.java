@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -16,14 +17,12 @@ public class FilePathField extends JPanel {
     private JTextField txt;
 
     private ArrayList<ChangedListener> listener = new ArrayList<>();
-    private JComponent owner;
     private boolean validateExists;
     private File currentDirectory;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public FilePathField(JComponent owner) {
-        this.owner = owner;
+    public FilePathField() {
         setupUI();
     }
 
@@ -32,8 +31,9 @@ public class FilePathField extends JPanel {
 
         {
             txt = new JTextField();
-            txt.setColumns(50);
+            txt.setColumns(52);
             txt.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("placeholderText"));
+            txt.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
@@ -80,24 +80,23 @@ public class FilePathField extends JPanel {
             c.gridy = 0;
             add(txt, c);
         }
+    }
+
+    private Object createToolbar() {
+        var toolbar = new JToolBar();
         {
-            var lbl = Utils.createLinkLabel(owner, res.getString("browse"));
-            lbl.addMouseListener(new MouseAdapter() {
+            var cmd = new JToggleButton(new FlatSVGIcon("svg/open.svg", 16, 16));
+            toolbar.add(cmd);
+            Utils.setRolloverIcon(cmd);
+            cmd.setToolTipText(res.getString("browse"));
+            cmd.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     showFileChooser();
                 }
             });
-
-            var c = new GridBagConstraints();
-            c.insets = new Insets(0, 5, 0, 5);
-            c.fill = GridBagConstraints.BOTH;
-            c.weightx = 0.0;
-            c.weighty = 0.5;
-            c.gridx = 1;
-            c.gridy = 0;
-            add(lbl, c);
         }
+        return toolbar;
     }
 
     private void showFileChooser() {

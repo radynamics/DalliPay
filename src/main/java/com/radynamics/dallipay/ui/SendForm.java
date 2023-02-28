@@ -119,7 +119,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 lbl.setOpaque(true);
                 panel1.add(lbl);
 
-                txtInput = new FilePathField(this);
+                txtInput = new FilePathField();
                 try (var repo = new ConfigRepo()) {
                     txtInput.setCurrentDirectory(repo.getDefaultInputDirectory());
                 } catch (Exception e) {
