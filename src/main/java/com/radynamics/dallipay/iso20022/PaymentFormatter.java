@@ -10,7 +10,13 @@ public final class PaymentFormatter {
     public static String singleLineText(Account account, Address address) {
         var sb = new StringBuilder();
 
-        if (address != null) {
+        var hasAddress = address != null;
+        var hasAccount = account != null && !StringUtils.isEmpty(account.getUnformatted());
+        if (!hasAddress && !hasAccount) {
+            return res.getString("unknownAddressAndAccount");
+        }
+
+        if (hasAddress) {
             sb.append(AddressFormatter.formatSingleLine(address));
         }
 
@@ -18,7 +24,7 @@ public final class PaymentFormatter {
             return sb.toString();
         }
 
-        var accountText = account == null || StringUtils.isEmpty(account.getUnformatted())
+        var accountText = !hasAccount
                 ? res.getString("missingAccount")
                 : AccountFormatter.format(account);
         var template = sb.length() == 0 ? "%s" : " (%s)";
