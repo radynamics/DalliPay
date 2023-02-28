@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -73,6 +75,26 @@ public final class Utils {
             }
         });
         return lbl;
+    }
+
+    public static void setRolloverIcon(JToggleButton button) {
+        var icon = button.getIcon();
+        if (icon == null) {
+            return;
+        }
+
+        var rolloverIcon = new FlatSVGIcon((FlatSVGIcon) icon);
+        rolloverIcon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorHoover));
+        button.setRolloverIcon(rolloverIcon);
+
+        // Ensure regular icon is shown after click.
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                button.setSelected(false);
+            }
+        });
+
     }
 
     public static String removeEndingLineSeparator(String text) {

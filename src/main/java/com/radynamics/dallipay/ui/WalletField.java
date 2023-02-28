@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
@@ -25,7 +26,7 @@ public class WalletField extends JPanel {
     private final static Logger log = LogManager.getLogger(WalletField.class);
     private final JComponent owner;
     private JTextField txt;
-    private JLabel lblShowDetail;
+    private JToggleButton detailButton;
     private JLabel lblInfoText;
     private Ledger ledger;
     private WalletFieldInputValidator validator;
@@ -49,8 +50,9 @@ public class WalletField extends JPanel {
 
         {
             txt = new JTextField();
-            txt.setColumns(25);
+            txt.setColumns(28);
             txt.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("placeholderText"));
+            txt.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
@@ -80,42 +82,6 @@ public class WalletField extends JPanel {
             add(txt, c);
         }
         {
-            var pnl = new JPanel();
-            pnl.setLayout(new BoxLayout(pnl, verticalLabels ? BoxLayout.Y_AXIS : BoxLayout.X_AXIS));
-
-            var c = new GridBagConstraints();
-            c.insets = new Insets(0, 5, 0, 5);
-            c.fill = GridBagConstraints.BOTH;
-            c.weightx = 0.0;
-            c.weighty = 0.5;
-            c.gridx = 1;
-            c.gridy = 0;
-            add(pnl, c);
-            {
-                var lbl = Utils.createLinkLabel(owner, res.getString("find"));
-                if (!verticalLabels) {
-                    lbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
-                }
-                pnl.add(lbl);
-                lbl.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        lookup();
-                    }
-                });
-            }
-            {
-                lblShowDetail = Utils.createLinkLabel(owner, res.getString("detail"));
-                pnl.add(lblShowDetail);
-                lblShowDetail.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        showMore();
-                    }
-                });
-            }
-        }
-        {
             lblInfoText = Utils.formatSecondaryInfo(new JLabel());
 
             var c = new GridBagConstraints();
@@ -126,6 +92,36 @@ public class WalletField extends JPanel {
             c.gridy = 1;
             add(lblInfoText, c);
         }
+    }
+
+    private JToolBar createToolbar() {
+        var toolbar = new JToolBar();
+        {
+            var cmd = new JToggleButton(new FlatSVGIcon("svg/search.svg", 16, 16));
+            toolbar.add(cmd);
+            Utils.setRolloverIcon(cmd);
+            cmd.setToolTipText(res.getString("find"));
+            cmd.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    lookup();
+                }
+            });
+        }
+        {
+            detailButton = new JToggleButton(new FlatSVGIcon("svg/listul.svg", 16, 16));
+            toolbar.add(detailButton);
+            Utils.setRolloverIcon(detailButton);
+            detailButton.setToolTipText(res.getString("detail"));
+            detailButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    showMore();
+                }
+            });
+        }
+
+        return toolbar;
     }
 
     private void updateInfoText(String text) {
@@ -263,7 +259,7 @@ public class WalletField extends JPanel {
     }
 
     public void setShowDetailVisible(boolean visible) {
-        lblShowDetail.setVisible(visible);
+        detailButton.setVisible(visible);
     }
 
     public void setInfoTextVisible(boolean visible) {
