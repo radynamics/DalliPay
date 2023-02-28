@@ -285,6 +285,7 @@ public class PaymentDetailForm extends JDialog {
             selected = path.isSet(payment) ? item : selected;
             popupMenu.add(item);
             item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
+            txtAmount.addKnownCurrency(path.getCcy());
         }
 
         if (selected != null) {

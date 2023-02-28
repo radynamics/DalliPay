@@ -3,14 +3,15 @@ package com.radynamics.dallipay.ui;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class MoneyTextField extends MoneyControl<JTextField> implements DocumentListener {
@@ -19,6 +20,7 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
     private boolean isInRefreshText;
     private final MoneyTextFieldInputValidator validator = new MoneyTextFieldInputValidator();
     private final ValidationControlDecorator decorator = new ValidationControlDecorator(ctrl, validator);
+    private final HashMap<String, Currency> knownCurrencies = new HashMap<>();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
@@ -55,6 +57,12 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
             var m = validator.getValidOrNull(value);
             if (m == null) {
                 return;
+            }
+
+            // Take previously known currency (with issuer information) if present.
+            var ccy = knownCurrencies.getOrDefault(m.getCcy().getCode(), null);
+            if (ccy != null) {
+                m = Money.of(m.getNumber(), ccy);
             }
 
             // Setting a rounded text in refreshText can be unequal.
@@ -103,5 +111,9 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
         for (var l : listener) {
             l.onChanged();
         }
+    }
+
+    public void addKnownCurrency(Currency ccy) {
+        knownCurrencies.put(ccy.getCode(), ccy);
     }
 }
