@@ -9,9 +9,12 @@ import org.apache.logging.log4j.Logger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MoneyTextFieldInputValidator implements InputControlValidator {
     private final static Logger log = LogManager.getLogger(MoneyTextFieldInputValidator.class);
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     @Override
     public boolean isValid(Object value) {
@@ -47,6 +50,6 @@ public class MoneyTextFieldInputValidator implements InputControlValidator {
 
     @Override
     public String getValidExampleInput() {
-        return "\"10 USD\" or \"5.33 EUR\"";
+        return res.getString("MoneyTextFieldInputValidator.exampleInput");
     }
 }
