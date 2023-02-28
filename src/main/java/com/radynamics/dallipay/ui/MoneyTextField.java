@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.exchange.Money;
@@ -8,7 +9,9 @@ import com.radynamics.dallipay.iso20022.Payment;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public class MoneyTextField extends MoneyControl<JTextField> implements DocumentListener {
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
@@ -17,9 +20,13 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
     private final MoneyTextFieldInputValidator validator = new MoneyTextFieldInputValidator();
     private final ValidationControlDecorator decorator = new ValidationControlDecorator(ctrl, validator);
 
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+
     public MoneyTextField(Ledger ledger) {
         super(ledger, new JTextField());
         setEditable(false);
+        ctrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("moneyTextField.placeholderText"));
+        ctrl.setColumns(9);
         ctrl.getDocument().addDocumentListener(this);
     }
 

@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
@@ -49,6 +50,7 @@ public class WalletField extends JPanel {
         {
             txt = new JTextField();
             txt.setColumns(25);
+            txt.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("placeholderText"));
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {

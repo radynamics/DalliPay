@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -31,6 +33,7 @@ public class FilePathField extends JPanel {
         {
             txt = new JTextField();
             txt.setColumns(50);
+            txt.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("placeholderText"));
             txt.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
