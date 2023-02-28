@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LookupProviderException;
@@ -15,7 +17,7 @@ import java.util.ResourceBundle;
 
 public abstract class MoneyControl<T extends JComponent> extends JPanel {
     protected final T ctrl;
-    private final JLabel detailLink;
+    private JToggleButton detailButton;
     private Money value;
     private final Ledger ledger;
     private boolean issuerVisible = true;
@@ -27,10 +29,29 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
         if (ctrl == null) throw new IllegalArgumentException("Parameter 'ctrl' cannot be null");
         this.ledger = ledger;
         this.ctrl = ctrl;
-        detailLink = Utils.createLinkLabel(this, res.getString("showIssuer"));
-        detailLink.putClientProperty("FlatLaf.styleClass", "small");
-        detailLink.setVisible(false);
+        ctrl.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
         setupUI();
+    }
+
+    private JToolBar createToolbar() {
+        var toolbar = new JToolBar();
+        {
+            detailButton = new JToggleButton(new FlatSVGIcon("svg/search.svg", 16, 16));
+            toolbar.add(detailButton);
+            Utils.setRolloverIcon(detailButton);
+            detailButton.setVisible(false);
+            detailButton.setToolTipText(res.getString("showIssuer"));
+            detailButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (hasAmountIssuer() && e.getClickCount() == 1) {
+                        lookup(value.getCcy().getIssuer());
+                    }
+                }
+            });
+        }
+
+        return toolbar;
     }
 
     private void setupUI() {
@@ -43,25 +64,6 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
             c.gridx = 0;
             c.gridy = 0;
             add(ctrl, c);
-        }
-        {
-            detailLink.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (hasAmountIssuer() && e.getClickCount() == 1) {
-                        lookup(value.getCcy().getIssuer());
-                    }
-                }
-            });
-
-            var c = new GridBagConstraints();
-            c.insets = new Insets(0, 5, 0, 5);
-            c.fill = GridBagConstraints.BOTH;
-            c.weightx = 0.0;
-            c.weighty = 0.5;
-            c.gridx = 1;
-            c.gridy = 0;
-            add(detailLink, c);
         }
     }
 
@@ -108,7 +110,7 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
     }
 
     private void refreshIssuerLinkVisibility() {
-        detailLink.setVisible(issuerVisible && hasAmountIssuer());
+        detailButton.setVisible(issuerVisible && hasAmountIssuer());
     }
 
     protected abstract void refreshText(Money value);
