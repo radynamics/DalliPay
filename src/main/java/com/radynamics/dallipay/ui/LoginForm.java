@@ -56,6 +56,7 @@ public class LoginForm {
         pnl.add(pf);
 
         var icon = Utils.getScaled("img/productIcon.png", 64, 64);
+        pf.select(0, pf.getPassword().length);
         pf.addAncestorListener(new RequestFocusListener());
         var result = JOptionPane.showOptionDialog(null, pnl, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon, null, null);
         frm.dispose();
