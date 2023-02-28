@@ -202,6 +202,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             cmdExport = new JButton(res.getString("exportPending"));
             cmdExport.setMnemonic(KeyEvent.VK_E);
             cmdExport.setPreferredSize(new Dimension(150, 35));
+            cmdExport.setEnabled(false);
             cmdExport.addActionListener(e -> export());
             panel3Layout.putConstraint(SpringLayout.VERTICAL_CENTER, cmdExport, 0, SpringLayout.VERTICAL_CENTER, cmdSendPayments);
             panel3Layout.putConstraint(SpringLayout.EAST, cmdExport, -170, SpringLayout.EAST, cmdSendPayments);
@@ -332,6 +333,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private void export() {
         try {
+            if (txtInput.getText().length() == 0) {
+                return;
+            }
+
             var failed = new ArrayList<Payment>();
             var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
             var countBefore = pain001.countCdtTrfTxInf();
