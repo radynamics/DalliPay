@@ -126,14 +126,18 @@ public class WalletField extends JPanel {
 
     private void updateInfoText(String text) {
         var wallet = validator.getValidOrNull(text);
-        if (wallet == null) {
+        if (wallet == null && text.length() > 0) {
             lblInfoText.setText(res.getString("invalidWallet"));
             return;
         }
 
         var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
         var wi = aggregator.getNameOrDomain(wallet);
-        lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse(res.getString("noInfo")));
+        if (text.length() > 0) {
+            lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse(res.getString("noInfo")));
+        } else {
+            lblInfoText.setText("");
+        }
         WalletInfoFormatter.format(lblInfoText, wi);
     }
 
