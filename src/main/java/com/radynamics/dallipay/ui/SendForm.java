@@ -341,6 +341,11 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
             var countBefore = pain001.countCdtTrfTxInf();
             var sent = payments.stream().filter(o -> o.getTransmission() == TransmissionState.Success).collect(Collectors.toList());
+            if (sent.size() == 0) {
+                JOptionPane.showMessageDialog(this, res.getString("export.NoneSent"), res.getString("export.NoneSentTitle"), JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
             for (var p : sent) {
                 if (pain001.isRemovable(p)) {
                     pain001.remove(p);
