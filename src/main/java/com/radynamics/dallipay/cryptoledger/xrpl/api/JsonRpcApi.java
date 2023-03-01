@@ -476,7 +476,7 @@ public class JsonRpcApi implements TransactionSource {
             return null;
         }
 
-        var future = new CompletableFuture<>();
+        var future = new CompletableFuture<EndpointInfo>();
         serverInfo.info().handle(rippledServerInfo -> future.complete(EndpointInfo.builder()
                 .networkInfo(networkInfo)
                 .serverVersion(rippledServerInfo.buildVersion())
@@ -489,14 +489,6 @@ public class JsonRpcApi implements TransactionSource {
                 .serverVersion(reportingModeServerInfo.buildVersion())
                 .hostId(reportingModeServerInfo.hostId())
         ));
-
-        CompletableFuture.allOf(future).join();
-
-        try {
-            return (EndpointInfo) future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
+        return future.join();
     }
 }
