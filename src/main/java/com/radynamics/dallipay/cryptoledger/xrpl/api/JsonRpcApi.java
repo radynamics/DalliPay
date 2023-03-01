@@ -88,11 +88,7 @@ public class JsonRpcApi implements TransactionSource {
                     return false;
                 }
 
-                deliveredAmount.handle(xrpCurrencyAmount -> {
-                    handleXrp(tr, p, xrpCurrencyAmount);
-                }, issuedCurrencyAmount -> {
-                    handleIssuedCurrency(tr, p, issuedCurrencyAmount);
-                });
+                tr.add(toTransaction(p, deliveredAmount));
                 return true;
             }
             return false;
@@ -138,45 +134,53 @@ public class JsonRpcApi implements TransactionSource {
         tr.setHasMaxPageCounterReached(pageCounter >= maxPages);
     }
 
-    private void handleXrp(TransactionResult tr, org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount amount) {
-        try {
-            tr.add(toTransaction(p, amount));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void handleIssuedCurrency(TransactionResult tr, Payment p, BigDecimal amt, Currency ccy) {
-        try {
-            tr.add(toTransaction(p, amt, ccy));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void handleIssuedCurrency(TransactionResult tr, org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) {
-        try {
-            var ccyCode = toCurrencyCode(amount.currency());
-            var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
-
-            var issuer = ledger.createWallet(amount.issuer().value(), "");
-            var ccy = new Currency(ccyCode, issuer);
-            // When the issuer field of the destination Amount field matches the Destination address, it is treated as a special case meaning "any issuer that the destination accepts." (https://xrpl.org/payment.html)
-            if (!issuer.getPublicKey().equals((p.destination().value())) || p.sendMax().isEmpty()) {
-                tr.add(toTransaction(p, amt, ccy));
-                return;
+    private Transaction toTransaction(Payment p, CurrencyAmount deliveredAmount) {
+        var future = new CompletableFuture<Transaction>();
+        deliveredAmount.handle(xrpCurrencyAmount -> {
+            try {
+                future.complete(toTransaction(p, xrpCurrencyAmount));
+            } catch (DecoderException | UnsupportedEncodingException e) {
+                future.completeExceptionally(e);
             }
+        }, issuedCurrencyAmount -> {
+            try {
+                future.complete(toTransaction(p, issuedCurrencyAmount));
+            } catch (ExecutionException | InterruptedException | DecoderException | UnsupportedEncodingException e) {
+                future.completeExceptionally(e);
+            }
+        });
+        return future.join();
+    }
 
-            p.sendMax().get().handle(xrpCurrencyAmount -> {
-                        handleIssuedCurrency(tr, p, amt, ccy);
-                    },
-                    issuedCurrencyAmountSendMax -> {
-                        var issuerSendMax = ledger.createWallet(issuedCurrencyAmountSendMax.issuer().value(), "");
-                        handleIssuedCurrency(tr, p, amt, new Currency(ccyCode, issuerSendMax));
-                    });
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
+        var ccyCode = toCurrencyCode(amount.currency());
+        var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
+
+        var issuer = ledger.createWallet(amount.issuer().value(), "");
+        var ccy = new Currency(ccyCode, issuer);
+        // When the issuer field of the destination Amount field matches the Destination address, it is treated as a special case meaning "any issuer that the destination accepts." (https://xrpl.org/payment.html)
+        if (!issuer.getPublicKey().equals((p.destination().value())) || p.sendMax().isEmpty()) {
+            return toTransaction(p, amt, ccy);
         }
+
+        var future = new CompletableFuture<Transaction>();
+        p.sendMax().get().handle(xrpCurrencyAmount -> {
+                    try {
+                        future.complete(toTransaction(p, amt, ccy));
+                    } catch (DecoderException | UnsupportedEncodingException e) {
+                        future.completeExceptionally(e);
+                    }
+                },
+                issuedCurrencyAmountSendMax -> {
+                    try {
+                        var issuerSendMax = ledger.createWallet(issuedCurrencyAmountSendMax.issuer().value(), "");
+                        future.complete(toTransaction(p, amt, new Currency(ccyCode, issuerSendMax)));
+                    } catch (DecoderException | UnsupportedEncodingException e) {
+                        future.completeExceptionally(e);
+                    }
+                });
+
+        return future.join();
     }
 
     private static String toCurrencyCode(String currency) {
@@ -230,18 +234,7 @@ public class JsonRpcApi implements TransactionSource {
             }
             var p = (Payment) r.transaction();
             var deliveredAmount = r.metadata().get().deliveredAmount().get();
-
-            var f = new CompletableFuture<com.radynamics.dallipay.cryptoledger.Transaction>();
-            var tr = new TransactionResult();
-            deliveredAmount.handle(xrpCurrencyAmount -> {
-                handleXrp(tr, p, xrpCurrencyAmount);
-                f.complete(tr.transactions()[0]);
-            }, issuedCurrencyAmount -> {
-                handleIssuedCurrency(tr, p, issuedCurrencyAmount);
-                f.complete(tr.transactions()[0]);
-            });
-
-            return f.join();
+            return toTransaction(p, deliveredAmount);
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -369,6 +362,10 @@ public class JsonRpcApi implements TransactionSource {
             return false;
         }
         return !accountData.flags().lsfDisallowXrp();
+    }
+
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+        return toTransaction((org.xrpl.xrpl4j.model.transactions.Transaction) p, deliveredAmount);
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
