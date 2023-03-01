@@ -19,7 +19,7 @@ public class NetworkPopMenu {
 
     private final ArrayList<ChangedListener> changedListener = new ArrayList<>();
 
-    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public NetworkPopMenu(NetworkInfo[] networks) {
         var index = 0;
@@ -45,7 +45,7 @@ public class NetworkPopMenu {
                 try {
                     httpUrl = HttpUrl.get(value);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(popupMenu, String.format("Could not parse %s as Http RPC endpoint.", value));
+                    JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("urlParseFailed"), value));
                     return;
                 }
 
