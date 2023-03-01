@@ -60,6 +60,10 @@ public class WalletInfoAggregator {
 
         var name = names.min(Comparator.comparing(WalletInfo::getImportance));
         var domain = domains.min(Comparator.comparing(WalletInfo::getImportance));
+        if (name.isPresent() && domain.isPresent()) {
+            // Prefer domain over a lower important name (eg. account alias)
+            return name.get().getImportance() > domain.get().getImportance() ? name.get() : domain.get();
+        }
         return name.orElse(domain.orElse(null));
     }
 
