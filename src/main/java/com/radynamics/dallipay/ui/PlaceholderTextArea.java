@@ -11,7 +11,7 @@ public class PlaceholderTextArea extends JTextArea {
         super.paintComponent(pG);
 
         var value = getClientProperty(FlatClientProperties.PLACEHOLDER_TEXT);
-        if (value == null) {
+        if (value == null || !isEditable()) {
             return;
         }
 
