@@ -2,14 +2,13 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
-import com.radynamics.dallipay.cryptoledger.Cache;
-import com.radynamics.dallipay.cryptoledger.LedgerException;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.TransactionResult;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
+import com.radynamics.dallipay.cryptoledger.xrpl.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
@@ -27,6 +26,7 @@ import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
+import org.xrpl.xrpl4j.model.client.serverinfo.ServerInfoResult;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -466,5 +467,39 @@ public class JsonRpcApi implements TransactionSource {
         var wallet = ledger.createWallet(w.wallet().classicAddress().value(), w.seed());
         ledger.refreshBalance(wallet, false);
         return wallet;
+    }
+
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
+        ServerInfoResult serverInfo;
+        try {
+            var c = new XrplClient(networkInfo.getUrl());
+            serverInfo = c.serverInformation();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+
+        var future = new CompletableFuture<>();
+        serverInfo.info().handle(rippledServerInfo -> future.complete(EndpointInfo.builder()
+                .networkInfo(networkInfo)
+                .serverVersion(rippledServerInfo.buildVersion())
+                .hostId(rippledServerInfo.hostId())
+        ), clioServerInfo -> future.complete(EndpointInfo.builder()
+                .networkInfo(networkInfo)
+                .serverVersion(clioServerInfo.rippledVersion().orElse(clioServerInfo.clioVersion()))
+        ), reportingModeServerInfo -> future.complete(EndpointInfo.builder()
+                .networkInfo(networkInfo)
+                .serverVersion(reportingModeServerInfo.buildVersion())
+                .hostId(reportingModeServerInfo.hostId())
+        ));
+
+        CompletableFuture.allOf(future).join();
+
+        try {
+            return (EndpointInfo) future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 }

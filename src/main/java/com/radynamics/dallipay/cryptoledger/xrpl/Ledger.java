@@ -235,6 +235,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return Money.of(rounded, amt.getCcy());
     }
 
+    @Override
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
+        return api.getEndpointInfo(networkInfo);
+    }
+
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }

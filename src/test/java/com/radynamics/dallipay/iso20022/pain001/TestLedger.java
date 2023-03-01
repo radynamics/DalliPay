@@ -198,4 +198,9 @@ public class TestLedger implements Ledger {
     public Money roundNativeCcy(Money amt) {
         return amt;
     }
+
+    @Override
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
+        return null;
+    }
 }

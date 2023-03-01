@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.ui;
 
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
+import com.radynamics.dallipay.cryptoledger.EndpointInfo;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -12,8 +14,11 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class NetworkPopMenu {
+    private final Ledger ledger;
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final ArrayList<Pair<JCheckBoxMenuItem, NetworkInfo>> selectableEntries = new ArrayList<>();
 
@@ -21,10 +26,12 @@ public class NetworkPopMenu {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public NetworkPopMenu(NetworkInfo[] networks) {
+    public NetworkPopMenu(Ledger ledger, NetworkInfo[] networks) {
+        this.ledger = ledger;
+
         var index = 0;
         for (var network : networks) {
-            addEntry(network, String.format(res.getString("network"), network.getShortText()), index++);
+            addEntry(network, String.format(res.getString("network"), network.getShortText()), loadAsync(network), index++);
         }
 
         {
@@ -45,22 +52,54 @@ public class NetworkPopMenu {
                 try {
                     httpUrl = HttpUrl.get(value);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("urlParseFailed"), value));
+                    JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("urlParseFailed"), value), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
 
-                var item = addEntryAtEnd(NetworkInfo.create(httpUrl), value);
+                var networkInfo = NetworkInfo.create(httpUrl);
+                var info = ledger.getEndpointInfo(networkInfo);
+                if (info == null) {
+                    JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("retrieveServerInfoFailed"), httpUrl), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                var item = addEntryAtEnd(networkInfo, value, CompletableFuture.completedFuture(info));
                 onNetworkChanged(item);
             });
         }
     }
 
-    private JCheckBoxMenuItem addEntryAtEnd(NetworkInfo networkInfo, String text) {
-        return addEntry(networkInfo, text, popupMenu.getComponentCount() - 1);
+    private CompletableFuture<EndpointInfo> loadAsync(NetworkInfo networkInfo) {
+        var future = new CompletableFuture<EndpointInfo>();
+        Executors.newCachedThreadPool().submit(() -> {
+            future.complete(ledger.getEndpointInfo(networkInfo));
+        });
+        return future;
     }
 
-    private JCheckBoxMenuItem addEntry(NetworkInfo networkInfo, String text, int index) {
+    private JCheckBoxMenuItem addEntryAtEnd(NetworkInfo networkInfo, String text, CompletableFuture<EndpointInfo> futureInfo) {
+        return addEntry(networkInfo, text, futureInfo, popupMenu.getComponentCount() - 1);
+    }
+
+    private JCheckBoxMenuItem addEntry(NetworkInfo networkInfo, String text, CompletableFuture<EndpointInfo> futureInfo, int index) {
         var item = new JCheckBoxMenuItem(text);
+        item.setToolTipText(res.getString("loading"));
+
+        futureInfo.thenAccept(endpointInfo -> {
+            if (endpointInfo == null) {
+                item.setToolTipText(res.getString("noInfo"));
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.append(String.format("%s: %s", res.getString("url"), endpointInfo.getNetworkInfo().getUrl()) + System.lineSeparator());
+            if (endpointInfo.getHostId() != null) {
+                sb.append(String.format("%s: %s", res.getString("hostId"), endpointInfo.getHostId()) + System.lineSeparator());
+            }
+            sb.append(String.format("%s: %s", res.getString("serverVersion"), endpointInfo.getServerVersion()));
+            item.setToolTipText(sb.toString());
+        });
+
         popupMenu.add(item, index);
         selectableEntries.add(new ImmutablePair<>(item, networkInfo));
         item.addActionListener((SplitButtonClickedActionListener) e -> onNetworkChanged(item));
@@ -101,7 +140,7 @@ public class NetworkPopMenu {
         }
 
         var text = network.getId() == null ? network.getUrl().toString() : String.format(res.getString("network"), network.getShortText());
-        var item = addEntryAtEnd(network, text);
+        var item = addEntryAtEnd(network, text, loadAsync(network));
         onNetworkChanged(item);
     }
 

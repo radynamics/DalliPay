@@ -153,7 +153,7 @@ public class MainForm extends JFrame {
             });
         }
 
-        var popupMenu = new NetworkPopMenu(transformInstruction.getConfig().getNetworkInfos());
+        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
         popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
         popupMenu.addChangedListener(() -> {
             var selected = popupMenu.getSelectedNetwork();

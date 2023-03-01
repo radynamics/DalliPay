@@ -59,4 +59,6 @@ public interface Ledger {
     TransactionSubmitterFactory createTransactionSubmitterFactory();
 
     Money roundNativeCcy(Money amt);
+
+    EndpointInfo getEndpointInfo(NetworkInfo networkInfo);
 }
