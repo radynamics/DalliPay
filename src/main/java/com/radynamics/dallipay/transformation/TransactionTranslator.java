@@ -7,6 +7,7 @@ import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.iso20022.Account;
+import com.radynamics.dallipay.iso20022.Address;
 import com.radynamics.dallipay.iso20022.OtherAccount;
 import com.radynamics.dallipay.iso20022.Payment;
 import org.apache.logging.log4j.LogManager;
@@ -36,20 +37,20 @@ public class TransactionTranslator {
             transformInstruction.getAccountMappingSource().open();
             for (var t : transactions) {
                 if (t.getSenderAccount() == null) {
-                    t.setSenderAccount(getAccountOrNull(t.getSenderWallet()));
+                    t.setSenderAccount(getAccountOrNull(t.getSenderWallet(), t.getSenderAddress()));
                 }
                 if (t.getReceiverAccount() == null) {
-                    t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet()));
+                    t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet(), t.getReceiverAddress()));
                 }
                 if (t.getSenderWallet() == null) {
-                    var wallet = transformInstruction.getWalletOrNull(t.getSenderAccount());
+                    var wallet = transformInstruction.getWalletOrNull(t.getSenderAccount(), t.getSenderAddress());
                     if (wallet == null) {
                         wallet = getDefaultSenderWallet(t.getLedger());
                     }
                     t.setSenderWallet(wallet);
                 }
                 if (t.getReceiverWallet() == null) {
-                    t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount()));
+                    t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount(), t.getReceiverAddress()));
                 }
 
                 var targetCcy = getTargetCcy(t);
@@ -89,11 +90,11 @@ public class TransactionTranslator {
 
     }
 
-    private Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException {
+    private Account getAccountOrNull(Wallet wallet, Address address) throws AccountMappingSourceException {
         if (wallet == null) {
             return null;
         }
-        var account = transformInstruction.getAccountOrNull(wallet);
+        var account = transformInstruction.getAccountOrNull(wallet, address);
         return account == null ? new OtherAccount(wallet.getPublicKey()) : account;
     }
 

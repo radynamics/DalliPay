@@ -12,6 +12,7 @@ public class AccountMapping {
     private Account account;
     private Wallet wallet;
     private LedgerId ledgerId;
+    private String partyId = "";
 
     public AccountMapping(LedgerId ledgerId) {
         this.ledgerId = ledgerId;
@@ -43,6 +44,14 @@ public class AccountMapping {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getPartyId() {
+        return partyId;
+    }
+
+    public void setPartyId(String partyId) {
+        this.partyId = partyId;
     }
 
     public boolean allPresent() {

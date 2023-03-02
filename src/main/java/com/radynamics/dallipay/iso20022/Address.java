@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.iso20022;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Address {
     private String name;
     private String street;
@@ -45,6 +47,10 @@ public class Address {
 
     public void setCountryShort(String countryShort) {
         this.countryShort = countryShort;
+    }
+
+    public static String createPartyIdOrEmpty(Address address) {
+        return address == null || StringUtils.isEmpty(address.getName()) ? "" : address.getName();
     }
 
     @Override

@@ -132,6 +132,7 @@ public class TestFactory {
         var mapping = new AccountMapping(ti.getLedger().getId());
         mapping.setAccount(account);
         mapping.setWallet(ti.getLedger().createWallet(walletPublicKey, ""));
+        mapping.setPartyId(MemoryAccountMappingSource.DummyPartyId);
         try {
             ti.getAccountMappingSource().open();
             ti.getAccountMappingSource().add(mapping);

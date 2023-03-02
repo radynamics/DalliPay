@@ -7,6 +7,7 @@ import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.Account;
+import com.radynamics.dallipay.iso20022.Address;
 import com.radynamics.dallipay.iso20022.camt054.DateFormat;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import org.apache.logging.log4j.LogManager;
@@ -35,11 +36,11 @@ public class TransformInstruction {
         this.accountMappingSource = accountMappingSource;
     }
 
-    public Wallet getWalletOrNull(Account account) throws AccountMappingSourceException {
+    public Wallet getWalletOrNull(Account account, Address address) throws AccountMappingSourceException {
         if (account == null) {
             return null;
         }
-        var wallet = accountMappingSource.getWalletOrNull(account);
+        var wallet = accountMappingSource.getWalletOrNull(account, Address.createPartyIdOrEmpty(address));
         if (wallet == null) {
             return null;
         }
@@ -47,8 +48,8 @@ public class TransformInstruction {
         return wallet;
     }
 
-    public Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException {
-        return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet);
+    public Account getAccountOrNull(Wallet wallet, Address address) throws AccountMappingSourceException {
+        return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet, Address.createPartyIdOrEmpty(address));
     }
 
     public void setStaticSender(String publicKey, String secret) {

@@ -27,18 +27,20 @@ public class AccountMappingRepo implements AutoCloseable {
         conn.close();
     }
 
-    public AccountMapping[] list(LedgerId ledgerId, Wallet wallet) throws SQLException {
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? LIMIT 100");
+    public AccountMapping[] list(LedgerId ledgerId, Wallet wallet, String partyId) throws SQLException {
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? AND partyId = ? LIMIT 100");
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, wallet.getPublicKey());
+        ps.setString(3, partyId);
 
         return readList(ps);
     }
 
-    public AccountMapping[] list(LedgerId ledgerId, Account account) throws SQLException {
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? LIMIT 100");
+    public AccountMapping[] list(LedgerId ledgerId, Account account, String partyId) throws SQLException {
+        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? AND partyId = ? LIMIT 100");
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, account.getUnformatted());
+        ps.setString(3, partyId);
 
         return readList(ps);
     }
@@ -59,41 +61,55 @@ public class AccountMappingRepo implements AutoCloseable {
         o.setAccount(AccountFactory.create(rs.getString("bankAccount")));
         var l = LedgerFactory.create(ledgerId);
         o.setWallet(l.createWallet(rs.getString("walletPublicKey"), ""));
+        o.setPartyId(rs.getString("partyId"));
         return o;
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Account account) throws SQLException {
+    public Optional<AccountMapping> single(LedgerId ledgerId, Account account, String partyId) throws SQLException {
         if (account == null) {
             return Optional.empty();
         }
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? LIMIT 1");
+
+        var includePartyId = partyId.length() > 0;
+        var filterPartyId = includePartyId ? "AND partyId = ?" : "";
+        var ps = conn.prepareStatement(String.format("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? %s LIMIT 1", filterPartyId));
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, account.getUnformatted());
+        if (includePartyId) {
+            ps.setString(3, partyId);
+        }
 
         var rs = ps.executeQuery();
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Wallet wallet) throws SQLException {
+    public Optional<AccountMapping> single(LedgerId ledgerId, Wallet wallet, String partyId) throws SQLException {
         if (wallet == null) {
             return Optional.empty();
         }
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? LIMIT 1");
+
+        var includePartyId = partyId.length() > 0;
+        var filterPartyId = includePartyId ? "AND partyId = ?" : "";
+        var ps = conn.prepareStatement(String.format("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? %s LIMIT 1", filterPartyId));
         ps.setInt(1, ledgerId.numericId());
         ps.setString(2, wallet.getPublicKey());
+        if (includePartyId) {
+            ps.setString(3, partyId);
+        }
 
         var rs = ps.executeQuery();
         return rs.next() ? Optional.of(read(rs)) : Optional.empty();
     }
 
     public void saveOrUpdate(AccountMapping value) throws SQLException {
-        String sql = "INSERT OR REPLACE INTO accountmapping (id, ledgerId, bankAccount, walletPublicKey) \n"
-                + "	    VALUES ((SELECT id FROM accountmapping WHERE id = ?), ?, ?, ?);";
+        String sql = "INSERT OR REPLACE INTO accountmapping (id, ledgerId, bankAccount, walletPublicKey, partyId) \n"
+                + "	    VALUES ((SELECT id FROM accountmapping WHERE id = ?), ?, ?, ?, ?);";
         var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, value.getId());
         ps.setInt(2, value.getLedgerId().numericId());
         ps.setString(3, value.getAccount().getUnformatted());
         ps.setString(4, value.getWallet().getPublicKey());
+        ps.setString(5, value.getPartyId());
 
         Database.executeUpdate(ps, 1);
 

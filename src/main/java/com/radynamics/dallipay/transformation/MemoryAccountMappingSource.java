@@ -12,6 +12,8 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
     private final ArrayList<AccountMapping> accountMappings = new ArrayList<>();
     private final Ledger ledger;
 
+    public static final String DummyPartyId = "undefined";
+
     public MemoryAccountMappingSource(Ledger ledger) {
         this.ledger = ledger;
     }
@@ -21,9 +23,9 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
     }
 
     @Override
-    public Wallet getWalletOrNull(Account account) {
+    public Wallet getWalletOrNull(Account account, String partyId) {
         for (var mapping : accountMappings) {
-            if (mapping.getAccount().getUnformatted().equals(account.getUnformatted())) {
+            if (mapping.getAccount().getUnformatted().equals(account.getUnformatted()) && mapping.getPartyId().equals(DummyPartyId)) {
                 return mapping.getWallet();
             }
         }
@@ -31,9 +33,9 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
     }
 
     @Override
-    public Account getAccountOrNull(Wallet wallet) {
+    public Account getAccountOrNull(Wallet wallet, String partyId) {
         for (var mapping : accountMappings) {
-            if (WalletCompare.isSame(mapping.getWallet(), wallet)) {
+            if (WalletCompare.isSame(mapping.getWallet(), wallet) && mapping.getPartyId().equals(DummyPartyId)) {
                 return mapping.getAccount();
             }
         }

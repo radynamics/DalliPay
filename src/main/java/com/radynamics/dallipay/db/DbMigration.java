@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
 public class DbMigration {
     final static Logger log = LogManager.getLogger(DbMigration.class);
@@ -14,14 +15,19 @@ public class DbMigration {
         this.conn = conn;
     }
 
-    public void migrateToLatest() throws SQLException {
-        var current = getDbVersion();
-        if (current < 1) {
-            migrateTo1();
-            setDbVersion(1);
-        }
+    public void migrateToLatest() throws Exception {
+        ensureVersion(1, this::migrateTo1);
+        ensureVersion(2, this::migrateTo2);
 
         conn.commit();
+    }
+
+    private void ensureVersion(int version, Callable<Void> migration) throws Exception {
+        var current = getDbVersion();
+        if (current < version) {
+            migration.call();
+            setDbVersion(version);
+        }
     }
 
     private int getDbVersion() throws SQLException {
@@ -38,9 +44,16 @@ public class DbMigration {
         ps.executeUpdate();
     }
 
-    private void migrateTo1() throws SQLException {
+    private Void migrateTo1() throws SQLException {
         insertConfig("dbVersion", "0");
         insertConfig("xrplPriceOracleConfig", "{\"version\":1,\"ccyPairs\":[{\"first\":\"XRP\",\"second\":\"USD\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"receiver\":\"rXUMMaPpZqPutoRszR29jtC8amWq3APkx\"},{\"first\":\"XRP\",\"second\":\"JPY\",\"issuer\":\"r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE\",\"receiver\":\"rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg\"}]}");
+        return null;
+    }
+
+    private Void migrateTo2() throws SQLException {
+        var ps = conn.prepareStatement("ALTER TABLE accountmapping ADD COLUMN partyId TEXT NOT NULL DEFAULT ''");
+        ps.execute();
+        return null;
     }
 
     private void insertConfig(String key, String value) throws SQLException {

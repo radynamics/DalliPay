@@ -21,10 +21,10 @@ public class DbAccountMappingSource implements AccountMappingSource {
     }
 
     @Override
-    public Wallet getWalletOrNull(Account account) throws AccountMappingSourceException {
+    public Wallet getWalletOrNull(Account account, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.list(ledgerId, account);
+            var found = repo.list(ledgerId, account, partyId);
             if (found.length == 0) {
                 return null;
             }
@@ -48,10 +48,10 @@ public class DbAccountMappingSource implements AccountMappingSource {
     }
 
     @Override
-    public Account getAccountOrNull(Wallet wallet) throws AccountMappingSourceException {
+    public Account getAccountOrNull(Wallet wallet, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.list(ledgerId, wallet);
+            var found = repo.list(ledgerId, wallet, partyId);
             return found.length == 0 ? null : found[0].getAccount();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);

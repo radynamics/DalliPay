@@ -50,15 +50,16 @@ public class Camt05400109Writer implements Camt054Writer {
 
         for (var t : transactions) {
             var receiver = t.getReceiverWallet();
+            var address = t.getReceiverAddress();
             var ccy = t.getUserCcyCodeOrEmpty();
-            var stmt = getNtfctnOrNull(d, receiver, ccy);
+            var stmt = getNtfctnOrNull(d, receiver, address, ccy);
             if (stmt == null) {
                 stmt = new AccountNotification19();
                 d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
                 stmt.setId(idGenerator.createStmId());
                 stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
                 stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
-                stmt.setAcct(createAcct(receiver, ccy));
+                stmt.setAcct(createAcct(receiver, address, ccy));
             }
 
             stmt.getNtry().add(createNtry(t));
@@ -72,19 +73,19 @@ public class Camt05400109Writer implements Camt054Writer {
         return transformInstruction;
     }
 
-    private AccountNotification19 getNtfctnOrNull(Document d, Wallet receiver, String ccy) throws AccountMappingSourceException {
+    private AccountNotification19 getNtfctnOrNull(Document d, Wallet receiver, Address address, String ccy) throws AccountMappingSourceException {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
-            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, ccy))) {
+            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, address, ccy))) {
                 return ntfctn;
             }
         }
         return null;
     }
 
-    private CashAccount41 createAcct(Wallet receiver, String ccy) throws AccountMappingSourceException {
+    private CashAccount41 createAcct(Wallet receiver, Address address, String ccy) throws AccountMappingSourceException {
         var acct = new CashAccount41();
         acct.setId(new AccountIdentification4Choice());
-        var account = transformInstruction.getAccountOrNull(receiver);
+        var account = transformInstruction.getAccountOrNull(receiver, address);
         if (account == null) {
             acct.getId().setOthr(new GenericAccountIdentification1());
             acct.getId().getOthr().setId(receiver.getPublicKey());

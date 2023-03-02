@@ -211,12 +211,14 @@ public class PaymentTable extends JPanel {
     private void onWalletEdited(Payment payment, Wallet newWallet, ChangedValue changedValue) {
         // While sending payments user is able to change "Receiver from Input". Account is not changeable.
         var account = changedValue == ChangedValue.SenderWallet ? payment.getSenderAccount() : payment.getReceiverAccount();
+        var address = changedValue == ChangedValue.SenderWallet ? payment.getSenderAddress() : payment.getReceiverAddress();
 
         var mapping = new AccountMapping(payment.getLedger().getId());
         mapping.setAccount(account);
+        mapping.setPartyId(Address.createPartyIdOrEmpty(address));
         try (var repo = new AccountMappingRepo()) {
             // User maps a wallet to an account number
-            mapping = repo.single(payment.getLedger().getId(), account).orElse(mapping);
+            mapping = repo.single(payment.getLedger().getId(), account, mapping.getPartyId()).orElse(mapping);
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
@@ -232,12 +234,14 @@ public class PaymentTable extends JPanel {
     private void onAccountEdited(Payment t, TableCellListener tcl, ChangedValue changedValue) {
         var newAccount = (Account) tcl.getNewValue();
         var wallet = changedValue == ChangedValue.SenderAccount ? t.getSenderWallet() : t.getReceiverWallet();
+        var address = changedValue == ChangedValue.SenderAccount ? t.getSenderAddress() : t.getReceiverAddress();
 
         var mapping = new AccountMapping(t.getLedger().getId());
         mapping.setWallet(wallet);
+        mapping.setPartyId(Address.createPartyIdOrEmpty(address));
         try (var repo = new AccountMappingRepo()) {
             // User maps an account number to a wallet
-            mapping = repo.single(t.getLedger().getId(), wallet).orElse(mapping);
+            mapping = repo.single(t.getLedger().getId(), wallet, mapping.getPartyId()).orElse(mapping);
         } catch (Exception ex) {
             ExceptionDialog.show(table, ex);
         }
