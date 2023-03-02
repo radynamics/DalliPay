@@ -27,24 +27,6 @@ public class AccountMappingRepo implements AutoCloseable {
         conn.close();
     }
 
-    public AccountMapping[] list(LedgerId ledgerId, Wallet wallet, String partyId) throws SQLException {
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? AND partyId = ? LIMIT 100");
-        ps.setInt(1, ledgerId.numericId());
-        ps.setString(2, wallet.getPublicKey());
-        ps.setString(3, partyId);
-
-        return readList(ps);
-    }
-
-    public AccountMapping[] list(LedgerId ledgerId, Account account, String partyId) throws SQLException {
-        var ps = conn.prepareStatement("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? AND partyId = ? LIMIT 100");
-        ps.setInt(1, ledgerId.numericId());
-        ps.setString(2, account.getUnformatted());
-        ps.setString(3, partyId);
-
-        return readList(ps);
-    }
-
     private AccountMapping[] readList(PreparedStatement ps) throws SQLException {
         var rs = ps.executeQuery();
         var list = new ArrayList<AccountMapping>();

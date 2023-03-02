@@ -24,11 +24,8 @@ public class DbAccountMappingSource implements AccountMappingSource {
     public Wallet getWalletOrNull(Account account, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.list(ledgerId, account, partyId);
-            if (found.length == 0) {
-                return null;
-            }
-            return found[0].getWallet();
+            var found = repo.single(ledgerId, account, partyId).orElse(null);
+            return found == null ? null : found.getWallet();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -51,8 +48,8 @@ public class DbAccountMappingSource implements AccountMappingSource {
     public Account getAccountOrNull(Wallet wallet, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.list(ledgerId, wallet, partyId);
-            return found.length == 0 ? null : found[0].getAccount();
+            var found = repo.single(ledgerId, wallet, partyId).orElse(null);
+            return found == null ? null : found.getAccount();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             return null;
