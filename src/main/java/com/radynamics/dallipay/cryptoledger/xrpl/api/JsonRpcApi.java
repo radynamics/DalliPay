@@ -279,7 +279,7 @@ public class JsonRpcApi implements TransactionSource {
             data = xrplClient.accountInfo(requestParams).accountData();
             accountDataCache.add(wallet, data);
             return data;
-        } catch (JsonRpcClientErrorException e) {
+        } catch (Exception e) {
             if (isAccountNotFound(e)) {
                 accountDataCache.add(wallet, null);
             } else {
