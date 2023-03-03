@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
@@ -149,6 +150,16 @@ public class MainForm extends JFrame {
                 if (updateInfo == null) {
                     return;
                 }
+
+                if (updateInfo.isMandatory()) {
+                    var text = String.format(res.getString("mandatoryUpdateAvailable"), updateInfo.getVersion());
+                    int ret = JOptionPane.showConfirmDialog(this, text, "Update", JOptionPane.YES_NO_CANCEL_OPTION);
+                    if (ret == JOptionPane.YES_OPTION) {
+                        Utils.openBrowser(this, updateInfo.getUri());
+                    }
+                    System.exit(ReturnCode.MandatoryUpdate.value);
+                }
+
                 var cmdUpdate = new FlatButton();
                 var icon = new FlatSVGIcon("svg/update.svg", 16, 16);
                 icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorAccent));

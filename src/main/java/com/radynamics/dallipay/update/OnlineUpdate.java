@@ -41,12 +41,14 @@ public class OnlineUpdate {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new URL("https://www.dallipay.com/releases/update.xml").openStream());
+            var url = new URL(String.format("https://www.dallipay.com/releases/?v=%s", new VersionController().getVersion()));
+            Document doc = db.parse(url.openStream());
 
             var xPath = XPathFactory.newInstance().newXPath();
             var version = xPath.evaluate("/item/version", doc);
             var urlText = xPath.evaluate("/item/url", doc);
-            return new UpdateInfo(version, URI.create(urlText));
+            var mandatory = "true".equals(xPath.evaluate("/item/mandatory", doc));
+            return new UpdateInfo(version, URI.create(urlText), mandatory);
         } catch (Exception e) {
             log.info(e.getMessage(), e);
             return null;
