@@ -7,6 +7,7 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.VersionController;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.iso20022.pain001.Pain001Reader;
@@ -111,16 +112,28 @@ public class MainForm extends JFrame {
                 }
                 {
                     optionsPanel = new OptionsForm(transformInstruction.getLedger());
-                    optionsPanel.addChangedListener(() -> {
-                        transformInstruction.getHistoricExchangeRateSource().init();
-                        receivingPanel.refreshTargetCcys();
-                    });
+                    optionsPanel.addChangedListener(this::refreshChangedSettings);
                     optionsPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("options"), optionsPanel);
                     optionsPanel.load();
                 }
             }
         }
+    }
+
+    private void refreshChangedSettings() {
+        transformInstruction.getHistoricExchangeRateSource().init();
+
+        String selectedCcy = null;
+        var xrplOracleConfig = new XrplPriceOracleConfig();
+        try (var repo = new ConfigRepo()) {
+            selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
+            xrplOracleConfig.load(repo);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+
+        receivingPanel.refreshTargetCcys(selectedCcy, xrplOracleConfig);
     }
 
     private JMenuBar createMenuBar() {

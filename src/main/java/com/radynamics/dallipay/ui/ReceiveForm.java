@@ -8,7 +8,6 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.VersionController;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
-import com.radynamics.dallipay.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Currency;
@@ -262,18 +261,21 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         transformInstruction.setTargetCcy(ccy);
     }
 
-
-    public void refreshTargetCcys() {
+    private void refreshTargetCcys() {
         String selectedCcy = null;
-        IssuedCurrency[] issuedCurrencies = new IssuedCurrency[0];
+        var xrplOracleConfig = new XrplPriceOracleConfig();
         try (var repo = new ConfigRepo()) {
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
-            var xrplOracleConfig = new XrplPriceOracleConfig();
             xrplOracleConfig.load(repo);
-            issuedCurrencies = xrplOracleConfig.issuedCurrencies();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+
+        refreshTargetCcys(selectedCcy, xrplOracleConfig);
+    }
+
+    public void refreshTargetCcys(String selectedCcy, XrplPriceOracleConfig xrplOracleConfig) {
+        var issuedCurrencies = xrplOracleConfig.issuedCurrencies();
 
         var ccys = new ArrayList<String>();
         for (var ic : issuedCurrencies) {
