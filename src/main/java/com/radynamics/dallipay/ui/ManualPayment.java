@@ -3,7 +3,6 @@ package com.radynamics.dallipay.ui;
 import com.radynamics.dallipay.cryptoledger.BalanceRefresher;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
-import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -14,15 +13,12 @@ import com.radynamics.dallipay.transformation.FreeTextPaymentFactory;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
 import com.radynamics.dallipay.util.RequestFocusListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ResourceBundle;
 
 public class ManualPayment {
-    private final static Logger log = LogManager.getLogger(ManualPayment.class);
     private final Payment payment;
     private final TransactionTranslator transactionTranslator;
 
@@ -30,16 +26,17 @@ public class ManualPayment {
 
     private ManualPayment(Payment payment, TransactionTranslator transactionTranslator) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
+        if (transactionTranslator == null) throw new IllegalArgumentException("Parameter 'transactionTranslator' cannot be null");
         this.payment = payment;
         this.transactionTranslator = transactionTranslator;
     }
 
-    public static ManualPayment createEmpty(Ledger ledger) {
+    public static ManualPayment createEmpty(Ledger ledger, TransactionTranslator transactionTranslator) {
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
         payment.setOrigin(Origin.Manual);
 
-        var o = new ManualPayment(payment, null);
+        var o = new ManualPayment(payment, transactionTranslator);
         o.applyDefaultSenderWallet();
         return o;
     }
@@ -70,11 +67,7 @@ public class ManualPayment {
     }
 
     private void applyDefaultSenderWallet() {
-        try (var repo = new ConfigRepo()) {
-            payment.setSenderWallet(repo.getDefaultSenderWallet(payment.getLedger()));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+        transactionTranslator.applyDefaultSender(payment);
 
         if (payment.getSenderWallet() != null) {
             var br = new BalanceRefresher(payment.getLedger().getNetwork());

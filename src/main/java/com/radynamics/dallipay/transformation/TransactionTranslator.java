@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.transformation;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -131,9 +132,11 @@ public class TransactionTranslator {
         this.targetCcy = targetCcy;
     }
 
-    public void setDefaultSenderWallet(Wallet wallet) {
-        defaultSenderWallets.removeIf(w -> w.getLedgerId().textId().equals(wallet.getLedgerId().textId()));
-        defaultSenderWallets.add(wallet);
+    public void setDefaultSenderWallet(LedgerId ledgerId, Wallet wallet) {
+        defaultSenderWallets.removeIf(w -> w.getLedgerId().textId().equals(ledgerId.textId()));
+        if (wallet != null) {
+            defaultSenderWallets.add(wallet);
+        }
     }
 
     private Wallet getDefaultSenderWallet(Ledger ledger) {

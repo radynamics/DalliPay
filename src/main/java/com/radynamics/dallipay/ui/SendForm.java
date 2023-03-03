@@ -251,7 +251,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void addNewEmptyPayment() {
-        showNewPayment(ManualPayment.createEmpty(transformInstruction.getLedger()));
+        showNewPayment(ManualPayment.createEmpty(transformInstruction.getLedger(), transactionTranslator));
     }
 
     private void showNewPayment(ManualPayment mp) {
@@ -306,10 +306,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 });
         Executors.newCachedThreadPool().submit(() -> {
             try (var repo = new ConfigRepo()) {
-                var w = repo.getDefaultSenderWallet(reader.getLedger());
-                if (w != null) {
-                    transactionTranslator.setDefaultSenderWallet(w);
-                }
+                var ledger = reader.getLedger();
+                transactionTranslator.setDefaultSenderWallet(ledger.getId(), repo.getDefaultSenderWallet(ledger));
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -480,6 +478,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             }
         }
         throw new RuntimeException("Could not find matching payment for transaction.");
+    }
+
+    public void refreshDefaultSenderWallet(LedgerId ledgerId, Wallet wallet) {
+        transactionTranslator.setDefaultSenderWallet(ledgerId, wallet);
     }
 
     private void refreshExchange() {

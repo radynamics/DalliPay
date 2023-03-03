@@ -124,15 +124,19 @@ public class MainForm extends JFrame {
     private void refreshChangedSettings() {
         transformInstruction.getHistoricExchangeRateSource().init();
 
+        Wallet defaultSenderWallet = null;
         String selectedCcy = null;
         var xrplOracleConfig = new XrplPriceOracleConfig();
+        var ledger = transformInstruction.getLedger();
         try (var repo = new ConfigRepo()) {
+            defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
             xrplOracleConfig.load(repo);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
 
+        sendingPanel.refreshDefaultSenderWallet(ledger.getId(), defaultSenderWallet);
         receivingPanel.refreshTargetCcys(selectedCcy, xrplOracleConfig);
     }
 
