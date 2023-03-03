@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 public class TransactionTranslator {
     private final static Logger log = LogManager.getLogger(TransactionTranslator.class);
@@ -43,11 +44,7 @@ public class TransactionTranslator {
                     t.setReceiverAccount(getAccountOrNull(t.getReceiverWallet(), t.getReceiverAddress()));
                 }
                 if (t.getSenderWallet() == null) {
-                    var wallet = transformInstruction.getWalletOrNull(t.getSenderAccount(), t.getSenderAddress());
-                    if (wallet == null) {
-                        wallet = getDefaultSenderWallet(t.getLedger());
-                    }
-                    t.setSenderWallet(wallet);
+                    t.setSenderWallet(transformInstruction.getWalletOrNull(t.getSenderAccount(), t.getSenderAddress()));
                 }
                 if (t.getReceiverWallet() == null) {
                     t.setReceiverWallet(transformInstruction.getWalletOrNull(t.getReceiverAccount(), t.getReceiverAddress()));
@@ -83,6 +80,20 @@ public class TransactionTranslator {
         }
 
         return transactions;
+    }
+
+    public void applyDefaultSender(Collection<Payment> transactions) {
+        for (var t : transactions) {
+            applyDefaultSender(t);
+        }
+    }
+
+    public void applyDefaultSender(Payment t) {
+        if (t.getSenderWallet() != null) {
+            return;
+        }
+
+        t.setSenderWallet(getDefaultSenderWallet(t.getLedger()));
     }
 
     private Currency getTargetCcy(Payment t) {

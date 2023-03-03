@@ -317,6 +317,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             try {
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
+                transactionTranslator.applyDefaultSender(payments);
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
