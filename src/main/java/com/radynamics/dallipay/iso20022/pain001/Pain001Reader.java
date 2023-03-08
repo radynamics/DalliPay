@@ -64,7 +64,7 @@ public class Pain001Reader {
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {
-                    t.setAmount(Money.of(sourceAmt, new Currency(sourceCcy)));
+                    t.setAmount(Money.of(sourceAmt.doubleValue(), new Currency(sourceCcy)));
                 }
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();

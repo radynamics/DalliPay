@@ -15,7 +15,7 @@ public class FeeSuggestion {
     }
 
     public static FeeSuggestion None(String ccy) {
-        var zero = Money.of(0, new Currency(ccy));
+        var zero = Money.of(0d, new Currency(ccy));
         return new FeeSuggestion(zero, zero, zero);
     }
 

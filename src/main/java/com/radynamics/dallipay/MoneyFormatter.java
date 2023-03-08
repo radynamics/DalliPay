@@ -1,20 +1,11 @@
 package com.radynamics.dallipay;
 
-import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.ui.Utils;
 
 import java.math.BigDecimal;
 
 public class MoneyFormatter {
-    public static String formatLedger(Double amount, String ccy) {
-        return formatLedger(BigDecimal.valueOf(amount), ccy);
-    }
-
-    public static String formatLedger(BigDecimal amount, String ccy) {
-        return formatLedger(Money.of(amount, new Currency(ccy)));
-    }
-
     public static String formatLedger(Money amount) {
         return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCode());
     }

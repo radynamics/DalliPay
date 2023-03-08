@@ -3,17 +3,17 @@ package com.radynamics.dallipay.exchange;
 import java.util.*;
 
 public class Money {
-    private final Number number;
+    private final Double number;
     private final Currency ccy;
 
-    private Money(Number number, Currency ccy) {
+    private Money(Double number, Currency ccy) {
         if (number == null) throw new IllegalArgumentException("Parameter 'number' cannot be null");
         if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
         this.number = number;
         this.ccy = ccy;
     }
 
-    public static Money of(Number number, Currency ccy) {
+    public static Money of(Double number, Currency ccy) {
         return new Money(number, ccy);
     }
 
@@ -22,7 +22,7 @@ public class Money {
     }
 
     public static Money zero(Currency ccy) {
-        return Money.of(0, ccy);
+        return Money.of(0d, ccy);
     }
 
     public static Money[] sort(Money[] values) {

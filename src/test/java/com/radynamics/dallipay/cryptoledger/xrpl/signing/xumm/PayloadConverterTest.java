@@ -114,7 +114,7 @@ public class PayloadConverterTest {
 
     private static Transaction createTransaction() {
         var ccy = new Currency(ledger.getNativeCcySymbol());
-        var t = new TestTransaction(ledger, Money.of(100, ccy));
+        var t = new TestTransaction(ledger, Money.of(100d, ccy));
         t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
         t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
         t.setInvoiceId("RG-00123.45");

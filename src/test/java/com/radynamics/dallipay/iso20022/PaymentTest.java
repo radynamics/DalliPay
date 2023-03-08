@@ -62,7 +62,7 @@ public class PaymentTest {
     public void setAmount() {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
         p.setExchangeRate(createRate2());
-        p.setAmount(Money.of(30, new Currency("USD")));
+        p.setAmount(Money.of(30d, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
@@ -74,9 +74,9 @@ public class PaymentTest {
     public void setAmountIssuedCcy() {
         var ledger = new TestLedger();
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
-        var p = new Payment(new TestTransaction(ledger, Money.of(10, ccyAAA)));
+        var p = new Payment(new TestTransaction(ledger, Money.of(10d, ccyAAA)));
         p.setExchangeRate(null);
-        p.setAmount(Money.of(10, ccyAAA));
+        p.setAmount(Money.of(10d, ccyAAA));
 
         Assertions.assertEquals(10, p.getAmount());
         Assertions.assertEquals("AAA", p.getUserCcyCodeOrEmpty());
@@ -88,11 +88,11 @@ public class PaymentTest {
     @Test
     public void setAmountNoExchangeRate() {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
-        p.setAmount(Money.of(30, new Currency("USD")));
+        p.setAmount(Money.of(30d, new Currency("USD")));
 
         Assertions.assertEquals(30, p.getAmount());
         Assertions.assertEquals("USD", p.getUserCcyCodeOrEmpty());
-        Assertions.assertEquals(0, p.getAmountTransaction().getNumber());
+        Assertions.assertEquals(0d, p.getAmountTransaction().getNumber());
         Assertions.assertEquals("TEST", p.getAmountTransaction().getCcy().getCode());
     }
 
@@ -112,7 +112,7 @@ public class PaymentTest {
         var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
         p.setExchangeRate(new ExchangeRate(new CurrencyPair("USD", "TEST"), 2.0, ZonedDateTime.now()));
         if (amountDefined) {
-            p.setAmount(Money.of(20, new Currency("USD")));
+            p.setAmount(Money.of(20d, new Currency("USD")));
 
         }
         Assertions.assertEquals(20, p.getAmount());
@@ -140,7 +140,7 @@ public class PaymentTest {
     public void setExchangeRateFiatCcyNotAffected(String ccyFrom, String ccyTo) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             var p = new Payment(new TestTransaction(new TestLedger(), 10.0, "TEST"));
-            p.setAmount(Money.of(30, new Currency("USD")));
+            p.setAmount(Money.of(30d, new Currency("USD")));
             p.setExchangeRate(new ExchangeRate(new CurrencyPair(ccyFrom, ccyTo), 2.0, ZonedDateTime.now()));
         });
     }

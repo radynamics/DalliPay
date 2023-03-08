@@ -66,7 +66,7 @@ public class TestFactory {
     public static Payment[] createTransactionsMaxRmtInfUstrd(Ledger ledger, TransformInstruction ti) {
         var list = new ArrayList<Transaction>();
         {
-            var t = new TestTransaction(ledger, Money.of(100, new Currency("TEST")));
+            var t = new TestTransaction(ledger, Money.of(100d, new Currency("TEST")));
             list.add(t);
             t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
             t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));
@@ -75,7 +75,7 @@ public class TestFactory {
             t.addMessage("0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789_0123456789");
         }
         {
-            var t = new TestTransaction(ledger, Money.of(100, new Currency("TEST")));
+            var t = new TestTransaction(ledger, Money.of(100d, new Currency("TEST")));
             list.add(t);
             t.setSenderWallet(ledger.createWallet("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", null));
             t.setReceiverWallet(ledger.createWallet("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", null));

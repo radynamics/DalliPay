@@ -62,7 +62,7 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
             // Take previously known currency (with issuer information) if present.
             var ccy = knownCurrencies.getOrDefault(m.getCcy().getCode(), null);
             if (ccy != null) {
-                m = Money.of(m.getNumber(), ccy);
+                m = Money.of(m.getNumber().doubleValue(), ccy);
             }
 
             // Setting a rounded text in refreshText can be unequal.

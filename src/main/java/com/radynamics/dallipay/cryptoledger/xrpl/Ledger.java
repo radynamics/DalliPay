@@ -62,7 +62,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     static Money dropsToXrp(long drops) {
-        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp(), new Currency(nativeCcySymbol));
+        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
     }
 
     @Override
@@ -233,7 +233,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         // Round to most accurate value supported by ledger.
         var digits = String.valueOf(CurrencyAmount.ONE_XRP_IN_DROPS).toCharArray().length - 1;
         var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
-        return Money.of(rounded, amt.getCcy());
+        return Money.of(rounded.doubleValue(), amt.getCcy());
     }
 
     @Override
