@@ -15,7 +15,7 @@ public class PayloadConverter {
         json.put("Account", payment.account().value());
         json.put("Destination", payment.destination().value());
         if (payment.destinationTag().isPresent()) {
-            json.put("Tag", payment.destinationTag().get());
+            json.put("DestinationTag", payment.destinationTag().get());
         }
         json.put("Fee", payment.fee().value());
 

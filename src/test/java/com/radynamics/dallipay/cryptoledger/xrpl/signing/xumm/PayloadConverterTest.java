@@ -45,9 +45,9 @@ public class PayloadConverterTest {
         Assertions.assertEquals("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", json.getString("Account"));
         Assertions.assertEquals("rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", json.getString("Destination"));
         if (destinationTag == null) {
-            Assertions.assertNull(json.optJSONObject("Tag"));
+            Assertions.assertNull(json.optJSONObject("DestinationTag"));
         } else {
-            Assertions.assertEquals(destinationTag, json.getInt("Tag"));
+            Assertions.assertEquals(destinationTag, json.getInt("DestinationTag"));
         }
         Assertions.assertEquals(15, json.getLong("Fee"));
         Assertions.assertEquals(100000000, json.getLong("Amount"));
