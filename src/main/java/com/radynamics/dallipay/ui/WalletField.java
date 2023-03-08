@@ -35,17 +35,13 @@ public class WalletField extends JPanel {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public WalletField(JComponent owner) {
-        this(owner, true);
-    }
-
-    public WalletField(JComponent owner, boolean verticalLabels) {
         this.owner = owner;
-        setupUI(verticalLabels);
+        setupUI();
         setShowDetailVisible(false);
         setInfoTextVisible(false);
     }
 
-    private void setupUI(boolean verticalLabels) {
+    private void setupUI() {
         setLayout(new GridBagLayout());
 
         {

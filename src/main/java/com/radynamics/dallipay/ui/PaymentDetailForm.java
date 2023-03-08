@@ -168,7 +168,7 @@ public class PaymentDetailForm extends JDialog {
             }
             {
                 var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getSenderAccount(), payment.getSenderAddress()));
-                txtSenderWallet = new WalletField(pnlMain, false);
+                txtSenderWallet = new WalletField(pnlMain);
                 txtSenderWallet.setLedger(payment.getLedger());
                 txtSenderWallet.setWallet(payment.getSenderWallet());
                 txtSenderWallet.setShowDetailVisible(true);
@@ -179,7 +179,7 @@ public class PaymentDetailForm extends JDialog {
             }
             {
                 var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getReceiverAccount(), payment.getReceiverAddress()));
-                txtReceiverWallet = new WalletField(pnlMain, false);
+                txtReceiverWallet = new WalletField(pnlMain);
                 txtReceiverWallet.setLedger(payment.getLedger());
                 txtReceiverWallet.setWallet(payment.getReceiverWallet());
                 txtReceiverWallet.setShowDetailVisible(true);
