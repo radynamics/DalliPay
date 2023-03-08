@@ -44,7 +44,7 @@ public class TestLedger implements Ledger {
     }
 
     static Money convertToNativeCcyAmount(long amountSmallestUnit) {
-        return Money.of(amountSmallestUnit / FACTOR, new Currency(nativeCcySymbol));
+        return Money.of((double) (amountSmallestUnit / FACTOR), new Currency(nativeCcySymbol));
     }
 
     @Override

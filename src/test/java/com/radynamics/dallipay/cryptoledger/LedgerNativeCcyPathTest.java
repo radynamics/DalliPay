@@ -45,6 +45,6 @@ public class LedgerNativeCcyPathTest {
         Assertions.assertNull(p.getExchangeRate());
         Assertions.assertEquals(20.0, p.getAmount());
         Assertions.assertEquals(userCcyCode, p.getUserCcyCodeOrEmpty());
-        Assertion.assertEquals(Money.of(0, new Currency("TEST")), p.getAmountTransaction());
+        Assertion.assertEquals(Money.of(0d, new Currency("TEST")), p.getAmountTransaction());
     }
 }
