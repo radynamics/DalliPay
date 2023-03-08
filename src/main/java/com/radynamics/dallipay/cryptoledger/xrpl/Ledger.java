@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
@@ -238,6 +239,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
         return api.getEndpointInfo(networkInfo);
+    }
+
+    @Override
+    public boolean supportsDestinationTag() {
+        return true;
+    }
+
+    @Override
+    public DestinationTagBuilder createDestinationTagBuilder() {
+        return new com.radynamics.dallipay.cryptoledger.xrpl.DestinationTagBuilder();
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {

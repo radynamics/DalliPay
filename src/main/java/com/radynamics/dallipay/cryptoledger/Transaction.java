@@ -27,6 +27,10 @@ public interface Transaction {
 
     void setReceiverWallet(Wallet wallet);
 
+    Integer getDestinationTag();
+
+    void setDestinationTag(Integer destinationTag);
+
     void addStructuredReference(StructuredReference structuredReference);
 
     void setStructuredReference(StructuredReference[] structuredReferences);

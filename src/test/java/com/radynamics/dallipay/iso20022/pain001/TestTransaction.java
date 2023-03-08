@@ -8,6 +8,7 @@ import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
+import jakarta.ws.rs.NotSupportedException;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -83,6 +84,16 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
     @Override
     public void setReceiverWallet(Wallet wallet) {
         setReceiver(wallet);
+    }
+
+    @Override
+    public Integer getDestinationTag() {
+        return null;
+    }
+
+    @Override
+    public void setDestinationTag(Integer destinationTag) {
+        throw new NotSupportedException();
     }
 
     @Override

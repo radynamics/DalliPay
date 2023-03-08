@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.FeeHelper;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
@@ -11,6 +12,7 @@ import org.xrpl.xrpl4j.model.transactions.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class PaymentBuilder {
     private Transaction transaction;
@@ -27,6 +29,7 @@ public class PaymentBuilder {
     public ImmutablePayment.Builder build() throws LedgerException {
         var sender = getSender();
         var receiver = Address.of(transaction.getReceiverWallet().getPublicKey());
+        Optional<UnsignedInteger> destinationTag = transaction.getDestinationTag() == null ? Optional.empty() : Optional.of(UnsignedInteger.valueOf(transaction.getDestinationTag()));
 
         var memos = new ArrayList<MemoWrapper>();
         var memoData = PayloadConverter.toMemo(transaction.getStructuredReferences(), transaction.getMessages());
@@ -42,8 +45,8 @@ public class PaymentBuilder {
                 .account(sender)
                 .amount(amount)
                 .addAllMemos(memos)
-                // TODO: implement TAG
                 .destination(receiver)
+                .destinationTag(destinationTag)
                 .fee(fee);
         var ccy = transaction.getAmount().getCcy();
         if (!transaction.getLedger().getNativeCcySymbol().equals(ccy.getCode())) {

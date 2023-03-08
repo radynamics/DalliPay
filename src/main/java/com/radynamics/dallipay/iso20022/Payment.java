@@ -81,6 +81,14 @@ public class Payment {
         return cryptoTrx.getSenderWallet();
     }
 
+    public Integer getDestinationTag() {
+        return cryptoTrx.getDestinationTag();
+    }
+
+    public void setDestinationTag(Integer destinationTag) {
+        cryptoTrx.setDestinationTag(destinationTag);
+    }
+
     public Double getAmount() {
         return this.amount;
     }

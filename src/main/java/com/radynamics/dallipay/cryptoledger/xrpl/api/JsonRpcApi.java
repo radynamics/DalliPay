@@ -395,6 +395,9 @@ public class JsonRpcApi implements TransactionSource {
         if (t.transactionType() == TransactionType.PAYMENT) {
             var p = (Payment) t;
             trx.setReceiver(WalletConverter.from(p.destination()));
+            if (p.destinationTag().isPresent()) {
+                trx.setDestinationTag(p.destinationTag().get().intValue());
+            }
             trx.setInvoiceId(p.invoiceId().isEmpty() ? "" : p.invoiceId().get().value());
         }
 

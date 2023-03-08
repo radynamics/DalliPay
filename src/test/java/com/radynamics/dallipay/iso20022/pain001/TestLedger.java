@@ -203,4 +203,14 @@ public class TestLedger implements Ledger {
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
         return null;
     }
+
+    @Override
+    public boolean supportsDestinationTag() {
+        return false;
+    }
+
+    @Override
+    public DestinationTagBuilder createDestinationTagBuilder() {
+        return null;
+    }
 }

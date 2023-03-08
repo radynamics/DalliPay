@@ -26,17 +26,21 @@ public class WalletField extends JPanel {
     private final static Logger log = LogManager.getLogger(WalletField.class);
     private final JComponent owner;
     private JTextField txt;
+    private JTextField destinationTag;
     private JToggleButton detailButton;
     private JLabel lblInfoText;
     private Ledger ledger;
-    private WalletFieldInputValidator validator;
-    private ValidationControlDecorator decorator;
+    private WalletFieldInputValidator walletValidator;
+    private ValidationControlDecorator walletDecorator;
+    private DestinationTagInputValidator destinationTagValidator;
+    private ValidationControlDecorator destinationTagDecorator;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public WalletField(JComponent owner) {
         this.owner = owner;
         setupUI();
+        setDestinationTagVisible(false);
         setShowDetailVisible(false);
         setInfoTextVisible(false);
     }
@@ -53,9 +57,9 @@ public class WalletField extends JPanel {
                 @Override
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
-                    decorator.update(text);
+                    walletDecorator.update(text);
                     updateInfoText(text);
-                    return validator.isValid(text);
+                    return walletValidator.isValid(text);
                 }
             });
             txt.addFocusListener(new FocusListener() {
@@ -76,6 +80,28 @@ public class WalletField extends JPanel {
             c.gridx = 0;
             c.gridy = 0;
             add(txt, c);
+        }
+        {
+            destinationTag = new JTextField();
+            destinationTag.setColumns(5);
+            destinationTag.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("destinationTag.placeholderText"));
+            destinationTag.setToolTipText(res.getString("destinationTag.tooltipText"));
+            destinationTag.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent input) {
+                    var text = ((JTextField) input).getText();
+                    destinationTagDecorator.update(text);
+                    return destinationTagValidator.isValid(text);
+                }
+            });
+
+            var c = new GridBagConstraints();
+            c.fill = GridBagConstraints.BOTH;
+            c.weightx = 1.0;
+            c.weighty = 0.5;
+            c.gridx = 1;
+            c.gridy = 0;
+            add(destinationTag, c);
         }
         {
             lblInfoText = Utils.formatSecondaryInfo(new JLabel());
@@ -121,7 +147,7 @@ public class WalletField extends JPanel {
     }
 
     private void updateInfoText(String text) {
-        var wallet = validator.getValidOrNull(text);
+        var wallet = walletValidator.getValidOrNull(text);
         if (wallet == null && text.length() > 0) {
             lblInfoText.setText(res.getString("invalidWallet"));
             return;
@@ -250,12 +276,18 @@ public class WalletField extends JPanel {
 
     public void setLedger(Ledger ledger) {
         this.ledger = ledger;
-        validator = new WalletFieldInputValidator(ledger);
-        decorator = new ValidationControlDecorator(txt, validator);
+        walletValidator = new WalletFieldInputValidator(ledger);
+        walletDecorator = new ValidationControlDecorator(txt, walletValidator);
+        destinationTagValidator = new DestinationTagInputValidator(ledger.createDestinationTagBuilder());
+        destinationTagDecorator = new ValidationControlDecorator(destinationTag, destinationTagValidator);
     }
 
     public void setEditable(boolean b) {
         txt.setEditable(b);
+    }
+
+    public void setDestinationTagVisible(boolean visible) {
+        destinationTag.setVisible(visible);
     }
 
     public void setShowDetailVisible(boolean visible) {
@@ -275,7 +307,7 @@ public class WalletField extends JPanel {
     }
 
     public Wallet getValidWallet() {
-        var wallet = validator.getValidOrNull(getText());
+        var wallet = walletValidator.getValidOrNull(getText());
         if (wallet == null) {
             return null;
         }
@@ -291,5 +323,13 @@ public class WalletField extends JPanel {
         }
 
         return getText().length() == 0 ? null : ledger.createWallet(txt.getText(), null);
+    }
+
+    public Integer getDestinationTag() {
+        return destinationTagValidator.getValidOrNull(destinationTag.getText().trim());
+    }
+
+    public void setDestinationTag(Integer destinationTag) {
+        this.destinationTag.setText(destinationTag == null ? "" : String.valueOf(destinationTag));
     }
 }

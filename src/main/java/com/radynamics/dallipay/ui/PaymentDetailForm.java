@@ -182,6 +182,8 @@ public class PaymentDetailForm extends JDialog {
                 txtReceiverWallet = new WalletField(pnlMain);
                 txtReceiverWallet.setLedger(payment.getLedger());
                 txtReceiverWallet.setWallet(payment.getReceiverWallet());
+                txtReceiverWallet.setDestinationTag(payment.getDestinationTag());
+                txtReceiverWallet.setDestinationTagVisible(payment.getLedger().supportsDestinationTag());
                 txtReceiverWallet.setShowDetailVisible(true);
                 txtReceiverWallet.setInfoTextVisible(true);
                 txtReceiverWallet.setEditable(edit.editable());
@@ -259,6 +261,7 @@ public class PaymentDetailForm extends JDialog {
     private void applyUIValues() {
         payment.setSenderWallet(txtSenderWallet.getWallet());
         payment.setReceiverWallet(txtReceiverWallet.getWallet());
+        payment.setDestinationTag(txtReceiverWallet.getDestinationTag());
         payment.setStructuredReference(txtStructuredReferences.getValue());
         payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
         setPaymentChanged(true);
