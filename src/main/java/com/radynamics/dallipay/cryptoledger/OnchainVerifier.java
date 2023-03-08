@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class OnchainVerifier {
     private final static Logger log = LogManager.getLogger(OnchainVerifier.class);
@@ -49,6 +50,11 @@ public class OnchainVerifier {
     private boolean areEqual(Transaction expected, Transaction actual) {
         if (!WalletCompare.isSame(expected.getReceiverWallet(), actual.getReceiverWallet())) {
             log.warn(String.format("Receiver is not equal for %s. Expected %s, actual %s", actual.getId(), expected.getReceiverWallet().getPublicKey(), actual.getReceiverWallet().getPublicKey()));
+            return false;
+        }
+
+        if (!Objects.equals(expected.getDestinationTag(), actual.getDestinationTag())) {
+            log.warn(String.format("Receiver destinationTag is not equal for %s. Expected %s, actual %s", actual.getId(), expected.getDestinationTag(), actual.getDestinationTag()));
             return false;
         }
 
