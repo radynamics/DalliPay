@@ -109,6 +109,9 @@ public class SwissQrBillPayment {
         if (chosen.expectedCcyIssuer != null) {
             payment.setExpectedCurrency(new ExpectedCurrency(chosen.expectedCcyIssuer));
         }
+        if (chosen.destinationTag != null) {
+            payment.setDestinationTag(chosen.destinationTag);
+        }
 
         return payment;
     }
@@ -153,22 +156,38 @@ public class SwissQrBillPayment {
 
         var o = new QrBillCc();
         o.receiverWallet = toWalletOrNull(elements, "10");
+        o.destinationTag = toIntegerOrNull(elements, "11");
         o.expectedCcyIssuer = toWalletOrNull(elements, "20");
         return o;
     }
 
     private Wallet toWalletOrNull(List<String> elements, String tag) {
-        var index = elements.indexOf(tag);
-        if (index == -1 || index + 1 >= elements.size()) {
+        if (!existsTagWithValue(elements, tag)) {
             return null;
         }
+        var index = elements.indexOf(tag);
+        var value = elements.get(index + 1);
+        return ledger.isValidPublicKey(value) ? ledger.createWallet(value, "") : null;
+    }
 
-        var walletText = elements.get(index + 1);
-        return ledger.isValidPublicKey(walletText) ? ledger.createWallet(walletText, "") : null;
+    private boolean existsTagWithValue(List<String> elements, String tag) {
+        var index = elements.indexOf(tag);
+        return index != -1 && index + 1 < elements.size();
+    }
+
+    private Integer toIntegerOrNull(List<String> elements, String tag) {
+        if (!existsTagWithValue(elements, tag)) {
+            return null;
+        }
+        var index = elements.indexOf(tag);
+        var value = elements.get(index + 1);
+        var builder = ledger.createDestinationTagBuilder();
+        return builder.isValid(value) ? builder.from(value).build() : null;
     }
 
     private static class QrBillCc {
         public Wallet receiverWallet;
         public Wallet expectedCcyIssuer;
+        public Integer destinationTag;
     }
 }
