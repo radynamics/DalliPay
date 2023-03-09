@@ -36,6 +36,14 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
             if (!walletAccepts(t.getReceiverWallet(), ccy)) {
                 list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("receiverWalletDoesntAccept"), ccy.getCode())));
             }
+
+            var xrplWallet = WalletConverter.from(t.getReceiverWallet());
+            if (t.getDestinationTag() == null && ledger.requiresDestinationTag(xrplWallet)) {
+                list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletDestTag")));
+            }
+            if (ledger.isBlackholed(xrplWallet)) {
+                list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletBlackholed")));
+            }
         }
 
         return list.toArray(new ValidationResult[0]);
@@ -72,7 +80,6 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
 
         return false;
     }
-
 
     @Override
     public WalletHistoryValidator getHistoryValidator() {

@@ -6,8 +6,6 @@ import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
-import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
@@ -25,7 +23,6 @@ import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -109,19 +106,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.exists(WalletConverter.from(wallet));
     }
 
-    @Override
-    public ValidationResult[] validateReceiver(Wallet wallet) {
-        var list = new ArrayList<ValidationResult>();
-        var xrplWallet = WalletConverter.from(wallet);
+    public boolean requiresDestinationTag(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+        return api.requiresDestinationTag(wallet);
+    }
 
-        if (api.requiresDestinationTag(xrplWallet)) {
-            list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletDestTag")));
-        }
-        if (api.isBlackholed(xrplWallet)) {
-            list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletBlackholed")));
-        }
-
-        return list.toArray(new ValidationResult[0]);
+    public boolean isBlackholed(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+        return api.isBlackholed(wallet);
     }
 
     public boolean walletAcceptsXrp(Wallet wallet) {

@@ -3,7 +3,6 @@ package com.radynamics.dallipay.iso20022.pain001;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
@@ -113,11 +112,6 @@ public class TestLedger implements Ledger {
     @Override
     public boolean exists(Wallet wallet) {
         return true;
-    }
-
-    @Override
-    public ValidationResult[] validateReceiver(Wallet wallet) {
-        return new ValidationResult[0];
     }
 
     @Override

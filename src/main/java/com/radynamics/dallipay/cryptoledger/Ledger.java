@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import okhttp3.HttpUrl;
@@ -29,8 +28,6 @@ public interface Ledger {
     TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception;
 
     boolean exists(Wallet wallet);
-
-    ValidationResult[] validateReceiver(Wallet wallet);
 
     NetworkInfo getNetwork();
 

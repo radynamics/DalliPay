@@ -31,10 +31,6 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         if (t.getReceiverWallet() != null) {
             var walletValidations = wv.validate(t.getReceiverWallet(), res.getString("receiver"));
             list.addAll(Arrays.asList(walletValidations));
-
-            if (walletValidations.length == 0) {
-                list.addAll(Arrays.asList(t.getLedger().validateReceiver(t.getReceiverWallet())));
-            }
         }
 
         if (t.getSenderWallet() == null) {
