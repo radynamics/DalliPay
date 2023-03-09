@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.iso20022;
 
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
@@ -81,11 +82,11 @@ public class Payment {
         return cryptoTrx.getSenderWallet();
     }
 
-    public Integer getDestinationTag() {
+    public UnsignedInteger getDestinationTag() {
         return cryptoTrx.getDestinationTag();
     }
 
-    public void setDestinationTag(Integer destinationTag) {
+    public void setDestinationTag(UnsignedInteger destinationTag) {
         cryptoTrx.setDestinationTag(destinationTag);
     }
 

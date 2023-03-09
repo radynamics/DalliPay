@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 
 public class DestinationTagInputValidator implements InputControlValidator {
@@ -15,7 +16,7 @@ public class DestinationTagInputValidator implements InputControlValidator {
         return builder.isValid((String) value);
     }
 
-    public Integer getValidOrNull(String text) {
+    public UnsignedInteger getValidOrNull(String text) {
         if (!builder.isValid(text)) {
             return null;
         }

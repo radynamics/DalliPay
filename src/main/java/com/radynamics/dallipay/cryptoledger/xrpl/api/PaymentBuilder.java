@@ -29,7 +29,7 @@ public class PaymentBuilder {
     public ImmutablePayment.Builder build() throws LedgerException {
         var sender = getSender();
         var receiver = Address.of(transaction.getReceiverWallet().getPublicKey());
-        Optional<UnsignedInteger> destinationTag = transaction.getDestinationTag() == null ? Optional.empty() : Optional.of(UnsignedInteger.valueOf(transaction.getDestinationTag()));
+        Optional<UnsignedInteger> destinationTag = transaction.getDestinationTag() == null ? Optional.empty() : Optional.of(transaction.getDestinationTag());
 
         var memos = new ArrayList<MemoWrapper>();
         var memoData = PayloadConverter.toMemo(transaction.getStructuredReferences(), transaction.getMessages());

@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.Fee;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Ledger;
@@ -21,7 +22,7 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     private ZonedDateTime booked;
     private com.radynamics.dallipay.cryptoledger.xrpl.Wallet senderWallet;
     private com.radynamics.dallipay.cryptoledger.xrpl.Wallet receiverWallet;
-    private Integer destinationTag;
+    private UnsignedInteger destinationTag;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
@@ -91,12 +92,12 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     }
 
     @Override
-    public Integer getDestinationTag() {
+    public UnsignedInteger getDestinationTag() {
         return destinationTag;
     }
 
     @Override
-    public void setDestinationTag(Integer destinationTag) {
+    public void setDestinationTag(UnsignedInteger destinationTag) {
         this.destinationTag = destinationTag;
     }
 

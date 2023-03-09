@@ -1,15 +1,16 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.google.common.primitives.UnsignedInteger;
 import org.apache.commons.lang3.StringUtils;
 
 public class DestinationTagBuilder implements com.radynamics.dallipay.cryptoledger.DestinationTagBuilder {
-    private final Integer destinationTag;
+    private final UnsignedInteger destinationTag;
 
     public DestinationTagBuilder() {
         this(null);
     }
 
-    private DestinationTagBuilder(Integer destinationTag) {
+    private DestinationTagBuilder(UnsignedInteger destinationTag) {
         this.destinationTag = destinationTag;
     }
 
@@ -18,13 +19,16 @@ public class DestinationTagBuilder implements com.radynamics.dallipay.cryptoledg
         return StringUtils.isEmpty(value) || parse(value) != null;
     }
 
-    private Integer parse(String value) {
-        if (value == null || value.length() != 6) {
+    private UnsignedInteger parse(String value) {
+        if (value == null || value.length() == 0) {
             return null;
         }
 
-        var num = Integer.valueOf(value);
-        return 100000 <= num && num <= 999999 ? num : null;
+        try {
+            return UnsignedInteger.valueOf(value);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -33,7 +37,7 @@ public class DestinationTagBuilder implements com.radynamics.dallipay.cryptoledg
     }
 
     @Override
-    public Integer build() {
+    public UnsignedInteger build() {
         return destinationTag;
     }
 }

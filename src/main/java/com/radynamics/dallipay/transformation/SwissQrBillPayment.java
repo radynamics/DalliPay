@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.transformation;
 
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.ExpectedCurrency;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
@@ -156,7 +157,7 @@ public class SwissQrBillPayment {
 
         var o = new QrBillCc();
         o.receiverWallet = toWalletOrNull(elements, "10");
-        o.destinationTag = toIntegerOrNull(elements, "11");
+        o.destinationTag = toUnsignedIntegerOrNull(elements, "11");
         o.expectedCcyIssuer = toWalletOrNull(elements, "20");
         return o;
     }
@@ -175,7 +176,7 @@ public class SwissQrBillPayment {
         return index != -1 && index + 1 < elements.size();
     }
 
-    private Integer toIntegerOrNull(List<String> elements, String tag) {
+    private UnsignedInteger toUnsignedIntegerOrNull(List<String> elements, String tag) {
         if (!existsTagWithValue(elements, tag)) {
             return null;
         }
@@ -188,6 +189,6 @@ public class SwissQrBillPayment {
     private static class QrBillCc {
         public Wallet receiverWallet;
         public Wallet expectedCcyIssuer;
-        public Integer destinationTag;
+        public UnsignedInteger destinationTag;
     }
 }
