@@ -84,7 +84,7 @@ public class WalletField extends JPanel {
         }
         {
             destinationTag = new JTextField();
-            destinationTag.setColumns(5);
+            destinationTag.setColumns(6);
             destinationTag.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("destinationTag.placeholderText"));
             destinationTag.setToolTipText(res.getString("destinationTag.tooltipText"));
             destinationTag.setInputVerifier(new InputVerifier() {
