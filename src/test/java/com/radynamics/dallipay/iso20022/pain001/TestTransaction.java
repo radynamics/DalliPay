@@ -1,6 +1,5 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.Fee;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Ledger;
@@ -88,12 +87,12 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
     }
 
     @Override
-    public UnsignedInteger getDestinationTag() {
+    public String getDestinationTag() {
         return null;
     }
 
     @Override
-    public void setDestinationTag(UnsignedInteger destinationTag) {
+    public void setDestinationTag(String destinationTag) {
         throw new NotSupportedException();
     }
 

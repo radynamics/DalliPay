@@ -29,7 +29,12 @@ public class PaymentBuilder {
     public ImmutablePayment.Builder build() throws LedgerException {
         var sender = getSender();
         var receiver = Address.of(transaction.getReceiverWallet().getPublicKey());
-        Optional<UnsignedInteger> destinationTag = transaction.getDestinationTag() == null ? Optional.empty() : Optional.of(transaction.getDestinationTag());
+
+        var destTagBuilder = transaction.getLedger().createDestinationTagBuilder();
+        if (!destTagBuilder.isValid(transaction.getDestinationTag())) {
+            throw new LedgerException(String.format("Specified destinationTag %s is invalid.", transaction.getDestinationTag()));
+        }
+        Optional<UnsignedInteger> destinationTag = StringUtils.isEmpty(transaction.getDestinationTag()) ? Optional.empty() : Optional.of(destTagBuilder.from(transaction.getDestinationTag()).build());
 
         var memos = new ArrayList<MemoWrapper>();
         var memoData = PayloadConverter.toMemo(transaction.getStructuredReferences(), transaction.getMessages());

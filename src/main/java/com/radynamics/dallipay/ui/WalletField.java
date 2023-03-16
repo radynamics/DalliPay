@@ -2,7 +2,6 @@ package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
@@ -326,11 +325,12 @@ public class WalletField extends JPanel {
         return getText().length() == 0 ? null : ledger.createWallet(txt.getText(), null);
     }
 
-    public UnsignedInteger getDestinationTag() {
-        return destinationTagValidator.getValidOrNull(destinationTag.getText().trim());
+    public String getDestinationTag() {
+        return destinationTag.getText().trim();
     }
 
-    public void setDestinationTag(UnsignedInteger destinationTag) {
-        this.destinationTag.setText(destinationTag == null ? "" : String.valueOf(destinationTag));
+    public void setDestinationTag(String destinationTag) {
+        this.destinationTag.setText(destinationTag);
+        destinationTagDecorator.update(destinationTag);
     }
 }

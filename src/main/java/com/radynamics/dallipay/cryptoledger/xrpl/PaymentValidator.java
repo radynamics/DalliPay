@@ -41,6 +41,10 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
             if (t.getDestinationTag() == null && ledger.requiresDestinationTag(xrplWallet)) {
                 list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletDestTag")));
             }
+            var destTagBuilder = t.getLedger().createDestinationTagBuilder();
+            if (!destTagBuilder.isValid(t.getDestinationTag())) {
+                list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("receiverWalletDestTagInvalid"), t.getDestinationTag())));
+            }
             if (ledger.isBlackholed(xrplWallet)) {
                 list.add(new ValidationResult(ValidationState.Error, res.getString("receiverWalletBlackholed")));
             }

@@ -157,7 +157,7 @@ public class SwissQrBillPayment {
 
         var o = new QrBillCc();
         o.receiverWallet = toWalletOrNull(elements, "10");
-        o.destinationTag = toUnsignedIntegerOrNull(elements, "11");
+        o.destinationTag = toStringOrNull(elements, "11");
         o.expectedCcyIssuer = toWalletOrNull(elements, "20");
         return o;
     }
@@ -176,19 +176,17 @@ public class SwissQrBillPayment {
         return index != -1 && index + 1 < elements.size();
     }
 
-    private UnsignedInteger toUnsignedIntegerOrNull(List<String> elements, String tag) {
+    private String toStringOrNull(List<String> elements, String tag) {
         if (!existsTagWithValue(elements, tag)) {
             return null;
         }
         var index = elements.indexOf(tag);
-        var value = elements.get(index + 1);
-        var builder = ledger.createDestinationTagBuilder();
-        return builder.isValid(value) ? builder.from(value).build() : null;
+        return elements.get(index + 1);
     }
 
     private static class QrBillCc {
         public Wallet receiverWallet;
         public Wallet expectedCcyIssuer;
-        public UnsignedInteger destinationTag;
+        public String destinationTag;
     }
 }

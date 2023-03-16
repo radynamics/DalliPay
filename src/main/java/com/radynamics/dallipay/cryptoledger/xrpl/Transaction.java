@@ -22,7 +22,7 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     private ZonedDateTime booked;
     private com.radynamics.dallipay.cryptoledger.xrpl.Wallet senderWallet;
     private com.radynamics.dallipay.cryptoledger.xrpl.Wallet receiverWallet;
-    private UnsignedInteger destinationTag;
+    private String destinationTag;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
@@ -92,12 +92,12 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     }
 
     @Override
-    public UnsignedInteger getDestinationTag() {
+    public String getDestinationTag() {
         return destinationTag;
     }
 
     @Override
-    public void setDestinationTag(UnsignedInteger destinationTag) {
+    public void setDestinationTag(String destinationTag) {
         this.destinationTag = destinationTag;
     }
 

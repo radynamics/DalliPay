@@ -82,11 +82,11 @@ public class Payment {
         return cryptoTrx.getSenderWallet();
     }
 
-    public UnsignedInteger getDestinationTag() {
+    public String getDestinationTag() {
         return cryptoTrx.getDestinationTag();
     }
 
-    public void setDestinationTag(UnsignedInteger destinationTag) {
+    public void setDestinationTag(String destinationTag) {
         cryptoTrx.setDestinationTag(destinationTag);
     }
 
