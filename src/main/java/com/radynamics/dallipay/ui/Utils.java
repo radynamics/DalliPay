@@ -13,6 +13,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public final class Utils {
     public static final NumberFormat createFormatFiat() {
@@ -110,7 +112,9 @@ public final class Utils {
     }
 
     public static String[] fromMultilineText(String text) {
-        return text.split("\\r?\\n");
+        var lines = new ArrayList<>(Arrays.asList(text.split("\\r?\\n")));
+        lines.removeAll(Arrays.asList(""));
+        return lines.toArray(new String[0]);
     }
 
     public static JLabel formatSecondaryInfo(JLabel lbl) {
