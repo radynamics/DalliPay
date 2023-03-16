@@ -2,8 +2,12 @@ package com.radynamics.dallipay.ui;
 
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 
+import java.util.ResourceBundle;
+
 public class DestinationTagInputValidator implements InputControlValidator {
     private final DestinationTagBuilder builder;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public DestinationTagInputValidator(DestinationTagBuilder builder) {
         if (builder == null) throw new IllegalArgumentException("Parameter 'builder' cannot be null");
@@ -17,6 +21,6 @@ public class DestinationTagInputValidator implements InputControlValidator {
 
     @Override
     public String getValidExampleInput() {
-        return "\"123456\"";
+        return res.getString("DestinationTagInputValidator.exampleInput");
     }
 }
