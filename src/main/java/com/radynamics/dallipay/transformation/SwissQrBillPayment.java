@@ -1,6 +1,5 @@
 package com.radynamics.dallipay.transformation;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.ExpectedCurrency;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
@@ -157,31 +156,30 @@ public class SwissQrBillPayment {
 
         var o = new QrBillCc();
         o.receiverWallet = toWalletOrNull(elements, "10");
-        o.destinationTag = toStringOrNull(elements, "11");
+        o.destinationTag = getTagValueOrNull(elements, "11");
         o.expectedCcyIssuer = toWalletOrNull(elements, "20");
         return o;
     }
 
     private Wallet toWalletOrNull(List<String> elements, String tag) {
-        if (!existsTagWithValue(elements, tag)) {
+        var value = getTagValueOrNull(elements, tag);
+        if (value == null) {
             return null;
         }
-        var index = elements.indexOf(tag);
-        var value = elements.get(index + 1);
         return ledger.isValidPublicKey(value) ? ledger.createWallet(value, "") : null;
     }
 
-    private boolean existsTagWithValue(List<String> elements, String tag) {
-        var index = elements.indexOf(tag);
-        return index != -1 && index + 1 < elements.size();
-    }
-
-    private String toStringOrNull(List<String> elements, String tag) {
+    private static String getTagValueOrNull(List<String> elements, String tag) {
         if (!existsTagWithValue(elements, tag)) {
             return null;
         }
         var index = elements.indexOf(tag);
         return elements.get(index + 1);
+    }
+
+    private static boolean existsTagWithValue(List<String> elements, String tag) {
+        var index = elements.indexOf(tag);
+        return index != -1 && index + 1 < elements.size();
     }
 
     private static class QrBillCc {
