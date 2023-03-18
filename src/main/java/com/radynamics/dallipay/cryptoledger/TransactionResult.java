@@ -7,6 +7,7 @@ public class TransactionResult {
     private boolean hasMarker;
     private boolean hasMaxPageCounterReached;
     private boolean hasNoTransactions;
+    private boolean existsWallet;
 
     public void add(Transaction t) {
         transactions.add(t);
@@ -38,5 +39,13 @@ public class TransactionResult {
 
     public boolean hasNoTransactions() {
         return hasNoTransactions;
+    }
+
+    public boolean existsWallet() {
+        return existsWallet;
+    }
+
+    public void setExistsWallet(boolean existsWallet) {
+        this.existsWallet = existsWallet;
     }
 }

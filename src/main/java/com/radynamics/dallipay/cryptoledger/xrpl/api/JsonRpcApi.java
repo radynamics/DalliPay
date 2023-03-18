@@ -100,6 +100,13 @@ public class JsonRpcApi implements TransactionSource {
         var pageCounter = 0;
         var maxPages = 10;
         var result = xrplClient.accountTransactions(params.build());
+
+        if (result.transactions().size() == 0) {
+            tr.setHasNoTransactions(true);
+            tr.setExistsWallet(exists(result.account()));
+            return;
+        }
+
         while (tr.transactions().length < limit && pageCounter < maxPages && result.transactions().size() > 0) {
             for (var r : result.transactions()) {
                 if (tr.transactions().length >= limit) {
@@ -261,6 +268,10 @@ public class JsonRpcApi implements TransactionSource {
             return true;
         });
         return tr.transactions();
+    }
+
+    private boolean exists(Address wallet) {
+        return exists(WalletConverter.from(wallet));
     }
 
     public boolean exists(Wallet wallet) {

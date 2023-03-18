@@ -449,7 +449,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     } else if (result.hasMaxPageCounterReached()) {
                         showInfo(res.getString("maxPageCounter"));
                     } else if (result.hasNoTransactions()) {
-                        showInfo(res.getString("noTrx"));
+                        showInfo(result.existsWallet() ? res.getString("noTrx") : res.getString("walletDoesntExist"));
                     } else {
                         hideInfo();
                     }
