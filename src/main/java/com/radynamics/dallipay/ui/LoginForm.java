@@ -42,11 +42,7 @@ public class LoginForm {
     }
 
     private boolean show(String labelText, String title) {
-        var frm = new JFrame("DalliPay");
-        frm.setIconImage(Utils.getProductIcon());
-        frm.setUndecorated(true);
-        frm.setVisible(true);
-        frm.setLocationRelativeTo(null);
+        var frm = Utils.createDummyForm();
 
         var pnl = new JPanel();
         pnl.setLayout(new GridLayout(2, 1));

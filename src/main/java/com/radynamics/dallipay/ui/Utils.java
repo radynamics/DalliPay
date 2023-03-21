@@ -155,4 +155,13 @@ public final class Utils {
         c.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
         c.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
     }
+
+    public static JFrame createDummyForm() {
+        var frm = new JFrame("DalliPay");
+        frm.setIconImage(getProductIcon());
+        frm.setUndecorated(true);
+        frm.setVisible(true);
+        frm.setLocationRelativeTo(null);
+        return frm;
+    }
 }

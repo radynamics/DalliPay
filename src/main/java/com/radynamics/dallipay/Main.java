@@ -12,10 +12,7 @@ import com.radynamics.dallipay.exchange.Coinbase;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
 import com.radynamics.dallipay.transformation.DbAccountMappingSource;
 import com.radynamics.dallipay.transformation.TransformInstruction;
-import com.radynamics.dallipay.ui.Consts;
-import com.radynamics.dallipay.ui.LoginForm;
-import com.radynamics.dallipay.ui.MainForm;
-import com.radynamics.dallipay.ui.Utils;
+import com.radynamics.dallipay.ui.*;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +75,9 @@ public class Main {
                 FlatLightLaf.setup();
 
                 var existsDb = Database.exists();
+                if (!existsDb && !showTerms()) {
+                    return;
+                }
                 if (existsDb && !login(password)) {
                     return;
                 }
@@ -160,6 +160,11 @@ public class Main {
         t.setHistoricExchangeRateSource(ledger.createHistoricExchangeRateSource());
         t.getHistoricExchangeRateSource().init();
         return t;
+    }
+
+    private static boolean showTerms() {
+        var frm = new TermsForm();
+        return frm.show();
     }
 
     private static boolean login(String password) {
