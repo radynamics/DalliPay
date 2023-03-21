@@ -74,7 +74,7 @@ public class PollingObserver<T> {
 
         var response = json.optJSONObject("response");
         // Not yet signed, waiting for response
-        if (response == null || response.isNull("dispatched_result")) {
+        if (response == null || response.isNull("dispatched_result") || response.getString("dispatched_result").length() == 0) {
             return;
         }
 
