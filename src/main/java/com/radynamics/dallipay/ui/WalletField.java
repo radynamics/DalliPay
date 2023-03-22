@@ -284,6 +284,7 @@ public class WalletField extends JPanel {
 
     public void setEditable(boolean b) {
         txt.setEditable(b);
+        destinationTag.setEditable(b);
     }
 
     public void setDestinationTagVisible(boolean visible) {
