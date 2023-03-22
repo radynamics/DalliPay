@@ -34,7 +34,7 @@ public class PaymentEdit {
         }
 
         // Edit exchange rates before export is allowed
-        return payment.getOrigin() == Origin.Ledger && payment.getExchangeRate() == null || !payment.getExchangeRate().isNone();
+        return payment.getOrigin() == Origin.Ledger && (payment.getExchangeRate() == null || !payment.getExchangeRate().isNone());
     }
 
     public boolean accountMappingEditable() {

@@ -35,10 +35,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -490,8 +488,9 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private void showExchangeRateEdit() {
         var uniques = new HashMap<String, ExchangeRate>();
+        var editablePayments = new HashSet<Payment>();
         for (var p : payments) {
-            if (p.isSameCcy()) {
+            if (p.isSameCcy() || !PaymentEdit.create(p).exchangeRateEditable()) {
                 continue;
             }
             var r = p.getExchangeRate();
@@ -499,6 +498,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 r = ExchangeRate.Undefined(p.createCcyPair());
             }
             uniques.put(r.getPair().getDisplayText(), r);
+            editablePayments.add(p);
         }
 
         if (uniques.size() == 0) {
@@ -527,14 +527,14 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
         refreshExchange();
         for (var ccyPairItem : uniques.entrySet()) {
-            for (var p : payments) {
+            for (var p : editablePayments) {
                 if (ccyPairItem.getKey().equals(p.createCcyPair().getDisplayText())) {
                     p.setExchangeRate(ccyPairItem.getValue());
                 }
             }
         }
 
-        var paymentArray = payments.toArray(new Payment[0]);
+        var paymentArray = editablePayments.toArray(new Payment[0]);
         var ar = new AmountRefresher(paymentArray);
         ar.refresh();
 
