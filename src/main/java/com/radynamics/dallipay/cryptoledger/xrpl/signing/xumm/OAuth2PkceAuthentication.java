@@ -253,10 +253,11 @@ public class OAuth2PkceAuthentication implements OAuth2PkceListener {
         }
 
         private void response(HttpExchange httpExchange, String responseText) throws IOException {
-            httpExchange.sendResponseHeaders(200, responseText.length());
+            byte[] bytes = responseText.getBytes(StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(200, bytes.length);
 
             var outputStream = httpExchange.getResponseBody();
-            outputStream.write(responseText.getBytes());
+            outputStream.write(bytes);
             outputStream.flush();
             outputStream.close();
         }
