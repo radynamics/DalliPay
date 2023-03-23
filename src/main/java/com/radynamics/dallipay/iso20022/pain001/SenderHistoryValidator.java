@@ -53,11 +53,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             return new ValidationResult[0];
         }
 
-        synchronized (this) {
-            if (!cache.isPresent(p.getSenderWallet())) {
-                loadHistory(ledger, p.getSenderWallet());
-            }
-        }
+        loadHistory(ledger, p.getSenderWallet());
 
         var paymentHistory = cache.get(p.getSenderWallet());
         var similar = paymentHistory.oldestSimilarOrDefault(p);
@@ -82,17 +78,19 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
             return;
         }
 
-        if (!cache.isPresent(wallet)) {
-            var paymentHistory = ledger.getPaymentHistoryProvider();
+        synchronized (this) {
+            if (!cache.isPresent(wallet)) {
+                var paymentHistory = ledger.getPaymentHistoryProvider();
 
-            var desired = ZonedDateTime.now().minusDays(40);
-            var availableSince = ledger.getNetwork().historyAvailableSince();
-            var since = desired.isBefore(availableSince) ? availableSince : desired;
+                var desired = ZonedDateTime.now().minusDays(40);
+                var availableSince = ledger.getNetwork().historyAvailableSince();
+                var since = desired.isBefore(availableSince) ? availableSince : desired;
 
-            // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
-            var sinceDaysAgo = Duration.between(Utils.endOfDay(since), ZonedDateTime.now()).toDays();
-            paymentHistory.load(ledger, wallet, sinceDaysAgo);
-            cache.add(wallet, paymentHistory);
+                // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
+                var sinceDaysAgo = Duration.between(Utils.endOfDay(since), ZonedDateTime.now()).toDays();
+                paymentHistory.load(ledger, wallet, sinceDaysAgo);
+                cache.add(wallet, paymentHistory);
+            }
         }
     }
 }
