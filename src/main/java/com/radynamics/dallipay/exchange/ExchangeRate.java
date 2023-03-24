@@ -66,6 +66,10 @@ public class ExchangeRate {
         return pointInTime;
     }
 
+    public void setPointInTime(ZonedDateTime pointInTime) {
+        this.pointInTime = pointInTime;
+    }
+
     @Override
     public String toString() {
         return String.format("pair=%s, rate=%s", pair, rate);

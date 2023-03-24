@@ -239,6 +239,7 @@ public class ExchangeRatesForm extends JDialog {
     private void apply() {
         for (var i = 0; i < rates.length; i++) {
             rates[i].setRate(getTxtValue(txts.get(i)));
+            rates[i].setPointInTime(ZonedDateTime.now());
         }
     }
 
