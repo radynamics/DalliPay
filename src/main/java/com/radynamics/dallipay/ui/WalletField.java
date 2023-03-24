@@ -327,7 +327,8 @@ public class WalletField extends JPanel {
     }
 
     public String getDestinationTag() {
-        return destinationTag.getText().trim();
+        var value = destinationTag.getText().trim();
+        return value.length() == 0 ? null : value;
     }
 
     public void setDestinationTag(String destinationTag) {
