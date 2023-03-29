@@ -9,7 +9,7 @@ As a ***payee*** you can fetch received cryptocurrency payments from your wallet
 Latest releases for various platforms are available in [releases](https://github.com/radynamics/DalliPay/releases) section. Visit [www.dallipay.com](https://www.dallipay.com) for more information.
 
 #### Demo (YouTube)
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/-u307nu72SQ/0.jpg)](https://www.youtube.com/watch?v=-u307nu72SQ)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/0zHE5hLu2U8/0.jpg)](https://www.youtube.com/watch?v=0zHE5hLu2U8)
 
 #### Supported crypto ledgers (cryptocurrencies)
 - [XRPL](https://xrpl.org/) (XRP)
