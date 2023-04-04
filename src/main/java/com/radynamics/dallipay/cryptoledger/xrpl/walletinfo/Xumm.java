@@ -24,7 +24,7 @@ public class Xumm implements WalletInfoProvider {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     @Override
-    public WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException {
+    public synchronized WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException {
         cache.evictOutdated();
         var data = cache.get(wallet);
         if (data != null) {
