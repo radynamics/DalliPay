@@ -98,8 +98,9 @@ public class LedgerRangeConverter {
             }
 
             var offset = UnsignedInteger.valueOf(100);
-            indexCandidate = searchEarlier ? indexCandidate.minus(offset) : indexCandidate.plus(offset);
-            log.trace(String.format("Ledger index %s not found, looking for %s instead", indexCandidate, indexCandidate));
+            var nextCandidate = searchEarlier ? indexCandidate.minus(offset) : indexCandidate.plus(offset);
+            log.trace(String.format("Ledger index %s not found, looking for %s instead", indexCandidate, nextCandidate));
+            indexCandidate = nextCandidate;
         }
 
         return null;
