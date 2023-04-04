@@ -278,7 +278,7 @@ public class JsonRpcApi implements TransactionSource {
         return getAccountData(wallet) != null;
     }
 
-    private AccountRootObject getAccountData(Wallet wallet) {
+    private synchronized AccountRootObject getAccountData(Wallet wallet) {
         accountDataCache.evictOutdated();
         var data = accountDataCache.get(wallet);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
