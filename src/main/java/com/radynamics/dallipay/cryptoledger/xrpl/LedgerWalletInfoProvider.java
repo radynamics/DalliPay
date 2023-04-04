@@ -9,12 +9,14 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class LedgerWalletInfoProvider implements WalletInfoProvider {
-    private Ledger ledger;
+    private final Ledger ledger;
+    private final DomainVerifier domainVerifier;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public LedgerWalletInfoProvider(Ledger ledger) {
         this.ledger = ledger;
+        this.domainVerifier = new DomainVerifier(ledger);
     }
 
     public WalletInfo[] list(com.radynamics.dallipay.cryptoledger.Wallet wallet) {
@@ -27,8 +29,7 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
         var domain = ledger.getAccountDomain(WalletConverter.from(wallet));
         if (!StringUtils.isAllEmpty(domain)) {
             var wi = new WalletInfo(this, domain, InfoType.Domain);
-            var dv = new DomainVerifier(ledger.getNetwork());
-            wi.setVerified(dv.isValid(wallet, domain));
+            wi.setVerified(domainVerifier.isValid(wallet, domain));
             list.add(wi);
         }
 
