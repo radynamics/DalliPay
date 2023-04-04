@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,11 +21,10 @@ public class LedgerWalletInfoProvider implements WalletInfoProvider {
         if (!ledger.isValidPublicKey(wallet.getPublicKey())) {
             return new WalletInfo[0];
         }
-        var api = new JsonRpcApi(ledger, ledger.getNetwork());
 
         var list = new ArrayList<WalletInfo>();
 
-        var domain = api.getAccountDomain(WalletConverter.from(wallet));
+        var domain = ledger.getAccountDomain(WalletConverter.from(wallet));
         if (!StringUtils.isAllEmpty(domain)) {
             var wi = new WalletInfo(this, domain, InfoType.Domain);
             var dv = new DomainVerifier(ledger.getNetwork());

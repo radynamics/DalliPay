@@ -101,6 +101,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.listTrustlines(wallet);
     }
 
+    public String getAccountDomain(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+        return api.getAccountDomain(wallet);
+    }
+
     @Override
     public boolean exists(Wallet wallet) {
         return api.exists(WalletConverter.from(wallet));
