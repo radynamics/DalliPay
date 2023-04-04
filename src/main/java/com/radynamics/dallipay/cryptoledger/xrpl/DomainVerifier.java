@@ -21,7 +21,8 @@ public class DomainVerifier {
     public boolean isValid(Wallet wallet, String domain) {
         Toml toml;
         try {
-            var url = new URL(String.format("https://%s/.well-known/xrp-ledger.toml", domain));
+            var scheme = domain.startsWith("https://") ? "" : "https://";
+            var url = new URL(String.format("%s%s/.well-known/xrp-ledger.toml", scheme, domain));
             toml = new Toml().read(url.openStream());
         } catch (Exception e) {
             log.info(e.getMessage(), e);
