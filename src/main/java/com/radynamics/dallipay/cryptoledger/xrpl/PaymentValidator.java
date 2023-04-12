@@ -33,7 +33,7 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
             list.addAll(validateTrustlineLimit(t.getReceiverWallet(), t.getAmountTransaction()));
 
             var ccy = t.getAmountTransaction().getCcy();
-            if (!walletAccepts(t.getReceiverWallet(), ccy)) {
+            if (ledger.exists(t.getReceiverWallet()) && !walletAccepts(t.getReceiverWallet(), ccy)) {
                 list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("receiverWalletDoesntAccept"), ccy.getCode())));
             }
 
