@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.Cache;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 
 public class TrustlineCache {
     private final Ledger ledger;

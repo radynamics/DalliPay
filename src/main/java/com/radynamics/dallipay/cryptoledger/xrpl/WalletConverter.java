@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import org.xrpl.xrpl4j.model.transactions.Address;
 
 public final class WalletConverter {

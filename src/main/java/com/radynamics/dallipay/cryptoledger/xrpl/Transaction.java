@@ -1,6 +1,5 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.Fee;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Ledger;
@@ -20,8 +19,8 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     private Ledger ledger;
     private Money amt;
     private ZonedDateTime booked;
-    private com.radynamics.dallipay.cryptoledger.xrpl.Wallet senderWallet;
-    private com.radynamics.dallipay.cryptoledger.xrpl.Wallet receiverWallet;
+    private com.radynamics.dallipay.cryptoledger.generic.Wallet senderWallet;
+    private com.radynamics.dallipay.cryptoledger.generic.Wallet receiverWallet;
     private String destinationTag;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
@@ -176,11 +175,11 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
         fee = value;
     }
 
-    public void setSender(com.radynamics.dallipay.cryptoledger.xrpl.Wallet sender) {
+    public void setSender(com.radynamics.dallipay.cryptoledger.generic.Wallet sender) {
         this.senderWallet = sender;
     }
 
-    public void setReceiver(com.radynamics.dallipay.cryptoledger.xrpl.Wallet receiver) {
+    public void setReceiver(com.radynamics.dallipay.cryptoledger.generic.Wallet receiver) {
         this.receiverWallet = receiver;
     }
 

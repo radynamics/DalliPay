@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
-import com.radynamics.dallipay.cryptoledger.xrpl.Wallet;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;

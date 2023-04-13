@@ -1,4 +1,4 @@
-package com.radynamics.dallipay.cryptoledger.xrpl;
+package com.radynamics.dallipay.cryptoledger.generic;
 
 import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
