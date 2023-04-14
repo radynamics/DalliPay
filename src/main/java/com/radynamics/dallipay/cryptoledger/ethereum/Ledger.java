@@ -4,7 +4,6 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.api.AlchemyApi;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.WalletConverter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.DemoExchange;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -46,9 +45,13 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         throw new NotImplementedException();
     }
 
+    public Wallet createWallet(String publicKey) {
+        return createWallet(publicKey, null);
+    }
+
     @Override
     public Wallet createWallet(String publicKey, String secret) {
-        return new com.radynamics.dallipay.cryptoledger.generic.Wallet(publicKey, secret);
+        return new com.radynamics.dallipay.cryptoledger.generic.Wallet(getId(), publicKey, secret);
     }
 
     @Override
@@ -58,7 +61,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public void refreshBalance(Wallet wallet, boolean useCache) {
-        api.refreshBalance(WalletConverter.from(wallet), useCache);
+        api.refreshBalance(wallet, useCache);
     }
 
     @Override
@@ -68,7 +71,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        return api.listPaymentsReceived(WalletConverter.from(wallet), period);
+        return api.listPaymentsReceived(wallet, period);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.radynamics.dallipay.ui.options.XrplPriceOracleEdit;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.IssuedCurrency;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
@@ -116,8 +117,8 @@ public class XrplPriceOracleEditor extends JPanel {
         var list = new ArrayList<IssuedCurrency>();
         for (var o : data) {
             list.add(new IssuedCurrency(new CurrencyPair(o.first, o.second),
-                    new Wallet(o.issuer),
-                    new Wallet(o.receiver)));
+                    new Wallet(LedgerId.Xrpl, o.issuer),
+                    new Wallet(LedgerId.Xrpl, o.receiver)));
         }
         return list;
     }

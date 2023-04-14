@@ -69,7 +69,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public Wallet createWallet(String publicKey, String secret) {
-        return new com.radynamics.dallipay.cryptoledger.generic.Wallet(publicKey, secret);
+        return new com.radynamics.dallipay.cryptoledger.generic.Wallet(getId(), publicKey, secret);
     }
 
     @Override

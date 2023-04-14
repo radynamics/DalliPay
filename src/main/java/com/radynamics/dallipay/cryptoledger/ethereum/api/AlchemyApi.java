@@ -7,7 +7,6 @@ import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.ethereum.Ledger;
-import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.codec.DecoderException;
@@ -43,7 +42,7 @@ public class AlchemyApi {
         this.accountBalanceCache = new Cache<>(network.getUrl().toString());
     }
 
-    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
+    public TransactionResult listPaymentsReceived(com.radynamics.dallipay.cryptoledger.Wallet wallet, DateTimeRange period) throws Exception {
         var tr = new TransactionResult();
         // https://docs.alchemy.com/reference/alchemy-getassettransfers
         // TODO: overhaul and replace demo code
@@ -82,8 +81,8 @@ public class AlchemyApi {
         var trx = new com.radynamics.dallipay.cryptoledger.xrpl.Transaction(ledger, amt);
         trx.setId(t.getString("hash"));
         trx.setBooked(getDateTimeOfBlock(BigInteger.valueOf(Integer.decode(t.getString("blockNum")))));
-        trx.setSender(new Wallet(t.getString("from")));
-        trx.setReceiver(new Wallet(t.getString("to")));
+        trx.setSender(ledger.createWallet(t.getString("from")));
+        trx.setReceiver(ledger.createWallet(t.getString("to")));
 
         // TODO: read transaction data/messages
         /*for (MemoWrapper mw : t.memos()) {
@@ -112,7 +111,7 @@ public class AlchemyApi {
         return DateTimeConvert.toUserTimeZone(ZonedDateTime.ofInstant(instant, ZoneId.of("UTC")));
     }
 
-    public void refreshBalance(Wallet wallet, boolean useCache) {
+    public void refreshBalance(com.radynamics.dallipay.cryptoledger.Wallet wallet, boolean useCache) {
         if (!useCache) {
             accountBalanceCache.evict(wallet);
         }
