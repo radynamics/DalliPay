@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
@@ -140,7 +139,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         var livenet = Arrays.stream(getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
-        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet);
+        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, this, livenet);
     }
 
     @Override

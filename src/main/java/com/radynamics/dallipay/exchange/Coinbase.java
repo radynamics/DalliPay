@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.exchange;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -13,10 +14,15 @@ import java.util.Scanner;
 
 public class Coinbase implements ExchangeRateProvider {
     final static Logger log = LogManager.getLogger(Coinbase.class);
-    private final String[] baseCurrencies = new String[]{"xrp"};
+    private final String[] baseCurrencies;
     private final ArrayList<ExchangeRate> exchangeRates = new ArrayList<>();
 
     public static final String ID = "coinbase";
+
+    public Coinbase(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        baseCurrencies = new String[]{ledger.getNativeCcySymbol()};
+    }
 
     @Override
     public String getId() {
