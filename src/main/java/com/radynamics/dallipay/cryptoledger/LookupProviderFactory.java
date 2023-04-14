@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
+import com.radynamics.dallipay.cryptoledger.ethereum.Etherscan;
 import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrpScan;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplOrg;
@@ -18,6 +19,13 @@ public class LookupProviderFactory {
                     return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
                     return new XrpScan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
+            }
+            case Ethereum -> {
+                lookupProviderId = lookupProviderId == null ? Etherscan.Id : lookupProviderId;
+                if (lookupProviderId.equals(Etherscan.Id)) {
+                    return new Etherscan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -40,6 +48,13 @@ public class LookupProviderFactory {
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
+            case Ethereum -> {
+                lookupProviderId = lookupProviderId == null ? Etherscan.Id : lookupProviderId;
+                if (lookupProviderId.equals(Etherscan.Id)) {
+                    return new Etherscan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
     }
@@ -50,7 +65,7 @@ public class LookupProviderFactory {
                 return new String[]{Bithomp.Id, XrplOrg.Id, XrpScan.Id};
             }
             case Ethereum -> {
-                return new String[0];
+                return new String[]{Etherscan.Id};
             }
             default -> throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -63,6 +78,8 @@ public class LookupProviderFactory {
             return XrplOrg.displayName;
         } else if (lookupProviderId.equals(XrpScan.Id)) {
             return XrpScan.displayName;
+        } else if (lookupProviderId.equals(Etherscan.Id)) {
+            return Etherscan.displayName;
         }
         throw new IllegalStateException("Unexpected value: " + lookupProviderId);
     }
