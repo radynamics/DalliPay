@@ -22,7 +22,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public LedgerId getId() {
-        return LedgerId.Xrpl;
+        return LedgerId.Ethereum;
     }
 
     @Override

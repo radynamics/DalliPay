@@ -49,6 +49,9 @@ public class LookupProviderFactory {
             case Xrpl -> {
                 return new String[]{Bithomp.Id, XrplOrg.Id, XrpScan.Id};
             }
+            case Ethereum -> {
+                return new String[0];
+            }
             default -> throw new IllegalStateException("Unexpected value: " + id);
         }
     }
