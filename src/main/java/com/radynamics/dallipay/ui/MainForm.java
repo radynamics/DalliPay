@@ -216,7 +216,7 @@ public class MainForm extends JFrame {
 
     private void saveLastUsedNetwork(NetworkInfo selected) {
         try (var repo = new ConfigRepo()) {
-            repo.setLastUsedRpcUrl(selected.getUrl());
+            repo.setLastUsedRpcUrl(transformInstruction.getLedger(), selected.getUrl());
             repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
