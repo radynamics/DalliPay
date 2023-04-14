@@ -31,6 +31,9 @@ dependencies {
     compile group: 'org.xrpl', name: 'xrpl4j-client', version: '2.5.1'
     compile group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.5.1'
 
+    compile 'org.web3j:core:4.9.7'
+    compile 'org.asynchttpclient:async-http-client:2.12.3'
+
     compile 'com.formdev:flatlaf:3.0'
     compile 'com.formdev:flatlaf-extras:3.0'
     compile 'com.formdev:svgSalamander:1.1.3'

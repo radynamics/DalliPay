@@ -2,11 +2,15 @@ package com.radynamics.dallipay.cryptoledger.ethereum;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.ethereum.api.AlchemyApi;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
+import com.radynamics.dallipay.cryptoledger.xrpl.WalletConverter;
+import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.DemoExchange;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
+import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import jakarta.ws.rs.NotSupportedException;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
@@ -14,6 +18,7 @@ import org.apache.commons.lang3.NotImplementedException;
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
+    private AlchemyApi api;
 
     @Override
     public LedgerId getId() {
@@ -27,7 +32,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public Transaction createTransaction() {
-        throw new NotImplementedException();
+        return new com.radynamics.dallipay.cryptoledger.xrpl.Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
 
     @Override
@@ -62,7 +67,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        throw new NotImplementedException();
+        return api.listPaymentsReceived(WalletConverter.from(wallet), period);
     }
 
     @Override
@@ -78,7 +83,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public void setNetwork(NetworkInfo network) {
         this.network = network;
-        // TODO: api = new JsonRpcApi(...
+        api = new AlchemyApi(this, network);
     }
 
     @Override
@@ -99,7 +104,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentPathFinder createPaymentPathFinder() {
-        throw new NotImplementedException();
+        return new com.radynamics.dallipay.cryptoledger.ethereum.PaymentPathFinder();
     }
 
     @Override
@@ -114,8 +119,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean isValidPublicKey(String publicKey) {
-        // TODO: implement
-        return false;
+        return org.web3j.crypto.WalletUtils.isValidAddress(publicKey);
     }
 
     @Override
@@ -126,8 +130,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
-        // TODO: implement
-        return new NetworkInfo[0];
+        var networks = new NetworkInfo[1];
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://eth-mainnet.g.alchemy.com/v2/5eFF_YzV9d6i6Fo5EO89EwSp5RfS-vri"));
+        return networks;
     }
 
     @Override
@@ -142,7 +147,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public Money roundNativeCcy(Money amt) {
-        throw new NotImplementedException();
+        if (!amt.getCcy().getCode().equals(getNativeCcySymbol())) {
+            throw new IllegalArgumentException(String.format("Currency must be %s instead of %s.", getNativeCcySymbol(), amt.getCcy()));
+        }
+
+        // Round to most accurate value supported by ledger.
+        final int digits = 18;
+        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
+        return Money.of(rounded.doubleValue(), amt.getCcy());
     }
 
     @Override
