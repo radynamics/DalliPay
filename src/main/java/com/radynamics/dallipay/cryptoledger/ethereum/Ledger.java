@@ -57,7 +57,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public void refreshBalance(Wallet wallet, boolean useCache) {
-        throw new NotImplementedException();
+        api.refreshBalance(WalletConverter.from(wallet), useCache);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean exists(Wallet wallet) {
-        throw new NotImplementedException();
+        return !wallet.getBalances().isEmpty();
     }
 
     @Override

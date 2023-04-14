@@ -2,6 +2,8 @@ package com.radynamics.dallipay.cryptoledger.ethereum.api;
 
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.Cache;
+import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.ethereum.Ledger;
@@ -15,10 +17,13 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -29,11 +34,13 @@ public class AlchemyApi {
     private final com.radynamics.dallipay.cryptoledger.ethereum.Ledger ledger;
     private final NetworkInfo network;
     private final Web3j web3;
+    private final Cache<MoneyBag> accountBalanceCache;
 
     public AlchemyApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
         web3 = Web3j.build(new HttpService(network.getUrl().toString()));
+        this.accountBalanceCache = new Cache<>(network.getUrl().toString());
     }
 
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
@@ -103,5 +110,34 @@ public class AlchemyApi {
 
         var instant = Instant.ofEpochSecond(result.getBlock().getTimestamp().longValue());
         return DateTimeConvert.toUserTimeZone(ZonedDateTime.ofInstant(instant, ZoneId.of("UTC")));
+    }
+
+    public void refreshBalance(Wallet wallet, boolean useCache) {
+        if (!useCache) {
+            accountBalanceCache.evict(wallet);
+        }
+
+        accountBalanceCache.evictOutdated();
+        var data = accountBalanceCache.get(wallet);
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (data != null || accountBalanceCache.isPresent(wallet)) {
+            return;
+        }
+
+        // TODO: implement ERC20
+        try {
+            var result = web3.ethGetBalance(wallet.getPublicKey(), DefaultBlockParameterName.LATEST).sendAsync().get();
+            wallet.getBalances().set(Money.of(weiToEth(result.getBalance()), new Currency(ledger.getNativeCcySymbol())));
+            accountBalanceCache.add(wallet, wallet.getBalances());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private Double weiToEth(BigInteger value) {
+        var scaledBalance = new BigDecimal(value).divide(
+                new BigDecimal(1000000000000000000L), 18, RoundingMode.HALF_UP
+        );
+        return scaledBalance.doubleValue();
     }
 }
