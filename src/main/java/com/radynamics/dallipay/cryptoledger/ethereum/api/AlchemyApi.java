@@ -139,4 +139,14 @@ public class AlchemyApi {
         );
         return scaledBalance.doubleValue();
     }
+
+    public Money estimatedGasPrice() {
+        try {
+            var result = web3.ethGasPrice().sendAsync().get();
+            return Money.of(weiToEth(result.getGasPrice()), new Currency(ledger.getNativeCcySymbol()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
 }

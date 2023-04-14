@@ -42,7 +42,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public FeeSuggestion getFeeSuggestion() {
-        throw new NotImplementedException();
+        var price = api.estimatedGasPrice();
+        if (price == null) {
+            return FeeSuggestion.None(getNativeCcySymbol());
+        }
+
+        return new FeeSuggestion(price.multiply(0.9d), price, price.multiply(1.1d));
     }
 
     public Wallet createWallet(String publicKey) {
