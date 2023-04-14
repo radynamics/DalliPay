@@ -99,7 +99,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentValidator createPaymentValidator() {
-        throw new NotImplementedException();
+        return new com.radynamics.dallipay.cryptoledger.ethereum.PaymentValidator(this);
     }
 
     @Override
