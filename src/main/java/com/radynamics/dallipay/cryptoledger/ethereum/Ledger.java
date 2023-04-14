@@ -9,6 +9,7 @@ import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.DemoExchange;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import jakarta.ws.rs.NotSupportedException;
@@ -88,7 +89,18 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
-        throw new NotImplementedException();
+        // TODO: implement
+        return new PaymentHistoryProvider() {
+            @Override
+            public void load(com.radynamics.dallipay.cryptoledger.Ledger ledger, Wallet wallet, long sinceDaysAgo) {
+                // do nothing
+            }
+
+            @Override
+            public Transaction oldestSimilarOrDefault(Payment p) {
+                return null;
+            }
+        };
     }
 
     @Override
