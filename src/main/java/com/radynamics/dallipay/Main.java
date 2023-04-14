@@ -65,7 +65,7 @@ public class Main {
 
             var f = new File(configFilePath);
 
-            var ledger = LedgerFactory.create(LedgerId.Xrpl);
+            var ledger = LedgerFactory.create(LedgerId.Ethereum);
             var config = f.exists() ? Config.load(ledger, configFilePath) : Config.fallback(ledger);
 
             var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
