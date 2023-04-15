@@ -45,7 +45,7 @@ public class AlchemyApi {
         // https://docs.alchemy.com/reference/alchemy-getassettransfers
         // TODO: overhaul and replace demo code
         var client = new DefaultAsyncHttpClient();
-        var fromBlock = "0x103FDDA"; // "0x0"
+        var fromBlock = "0x0"; // "0x0", "0x103FDDA"
         var toBlock = "latest"; // "latest", "0x103FDDF"
         var maxCount = "0x" + Integer.toHexString(3); // "0x3e8";
         client.prepare("POST", network.getUrl().toString())
