@@ -4,6 +4,8 @@ import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.Ledger;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.codec.DecoderException;
@@ -157,5 +159,9 @@ public class AlchemyApi {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    public TransactionSubmitter createTransactionSubmitter(UserDialogPrivateKeyProvider privateKeyProvider) {
+        return new RpcSubmitter(ledger, web3, privateKeyProvider);
     }
 }

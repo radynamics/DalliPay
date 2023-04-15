@@ -3,7 +3,9 @@ package com.radynamics.dallipay.cryptoledger.ethereum;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.api.AlchemyApi;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
+import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.DemoExchange;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -14,6 +16,10 @@ import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import jakarta.ws.rs.NotSupportedException;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
+import org.web3j.crypto.Credentials;
+
+import java.awt.*;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -144,8 +150,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean isSecretValid(Wallet wallet) {
-        // TODO: implement
-        return false;
+        try {
+            if (StringUtils.isEmpty(wallet.getSecret())) {
+                return false;
+            }
+            var cred = Credentials.create(wallet.getSecret());
+            // TODO: unclear why casing doesn't match
+            return cred.getAddress().equalsIgnoreCase(wallet.getPublicKey());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -163,7 +177,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
-        throw new NotImplementedException();
+        return new com.radynamics.dallipay.cryptoledger.ethereum.TransactionSubmitterFactory(this);
     }
 
     @Override
@@ -191,5 +205,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public DestinationTagBuilder createDestinationTagBuilder() {
         throw new NotSupportedException();
+    }
+
+    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
+        return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }
 }

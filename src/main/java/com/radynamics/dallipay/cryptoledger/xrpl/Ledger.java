@@ -6,7 +6,7 @@ import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
-import com.radynamics.dallipay.cryptoledger.xrpl.signing.UserDialogPrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
