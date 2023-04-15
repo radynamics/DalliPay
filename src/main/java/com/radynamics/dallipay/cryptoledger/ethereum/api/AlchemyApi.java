@@ -2,10 +2,7 @@ package com.radynamics.dallipay.cryptoledger.ethereum.api;
 
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
-import com.radynamics.dallipay.cryptoledger.Cache;
-import com.radynamics.dallipay.cryptoledger.MoneyBag;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.TransactionResult;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.Ledger;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -26,6 +23,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 public class AlchemyApi {
@@ -58,15 +56,26 @@ public class AlchemyApi {
                 .toCompletableFuture()
                 .thenAccept(response -> {
                     try {
-                        readTransactions(tr, new JSONObject(response.getResponseBody()));
+                        var json = new JSONObject(response.getResponseBody());
+                        throwIfError(json);
+                        readTransactions(tr, json);
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        throw new CompletionException(e);
                     }
                 })
                 .join();
 
         client.close();
         return tr;
+    }
+
+    private void throwIfError(JSONObject json) throws LedgerException {
+        var error = json.optJSONObject("error");
+        if (error == null) {
+            return;
+        }
+
+        throw new LedgerException(String.format("%s (Code %s)", error.getString("message"), error.getInt("code")));
     }
 
     private void readTransactions(TransactionResult tr, JSONObject json) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
