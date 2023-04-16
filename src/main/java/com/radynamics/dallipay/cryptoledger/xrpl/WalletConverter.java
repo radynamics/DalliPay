@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import org.xrpl.xrpl4j.model.transactions.Address;
 
 public final class WalletConverter {
@@ -8,6 +10,6 @@ public final class WalletConverter {
     }
 
     public static Wallet from(Address address) {
-        return new Wallet(address.value());
+        return new Wallet(LedgerId.Xrpl, address.value());
     }
 }

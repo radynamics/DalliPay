@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import org.apache.logging.log4j.LogManager;
@@ -68,7 +70,7 @@ public class XrplPriceOracleConfig {
         for (var i = 0; i < ccyPairs.length(); i++) {
             var k = ccyPairs.getJSONObject(i);
             var pair = new CurrencyPair(k.getString("first"), k.getString("second"));
-            list.add(new IssuedCurrency(pair, new Wallet(k.getString("issuer")), new Wallet((k.getString("receiver")))));
+            list.add(new IssuedCurrency(pair, new Wallet(LedgerId.Xrpl, k.getString("issuer")), new Wallet(LedgerId.Xrpl, k.getString("receiver"))));
         }
 
         return list.toArray(new IssuedCurrency[0]);
@@ -76,14 +78,14 @@ public class XrplPriceOracleConfig {
 
     public static List<IssuedCurrency> defaultsXumm() {
         var list = new ArrayList<IssuedCurrency>();
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet("r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet("rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet(LedgerId.Xrpl, "rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
+        list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet(LedgerId.Xrpl, "rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
         return list;
     }
 
     public static List<IssuedCurrency> defaultsRadyamics() {
-        var issuer = new Wallet("rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
-        var receiver = new Wallet("rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
+        var issuer = new Wallet(LedgerId.Xrpl, "rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
+        var receiver = new Wallet(LedgerId.Xrpl, "rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
         var list = new ArrayList<IssuedCurrency>();
         list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
         list.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));

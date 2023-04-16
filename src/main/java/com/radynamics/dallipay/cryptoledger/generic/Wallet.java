@@ -1,19 +1,20 @@
-package com.radynamics.dallipay.cryptoledger.xrpl;
+package com.radynamics.dallipay.cryptoledger.generic;
 
-import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.MoneyBag;
 
 public class Wallet implements com.radynamics.dallipay.cryptoledger.Wallet {
-
+    private final LedgerId ledgerId;
     private String publicKey;
     private String secret;
     private MoneyBag balances = new MoneyBag();
 
-    public Wallet(String publicKey) {
-        this(publicKey, null);
+    public Wallet(LedgerId ledgerId, String publicKey) {
+        this(ledgerId, publicKey, null);
     }
 
-    public Wallet(String publicKey, String secret) {
+    public Wallet(LedgerId ledgerId, String publicKey, String secret) {
+        this.ledgerId = ledgerId;
         this.publicKey = publicKey;
         this.secret = secret;
     }
@@ -40,7 +41,7 @@ public class Wallet implements com.radynamics.dallipay.cryptoledger.Wallet {
 
     @Override
     public LedgerId getLedgerId() {
-        return LedgerId.Xrpl;
+        return ledgerId;
     }
 
     @Override

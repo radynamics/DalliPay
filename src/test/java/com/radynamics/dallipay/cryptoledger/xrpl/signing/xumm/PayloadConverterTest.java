@@ -2,9 +2,10 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
-import com.radynamics.dallipay.cryptoledger.xrpl.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -23,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 
 public class PayloadConverterTest {
-    private static final Currency eur = new Currency("EUR", new Wallet("rKYNzaJ3UZjHSENVgiu9ULKARvF2CuS8xg"));
+    private static final Currency eur = new Currency("EUR", new Wallet(LedgerId.Xrpl, "rKYNzaJ3UZjHSENVgiu9ULKARvF2CuS8xg"));
     private static final Ledger ledger = new Ledger();
 
     @Test

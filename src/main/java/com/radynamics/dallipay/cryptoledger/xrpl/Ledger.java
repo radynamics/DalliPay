@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
@@ -70,7 +69,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public Wallet createWallet(String publicKey, String secret) {
-        return new com.radynamics.dallipay.cryptoledger.xrpl.Wallet(publicKey, secret);
+        return new com.radynamics.dallipay.cryptoledger.generic.Wallet(getId(), publicKey, secret);
     }
 
     @Override
@@ -93,15 +92,15 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.listPaymentsReceived(WalletConverter.from(wallet), period);
     }
 
-    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
         return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
     }
 
-    public Trustline[] listTrustlines(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+    public Trustline[] listTrustlines(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet) {
         return api.listTrustlines(wallet);
     }
 
-    public String getAccountDomain(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+    public String getAccountDomain(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet) {
         return api.getAccountDomain(wallet);
     }
 
@@ -110,11 +109,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.exists(WalletConverter.from(wallet));
     }
 
-    public boolean requiresDestinationTag(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+    public boolean requiresDestinationTag(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet) {
         return api.requiresDestinationTag(wallet);
     }
 
-    public boolean isBlackholed(com.radynamics.dallipay.cryptoledger.xrpl.Wallet wallet) {
+    public boolean isBlackholed(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet) {
         return api.isBlackholed(wallet);
     }
 

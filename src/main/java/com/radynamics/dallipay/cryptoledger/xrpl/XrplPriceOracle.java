@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;

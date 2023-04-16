@@ -8,7 +8,7 @@ import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
-import com.radynamics.dallipay.cryptoledger.xrpl.Wallet;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.exchange.Currency;

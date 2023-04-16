@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.exchange.Money;
 
 public class Trustline {
