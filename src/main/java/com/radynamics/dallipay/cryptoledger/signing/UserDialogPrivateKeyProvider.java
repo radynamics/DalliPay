@@ -1,8 +1,7 @@
-package com.radynamics.dallipay.cryptoledger.xrpl.signing;
+package com.radynamics.dallipay.cryptoledger.signing;
 
 import com.radynamics.dallipay.cryptoledger.PaymentUtils;
 import com.radynamics.dallipay.cryptoledger.WalletValidator;
-import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.ui.ValidationResultDialog;
