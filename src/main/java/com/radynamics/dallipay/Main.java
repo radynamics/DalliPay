@@ -86,7 +86,7 @@ public class Main {
                     return;
                 }
 
-                var transformInstruction = createTransformInstruction(ledger, config, getNetworkOrDefault(config, networkId));
+                var transformInstruction = createTransformInstruction(ledger, config, getNetworkOrDefault(ledger, config, networkId));
                 var frm = new MainForm(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
@@ -117,7 +117,7 @@ public class Main {
         }
     }
 
-    private static NetworkInfo getNetworkOrDefault(Config config, String networkId) {
+    private static NetworkInfo getNetworkOrDefault(Ledger ledger, Config config, String networkId) {
         if (!StringUtils.isEmpty(networkId)) {
             var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
             if (networkByParam.isPresent()) {
@@ -127,7 +127,7 @@ public class Main {
 
         HttpUrl lastUsed = null;
         try (var repo = new ConfigRepo()) {
-            lastUsed = repo.getLastUsedRpcUrl();
+            lastUsed = repo.getLastUsedRpcUrl(ledger);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

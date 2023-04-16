@@ -106,13 +106,13 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("outputDirectory", value == null ? "" : value.getAbsolutePath());
     }
 
-    public HttpUrl getLastUsedRpcUrl() throws Exception {
-        var value = single("lastUsedRpcUrl").orElse("");
+    public HttpUrl getLastUsedRpcUrl(Ledger ledger) throws Exception {
+        var value = single(createLedgerSpecificKey(ledger, "lastUsedRpcUrl")).orElse("");
         return value.length() == 0 ? null : HttpUrl.get(value);
     }
 
-    public void setLastUsedRpcUrl(HttpUrl value) throws Exception {
-        saveOrUpdate("lastUsedRpcUrl", value == null ? "" : value.toString());
+    public void setLastUsedRpcUrl(Ledger ledger, HttpUrl value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
     }
 
     public TransactionSubmitter getLastUsedSubmitter(Component parentComponent, Ledger ledger) throws Exception {
@@ -124,7 +124,11 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     private static String createLastUsedSubmitterKey(Ledger ledger) {
-        return String.format("%s_lastUsedSubmitter", ledger.getId());
+        return createLedgerSpecificKey(ledger, "lastUsedSubmitter");
+    }
+
+    private static String createLedgerSpecificKey(Ledger ledger, String key) {
+        return String.format("%s_%s", ledger.getId(), key);
     }
 
     public void setLastUsedSubmitter(TransactionSubmitter submitter) throws Exception {
