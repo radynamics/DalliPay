@@ -32,7 +32,7 @@ public class WalletField extends JPanel {
     private Ledger ledger;
     private WalletFieldInputValidator walletValidator;
     private ValidationControlDecorator walletDecorator;
-    private DestinationTagInputValidator destinationTagValidator;
+    private InputControlValidator destinationTagValidator;
     private ValidationControlDecorator destinationTagDecorator;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
@@ -278,7 +278,9 @@ public class WalletField extends JPanel {
         this.ledger = ledger;
         walletValidator = new WalletFieldInputValidator(ledger);
         walletDecorator = new ValidationControlDecorator(txt, walletValidator);
-        destinationTagValidator = new DestinationTagInputValidator(ledger.createDestinationTagBuilder());
+        destinationTagValidator = ledger.supportsDestinationTag()
+                ? new DestinationTagInputValidator(ledger.createDestinationTagBuilder())
+                : new AlwaysValidInputValidator();
         destinationTagDecorator = new ValidationControlDecorator(destinationTag, destinationTagValidator);
     }
 
