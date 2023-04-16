@@ -149,10 +149,10 @@ public class Main {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(network);
         try (var repo = new ConfigRepo()) {
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider()));
+            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider(), ledger));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID));
+            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID, ledger));
         }
         t.getExchangeRateProvider().init();
 

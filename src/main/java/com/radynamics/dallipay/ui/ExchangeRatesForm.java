@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class ExchangeRatesForm extends JDialog {
+    private final Ledger ledger;
     private ExchangeRateProvider selectedExchange;
     private final ExchangeRate[] rates;
     private SpringLayout panel1Layout;
@@ -28,10 +30,12 @@ public class ExchangeRatesForm extends JDialog {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ExchangeRatesForm(ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
+    public ExchangeRatesForm(Ledger ledger, ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");
+        this.ledger = ledger;
         this.selectedExchange = selectedExchange;
         this.rates = rates;
         this.pointInTime = pointInTime;
@@ -118,7 +122,7 @@ public class ExchangeRatesForm extends JDialog {
                     setAllowChangeExchange(false);
                     cboExchange.setRenderer(new ExchangeRateProviderCellRenderer());
                     var selectedFound = false;
-                    for (var exchange : ExchangeRateProviderFactory.allExchanges()) {
+                    for (var exchange : ExchangeRateProviderFactory.allExchanges(ledger)) {
                         cboExchange.addItem(exchange);
                         if (exchange.getId().equals(selectedExchange.getId())) {
                             cboExchange.setSelectedItem(exchange);

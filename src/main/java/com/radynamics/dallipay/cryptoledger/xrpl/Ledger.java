@@ -139,7 +139,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         var livenet = Arrays.stream(getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
-        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, livenet);
+        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, this, livenet);
     }
 
     @Override
