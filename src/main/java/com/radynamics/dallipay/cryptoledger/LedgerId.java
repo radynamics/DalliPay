@@ -3,7 +3,8 @@ package com.radynamics.dallipay.cryptoledger;
 import org.apache.commons.lang3.NotImplementedException;
 
 public enum LedgerId {
-    Xrpl(0, "xrpl");
+    Xrpl(0, "xrpl"),
+    Bitcoin(1, "bitcoin");
 
     private final int numericId;
     private final String textId;

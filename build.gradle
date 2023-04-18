@@ -31,6 +31,8 @@ dependencies {
     compile group: 'org.xrpl', name: 'xrpl4j-client', version: '2.5.1'
     compile group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.5.1'
 
+    compile 'wf.bitcoin:bitcoin-rpc-client:1.2.4'
+
     compile 'com.formdev:flatlaf:3.0'
     compile 'com.formdev:flatlaf-extras:3.0'
     compile 'com.formdev:svgSalamander:1.1.3'
