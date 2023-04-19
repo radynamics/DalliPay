@@ -16,9 +16,9 @@ public class Etherscan implements WalletLookupProvider, TransactionLookupProvide
 
     public Etherscan(NetworkInfo network) throws LookupProviderException {
         if (network.isLivenet()) {
-            this.baseUrl = "https://etherscan.io/";
+            this.baseUrl = "https://etherscan.io";
         } else if (network.isTestnet()) {
-            this.baseUrl = "https://goerli.etherscan.io/";
+            this.baseUrl = "https://goerli.etherscan.io";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
         }
