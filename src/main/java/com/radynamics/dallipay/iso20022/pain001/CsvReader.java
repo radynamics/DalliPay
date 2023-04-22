@@ -117,7 +117,7 @@ public class CsvReader implements PaymentInstructionReader {
 
     @Override
     public Ledger getLedger() {
-        return null;
+        return ledger;
     }
 
     public boolean skipFirstLine() {
