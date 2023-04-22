@@ -45,8 +45,7 @@ public class CsvReader implements PaymentInstructionReader {
             t.setReceiverAccount(receiverAccount);
             t.setReceiverWallet(ReaderUtils.toValidWalletOrNull(ledger, receiverAccount));
             t.setReceiverAddress(getAddress(r.receiverName));
-            // TODO: Origin.Csv or Origin.Imported?
-            t.setOrigin(Origin.Pain001);
+            t.setOrigin(Origin.Imported);
             if (StringUtils.isEmpty(r.amount) || StringUtils.isEmpty(r.currency)) {
                 t.setAmountUnknown();
             } else {

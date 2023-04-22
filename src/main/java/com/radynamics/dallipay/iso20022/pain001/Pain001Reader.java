@@ -59,7 +59,7 @@ public class Pain001Reader implements PaymentInstructionReader {
                 t.setReceiverAccount(receiverAccount);
                 t.setReceiverWallet(ReaderUtils.toValidWalletOrNull(ledger, receiverAccount));
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
-                t.setOrigin(Origin.Pain001);
+                t.setOrigin(Origin.Imported);
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {
