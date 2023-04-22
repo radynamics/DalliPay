@@ -14,10 +14,7 @@ import com.radynamics.dallipay.iso20022.AddressFormatter;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
-import com.radynamics.dallipay.iso20022.pain001.Pain001Reader;
-import com.radynamics.dallipay.iso20022.pain001.Pain001Xml;
-import com.radynamics.dallipay.iso20022.pain001.PaymentValidator;
-import com.radynamics.dallipay.iso20022.pain001.SenderHistoryValidator;
+import com.radynamics.dallipay.iso20022.pain001.*;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
@@ -51,7 +48,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private JLabel lblExchange;
     private PaymentTable table;
     private FilePathField txtInput;
-    private Pain001Reader reader;
+    private PaymentInstructionReader reader;
     private ArrayList<Payment> payments = new ArrayList<>();
     private JSplitButton cmdAdd;
     private JButton cmdSendPayments;
@@ -583,7 +580,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         txtInput.setText(value);
     }
 
-    public void setReader(Pain001Reader reader) {
+    public void setReader(PaymentInstructionReader reader) {
         this.reader = reader;
     }
 

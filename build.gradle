@@ -15,6 +15,8 @@ test {
 
 dependencies {
     compile("org.glassfish.jaxb:jaxb-runtime:2.3.2")
+    compile 'com.opencsv:opencsv:5.7.1'
+
     compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '3.0.1'
     compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '3.0.1'
     compile group: 'org.json', name: 'json', version: '20210307'

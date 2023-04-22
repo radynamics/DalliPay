@@ -146,6 +146,8 @@ public class GeneralPane extends JPanel {
         sb.append("JUnit, Eclipse Public License - v 2.0, https://junit.org" + System.lineSeparator());
         sb.append(System.lineSeparator());
         sb.append("XMLUnit, Apache License 2.0, https://www.xmlunit.org" + System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append("Opencsv, Apache License 2.0, https://opencsv.sourceforge.net" + System.lineSeparator());
 
         var textArea = new JTextArea(sb.toString());
         textArea.setColumns(30);
