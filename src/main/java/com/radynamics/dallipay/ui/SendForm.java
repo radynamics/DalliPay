@@ -48,7 +48,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private JLabel lblExchange;
     private PaymentTable table;
     private FilePathField txtInput;
-    private PaymentInstructionReader reader;
     private ArrayList<Payment> payments = new ArrayList<>();
     private JSplitButton cmdAdd;
     private JButton cmdSendPayments;
@@ -284,6 +283,15 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void onTxtInputChanged() {
+        PaymentInstructionReader reader;
+        try {
+            reader = PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
+            return;
+        }
+
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         enableInputControls(false);
         lblLoading.showLoading();
@@ -578,10 +586,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     public void setInput(String value) {
         txtInput.setText(value);
-    }
-
-    public void setReader(PaymentInstructionReader reader) {
-        this.reader = reader;
     }
 
     @Override
