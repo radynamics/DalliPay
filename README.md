@@ -14,12 +14,13 @@ Latest releases for various platforms are available in [releases](https://github
 #### Supported crypto ledgers (cryptocurrencies)
 - [XRPL](https://xrpl.org/) (XRP)
 
-#### Supported ISO 20022 formats
-Following *pain.001 (sending payments)* format versions are tested. Other versions may also work.
-- pain.001.001.03
-- pain.001.001.09
+#### Supported formats
+Following formats for *sending payments* are tested. Other ISO 20022 versions may also work.
+- ISO 20022 pain.001.001.03
+- ISO 20022 pain.001.001.09
+- CSV text file (see pain.001.001.03_USD_EUR.csv in testfiles)
 
-Following *camt.054 (received payments)* format versions are available for export.
+Following ISO 20022 formats for *received payments* are available for export.
 - camt.054.001.02
 - camt.054.001.04
 - camt.054.001.09
