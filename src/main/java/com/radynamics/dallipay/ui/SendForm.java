@@ -339,6 +339,11 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 return;
             }
 
+            if (!PaymentInstructionReaderFactory.supportsExport(new File(txtInput.getText()))) {
+                JOptionPane.showMessageDialog(this, res.getString("export.notSupported"), res.getString("export.NoneSentTitle"), JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
             var failed = new ArrayList<Payment>();
             var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
             var countBefore = pain001.countCdtTrfTxInf();

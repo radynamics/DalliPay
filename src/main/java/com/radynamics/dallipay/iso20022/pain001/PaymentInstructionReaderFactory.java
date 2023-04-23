@@ -22,4 +22,9 @@ public final class PaymentInstructionReaderFactory {
 
         throw new Exception("Could not determine format if the given file based on its file extension.");
     }
+
+    public static boolean supportsExport(File file) {
+        var ext = Files.getFileExtension(file.getName()).toLowerCase(Locale.ROOT);
+        return ext.equals("xml");
+    }
 }
