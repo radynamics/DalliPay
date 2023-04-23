@@ -1,7 +1,7 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
-import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.RFC4180ParserBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
@@ -86,7 +86,7 @@ public class CsvReader implements PaymentInstructionReader {
         var records = new ArrayList<Record>();
         try (var reader = new CSVReaderBuilder(new InputStreamReader(input))
                 .withSkipLines(skipFirstLine ? 1 : 0)
-                .withCSVParser(new CSVParserBuilder().withSeparator(separator).build())
+                .withCSVParser(new RFC4180ParserBuilder().withSeparator(separator).build())
                 .build()) {
             String[] values;
             var lineNumber = 0;
