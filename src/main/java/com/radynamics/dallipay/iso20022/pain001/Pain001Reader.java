@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLInputFactory;
@@ -170,5 +171,15 @@ public class Pain001Reader implements PaymentInstructionReader {
 
     public Ledger getLedger() {
         return ledger;
+    }
+
+    @Override
+    public JPanel createParameterPanel() {
+        return null;
+    }
+
+    @Override
+    public boolean applyParameters(JPanel parameterPanel) {
+        return true;
     }
 }

@@ -292,6 +292,20 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
+        var paramPanel = reader.createParameterPanel();
+        if (paramPanel != null) {
+            var frm = new ImportParameterForm(paramPanel);
+            frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            frm.setSize(500, 300);
+            frm.setModal(true);
+            frm.setLocationRelativeTo(this);
+            frm.setVisible(true);
+
+            if (!frm.isDialogAccepted() || !reader.applyParameters(paramPanel)) {
+                return;
+            }
+        }
+
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         enableInputControls(false);
         lblLoading.showLoading();
