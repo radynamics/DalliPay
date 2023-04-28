@@ -39,6 +39,7 @@ public class GemWallet implements TransactionSubmitter {
         info.setTitle(res.getString("gemwallet.title"));
         info.setDescription(res.getString("gemwallet.desc"));
         info.setDetailUri(URI.create("https://gemwallet.app"));
+        info.setOrder(50);
 
         server.addBridgeEventListener(new BridgeEventListener() {
             @Override

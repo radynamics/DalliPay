@@ -7,6 +7,7 @@ public class TransactionSubmitterInfo {
     private String description;
     private URI detailUri;
     private boolean isRecommended;
+    private int order = 0;
 
     public String getTitle() {
         return title;
@@ -38,6 +39,14 @@ public class TransactionSubmitterInfo {
 
     public void setRecommended(boolean recommended) {
         isRecommended = recommended;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

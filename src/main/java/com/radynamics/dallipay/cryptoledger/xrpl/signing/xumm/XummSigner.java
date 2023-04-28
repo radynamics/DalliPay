@@ -48,6 +48,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         info.setDescription(res.getString("xumm.desc"));
         info.setDetailUri(URI.create("https://xumm.app"));
         info.setRecommended(true);
+        info.setOrder(100);
     }
 
     @Override

@@ -90,7 +90,7 @@ public class SubmitterSelectionForm extends JDialog {
 
         {
             var sorted = new ArrayList<>(List.of(submitters));
-            sorted.sort((o1, o2) -> Boolean.compare(o2.getInfo().isRecommended(), o1.getInfo().isRecommended()));
+            sorted.sort((o1, o2) -> Integer.compare(o2.getInfo().getOrder(), o1.getInfo().getOrder()));
             for (var s : sorted) {
                 create(s, selected);
             }
