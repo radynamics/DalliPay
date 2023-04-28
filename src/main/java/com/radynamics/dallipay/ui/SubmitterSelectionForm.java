@@ -45,14 +45,12 @@ public class SubmitterSelectionForm extends JDialog {
         var panel1 = new JPanel();
         panel1.setBorder(innerBorder);
         panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
-        FlowLayout panel1Layout = new FlowLayout(FlowLayout.LEADING, 0, 10);
         pnlContent = new JPanel();
-        pnlContent.setLayout(panel1Layout);
+        pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.Y_AXIS));
         JPanel panel3 = new JPanel();
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 200));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
@@ -160,6 +158,7 @@ public class SubmitterSelectionForm extends JDialog {
         var layout = new GridBagLayout();
         pnl.setLayout(layout);
         pnlContent.add(pnl);
+        pnlContent.add(Box.createRigidArea(new Dimension(0, 10)));
         pnl.addMouseListener(itemClickListener);
 
         var c = new GridBagConstraints();
