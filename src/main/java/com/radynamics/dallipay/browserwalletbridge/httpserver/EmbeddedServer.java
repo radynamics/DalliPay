@@ -16,6 +16,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -128,6 +130,7 @@ public class EmbeddedServer {
         private final ArrayList<BridgeEventListener> listener = new ArrayList<>();
 
         public static final String SendPath = "send";
+        private static final String CommonPath = "common";
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
@@ -136,6 +139,15 @@ public class EmbeddedServer {
             if ("GET".equals(httpExchange.getRequestMethod())) {
                 if (uri.getPath().equals("/" + SendPath)) {
                     response(httpExchange, browserApi.createSendRequestResponse());
+                    return;
+                }
+
+                var content = getContent(uri.getPath().substring(SendPath.length() + 1));
+                if (content == null) {
+                    httpExchange.sendResponseHeaders(404, 0);
+                } else {
+                    var ext = uri.getPath().substring(uri.getPath().lastIndexOf(".") + 1);
+                    response(httpExchange, content, extToMimeType(ext).orElse("text/html"));
                 }
                 return;
             }
@@ -159,9 +171,35 @@ public class EmbeddedServer {
             httpExchange.sendResponseHeaders(404, 0);
         }
 
+        private Optional<String> extToMimeType(String ext) {
+            if (ext == null) {
+                return Optional.empty();
+            }
+            switch (ext.toLowerCase(Locale.ROOT)) {
+                case "js":
+                    return Optional.of("text/javascript");
+                default:
+                    return Optional.empty();
+            }
+        }
+
+        private String getContent(String path) {
+            var is = getClass().getClassLoader().getResourceAsStream("browserwalletbridge" + path);
+            try {
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                System.out.println(e);
+                return null;
+            }
+        }
+
         private void response(HttpExchange httpExchange, String responseText) throws IOException {
+            response(httpExchange, responseText, "text/html");
+        }
+
+        private void response(HttpExchange httpExchange, String responseText, String mimeType) throws IOException {
             byte[] bytes = responseText.getBytes(StandardCharsets.UTF_8);
-            httpExchange.getResponseHeaders().set("Content-Type", "text/html; charset=" + StandardCharsets.UTF_8);
+            httpExchange.getResponseHeaders().set("Content-Type", mimeType + "; charset=" + StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(200, bytes.length);
 
             var outputStream = httpExchange.getResponseBody();
