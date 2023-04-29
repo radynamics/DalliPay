@@ -6,11 +6,7 @@
     <title>GemWallet</title>
     <script src="https://unpkg.com/@gemwallet/api@2.2.1/umd/gemwallet-api.js"></script>
     <script type="text/javascript"  src="/send/common/walletbridge.js"></script>
-    <style>
-        body {
-            font: 16px Helvetica, sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="/send/common/main.css">
 </head>
 <body>
 </body>
@@ -31,13 +27,10 @@ function onLoad() {
         }
 
         GemWalletApi.sendPayment(bridge._tx).then((txHash) => {
-            bridge.hide('waiting')
             if(txHash == null) {
-                bridge.show('rejected')
-                bridge.reportFailure('user_rejected', 'User rejected to sign the payment.')
+                bridge.reject()
             } else {
-                bridge.show('success')
-                bridge.reportSuccess(txHash)
+                bridge.success(txHash);
             }
         });
     });

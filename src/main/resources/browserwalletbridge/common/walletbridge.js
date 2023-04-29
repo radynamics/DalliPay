@@ -7,8 +7,21 @@ class WalletBridge {
         this._ccy = null
     }
 
-    reportSuccess(txHash) {
+    success(txHash) {
+        this.hide('cancel')
+        this.hide('waiting')
+        this.show('success')
         this.report({ data: { txHash: txHash } })
+    }
+    reject() {
+        this.reportRejected('user_rejected', 'User rejected to sign the payment.')
+    }
+
+    reportRejected(key, message) {
+        this.hide('waiting')
+        this.hide('walletApiNotAvailable')
+        this.show('rejected')
+        this.reportFailure(key, message)
     }
     reportFailure(key, message) {
         console.error(key + ': ' + message)
@@ -27,6 +40,7 @@ class WalletBridge {
 
     init() {
         document.body.innerHTML = this.createBodyHtml()
+        document.getElementById("cancel").addEventListener("click", this.cancel, false);
         document.getElementById("copy").addEventListener("click", this.copyUrlToClipboard, false);
 
         const urlParams = new URLSearchParams(window.location.search)
@@ -75,8 +89,10 @@ class WalletBridge {
                         <li>Make sure you are using a browser that supports this extension. You can <a id="copy" href="#">copy</a> the browser location from the address bar and paste it into another browser.</li>
                     </ul>
                 </div>
-                <div style="font-style: italic;">
-                    <p>Payment: <span id="amount">unknown</span></p>
+                <div>
+                    <p style="font-style: italic;">Payment: <span id="amount">unknown</span></p>
+                    <br />
+                    <button id="cancel" class="block">Cancel / Reject</button>
                 </div>`
     }
     createAmountText() {
@@ -88,6 +104,12 @@ class WalletBridge {
     }
     show(id) {
         document.getElementById(id).style.display = 'inline';
+    }
+
+    cancel() {
+        let bridge = new WalletBridge();
+        bridge.hide('cancel')
+        bridge.reportRejected('user_cancelled', 'User cancelled sign request.')
     }
 
     copyUrlToClipboard() {

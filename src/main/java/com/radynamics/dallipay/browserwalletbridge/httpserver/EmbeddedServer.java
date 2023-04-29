@@ -178,6 +178,8 @@ public class EmbeddedServer {
             switch (ext.toLowerCase(Locale.ROOT)) {
                 case "js":
                     return Optional.of("text/javascript");
+                case "css":
+                    return Optional.of("text/css");
                 default:
                     return Optional.empty();
             }
