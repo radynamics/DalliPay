@@ -50,7 +50,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
             @Override
             public void onError(com.radynamics.dallipay.browserwalletbridge.httpserver.Transaction t, String key, String message) {
                 var xrplTx = ((TransactionDto) t).getTransaction();
-                if ("user_rejected".equals(key)) {
+                if ("user_rejected".equals(key) || "user_cancelled".equals(key)) {
                     xrplTx.refreshTransmission(new BridgeException(res.getString("browserapisubmitter.rejected")));
                 } else {
                     xrplTx.refreshTransmission(new BridgeException("Error, key: %s, message: %s".formatted(key, message)));
