@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.signing;
 
+import javax.swing.*;
 import java.net.URI;
 
 public class TransactionSubmitterInfo {
@@ -7,6 +8,8 @@ public class TransactionSubmitterInfo {
     private String description;
     private URI detailUri;
     private boolean isRecommended;
+    private int order = 0;
+    private Icon icon;
 
     public String getTitle() {
         return title;
@@ -38,6 +41,22 @@ public class TransactionSubmitterInfo {
 
     public void setRecommended(boolean recommended) {
         isRecommended = recommended;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     @Override

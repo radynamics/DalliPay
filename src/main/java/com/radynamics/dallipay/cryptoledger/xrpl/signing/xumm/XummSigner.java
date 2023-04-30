@@ -7,6 +7,7 @@ import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
+import com.radynamics.dallipay.ui.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -48,6 +49,8 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         info.setDescription(res.getString("xumm.desc"));
         info.setDetailUri(URI.create("https://xumm.app"));
         info.setRecommended(true);
+        info.setOrder(100);
+        info.setIcon(Utils.getScaled("img/xumm.png", 64, 64));
     }
 
     @Override
