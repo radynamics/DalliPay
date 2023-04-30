@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.signing;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.browserwalletbridge.BridgeException;
 import com.radynamics.dallipay.browserwalletbridge.BrowserApi;
 import com.radynamics.dallipay.browserwalletbridge.gemwallet.PayloadConverter;
@@ -40,6 +41,7 @@ public class GemWallet implements TransactionSubmitter {
         info.setDescription(res.getString("gemwallet.desc"));
         info.setDetailUri(URI.create("https://gemwallet.app"));
         info.setOrder(50);
+        info.setIcon(new FlatSVGIcon("img/gemwallet.svg", 64, 64));
 
         server.addBridgeEventListener(new BridgeEventListener() {
             @Override
