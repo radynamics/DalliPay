@@ -52,6 +52,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         info = new TransactionSubmitterInfo();
         info.setTitle(res.getString("rpc.title"));
         info.setDescription(res.getString("rpc.desc"));
+        info.setNotRecommended(true);
     }
 
     @Override
