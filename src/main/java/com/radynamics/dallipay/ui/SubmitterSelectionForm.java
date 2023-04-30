@@ -92,10 +92,7 @@ public class SubmitterSelectionForm extends JDialog {
             var sorted = new ArrayList<>(List.of(submitters));
             sorted.sort((o1, o2) -> Integer.compare(o2.getInfo().getOrder(), o1.getInfo().getOrder()));
             for (var s : sorted) {
-                create(s, selected);
-            }
-            if (buttonGroup.getButtonCount() > 0 && buttonGroup.getSelection() == null) {
-                buttonGroup.setSelected(buttonGroup.getElements().nextElement().getModel(), true);
+                create(s, selected != null ? selected : sorted.get(0));
             }
         }
         {
@@ -122,8 +119,8 @@ public class SubmitterSelectionForm extends JDialog {
         var info = submitter.getInfo();
 
         var title = info.getTitle();
-        if (info.isRecommended()) {
-            title = String.format("%s (" + res.getString("recommended") + ")", title);
+        if (info.isNotRecommended()) {
+            title = String.format("%s (" + res.getString("notRecommended") + ")", title);
         }
 
         var size = new Dimension(150, 100);
@@ -140,7 +137,7 @@ public class SubmitterSelectionForm extends JDialog {
         cmd.setMaximumSize(size);
         pnlContent.add(cmd);
 
-        cmd.setSelected(selected == null ? info.isRecommended() : info.getTitle().equals(selected.getInfo().getTitle()));
+        cmd.setSelected(selected != null && info.getTitle().equals(selected.getInfo().getTitle()));
 
         mapping.put(cmd, submitter);
         buttonGroup.add(cmd);
