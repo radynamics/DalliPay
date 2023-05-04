@@ -8,10 +8,7 @@
 
 package com.radynamics.dallipay.iso20022.camt054.camt05300108.generated;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -37,6 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "Document", propOrder = {
     "bkToCstmrStmt"
 })
+@XmlRootElement(name="Document")
 public class Document {
 
     @XmlElement(name = "BkToCstmrStmt", required = true)
