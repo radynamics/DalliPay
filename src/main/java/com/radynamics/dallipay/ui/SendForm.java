@@ -85,7 +85,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         JPanel panel3 = new JPanel();
         panel3.setBorder(innerBorder);
         var panel3Layout = new SpringLayout();
-        panel3.setLayout(panel3Layout/*new FlowLayout(FlowLayout.RIGHT)*/);
+        panel3.setLayout(panel3Layout);
 
         pnlMain.add(panel1);
         pnlMain.add(panel2);
