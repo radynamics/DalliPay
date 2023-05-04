@@ -23,6 +23,7 @@ public class ReceiveExportForm extends JDialog {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public ReceiveExportForm() {
+        formatMapping.put(CamtFormat.Camt05300108, "camt.053 Version 08");
         formatMapping.put(CamtFormat.Camt05400109, "camt.054 Version 09");
         formatMapping.put(CamtFormat.Camt05400104, "camt.054 Version 04");
         formatMapping.put(CamtFormat.Camt05400102, "camt.054 Version 02");

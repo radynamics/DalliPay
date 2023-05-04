@@ -9,6 +9,7 @@ public class CamtFormatHelper {
 
     static {
         map = new HashMap<>();
+        map.put("camt05300108", CamtFormat.Camt05300108);
         map.put("camt05400102", CamtFormat.Camt05400102);
         map.put("camt05400104", CamtFormat.Camt05400104);
         map.put("camt05400109", CamtFormat.Camt05400109);
