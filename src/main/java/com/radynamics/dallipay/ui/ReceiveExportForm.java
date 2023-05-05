@@ -1,12 +1,11 @@
 package com.radynamics.dallipay.ui;
 
 import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
+import com.radynamics.dallipay.iso20022.camt054.CamtFormatEntry;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ReceiveExportForm extends JDialog {
@@ -15,19 +14,12 @@ public class ReceiveExportForm extends JDialog {
     private Component anchorComponentTopLeft;
     private boolean accepted;
     private FilePathField txtOutputFile;
-    private JComboBox<CamtFormat> cboExportFormat;
+    private JComboBox<CamtFormatEntry> cboExportFormat;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
-
-    private static final Map<CamtFormat, String> formatMapping = new LinkedHashMap<>();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public ReceiveExportForm() {
-        formatMapping.put(CamtFormat.Camt05300108, "camt.053 Version 08");
-        formatMapping.put(CamtFormat.Camt05400109, "camt.054 Version 09");
-        formatMapping.put(CamtFormat.Camt05400104, "camt.054 Version 04");
-        formatMapping.put(CamtFormat.Camt05400102, "camt.054 Version 02");
-
         setupUI();
     }
 
@@ -124,13 +116,13 @@ public class ReceiveExportForm extends JDialog {
                 cboExportFormat.setRenderer(new DefaultListCellRenderer() {
                     @Override
                     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                        return super.getListCellRendererComponent(list, formatMapping.get(value), index, isSelected, cellHasFocus);
+                        return super.getListCellRendererComponent(list, ((CamtFormatEntry) value).getDisplayText(), index, isSelected, cellHasFocus);
                     }
                 });
-                for (var item : formatMapping.entrySet()) {
-                    cboExportFormat.addItem(item.getKey());
+                for (var item : CamtFormatHelper.all()) {
+                    cboExportFormat.addItem(item);
                 }
-                cboExportFormat.setSelectedItem(CamtFormatHelper.getDefault());
+                setExportFormat(CamtFormatHelper.getDefault());
                 panel1Layout.putConstraint(SpringLayout.WEST, cboExportFormat, padValueCtrl, SpringLayout.WEST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboExportFormat, getNorthPad(line), SpringLayout.NORTH, pnlContent);
                 pnlContent.add(cboExportFormat);
@@ -183,10 +175,15 @@ public class ReceiveExportForm extends JDialog {
     }
 
     public CamtFormat getExportFormat() {
-        return (CamtFormat) cboExportFormat.getSelectedItem();
+        return ((CamtFormatEntry) cboExportFormat.getSelectedItem()).getCamtFormat();
     }
 
     public void setExportFormat(CamtFormat exportFormat) {
-        cboExportFormat.setSelectedItem(exportFormat);
+        for (var i = 0; i < cboExportFormat.getItemCount(); i++) {
+            var item = cboExportFormat.getItemAt(i);
+            if (item.getCamtFormat() == exportFormat) {
+                cboExportFormat.setSelectedItem(item);
+            }
+        }
     }
 }
