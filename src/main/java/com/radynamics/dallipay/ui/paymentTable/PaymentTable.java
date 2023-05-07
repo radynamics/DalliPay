@@ -120,7 +120,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue(res.getString("booked")).width(90).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue(res.getString("booked")).width(60).getColumn();
             c.setCellRenderer(new DateTimeCellRenderer());
             if (model.getActor() == Actor.Sender) {
                 cb.hide();
@@ -134,7 +134,7 @@ public class PaymentTable extends JPanel {
             var c = cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50).getColumn();
             c.setCellRenderer(new CurrencyCellRenderer(table.getColumn(PaymentTableModel.COL_OBJECT)));
         }
-        cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(50);
+        cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(40);
         {
             var c = cb.forColumn(PaymentTableModel.COL_DETAIL).headerValue("").maxWidth(50).headerCenter().getColumn();
             c.setCellRenderer(new ShowDetailCellRenderer());
