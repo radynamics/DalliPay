@@ -111,14 +111,6 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue(res.getString("senderAccount")).width(200).getColumn();
-            c.setCellEditor(new AccountCellEditor(true));
-            c.setCellRenderer(new AccountCellRenderer());
-            if (actor == Actor.Sender) {
-                cb.hide();
-            }
-        }
-        {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue(res.getString("receiverAccount")).width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
@@ -192,9 +184,6 @@ public class PaymentTable extends JPanel {
 
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
             onWalletEdited(t, tcl, ChangedValue.SenderWallet);
-        }
-        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
-            onAccountEdited(t, tcl, ChangedValue.SenderAccount);
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ACCOUNT)) {
             onAccountEdited(t, tcl, ChangedValue.ReceiverAccount);
