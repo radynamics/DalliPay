@@ -63,11 +63,11 @@
                             </Domn>
                         </BkTxCd>
                         <RltdAgts>
-                            <DbtrAgt>
+                            <CdtrAgt>
                                 <FinInstnId>
                                     <Nm>xrpl</Nm>
                                 </FinInstnId>
-                            </DbtrAgt>
+                            </CdtrAgt>
                         </RltdAgts>
                         <RmtInf>
                             <Strd>

@@ -149,9 +149,9 @@ public class Camt05400102Writer implements Camt054Writer {
         txDtls.setRltdPties(createRltdPties(trx));
 
         txDtls.setRltdAgts(new TransactionAgents2());
-        txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification4());
-        txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification7());
-        txDtls.getRltdAgts().getDbtrAgt().getFinInstnId().setNm(ledger.getId().textId());
+        txDtls.getRltdAgts().setCdtrAgt(new BranchAndFinancialInstitutionIdentification4());
+        txDtls.getRltdAgts().getCdtrAgt().setFinInstnId(new FinancialInstitutionIdentification7());
+        txDtls.getRltdAgts().getCdtrAgt().getFinInstnId().setNm(ledger.getId().textId());
 
         var structuredReferences = WriterHelper.getStructuredReferences(transformInstruction, trx);
         var hasStrd = structuredReferences.length > 0 || trx.getInvoiceId() != null;
