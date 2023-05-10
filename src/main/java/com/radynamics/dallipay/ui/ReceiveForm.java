@@ -99,7 +99,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        var panel1Height = getNorthPad(3) + 20;
+        var panel1Height = getNorthPad(3);
         panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
         panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
         panel1.setPreferredSize(new Dimension(500, panel1Height));
@@ -186,7 +186,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     load();
                 });
                 panel1Layout.putConstraint(SpringLayout.EAST, cmdRefresh, 0, SpringLayout.EAST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, cmdRefresh, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.SOUTH, cmdRefresh, 0, SpringLayout.SOUTH, panel1);
                 panel1.add(cmdRefresh);
             }
         }
