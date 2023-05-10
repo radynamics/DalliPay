@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.model.transactions.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -74,8 +75,7 @@ public class PaymentBuilder {
         }
 
         // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
-        var scale = Math.pow(10, 15);
-        var amt = Math.round(amount.getNumber().doubleValue() * scale) / scale;
+        var amt = BigDecimal.valueOf(amount.getNumber().doubleValue()).setScale(15, RoundingMode.HALF_UP).doubleValue();
         return IssuedCurrencyAmount.builder()
                 .currency(ccy.getCode())
                 .issuer(Address.of(ccy.getIssuer().getPublicKey()))
