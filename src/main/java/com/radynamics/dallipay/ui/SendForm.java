@@ -253,8 +253,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
 
         }
-        payments.add(mp.getPayment());
-        table.add(mp.getPayment());
+        var p = mp.getPayment();
+        p.setSubmitter(getLastUsedSubmitter(p.getLedger()));
+        payments.add(p);
+        table.add(p);
     }
 
     @Override
@@ -333,6 +335,9 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 transactionTranslator.applyDefaultSender(payments);
+                for (var p : payments) {
+                    p.setSubmitter(getLastUsedSubmitter(p.getLedger()));
+                }
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);

@@ -1,8 +1,9 @@
 package com.radynamics.dallipay.iso20022;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.exchange.*;
@@ -24,6 +25,7 @@ public class Payment {
     private ExchangeRate exchangeRate;
     private Origin origin;
     private ExpectedCurrency expectedCcy;
+    private TransactionSubmitter submitter;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -32,6 +34,7 @@ public class Payment {
     public Payment(Transaction cryptoTrx) {
         if (cryptoTrx == null) throw new IllegalArgumentException("Parameter 'cryptoTrx' cannot be null");
         this.cryptoTrx = cryptoTrx;
+        this.submitter = new NullSubmitter(cryptoTrx.getLedger());
     }
 
     public Address getReceiverAddress() {
@@ -349,5 +352,13 @@ public class Payment {
 
     public void setExpectedCurrency(ExpectedCurrency expectedCcy) {
         this.expectedCcy = expectedCcy;
+    }
+
+    public TransactionSubmitter getSubmitter() {
+        return this.submitter;
+    }
+
+    public void setSubmitter(TransactionSubmitter submitter) {
+        this.submitter = submitter;
     }
 }

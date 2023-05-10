@@ -216,6 +216,11 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         stateListener.add(l);
     }
 
+    @Override
+    public boolean supportsPathFinding() {
+        return true;
+    }
+
     private void raiseProgressChanged(Transaction t) {
         for (var l : stateListener) {
             l.onProgressChanged(t);

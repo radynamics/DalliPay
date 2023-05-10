@@ -33,11 +33,23 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
         var ccysBothAccepting = findCcysBothAccepting(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
 
         Arrays.sort(ccysBothAccepting, Comparator.comparing(Currency::getTransferFee));
+        var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
         for (var i = 0; i < ccysBothAccepting.length; i++) {
             var ccy = ccysBothAccepting[i];
-            var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
             // Higher fee -> higher rank deduction -> less preferred
             list.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee() == 0 ? 0 : i));
+        }
+
+        if (p.getSubmitter().supportsPathFinding()) {
+            var acceptedUserCcyByReceiver = Arrays.stream(p.getReceiverWallet().getBalances().all())
+                    // Always compare without issued due it's missing after entered by user
+                    .filter(o -> o.getCcy().withoutIssuer().equals(p.getUserCcy().withoutIssuer()))
+                    .findFirst()
+                    .map(Money::getCcy)
+                    .orElse(null);
+            if (acceptedUserCcyByReceiver != null && list.stream().noneMatch(o -> o.getCcy().sameCode(acceptedUserCcyByReceiver))) {
+                list.add(new IssuedCurrencyPath(cf, acceptedUserCcyByReceiver, acceptedUserCcyByReceiver.getTransferFee() == 0 ? 0 : 2));
+            }
         }
 
         return list.toArray(new PaymentPath[0]);
