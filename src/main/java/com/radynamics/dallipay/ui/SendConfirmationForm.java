@@ -3,7 +3,6 @@ package com.radynamics.dallipay.ui;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
@@ -23,26 +22,23 @@ public class SendConfirmationForm extends JDialog {
     private final Payment[] payments;
     private final ExchangeRateProvider provider;
     private int totalPaymentCount;
-    private TransactionSubmitter submitter;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private JPanel pnlContent;
     private boolean accepted;
     private JButton cmdSend;
     private JLabel lblFee;
-    private JLabel lblSigningText;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     private static final int ENTRY_VERTICAL_SPACING = 7;
     private static final int ENTRY_HEIGHT = 45;
 
-    public SendConfirmationForm(Ledger ledger, Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount, TransactionSubmitter submitter) {
+    public SendConfirmationForm(Ledger ledger, Payment[] payments, ExchangeRateProvider provider, int totalPaymentCount) {
         this.ledger = ledger;
         this.payments = payments;
         this.provider = provider;
         this.totalPaymentCount = totalPaymentCount;
-        this.submitter = submitter;
         setupUI();
     }
 
@@ -75,13 +71,6 @@ public class SendConfirmationForm extends JDialog {
         var pnlFeeContent = new JPanel();
         pnlFeeContent.setLayout(panel2Layout);
         panel2.add(pnlFeeContent);
-        var panelSigning = new JPanel();
-        panelSigning.setBorder(innerBorder);
-        panelSigning.setLayout(new BoxLayout(panelSigning, BoxLayout.X_AXIS));
-        var panelSigningLayout = new SpringLayout();
-        var pnlSigningContent = new JPanel();
-        pnlSigningContent.setLayout(panelSigningLayout);
-        panelSigning.add(pnlSigningContent);
         JPanel panel3 = new JPanel();
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
@@ -93,7 +82,6 @@ public class SendConfirmationForm extends JDialog {
         pnlMain.add(panel0);
         pnlMain.add(panel1);
         pnlMain.add(panel2);
-        pnlMain.add(panelSigning);
         pnlMain.add(panel3);
 
         panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 110));
@@ -102,9 +90,6 @@ public class SendConfirmationForm extends JDialog {
         panel2.setMinimumSize(new Dimension(Integer.MAX_VALUE, 30));
         panel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         panel2.setPreferredSize(new Dimension(Integer.MAX_VALUE, 30));
-        panelSigning.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panelSigning.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        panelSigning.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -196,27 +181,6 @@ public class SendConfirmationForm extends JDialog {
             pnlFeeContent.add(lbl4);
         }
         {
-            lblSigningText = new JLabel();
-            panelSigningLayout.putConstraint(SpringLayout.WEST, lblSigningText, 0, SpringLayout.WEST, pnlSigningContent);
-            panelSigningLayout.putConstraint(SpringLayout.NORTH, lblSigningText, 0, SpringLayout.NORTH, pnlSigningContent);
-            pnlSigningContent.add(lblSigningText);
-
-            var lbl3 = Utils.createLinkLabel(pnlMain, res.getString("edit"));
-            panelSigningLayout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblSigningText);
-            panelSigningLayout.putConstraint(SpringLayout.NORTH, lbl3, 0, SpringLayout.NORTH, pnlSigningContent);
-            lbl3.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 1) {
-                        showSigningEdit();
-                    }
-                }
-            });
-            pnlSigningContent.add(lbl3);
-
-            refreshSigningText();
-        }
-        {
             var pnl = new JPanel();
             panel3Layout.putConstraint(SpringLayout.EAST, pnl, 0, SpringLayout.EAST, panel3);
             panel3Layout.putConstraint(SpringLayout.SOUTH, pnl, 0, SpringLayout.SOUTH, panel3);
@@ -236,10 +200,6 @@ public class SendConfirmationForm extends JDialog {
         }
 
         startTimeoutCountdown();
-    }
-
-    private void refreshSigningText() {
-        lblSigningText.setText(String.format(res.getString("signUsing"), submitter == null ? res.getString("unknown") : submitter.getInfo().getTitle()));
     }
 
     private void acceptDialog() {
@@ -423,15 +383,6 @@ public class SendConfirmationForm extends JDialog {
         JOptionPane.showMessageDialog(this, new JScrollPane(textArea), res.getString("fees.title"), JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void showSigningEdit() {
-        var submitter = SubmitterSelectionForm.showDialog(this, ledger, this.submitter);
-        if (submitter == null) {
-            return;
-        }
-        this.submitter = submitter;
-        refreshSigningText();
-    }
-
     private void startTimeoutCountdown() {
         var scheduler = Executors.newScheduledThreadPool(1);
         var runnable = new Runnable() {
@@ -458,9 +409,5 @@ public class SendConfirmationForm extends JDialog {
 
     public boolean isDialogAccepted() {
         return accepted;
-    }
-
-    public TransactionSubmitter getTransactionSubmitter() {
-        return submitter;
     }
 }
