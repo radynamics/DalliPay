@@ -325,16 +325,21 @@ public class Payment {
 
     public void refreshPaymentPath(CurrencyConverter currencyConverter) {
         var availablePaths = getLedger().createPaymentPathFinder().find(currencyConverter, this);
+        if (availablePaths.length == 0) {
+            return;
+        }
+
         var pathSameCcyCode = Arrays.stream(availablePaths)
                 .filter(o -> o.getCcy().withoutIssuer().equals(getUserCcy()))
                 .findFirst()
                 .orElse(null);
         if (pathSameCcyCode == null) {
-            return;
+            Arrays.sort(availablePaths, (a, b) -> Integer.compare(b.getRank(), a.getRank()));
+            availablePaths[0].apply(this);
+        } else {
+            setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
+            pathSameCcyCode.apply(this);
         }
-
-        setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
-        pathSameCcyCode.apply(this);
     }
 
     public Origin getOrigin() {

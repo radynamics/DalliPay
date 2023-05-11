@@ -322,6 +322,10 @@ public class PaymentTable extends JPanel {
                 : transformInstruction.getHistoricExchangeRateSource();
     }
 
+    public int paymentCount() {
+        return model.getRowCount();
+    }
+
     public Payment[] checkedPayments() {
         return model.checkedPayments();
     }
