@@ -628,9 +628,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
         for (var p : payments) {
             // Prevent setting null to payments
-            // TODO: also use NullSubmitter in UI instead of null value
-            var paymentSubmitter = this.submitter == null ? new NullSubmitter(p.getLedger()) : this.submitter;
-            p.setSubmitter(paymentSubmitter);
+            p.setSubmitter(this.submitter == null ? new NullSubmitter() : this.submitter);
             // Eg. pathfinding is supported only by specific signers.
             // TODO: refresh paymnets (p.refreshPaymentPath(currencyConverter))
         }

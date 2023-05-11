@@ -5,12 +5,6 @@ import com.radynamics.dallipay.cryptoledger.Transaction;
 import jakarta.ws.rs.NotSupportedException;
 
 public class NullSubmitter implements TransactionSubmitter {
-    private final Ledger ledger;
-
-    public NullSubmitter(Ledger ledger) {
-        this.ledger = ledger;
-    }
-
     @Override
     public String getId() {
         return "nullSubmitter";
@@ -18,12 +12,12 @@ public class NullSubmitter implements TransactionSubmitter {
 
     @Override
     public Ledger getLedger() {
-        return ledger;
+        return null;
     }
 
     @Override
     public void submit(Transaction[] transactions) {
-        // do nothing
+        throw new NotSupportedException();
     }
 
     @Override

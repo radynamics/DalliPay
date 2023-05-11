@@ -25,7 +25,7 @@ public class Payment {
     private ExchangeRate exchangeRate;
     private Origin origin;
     private ExpectedCurrency expectedCcy;
-    private TransactionSubmitter submitter;
+    private TransactionSubmitter submitter = new NullSubmitter();
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -34,7 +34,6 @@ public class Payment {
     public Payment(Transaction cryptoTrx) {
         if (cryptoTrx == null) throw new IllegalArgumentException("Parameter 'cryptoTrx' cannot be null");
         this.cryptoTrx = cryptoTrx;
-        this.submitter = new NullSubmitter(cryptoTrx.getLedger());
     }
 
     public Address getReceiverAddress() {
@@ -359,6 +358,7 @@ public class Payment {
     }
 
     public void setSubmitter(TransactionSubmitter submitter) {
+        if (submitter == null) throw new IllegalArgumentException("Parameter 'submitter' cannot be null");
         this.submitter = submitter;
     }
 }
