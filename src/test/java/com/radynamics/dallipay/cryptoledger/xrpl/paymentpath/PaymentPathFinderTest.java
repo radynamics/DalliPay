@@ -51,7 +51,7 @@ public class PaymentPathFinderTest {
     private void assertLedgerNativeCcyPath(PaymentPath actual) {
         Assertions.assertNotNull(actual);
         Assertions.assertInstanceOf(LedgerNativeCcyPath.class, actual);
-        Assertions.assertEquals(((LedgerNativeCcyPath) actual).getCcy(), new Currency("TEST"));
+        Assertions.assertEquals(new Currency("TEST"), actual.getCcy());
     }
 
     @ParameterizedTest
@@ -107,8 +107,8 @@ public class PaymentPathFinderTest {
         assertLedgerNativeCcyPath(actual[0]);
 
         Assertions.assertInstanceOf(IssuedCurrencyPath.class, actual[1]);
-        Assertions.assertEquals(((IssuedCurrencyPath) actual[1]).getCcy(), ccyCCC);
-        Assertions.assertEquals(actual[1].getRank(), 10);
+        Assertions.assertEquals(ccyCCC, actual[1].getCcy());
+        Assertions.assertEquals(10, actual[1].getRank());
     }
 
     @Test
@@ -143,14 +143,14 @@ public class PaymentPathFinderTest {
             var actualPath = actual[1];
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
             // CCC_issuer2 has lower transfer fee
-            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC2);
-            Assertions.assertEquals(actualPath.getRank(), 8);
+            Assertions.assertEquals(ccyCCC2, actualPath.getCcy());
+            Assertions.assertEquals(8, actualPath.getRank());
         }
         {
             var actualPath = actual[2];
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
-            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC1);
-            Assertions.assertEquals(actualPath.getRank(), 7);
+            Assertions.assertEquals(ccyCCC1, actualPath.getCcy());
+            Assertions.assertEquals(7, actualPath.getRank());
         }
     }
 }
