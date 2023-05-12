@@ -39,6 +39,7 @@ public class Currency {
     }
 
     public void setTransferFee(double transferFee) {
+        if (transferFee < 0 || transferFee > 1) throw new IllegalArgumentException("Parameter 'transferFee' must be between 0 and 1");
         this.transferFee = transferFee;
     }
 

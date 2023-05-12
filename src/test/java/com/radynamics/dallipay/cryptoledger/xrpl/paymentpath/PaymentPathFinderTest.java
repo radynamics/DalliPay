@@ -116,9 +116,9 @@ public class PaymentPathFinderTest {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
-        ccyCCC1.setTransferFee(3);
+        ccyCCC1.setTransferFee(0.03);
         var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
-        ccyCCC2.setTransferFee(2);
+        ccyCCC2.setTransferFee(0.02);
 
         var senderWallet = ledger.createWallet("aaa", "");
         senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
