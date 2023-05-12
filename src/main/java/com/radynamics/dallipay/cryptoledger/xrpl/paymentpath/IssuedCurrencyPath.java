@@ -65,6 +65,11 @@ public class IssuedCurrencyPath implements PaymentPath {
     }
 
     @Override
+    public boolean isVolatile() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return String.format("Ccy: %s", ccy.toString());
     }

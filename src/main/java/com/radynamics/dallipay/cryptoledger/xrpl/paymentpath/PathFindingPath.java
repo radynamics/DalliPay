@@ -6,14 +6,10 @@ import com.radynamics.dallipay.exchange.CurrencyFormatter;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 
-import java.util.ResourceBundle;
-
 public class PathFindingPath implements PaymentPath {
     private final CurrencyFormatter currencyFormatter;
     private final Currency ccy;
     private final Double transferFee;
-
-    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Xrpl");
 
     public PathFindingPath(CurrencyFormatter currencyFormatter, Currency ccy, Double transferFee) {
         if (currencyFormatter == null) throw new IllegalArgumentException("Parameter 'currencyFormatter' cannot be null");
@@ -48,7 +44,12 @@ public class PathFindingPath implements PaymentPath {
 
     @Override
     public String getDisplayText() {
-        return String.format("%s (%s)", currencyFormatter.formatCcyAndIssuer(ccy), res.getString("transient"));
+        return currencyFormatter.formatCcyAndIssuer(ccy);
+    }
+
+    @Override
+    public boolean isVolatile() {
+        return true;
     }
 
     @Override

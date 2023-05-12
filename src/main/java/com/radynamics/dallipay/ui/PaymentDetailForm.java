@@ -14,6 +14,8 @@ import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.PaymentFormatter;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -280,35 +282,50 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshPaymentPaths() {
-        JMenuItem selected = null;
+        Pair<JMenuItem, PaymentPath> selected = null;
         var popupMenu = new JPopupMenu();
         var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
         for (var path : availablePaths) {
-            var item = new JMenuItem(path.getDisplayText());
-            selected = path.isSet(payment) ? item : selected;
+            var item = new JMenuItem(getDisplayText(path));
+            item.setToolTipText(getToolTipText(path));
+            selected = path.isSet(payment) ? new ImmutablePair<>(item, path) : selected;
             popupMenu.add(item);
             item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
             txtAmount.addKnownCurrency(path.getCcy());
         }
 
         if (selected != null) {
-            popupMenu.setSelected(selected);
-            refreshPaymentPathText(selected.getText());
+            popupMenu.setSelected(selected.getKey());
+            refreshPaymentPathText(selected.getValue());
         }
 
         cmdPaymentPath.setEnabled(edit.editable() && availablePaths.length > 1 && payment.getBooked() == null);
         cmdPaymentPath.setPopupMenu(popupMenu);
     }
 
+    private String getDisplayText(PaymentPath path) {
+        var sb = new StringBuilder();
+        sb.append(path.getDisplayText());
+        if (path.isVolatile()) {
+            sb.append(String.format(" (%s)", res.getString("volatile")));
+        }
+        return sb.toString();
+    }
+
+    private String getToolTipText(PaymentPath path) {
+        return path.isVolatile() ? res.getString("volatileToolTipText") : null;
+    }
+
     private void apply(PaymentPath path) {
         path.apply(payment);
-        refreshPaymentPathText(path.getDisplayText());
+        refreshPaymentPathText(path);
         refreshAmountsText();
         setPaymentChanged(true);
     }
 
-    private void refreshPaymentPathText(String selectedText) {
-        cmdPaymentPath.setText(String.format(res.getString("sendUsing"), selectedText));
+    private void refreshPaymentPathText(PaymentPath selected) {
+        cmdPaymentPath.setToolTipText(getToolTipText(selected));
+        cmdPaymentPath.setText(String.format(res.getString("sendUsing"), getDisplayText(selected)));
     }
 
     private void refreshAmountsText() {

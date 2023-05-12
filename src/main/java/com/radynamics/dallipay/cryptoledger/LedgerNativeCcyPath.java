@@ -46,6 +46,11 @@ public class LedgerNativeCcyPath implements PaymentPath {
     }
 
     @Override
+    public boolean isVolatile() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return String.format("Ccy: %s", ccy);
     }
