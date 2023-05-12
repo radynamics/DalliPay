@@ -8,6 +8,7 @@ import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.TestUtils;
+import com.radynamics.dallipay.iso20022.camt054.TestFactory;
 import com.radynamics.dallipay.iso20022.pain001.TestLedger;
 import com.radynamics.dallipay.iso20022.pain001.TestTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -151,6 +152,48 @@ public class PaymentPathFinderTest {
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
             Assertions.assertEquals(ccyCCC1, actualPath.getCcy());
             Assertions.assertEquals(7, actualPath.getRank());
+        }
+    }
+
+    @Test
+    public void findPathFindingPath() {
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
+        var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
+        ccyCCC1.setTransferFee(0.003);
+        var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
+        ccyCCC2.setTransferFee(0.002);
+
+        var senderWallet = ledger.createWallet("aaa", "");
+        senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
+
+        var receiverWallet = ledger.createWallet("bbb", "");
+        receiverWallet.getBalances().set(Money.of(100.0, ccyBBB));
+        receiverWallet.getBalances().set(Money.of(1000.0, ccyCCC1));
+        receiverWallet.getBalances().set(Money.of(10000.0, ccyCCC2));
+
+        var p = new Payment(new TestTransaction(ledger, 10.0, "TEST"));
+        p.setSenderWallet(senderWallet);
+        p.setReceiverWallet(receiverWallet);
+        p.setAmount(Money.of(20.0, new Currency("CCC")));
+        p.setSubmitter(TestFactory.createSubmitter());
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+
+        Assertions.assertEquals(3, actual.length);
+        assertLedgerNativeCcyPath(actual[0]);
+
+        {
+            var actualPath = actual[1];
+            Assertions.assertInstanceOf(PathFindingPath.class, actualPath);
+            // CCC_issuer2 has lower transfer fee
+            Assertions.assertEquals(ccyCCC2, actualPath.getCcy());
+            Assertions.assertEquals(4, actualPath.getRank());
+        }
+        {
+            var actualPath = actual[2];
+            Assertions.assertInstanceOf(PathFindingPath.class, actualPath);
+            Assertions.assertEquals(ccyCCC1, actualPath.getCcy());
+            Assertions.assertEquals(3, actualPath.getRank());
         }
     }
 }

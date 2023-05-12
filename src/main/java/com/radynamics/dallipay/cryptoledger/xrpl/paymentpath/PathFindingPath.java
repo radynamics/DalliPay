@@ -11,23 +11,29 @@ import java.util.ResourceBundle;
 public class PathFindingPath implements PaymentPath {
     private final CurrencyFormatter currencyFormatter;
     private final Currency ccy;
-    private final int rankDeduction;
+    private final Double transferFee;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Xrpl");
 
-    public PathFindingPath(CurrencyFormatter currencyFormatter, Currency ccy, int rankDeduction) {
+    public PathFindingPath(CurrencyFormatter currencyFormatter, Currency ccy, Double transferFee) {
         if (currencyFormatter == null) throw new IllegalArgumentException("Parameter 'currencyFormatter' cannot be null");
         if (ccy == null) throw new IllegalArgumentException("Parameter 'ccy' cannot be null");
         if (ccy.getIssuer() == null) throw new IllegalArgumentException("Parameter 'ccy.getIssuer()' cannot be null");
-        if (rankDeduction < 0) throw new IllegalArgumentException("Parameter 'rankDeduction' cannot be less than 0");
+        if (transferFee < 0 || transferFee > 1) throw new IllegalArgumentException("Parameter 'transferFee' must be between 0 and 1");
         this.currencyFormatter = currencyFormatter;
         this.ccy = ccy;
-        this.rankDeduction = rankDeduction;
+        this.transferFee = transferFee;
     }
 
     @Override
     public int getRank() {
-        return 5 - Math.max(rankDeduction, 0);
+        return 5 - getRankDeduction();
+    }
+
+    private int getRankDeduction() {
+        if (transferFee == 0) return 0;
+        if (0 < transferFee && transferFee <= 0.002) return 1;
+        return 2;
     }
 
     @Override

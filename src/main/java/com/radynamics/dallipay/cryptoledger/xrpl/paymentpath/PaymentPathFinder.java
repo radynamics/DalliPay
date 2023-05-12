@@ -30,25 +30,31 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
             return list.toArray(new PaymentPath[0]);
         }
 
-        var ccysBothAccepting = findCcysBothAccepting(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
-
-        Arrays.sort(ccysBothAccepting, Comparator.comparing(Currency::getTransferFee));
         var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
-        for (var i = 0; i < ccysBothAccepting.length; i++) {
-            var ccy = ccysBothAccepting[i];
-            list.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee()));
+        {
+            var candidates = new ArrayList<IssuedCurrencyPath>();
+            var ccysBothAccepting = findCcysBothAccepting(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
+            for (var i = 0; i < ccysBothAccepting.length; i++) {
+                var ccy = ccysBothAccepting[i];
+                candidates.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee()));
+            }
+            candidates.sort(Comparator.comparing(IssuedCurrencyPath::getRank).reversed());
+            list.addAll(candidates);
         }
 
         if (p.getSubmitter().supportsPathFinding()) {
+            var candidates = new ArrayList<PathFindingPath>();
             var acceptedUserCcyByReceiver = Arrays.stream(p.getReceiverWallet().getBalances().all())
                     // Always compare without issued due it's missing after entered by user
                     .filter(o -> o.getCcy().withoutIssuer().equals(p.getUserCcy().withoutIssuer()))
-                    .findFirst()
+                    .filter(o -> list.stream().noneMatch(x -> x.getCcy().sameCode(o.getCcy())))
                     .map(Money::getCcy)
-                    .orElse(null);
-            if (acceptedUserCcyByReceiver != null && list.stream().noneMatch(o -> o.getCcy().sameCode(acceptedUserCcyByReceiver))) {
-                list.add(new PathFindingPath(cf, acceptedUserCcyByReceiver, acceptedUserCcyByReceiver.getTransferFee() == 0 ? 0 : 2));
+                    .toArray(Currency[]::new);
+            for (var ccy : acceptedUserCcyByReceiver) {
+                candidates.add(new PathFindingPath(cf, ccy, ccy.getTransferFee()));
             }
+            candidates.sort(Comparator.comparing(PathFindingPath::getRank).reversed());
+            list.addAll(candidates);
         }
 
         return list.toArray(new PaymentPath[0]);
