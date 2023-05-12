@@ -48,7 +48,7 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
                     .map(Money::getCcy)
                     .orElse(null);
             if (acceptedUserCcyByReceiver != null && list.stream().noneMatch(o -> o.getCcy().sameCode(acceptedUserCcyByReceiver))) {
-                list.add(new IssuedCurrencyPath(cf, acceptedUserCcyByReceiver, acceptedUserCcyByReceiver.getTransferFee() == 0 ? 0 : 2));
+                list.add(new PathFindingPath(cf, acceptedUserCcyByReceiver, acceptedUserCcyByReceiver.getTransferFee() == 0 ? 0 : 2));
             }
         }
 
