@@ -144,13 +144,13 @@ public class PaymentPathFinderTest {
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
             // CCC_issuer2 has lower transfer fee
             Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC2);
-            Assertions.assertEquals(actualPath.getRank(), 10);
+            Assertions.assertEquals(actualPath.getRank(), 8);
         }
         {
             var actualPath = actual[2];
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
             Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC1);
-            Assertions.assertEquals(actualPath.getRank(), 9);
+            Assertions.assertEquals(actualPath.getRank(), 7);
         }
     }
 }
