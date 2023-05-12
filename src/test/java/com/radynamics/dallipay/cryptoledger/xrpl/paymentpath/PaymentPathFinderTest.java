@@ -155,8 +155,9 @@ public class PaymentPathFinderTest {
         }
     }
 
-    @Test
-    public void findPathFindingPath() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void findPathFindingPath(boolean senderHoldsCCC1) {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
@@ -166,6 +167,9 @@ public class PaymentPathFinderTest {
 
         var senderWallet = ledger.createWallet("aaa", "");
         senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
+        if (senderHoldsCCC1) {
+            senderWallet.getBalances().set(Money.of(800.0, ccyCCC1));
+        }
 
         var receiverWallet = ledger.createWallet("bbb", "");
         receiverWallet.getBalances().set(Money.of(100.0, ccyBBB));
@@ -182,18 +186,23 @@ public class PaymentPathFinderTest {
         Assertions.assertEquals(3, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
 
-        {
-            var actualPath = actual[1];
-            Assertions.assertInstanceOf(PathFindingPath.class, actualPath);
+        if (senderHoldsCCC1) {
+            Assertions.assertInstanceOf(IssuedCurrencyPath.class, actual[1]);
+            Assertions.assertEquals(ccyCCC1, actual[1].getCcy());
+            Assertions.assertEquals(7, actual[1].getRank());
+
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[2]);
+            Assertions.assertEquals(ccyCCC2, actual[2].getCcy());
+            Assertions.assertEquals(4, actual[2].getRank());
+        } else {
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[1]);
             // CCC_issuer2 has lower transfer fee
-            Assertions.assertEquals(ccyCCC2, actualPath.getCcy());
-            Assertions.assertEquals(4, actualPath.getRank());
-        }
-        {
-            var actualPath = actual[2];
-            Assertions.assertInstanceOf(PathFindingPath.class, actualPath);
-            Assertions.assertEquals(ccyCCC1, actualPath.getCcy());
-            Assertions.assertEquals(3, actualPath.getRank());
+            Assertions.assertEquals(ccyCCC2, actual[1].getCcy());
+            Assertions.assertEquals(4, actual[1].getRank());
+
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[2]);
+            Assertions.assertEquals(ccyCCC1, actual[2].getCcy());
+            Assertions.assertEquals(3, actual[2].getRank());
         }
     }
 }
