@@ -36,8 +36,7 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
         var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
         for (var i = 0; i < ccysBothAccepting.length; i++) {
             var ccy = ccysBothAccepting[i];
-            // Higher fee -> higher rank deduction -> less preferred
-            list.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee() == 0 ? 0 : i));
+            list.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee()));
         }
 
         if (p.getSubmitter().supportsPathFinding()) {
