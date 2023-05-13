@@ -207,4 +207,9 @@ public class TestLedger implements Ledger {
     public DestinationTagBuilder createDestinationTagBuilder() {
         return null;
     }
+
+    @Override
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        return true;
+    }
 }

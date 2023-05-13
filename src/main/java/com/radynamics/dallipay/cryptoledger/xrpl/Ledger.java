@@ -244,11 +244,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return new com.radynamics.dallipay.cryptoledger.xrpl.DestinationTagBuilder();
     }
 
-    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
-        return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
-    }
-
+    @Override
     public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
         return api.existsPath(WalletConverter.from(sender), WalletConverter.from(receiver), amount);
+    }
+
+    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
+        return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }
 }

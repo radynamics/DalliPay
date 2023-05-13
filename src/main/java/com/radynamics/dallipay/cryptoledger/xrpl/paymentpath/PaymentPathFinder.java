@@ -51,8 +51,7 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
                     .map(Money::getCcy)
                     .toArray(Currency[]::new);
             for (var ccy : acceptedUserCcyByReceiver) {
-                var ledger = (com.radynamics.dallipay.cryptoledger.xrpl.Ledger) p.getLedger();
-                if (ledger.existsPath(p.getSenderWallet(), p.getReceiverWallet(), Money.of(p.getAmount(), ccy))) {
+                if (p.getLedger().existsPath(p.getSenderWallet(), p.getReceiverWallet(), Money.of(p.getAmount(), ccy))) {
                     candidates.add(new PathFindingPath(cf, ccy, ccy.getTransferFee()));
                 }
             }
