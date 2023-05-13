@@ -40,8 +40,9 @@ public class BalanceRefresher {
         }
 
         // Use cached balance for other instances of the same wallet.
-        if (cache.isPresent(wallet)) {
-            wallet.getBalances().replaceBy(cache.get(wallet));
+        var key = new WalletKey(wallet);
+        if (cache.isPresent(key)) {
+            wallet.getBalances().replaceBy(cache.get(key));
             return;
         }
 
@@ -49,6 +50,6 @@ public class BalanceRefresher {
         if (wallet.getBalances().isEmpty()) {
             return;
         }
-        cache.add(wallet, wallet.getBalances());
+        cache.add(key, wallet.getBalances());
     }
 }

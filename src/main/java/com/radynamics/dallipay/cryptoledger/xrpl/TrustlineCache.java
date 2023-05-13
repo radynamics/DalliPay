@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.Cache;
+import com.radynamics.dallipay.cryptoledger.WalletKey;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 
 public class TrustlineCache {
@@ -15,12 +16,13 @@ public class TrustlineCache {
 
     public Trustline[] get(Wallet wallet) {
         if (wallet == null) throw new IllegalArgumentException("Parameter 'wallet' cannot be null");
-        var item = cache.get(wallet);
+        var key = new WalletKey(wallet);
+        var item = cache.get(key);
         if (item != null) {
             return item;
         }
 
-        cache.add(wallet, ledger.listTrustlines(wallet));
+        cache.add(key, ledger.listTrustlines(wallet));
         return get(wallet);
     }
 

@@ -23,31 +23,31 @@ public class Cache<T> {
         this.maxAge = maxAge;
     }
 
-    public void add(Wallet wallet, T data) {
-        cache.put(createKey(wallet), new CacheEntry<>(data));
+    public void add(Key key, T data) {
+        cache.put(createKey(key), new CacheEntry<>(data));
     }
 
-    private String createKey(Wallet wallet) {
-        return String.format("%s_%s", prefix, wallet.getPublicKey());
+    private String createKey(Key key) {
+        return String.format("%s_%s", prefix, key.get());
     }
 
-    public boolean isPresent(Wallet wallet) {
-        return getEntry(wallet) != null;
+    public boolean isPresent(Key key) {
+        return getEntry(key) != null;
     }
 
-    private CacheEntry<T> getEntry(Wallet wallet) {
-        var needle = createKey(wallet);
+    private CacheEntry<T> getEntry(Key key) {
+        var needle = createKey(key);
         return cache.entrySet().stream().filter(o -> o.getKey().equals(needle)).findFirst().map(Map.Entry::getValue).orElse(null);
     }
 
-    public T get(Wallet wallet) {
-        var o = getEntry(wallet);
+    public T get(Key key) {
+        var o = getEntry(key);
         return o == null ? null : o.getValue();
     }
 
-    public void evict(Wallet wallet) {
-        var key = createKey(wallet);
-        cache.entrySet().removeIf(entry -> entry.getKey().equals(key));
+    public void evict(Key key) {
+        var keyString = createKey(key);
+        cache.entrySet().removeIf(entry -> entry.getKey().equals(keyString));
     }
 
     public synchronized void evictOutdated() {

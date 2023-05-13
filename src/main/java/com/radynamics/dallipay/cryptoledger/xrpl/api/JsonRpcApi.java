@@ -280,19 +280,20 @@ public class JsonRpcApi implements TransactionSource {
 
     private synchronized AccountRootObject getAccountData(Wallet wallet) {
         accountDataCache.evictOutdated();
-        var data = accountDataCache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = accountDataCache.get(key);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountDataCache.isPresent(wallet)) {
+        if (data != null || accountDataCache.isPresent(key)) {
             return data;
         }
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             data = xrplClient.accountInfo(requestParams).accountData();
-            accountDataCache.add(wallet, data);
+            accountDataCache.add(key, data);
             return data;
         } catch (Exception e) {
             if (isAccountNotFound(e)) {
-                accountDataCache.add(wallet, null);
+                accountDataCache.add(key, null);
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -302,19 +303,20 @@ public class JsonRpcApi implements TransactionSource {
 
     private synchronized AccountLinesResult getAccountLines(Wallet wallet) {
         accountTrustLineCache.evictOutdated();
-        var data = accountTrustLineCache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = accountTrustLineCache.get(key);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountTrustLineCache.isPresent(wallet)) {
+        if (data != null || accountTrustLineCache.isPresent(key)) {
             return data;
         }
         try {
             var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
             data = xrplClient.accountLines(requestParams);
-            accountTrustLineCache.add(wallet, data);
+            accountTrustLineCache.add(key, data);
             return data;
         } catch (JsonRpcClientErrorException e) {
             if (isAccountNotFound(e)) {
-                accountTrustLineCache.add(wallet, null);
+                accountTrustLineCache.add(key, null);
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -417,8 +419,9 @@ public class JsonRpcApi implements TransactionSource {
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
         if (!useCache) {
-            accountDataCache.evict(wallet);
-            accountTrustLineCache.evict(wallet);
+            var key = new WalletKey(wallet);
+            accountDataCache.evict(key);
+            accountTrustLineCache.evict(key);
         }
         var accountData = getAccountData(wallet);
         if (accountData != null) {
