@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.moandjiezana.toml.Toml;
 import com.radynamics.dallipay.cryptoledger.Cache;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.WalletKey;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +22,8 @@ public class DomainVerifier {
 
     public synchronized boolean isValid(Wallet wallet, String domain) {
         cache.evictOutdated();
-        var data = cache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = cache.get(key);
         if (data != null) {
             return data;
         }
@@ -33,13 +35,13 @@ public class DomainVerifier {
             toml = new Toml().read(url.openStream());
         } catch (Exception e) {
             log.info(e.getMessage(), e);
-            cache.add(wallet, false);
+            cache.add(key, false);
             return false;
         }
 
         var accounts = toml.getList("ACCOUNTS");
         if (accounts == null) {
-            cache.add(wallet, false);
+            cache.add(key, false);
             return false;
         }
 
@@ -53,12 +55,12 @@ public class DomainVerifier {
 
             var address = map.get("address");
             if (matchesNetwork && address.equals(wallet.getPublicKey())) {
-                cache.add(wallet, true);
+                cache.add(key, true);
                 return true;
             }
         }
 
-        cache.add(wallet, false);
+        cache.add(key, false);
         return false;
     }
 }
