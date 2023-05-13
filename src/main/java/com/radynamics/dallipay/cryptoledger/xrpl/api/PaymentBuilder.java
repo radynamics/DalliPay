@@ -1,10 +1,8 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.radynamics.dallipay.cryptoledger.FeeHelper;
-import com.radynamics.dallipay.cryptoledger.FeeType;
-import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +41,7 @@ public class PaymentBuilder {
             memos.add(Convert.toMemoWrapper(memoData));
         }
 
-        var amount = toCurrencyAmount(transaction.getAmount());
+        var amount = toCurrencyAmount(transaction.getLedger(), transaction.getAmount());
         var lederTransactionFee = FeeHelper.get(transaction.getFees(), FeeType.LedgerTransactionFee).orElseThrow();
         var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
 
@@ -59,14 +57,14 @@ public class PaymentBuilder {
             var transferFee = ccy.getTransferFeeAmount(transaction.getAmount());
             // maximum including an additional tolerance
             var sendMax = transaction.getAmount().plus(transferFee).plus(transferFee.multiply(0.01));
-            builder.sendMax(toCurrencyAmount(sendMax));
+            builder.sendMax(toCurrencyAmount(transaction.getLedger(), sendMax));
         }
         return builder;
     }
 
-    private CurrencyAmount toCurrencyAmount(Money amount) throws LedgerException {
+    public static CurrencyAmount toCurrencyAmount(Ledger ledger, Money amount) throws LedgerException {
         var ccy = amount.getCcy();
-        if (ccy.getCode().equals(transaction.getLedger().getNativeCcySymbol())) {
+        if (ccy.getCode().equals(ledger.getNativeCcySymbol())) {
             return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue()));
         }
 

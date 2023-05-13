@@ -3,12 +3,12 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
-import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
@@ -26,6 +26,8 @@ import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
+import org.xrpl.xrpl4j.model.client.path.RipplePathFindRequestParams;
+import org.xrpl.xrpl4j.model.client.path.RipplePathFindResult;
 import org.xrpl.xrpl4j.model.client.serverinfo.ServerInfoResult;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
@@ -52,6 +54,7 @@ public class JsonRpcApi implements TransactionSource {
     private final LedgerRangeConverter ledgerRangeConverter;
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
+    private final Cache<RipplePathFindResult> ripplePathFindCache;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -62,6 +65,7 @@ public class JsonRpcApi implements TransactionSource {
         this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
         this.accountDataCache = new Cache<>(network.getUrl().toString());
         this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
+        this.ripplePathFindCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -317,6 +321,37 @@ public class JsonRpcApi implements TransactionSource {
         } catch (JsonRpcClientErrorException e) {
             if (isAccountNotFound(e)) {
                 accountTrustLineCache.add(key, null);
+            } else {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        }
+    }
+
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        var data = getRipplePathFindResult(sender, receiver, amount);
+        return data != null && data.alternatives().size() > 0;
+    }
+
+    private synchronized RipplePathFindResult getRipplePathFindResult(Wallet sender, Wallet receiver, Money amount) {
+        ripplePathFindCache.evictOutdated();
+        var key = new RipplePathFindKey(sender, receiver, amount);
+        var data = ripplePathFindCache.get(key);
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (data != null || ripplePathFindCache.isPresent(key)) {
+            return data;
+        }
+        try {
+            var requestParams = RipplePathFindRequestParams.builder()
+                    .sourceAccount(Address.of(sender.getPublicKey()))
+                    .destinationAccount(Address.of(receiver.getPublicKey()))
+                    .destinationAmount(PaymentBuilder.toCurrencyAmount(ledger, amount));
+            data = xrplClient.ripplePathFind(requestParams.build());
+            ripplePathFindCache.add(key, data);
+            return data;
+        } catch (Exception e) {
+            if (isAccountNotFound(e)) {
+                ripplePathFindCache.add(key, null);
             } else {
                 log.error(e.getMessage(), e);
             }

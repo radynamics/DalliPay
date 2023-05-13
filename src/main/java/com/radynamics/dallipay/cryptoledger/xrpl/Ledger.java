@@ -5,8 +5,8 @@ import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -246,5 +246,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
+    }
+
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        return api.existsPath(WalletConverter.from(sender), WalletConverter.from(receiver), amount);
     }
 }
