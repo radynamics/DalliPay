@@ -291,6 +291,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         var p = mp.getPayment();
         payments.add(p);
         initSubmitter();
+        setSubmitter(p);
         table.add(p);
     }
 
@@ -627,16 +628,20 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         refreshSigningText();
 
         for (var p : payments) {
-            // Prevent setting null to payments
-            p.setSubmitter(this.submitter == null ? new NullSubmitter() : this.submitter);
-            // Eg. pathfinding is supported only by specific signers.
-            p.refreshPaymentPath(currencyConverter);
+            setSubmitter(p);
         }
 
         // While reading an input file there aren't yet any loaded payments.
         if (table.paymentCount() > 0) {
             table.refresh(payments.toArray(new Payment[0]));
         }
+    }
+
+    private void setSubmitter(Payment p) {
+        // Prevent setting null to payments
+        p.setSubmitter(this.submitter == null ? new NullSubmitter() : this.submitter);
+        // Eg. pathfinding is supported only by specific signers.
+        p.refreshPaymentPath(currencyConverter);
     }
 
     private void refreshSigningText() {
