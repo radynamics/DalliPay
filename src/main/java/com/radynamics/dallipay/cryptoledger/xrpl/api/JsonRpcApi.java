@@ -367,7 +367,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private boolean isAccountNotFound(Exception e) {
-        return e.getMessage().equals("Account not found.");
+        return e.getMessage().equals("Account not found.") || e.getMessage().equals("Source account not found.");
     }
 
     public FeeInfo latestFee() {
