@@ -54,7 +54,7 @@ public class JsonRpcApi implements TransactionSource {
     private final LedgerRangeConverter ledgerRangeConverter;
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
-    private final Cache<RipplePathFindResult> ripplePathFindCache;
+    private final Cache<RipplePathFindResultEntry> ripplePathFindCache;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -335,23 +335,30 @@ public class JsonRpcApi implements TransactionSource {
 
     private synchronized RipplePathFindResult getRipplePathFindResult(Wallet sender, Wallet receiver, Money amount) {
         ripplePathFindCache.evictOutdated();
-        var key = new RipplePathFindKey(sender, receiver, amount);
-        var data = ripplePathFindCache.get(key);
-        // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || ripplePathFindCache.isPresent(key)) {
-            return data;
+        var key = new RipplePathFindKey(sender, receiver, amount.getCcy());
+        var cached = ripplePathFindCache.list(key, new RipplePathFindResultEntry[0]);
+        for (var c : cached) {
+            // Contained without data means "wallet doesn't exist" (wasn't found previously)
+            if (c.getResult() == null) {
+                return null;
+            }
+            // Assume lower amounts also work if there are known paths for higher amounts.
+            if (amount.lessThan(c.getAmount()) || amount.equals(c.getAmount())) {
+                log.trace(String.format("CACHE hit %s (%s <= %s)", key.get(), amount, c.getAmount()));
+                return c.getResult();
+            }
         }
         try {
             var requestParams = RipplePathFindRequestParams.builder()
                     .sourceAccount(Address.of(sender.getPublicKey()))
                     .destinationAccount(Address.of(receiver.getPublicKey()))
                     .destinationAmount(PaymentBuilder.toCurrencyAmount(ledger, amount));
-            data = xrplClient.ripplePathFind(requestParams.build());
-            ripplePathFindCache.add(key, data);
+            var data = xrplClient.ripplePathFind(requestParams.build());
+            ripplePathFindCache.add(key, new RipplePathFindResultEntry(data, amount));
             return data;
         } catch (Exception e) {
             if (isAccountNotFound(e)) {
-                ripplePathFindCache.add(key, null);
+                ripplePathFindCache.add(key, new RipplePathFindResultEntry(null, amount));
             } else {
                 log.error(e.getMessage(), e);
             }
