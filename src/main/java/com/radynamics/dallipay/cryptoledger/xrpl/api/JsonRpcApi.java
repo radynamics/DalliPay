@@ -333,7 +333,7 @@ public class JsonRpcApi implements TransactionSource {
         return data != null && data.alternatives().size() > 0;
     }
 
-    private synchronized RipplePathFindResult getRipplePathFindResult(Wallet sender, Wallet receiver, Money amount) {
+    private RipplePathFindResult getRipplePathFindResult(Wallet sender, Wallet receiver, Money amount) {
         ripplePathFindCache.evictOutdated();
         var key = new RipplePathFindKey(sender, receiver, amount.getCcy());
         var cached = ripplePathFindCache.list(key, new RipplePathFindResultEntry[0]);

@@ -21,6 +21,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class PaymentDetailForm extends JDialog {
     private final Payment payment;
@@ -59,6 +61,8 @@ public class PaymentDetailForm extends JDialog {
         edit = PaymentEdit.create(payment);
         edit.setEditable(editable);
         setupUI();
+
+        refreshPaymentPaths();
     }
 
     public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
@@ -141,7 +145,6 @@ public class PaymentDetailForm extends JDialog {
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
                 {
                     cmdPaymentPath = new JSplitButton();
-                    refreshPaymentPaths();
                     cmdPaymentPath.setVisible(actor == Actor.Sender);
                     cmdPaymentPath.setAlwaysPopup(true);
                     cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
@@ -282,9 +285,28 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshPaymentPaths() {
+        enableInputControls(false);
+        cmdPaymentPath.setText(res.getString("loading"));
+
+        var future = new CompletableFuture<PaymentPath[]>();
+        future.whenComplete((paymentPaths, e) -> {
+            enableInputControls(true);
+            if (e != null) {
+                cmdPaymentPath.setText(res.getString("failed"));
+                ExceptionDialog.show(pnlContent, e);
+                return;
+            }
+            refreshPaymentPaths(paymentPaths);
+        });
+
+        Executors.newCachedThreadPool().submit(() -> {
+            future.complete(payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment));
+        });
+    }
+
+    private void refreshPaymentPaths(PaymentPath[] availablePaths) {
         Pair<JMenuItem, PaymentPath> selected = null;
         var popupMenu = new JPopupMenu();
-        var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
         for (var path : availablePaths) {
             var item = new JMenuItem(getDisplayText(path));
             item.setToolTipText(getToolTipText(path));
@@ -444,6 +466,16 @@ public class PaymentDetailForm extends JDialog {
     private JLabel formatSecondLineLinkLabel(JLabel lbl) {
         lbl.putClientProperty("FlatLaf.styleClass", "small");
         return lbl;
+    }
+
+    private void enableInputControls(boolean enabled) {
+        var e = enabled && edit.editable();
+        txtAmount.setEditable(e);
+        cmdPaymentPath.setEnabled(e);
+        txtSenderWallet.setEditable(e);
+        txtReceiverWallet.setEditable(e);
+        txtStructuredReferences.setEditable(e);
+        txtMessages.setEditable(e);
     }
 
     private void setPaymentChanged(boolean changed) {
