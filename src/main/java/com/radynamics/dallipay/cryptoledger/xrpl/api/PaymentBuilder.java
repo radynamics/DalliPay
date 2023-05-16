@@ -77,7 +77,7 @@ public class PaymentBuilder {
         // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
         var amt = BigDecimal.valueOf(amount.getNumber().doubleValue()).setScale(15, RoundingMode.HALF_UP).doubleValue();
         return IssuedCurrencyAmount.builder()
-                .currency(ccy.getCode())
+                .currency(Convert.fromCurrencyCode(ccy.getCode()))
                 .issuer(Address.of(ccy.getIssuer().getPublicKey()))
                 .value(String.valueOf(amt))
                 .build();

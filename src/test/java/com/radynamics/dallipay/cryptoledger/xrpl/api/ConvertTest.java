@@ -9,4 +9,10 @@ public class ConvertTest {
         Assertions.assertEquals("USD", Convert.toCurrencyCode("USD"));
         Assertions.assertEquals("EURS", Convert.toCurrencyCode("4555525300000000000000000000000000000000"));
     }
+
+    @Test
+    public void fromCurrencyCode() {
+        Assertions.assertEquals("USD", Convert.fromCurrencyCode("USD"));
+        Assertions.assertEquals("4555525300000000000000000000000000000000", Convert.fromCurrencyCode("EURS"));
+    }
 }

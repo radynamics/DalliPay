@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.transactions.ImmutableMemo;
@@ -32,5 +33,10 @@ public final class Convert {
             log.error(e.getMessage(), e);
             return currency;
         }
+    }
+
+    public static String fromCurrencyCode(String code) {
+        // value is always 20 bytes, filled with 0.
+        return code.length() <= ccyCodeStandardFormatLength ? code : StringUtils.rightPad(Utils.stringToHex(code), 40, '0');
     }
 }
