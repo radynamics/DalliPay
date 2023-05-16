@@ -5,8 +5,8 @@ import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -27,6 +27,7 @@ import java.util.ResourceBundle;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
+    private TrustlineCache trustlineCache;
     private NetworkInfo network;
     private JsonRpcApi api;
 
@@ -144,7 +145,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public com.radynamics.dallipay.iso20022.PaymentValidator createPaymentValidator() {
-        return new com.radynamics.dallipay.cryptoledger.xrpl.PaymentValidator(this, new TrustlineCache(this));
+        return new com.radynamics.dallipay.cryptoledger.xrpl.PaymentValidator(this, getTrustlineCache());
+    }
+
+    private TrustlineCache getTrustlineCache() {
+        if (trustlineCache == null || trustlineCache.networkChanged(getNetwork())) {
+            trustlineCache = new TrustlineCache(this);
+        }
+        return trustlineCache;
     }
 
     @Override
@@ -159,7 +167,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
                     new CachedWalletInfoProvider(this, new WalletInfoProvider[]{
                             new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this),
                             new Xumm()}),
-                    new TrustlineInfoProvider(new TrustlineCache(this))
+                    new TrustlineInfoProvider(getTrustlineCache())
             };
         }
         return walletInfoProvider;

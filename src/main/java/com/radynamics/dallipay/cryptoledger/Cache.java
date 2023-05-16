@@ -60,6 +60,10 @@ public class Cache<T> {
         cache.clear();
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
     @Override
     public String toString() {
         return String.format("%s entries", cache.size());
