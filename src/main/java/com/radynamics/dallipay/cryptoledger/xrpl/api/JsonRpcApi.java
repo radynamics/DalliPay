@@ -485,9 +485,13 @@ public class JsonRpcApi implements TransactionSource {
             var amt = Double.parseDouble(line.balance());
             var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
             var ccy = new Currency(toCurrencyCode(line.currency()), issuer);
-            ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
-            var balance = Money.of(amt, ccy);
             var lmt = Double.parseDouble(line.limit());
+            if (lmt > 0) {
+                ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
+            } else {
+                log.trace("Skipped getTransferFee due trustline.limit is " + lmt);
+            }
+            var balance = Money.of(amt, ccy);
             var limit = Money.of(lmt, ccy);
 
             list.add(new Trustline(wallet, balance, limit));

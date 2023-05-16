@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.Cache;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.WalletKey;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 
@@ -11,7 +12,11 @@ public class TrustlineCache {
     public TrustlineCache(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
-        this.cache = new Cache<>(ledger.getNetwork().getUrl().toString());
+        this.cache = new Cache<>(createPrefix(ledger.getNetwork()));
+    }
+
+    private static String createPrefix(NetworkInfo network) {
+        return network.getUrl().toString();
     }
 
     public Trustline[] get(Wallet wallet) {
@@ -32,5 +37,9 @@ public class TrustlineCache {
 
     public Ledger getLedger() {
         return ledger;
+    }
+
+    public boolean networkChanged(NetworkInfo network) {
+        return !cache.getPrefix().equals(createPrefix(network));
     }
 }
