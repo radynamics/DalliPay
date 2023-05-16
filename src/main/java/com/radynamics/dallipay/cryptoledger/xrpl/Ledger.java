@@ -254,6 +254,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        if (!exists(sender) || !exists(receiver)) {
+            return false;
+        }
         return api.existsPath(WalletConverter.from(sender), WalletConverter.from(receiver), amount);
     }
 
