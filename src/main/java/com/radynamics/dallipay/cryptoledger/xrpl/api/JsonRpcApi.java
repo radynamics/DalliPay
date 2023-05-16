@@ -164,7 +164,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
-        var ccyCode = toCurrencyCode(amount.currency());
+        var ccyCode = Convert.toCurrencyCode(amount.currency());
         var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
 
         var issuer = ledger.createWallet(amount.issuer().value(), "");
@@ -192,18 +192,6 @@ public class JsonRpcApi implements TransactionSource {
                 });
 
         return future.join();
-    }
-
-    private static String toCurrencyCode(String currency) {
-        try {
-            // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
-            final int ccyCodeStandardFormatLength = 3;
-            // trim() needed, due value is always 20 bytes, filled with 0.
-            return currency.length() <= ccyCodeStandardFormatLength ? currency : Utils.hexToString(currency).trim();
-        } catch (DecoderException | UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-            return currency;
-        }
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
@@ -484,7 +472,7 @@ public class JsonRpcApi implements TransactionSource {
         for (var line : result.lines()) {
             var amt = Double.parseDouble(line.balance());
             var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
-            var ccy = new Currency(toCurrencyCode(line.currency()), issuer);
+            var ccy = new Currency(Convert.toCurrencyCode(line.currency()), issuer);
             var lmt = Double.parseDouble(line.limit());
             if (lmt > 0) {
                 ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
