@@ -59,6 +59,7 @@ public class JsonRpcApi implements TransactionSource {
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
     private final Cache<RipplePathFindResultEntry> ripplePathFindCache;
+    private final Cache<ImmutableBookOffersResult> bookOffersCache;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -70,6 +71,7 @@ public class JsonRpcApi implements TransactionSource {
         this.accountDataCache = new Cache<>(network.getUrl().toString());
         this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
         this.ripplePathFindCache = new Cache<>(network.getUrl().toString());
+        this.bookOffersCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -363,25 +365,39 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public boolean existsSellOffer(Money minimum) {
+        var result = getBookOffers(minimum.getCcy());
+        if (result == null) {
+            return false;
+        }
+
+        var available = Money.zero(minimum.getCcy());
+        for (var o : result.offers()) {
+            available = available.plus(PaymentBuilder.fromCurrencyAmount(ledger, o.takerPays()));
+        }
+
+        return minimum.lessThan(available);
+    }
+
+    private synchronized ImmutableBookOffersResult getBookOffers(Currency ccy) {
+        bookOffersCache.evictOutdated();
+        var key = new CurrencyKey(ccy);
+        var data = bookOffersCache.get(key);
+        // Contained without data means "doesn't exist" (wasn't found previously)
+        if (data != null || bookOffersCache.isPresent(key)) {
+            return data;
+        }
         try {
-            // TODO: implement caching
-            var ccy = minimum.getCcy();
             var b = ImmutableBookOffersRequestParams.builder()
                     .takerGets(new ImmutableXrpCurrency())
                     .takerPays(ImmutableIssuedCurrency.of(Convert.fromCurrencyCode(ccy.getCode()), Address.of(ccy.getIssuer().getPublicKey())))
                     .limit(10)
                     .build();
-            var result = xrplClient.getJsonRpcClient().send(b.request(), ImmutableBookOffersResult.class);
-
-            var available = Money.zero(ccy);
-            for (var o : result.offers()) {
-                available = available.plus(PaymentBuilder.fromCurrencyAmount(ledger, o.takerPays()));
-            }
-
-            return minimum.lessThan(available);
-        } catch (JsonRpcClientErrorException e) {
+            data = xrplClient.getJsonRpcClient().send(b.request(), ImmutableBookOffersResult.class);
+            bookOffersCache.add(key, data);
+            return data;
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return false;
+            return null;
         }
     }
 
