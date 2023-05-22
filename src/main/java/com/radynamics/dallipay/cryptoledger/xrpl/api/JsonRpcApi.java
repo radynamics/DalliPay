@@ -10,6 +10,10 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersRequestParams;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersResult;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableIssuedCurrency;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableXrpCurrency;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -356,6 +360,29 @@ public class JsonRpcApi implements TransactionSource {
 
     private boolean isAccountNotFound(Exception e) {
         return e.getMessage().equals("Account not found.") || e.getMessage().equals("Source account not found.");
+    }
+
+    public boolean existsSellOffer(Money minimum) {
+        try {
+            // TODO: implement caching
+            var ccy = minimum.getCcy();
+            var b = ImmutableBookOffersRequestParams.builder()
+                    .takerGets(new ImmutableXrpCurrency())
+                    .takerPays(ImmutableIssuedCurrency.of(Convert.fromCurrencyCode(ccy.getCode()), Address.of(ccy.getIssuer().getPublicKey())))
+                    .limit(10)
+                    .build();
+            var result = xrplClient.getJsonRpcClient().send(b.request(), ImmutableBookOffersResult.class);
+
+            var available = Money.zero(ccy);
+            for (var o : result.offers()) {
+                available = available.plus(PaymentBuilder.fromCurrencyAmount(ledger, o.takerPays()));
+            }
+
+            return minimum.lessThan(available);
+        } catch (JsonRpcClientErrorException e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     public FeeInfo latestFee() {

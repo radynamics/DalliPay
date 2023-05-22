@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
+import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.model.transactions.*;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PaymentBuilder {
     private Transaction transaction;
@@ -79,6 +81,21 @@ public class PaymentBuilder {
                 .issuer(Address.of(ccy.getIssuer().getPublicKey()))
                 .value(String.valueOf(amt))
                 .build();
+    }
+
+    public static Money fromCurrencyAmount(Ledger ledger, CurrencyAmount amount) {
+        var future = new CompletableFuture<Money>();
+        amount.handle(xrpCurrencyAmount -> {
+            future.complete(Money.of(xrpCurrencyAmount.toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        }, issuedCurrencyAmount -> {
+            var ccyCode = Convert.toCurrencyCode(issuedCurrencyAmount.currency());
+            var amt = Double.parseDouble(issuedCurrencyAmount.value());
+            var issuer = ledger.createWallet(issuedCurrencyAmount.issuer().value(), "");
+            var ccy = new Currency(ccyCode, issuer);
+
+            future.complete(Money.of(amt, ccy));
+        });
+        return future.join();
     }
 
     public Address getSender() {

@@ -260,6 +260,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.existsPath(WalletConverter.from(sender), WalletConverter.from(receiver), amount);
     }
 
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return api.existsSellOffer(minimum);
+    }
+
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }

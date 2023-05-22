@@ -212,4 +212,9 @@ public class TestLedger implements Ledger {
     public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
         return true;
     }
+
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return false;
+    }
 }
