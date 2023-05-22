@@ -215,6 +215,6 @@ public class TestLedger implements Ledger {
 
     @Override
     public boolean existsSellOffer(Money minimum) {
-        return false;
+        return true;
     }
 }
