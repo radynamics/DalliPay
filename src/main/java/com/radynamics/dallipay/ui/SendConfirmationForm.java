@@ -365,7 +365,7 @@ public class SendConfirmationForm extends JDialog {
             }
             var p = payments[i];
             var paymentHeader = p.getReceiverAddress() == null
-                    ? AccountFormatter.format(p.getReceiverAccount())
+                    ? PaymentFormatter.singleLineText(p.getSenderAccount(), p.getSenderAddress())
                     : AddressFormatter.formatSingleLine(p.getReceiverAddress());
             sb.append(String.format("%s. %s, %s%s", i + 1, paymentHeader, AmountFormatter.formatAmtWithCcy(p), System.lineSeparator()));
             for (var fee : p.getFees()) {
