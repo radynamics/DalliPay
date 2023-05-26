@@ -45,7 +45,7 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
         if (p.getSubmitter().supportsPathFinding()) {
             var candidates = new ArrayList<PathFindingPath>();
             var acceptedUserCcyByReceiver = Arrays.stream(p.getReceiverWallet().getBalances().all())
-                    // Always compare without issued due it's missing after entered by user
+                    // Always compare without issuer due it's missing after entered by user
                     .filter(o -> o.getCcy().withoutIssuer().equals(p.getUserCcy().withoutIssuer()))
                     .filter(o -> list.stream().noneMatch(x -> x.getCcy().equals(o.getCcy())))
                     .map(Money::getCcy)
