@@ -11,7 +11,6 @@ import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
-import com.radynamics.dallipay.iso20022.pain001.Pain001Reader;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.update.OnlineUpdate;
 
@@ -99,7 +98,6 @@ public class MainForm extends JFrame {
 
                     sendingPanel = new SendForm(transformInstruction, new CurrencyConverter(provider.latestRates()));
                     sendingPanel.setBorder(mainContentBorder);
-                    sendingPanel.setReader(new Pain001Reader(transformInstruction.getLedger()));
                     tabbedPane.addTab(res.getString("send"), sendingPanel);
                 }
                 {

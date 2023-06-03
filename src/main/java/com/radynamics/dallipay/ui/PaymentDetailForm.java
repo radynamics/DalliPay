@@ -14,11 +14,15 @@ import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.PaymentFormatter;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class PaymentDetailForm extends JDialog {
     private final Payment payment;
@@ -57,6 +61,8 @@ public class PaymentDetailForm extends JDialog {
         edit = PaymentEdit.create(payment);
         edit.setEditable(editable);
         setupUI();
+
+        refreshPaymentPaths();
     }
 
     public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
@@ -139,7 +145,6 @@ public class PaymentDetailForm extends JDialog {
                 pnlFirstLine.add(Box.createRigidArea(new Dimension(10, 0)));
                 {
                     cmdPaymentPath = new JSplitButton();
-                    refreshPaymentPaths();
                     cmdPaymentPath.setVisible(actor == Actor.Sender);
                     cmdPaymentPath.setAlwaysPopup(true);
                     cmdPaymentPath.setPreferredSize(new Dimension(170, 21));
@@ -280,35 +285,69 @@ public class PaymentDetailForm extends JDialog {
     }
 
     private void refreshPaymentPaths() {
-        JMenuItem selected = null;
+        enableInputControls(false);
+        cmdPaymentPath.setText(res.getString("loading"));
+
+        var future = new CompletableFuture<PaymentPath[]>();
+        future.whenComplete((paymentPaths, e) -> {
+            enableInputControls(true);
+            if (e != null) {
+                cmdPaymentPath.setText(res.getString("failed"));
+                ExceptionDialog.show(pnlContent, e);
+                return;
+            }
+            refreshPaymentPaths(paymentPaths);
+        });
+
+        Executors.newCachedThreadPool().submit(() -> {
+            future.complete(payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment));
+        });
+    }
+
+    private void refreshPaymentPaths(PaymentPath[] availablePaths) {
+        Pair<JMenuItem, PaymentPath> selected = null;
         var popupMenu = new JPopupMenu();
-        var availablePaths = payment.getLedger().createPaymentPathFinder().find(currencyConverter, payment);
         for (var path : availablePaths) {
-            var item = new JMenuItem(path.getDisplayText());
-            selected = path.isSet(payment) ? item : selected;
+            var item = new JMenuItem(getDisplayText(path));
+            item.setToolTipText(getToolTipText(path));
+            selected = path.isSet(payment) ? new ImmutablePair<>(item, path) : selected;
             popupMenu.add(item);
             item.addActionListener((SplitButtonClickedActionListener) e -> apply(path));
             txtAmount.addKnownCurrency(path.getCcy());
         }
 
         if (selected != null) {
-            popupMenu.setSelected(selected);
-            refreshPaymentPathText(selected.getText());
+            popupMenu.setSelected(selected.getKey());
+            refreshPaymentPathText(selected.getValue());
         }
 
         cmdPaymentPath.setEnabled(edit.editable() && availablePaths.length > 1 && payment.getBooked() == null);
         cmdPaymentPath.setPopupMenu(popupMenu);
     }
 
+    private String getDisplayText(PaymentPath path) {
+        var sb = new StringBuilder();
+        sb.append(path.getDisplayText());
+        if (path.isVolatile()) {
+            sb.append(String.format(" (%s)", res.getString("volatile")));
+        }
+        return sb.toString();
+    }
+
+    private String getToolTipText(PaymentPath path) {
+        return path.isVolatile() ? res.getString("volatileToolTipText") : null;
+    }
+
     private void apply(PaymentPath path) {
         path.apply(payment);
-        refreshPaymentPathText(path.getDisplayText());
+        refreshPaymentPathText(path);
         refreshAmountsText();
         setPaymentChanged(true);
     }
 
-    private void refreshPaymentPathText(String selectedText) {
-        cmdPaymentPath.setText(String.format(res.getString("sendUsing"), selectedText));
+    private void refreshPaymentPathText(PaymentPath selected) {
+        cmdPaymentPath.setToolTipText(getToolTipText(selected));
+        cmdPaymentPath.setText(String.format(res.getString("sendUsing"), getDisplayText(selected)));
     }
 
     private void refreshAmountsText() {
@@ -427,6 +466,16 @@ public class PaymentDetailForm extends JDialog {
     private JLabel formatSecondLineLinkLabel(JLabel lbl) {
         lbl.putClientProperty("FlatLaf.styleClass", "small");
         return lbl;
+    }
+
+    private void enableInputControls(boolean enabled) {
+        var e = enabled && edit.editable();
+        txtAmount.setEditable(e);
+        cmdPaymentPath.setEnabled(e);
+        txtSenderWallet.setEditable(e);
+        txtReceiverWallet.setEditable(e);
+        txtStructuredReferences.setEditable(e);
+        txtMessages.setEditable(e);
     }
 
     private void setPaymentChanged(boolean changed) {

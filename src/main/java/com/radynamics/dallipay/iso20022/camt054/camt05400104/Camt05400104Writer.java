@@ -107,7 +107,7 @@ public class Camt05400104Writer implements Camt054Writer {
         var ntry = new ReportEntry4();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
-        ntry.setNtryRef(trx.getSenderAccount().getUnformatted());
+        ntry.setNtryRef(trx.getReceiverAccount().getUnformatted());
 
         var amt = new ActiveOrHistoricCurrencyAndAmount();
         amt.setValue(AmountRounder.round(trx.getAmount(), 2));
@@ -151,9 +151,9 @@ public class Camt05400104Writer implements Camt054Writer {
         txDtls.setRltdPties(createRltdPties(trx));
 
         txDtls.setRltdAgts(new TransactionAgents3());
-        txDtls.getRltdAgts().setDbtrAgt(new BranchAndFinancialInstitutionIdentification5());
-        txDtls.getRltdAgts().getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentification8());
-        txDtls.getRltdAgts().getDbtrAgt().getFinInstnId().setNm(ledger.getId().textId());
+        txDtls.getRltdAgts().setCdtrAgt(new BranchAndFinancialInstitutionIdentification5());
+        txDtls.getRltdAgts().getCdtrAgt().setFinInstnId(new FinancialInstitutionIdentification8());
+        txDtls.getRltdAgts().getCdtrAgt().getFinInstnId().setNm(ledger.getId().textId());
 
         var structuredReferences = WriterHelper.getStructuredReferences(transformInstruction, trx);
         var hasStrd = structuredReferences.length > 0 || trx.getInvoiceId() != null;

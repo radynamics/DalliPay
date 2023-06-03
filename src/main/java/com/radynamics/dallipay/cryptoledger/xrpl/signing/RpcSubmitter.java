@@ -52,6 +52,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         info = new TransactionSubmitterInfo();
         info.setTitle(res.getString("rpc.title"));
         info.setDescription(res.getString("rpc.desc"));
+        info.setNotRecommended(true);
     }
 
     @Override
@@ -169,6 +170,11 @@ public class RpcSubmitter implements TransactionSubmitter {
     @Override
     public void addStateListener(TransactionStateListener l) {
         stateListener.add(l);
+    }
+
+    @Override
+    public boolean supportsPathFinding() {
+        return false;
     }
 
     private void raiseSuccess(Transaction t) {

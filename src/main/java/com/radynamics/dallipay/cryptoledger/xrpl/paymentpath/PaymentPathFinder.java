@@ -30,14 +30,34 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
             return list.toArray(new PaymentPath[0]);
         }
 
-        var ccysBothAccepting = findCcysBothAccepting(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
+        var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
+        {
+            var candidates = new ArrayList<IssuedCurrencyPath>();
+            var ccysBothAccepting = findCcysBothAccepting(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
+            for (var i = 0; i < ccysBothAccepting.length; i++) {
+                var ccy = ccysBothAccepting[i];
+                candidates.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee()));
+            }
+            candidates.sort(Comparator.comparing(IssuedCurrencyPath::getRank).reversed());
+            list.addAll(candidates);
+        }
 
-        Arrays.sort(ccysBothAccepting, Comparator.comparing(Currency::getTransferFee));
-        for (var i = 0; i < ccysBothAccepting.length; i++) {
-            var ccy = ccysBothAccepting[i];
-            var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
-            // Higher fee -> higher rank deduction -> less preferred
-            list.add(new IssuedCurrencyPath(cf, ccy, ccy.getTransferFee() == 0 ? 0 : i));
+        if (p.getSubmitter().supportsPathFinding()) {
+            var candidates = new ArrayList<PathFindingPath>();
+            var acceptedUserCcyByReceiver = Arrays.stream(p.getReceiverWallet().getBalances().all())
+                    // Always compare without issuer due it's missing after entered by user
+                    .filter(o -> o.getCcy().withoutIssuer().equals(p.getUserCcy().withoutIssuer()))
+                    .filter(o -> list.stream().noneMatch(x -> x.getCcy().equals(o.getCcy())))
+                    .map(Money::getCcy)
+                    .toArray(Currency[]::new);
+            for (var ccy : acceptedUserCcyByReceiver) {
+                // Assume a path is available if sale offers are available for the payment amount.
+                if (p.getLedger().existsSellOffer(Money.of(p.getAmount(), ccy))) {
+                    candidates.add(new PathFindingPath(cf, ccy, ccy.getTransferFee()));
+                }
+            }
+            candidates.sort(Comparator.comparing(PathFindingPath::getRank).reversed());
+            list.addAll(candidates);
         }
 
         return list.toArray(new PaymentPath[0]);

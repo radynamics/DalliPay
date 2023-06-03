@@ -75,8 +75,11 @@ public class DataLoader {
             }
             br.refresh(p);
 
-            // When fetching received payments transaction ccy must not be adjusted based on user ccy (pain.001).
-            transactionTranslator.applyUserCcy(p);
+            // Available payment paths are loaded inside. To ensure caching works call api sequentially.
+            synchronized (this) {
+                // When fetching received payments transaction ccy must not be adjusted based on user ccy (pain.001).
+                transactionTranslator.applyUserCcy(p);
+            }
             validator.getHistoryValidator().loadHistory(p.getLedger(), p.getSenderWallet());
         });
 

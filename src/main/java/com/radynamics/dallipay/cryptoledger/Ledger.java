@@ -62,4 +62,8 @@ public interface Ledger {
     boolean supportsDestinationTag();
 
     DestinationTagBuilder createDestinationTagBuilder();
+
+    boolean existsPath(Wallet sender, Wallet receiver, Money amount);
+
+    boolean existsSellOffer(Money minimum);
 }

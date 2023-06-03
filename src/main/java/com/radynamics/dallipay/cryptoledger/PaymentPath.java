@@ -12,5 +12,7 @@ public interface PaymentPath {
 
     String getDisplayText();
 
+    boolean isVolatile();
+
     Currency getCcy();
 }

@@ -3,13 +3,17 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
-import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersRequestParams;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersResult;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableIssuedCurrency;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableXrpCurrency;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -26,6 +30,8 @@ import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
+import org.xrpl.xrpl4j.model.client.path.RipplePathFindRequestParams;
+import org.xrpl.xrpl4j.model.client.path.RipplePathFindResult;
 import org.xrpl.xrpl4j.model.client.serverinfo.ServerInfoResult;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
@@ -52,6 +58,8 @@ public class JsonRpcApi implements TransactionSource {
     private final LedgerRangeConverter ledgerRangeConverter;
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
+    private final Cache<RipplePathFindResultEntry> ripplePathFindCache;
+    private final Cache<ImmutableBookOffersResult> bookOffersCache;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -62,6 +70,8 @@ public class JsonRpcApi implements TransactionSource {
         this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
         this.accountDataCache = new Cache<>(network.getUrl().toString());
         this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
+        this.ripplePathFindCache = new Cache<>(network.getUrl().toString());
+        this.bookOffersCache = new Cache<>(network.getUrl().toString());
     }
 
     @Override
@@ -160,7 +170,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
-        var ccyCode = toCurrencyCode(amount.currency());
+        var ccyCode = Convert.toCurrencyCode(amount.currency());
         var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
 
         var issuer = ledger.createWallet(amount.issuer().value(), "");
@@ -188,18 +198,6 @@ public class JsonRpcApi implements TransactionSource {
                 });
 
         return future.join();
-    }
-
-    private static String toCurrencyCode(String currency) {
-        try {
-            // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
-            final int ccyCodeStandardFormatLength = 3;
-            // trim() needed, due value is always 20 bytes, filled with 0.
-            return currency.length() <= ccyCodeStandardFormatLength ? currency : Utils.hexToString(currency).trim();
-        } catch (DecoderException | UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-            return currency;
-        }
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
@@ -280,19 +278,20 @@ public class JsonRpcApi implements TransactionSource {
 
     private synchronized AccountRootObject getAccountData(Wallet wallet) {
         accountDataCache.evictOutdated();
-        var data = accountDataCache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = accountDataCache.get(key);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountDataCache.isPresent(wallet)) {
+        if (data != null || accountDataCache.isPresent(key)) {
             return data;
         }
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             data = xrplClient.accountInfo(requestParams).accountData();
-            accountDataCache.add(wallet, data);
+            accountDataCache.add(key, data);
             return data;
         } catch (Exception e) {
             if (isAccountNotFound(e)) {
-                accountDataCache.add(wallet, null);
+                accountDataCache.add(key, null);
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -302,19 +301,58 @@ public class JsonRpcApi implements TransactionSource {
 
     private synchronized AccountLinesResult getAccountLines(Wallet wallet) {
         accountTrustLineCache.evictOutdated();
-        var data = accountTrustLineCache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = accountTrustLineCache.get(key);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountTrustLineCache.isPresent(wallet)) {
+        if (data != null || accountTrustLineCache.isPresent(key)) {
             return data;
         }
         try {
             var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
             data = xrplClient.accountLines(requestParams);
-            accountTrustLineCache.add(wallet, data);
+            accountTrustLineCache.add(key, data);
             return data;
         } catch (JsonRpcClientErrorException e) {
             if (isAccountNotFound(e)) {
-                accountTrustLineCache.add(wallet, null);
+                accountTrustLineCache.add(key, null);
+            } else {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        }
+    }
+
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        var data = getRipplePathFindResult(sender, receiver, amount);
+        return data != null && data.alternatives().size() > 0;
+    }
+
+    private RipplePathFindResult getRipplePathFindResult(Wallet sender, Wallet receiver, Money amount) {
+        ripplePathFindCache.evictOutdated();
+        var key = new RipplePathFindKey(sender, receiver, amount.getCcy());
+        var cached = ripplePathFindCache.list(key, new RipplePathFindResultEntry[0]);
+        for (var c : cached) {
+            // Contained without data means "wallet doesn't exist" (wasn't found previously)
+            if (c.getResult() == null) {
+                return null;
+            }
+            // Assume lower amounts also work if there are known paths for higher amounts.
+            if (amount.lessThan(c.getAmount()) || amount.equals(c.getAmount())) {
+                log.trace(String.format("CACHE hit %s (%s <= %s)", key.get(), amount, c.getAmount()));
+                return c.getResult();
+            }
+        }
+        try {
+            var requestParams = RipplePathFindRequestParams.builder()
+                    .sourceAccount(Address.of(sender.getPublicKey()))
+                    .destinationAccount(Address.of(receiver.getPublicKey()))
+                    .destinationAmount(PaymentBuilder.toCurrencyAmount(ledger, amount));
+            var data = xrplClient.ripplePathFind(requestParams.build());
+            ripplePathFindCache.add(key, new RipplePathFindResultEntry(data, amount));
+            return data;
+        } catch (Exception e) {
+            if (isAccountNotFound(e)) {
+                ripplePathFindCache.add(key, new RipplePathFindResultEntry(null, amount));
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -323,7 +361,44 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private boolean isAccountNotFound(Exception e) {
-        return e.getMessage().equals("Account not found.");
+        return e.getMessage().equals("Account not found.") || e.getMessage().equals("Source account not found.");
+    }
+
+    public boolean existsSellOffer(Money minimum) {
+        var result = getBookOffers(minimum.getCcy());
+        if (result == null) {
+            return false;
+        }
+
+        var available = Money.zero(minimum.getCcy());
+        for (var o : result.offers()) {
+            available = available.plus(PaymentBuilder.fromCurrencyAmount(ledger, o.takerPays()));
+        }
+
+        return minimum.lessThan(available);
+    }
+
+    private synchronized ImmutableBookOffersResult getBookOffers(Currency ccy) {
+        bookOffersCache.evictOutdated();
+        var key = new CurrencyKey(ccy);
+        var data = bookOffersCache.get(key);
+        // Contained without data means "doesn't exist" (wasn't found previously)
+        if (data != null || bookOffersCache.isPresent(key)) {
+            return data;
+        }
+        try {
+            var b = ImmutableBookOffersRequestParams.builder()
+                    .takerGets(new ImmutableXrpCurrency())
+                    .takerPays(ImmutableIssuedCurrency.of(Convert.fromCurrencyCode(ccy.getCode()), Address.of(ccy.getIssuer().getPublicKey())))
+                    .limit(10)
+                    .build();
+            data = xrplClient.getJsonRpcClient().send(b.request(), ImmutableBookOffersResult.class);
+            bookOffersCache.add(key, data);
+            return data;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     public FeeInfo latestFee() {
@@ -417,8 +492,9 @@ public class JsonRpcApi implements TransactionSource {
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
         if (!useCache) {
-            accountDataCache.evict(wallet);
-            accountTrustLineCache.evict(wallet);
+            var key = new WalletKey(wallet);
+            accountDataCache.evict(key);
+            accountTrustLineCache.evict(key);
         }
         var accountData = getAccountData(wallet);
         if (accountData != null) {
@@ -439,10 +515,14 @@ public class JsonRpcApi implements TransactionSource {
         for (var line : result.lines()) {
             var amt = Double.parseDouble(line.balance());
             var issuer = amt >= 0 ? ledger.createWallet(line.account().value(), "") : wallet;
-            var ccy = new Currency(toCurrencyCode(line.currency()), issuer);
-            ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
-            var balance = Money.of(amt, ccy);
+            var ccy = new Currency(Convert.toCurrencyCode(line.currency()), issuer);
             var lmt = Double.parseDouble(line.limit());
+            if (lmt > 0) {
+                ccy.setTransferFee(getTransferFee(WalletConverter.from(issuer)));
+            } else {
+                log.trace("Skipped getTransferFee due trustline.limit is " + lmt);
+            }
+            var balance = Money.of(amt, ccy);
             var limit = Money.of(lmt, ccy);
 
             list.add(new Trustline(wallet, balance, limit));

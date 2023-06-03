@@ -23,7 +23,7 @@
                 <Ccy>USD</Ccy>
             </Acct>
             <Ntry>
-                <NtryRef>rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87</NtryRef>
+                <NtryRef>rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY</NtryRef>
                 <Amt Ccy="USD">30.66</Amt>
                 <CdtDbtInd>CRDT</CdtDbtInd>
                 <Sts>
@@ -85,11 +85,11 @@
                             </Domn>
                         </BkTxCd>
                         <RltdAgts>
-                            <DbtrAgt>
+                            <CdtrAgt>
                                 <FinInstnId>
                                     <Nm>xrpl</Nm>
                                 </FinInstnId>
-                            </DbtrAgt>
+                            </CdtrAgt>
                         </RltdAgts>
                         <RmtInf>
                             <Strd>
@@ -107,7 +107,7 @@
                 </NtryDtls>
             </Ntry>
             <Ntry>
-                <NtryRef>rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4</NtryRef>
+                <NtryRef>rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY</NtryRef>
                 <Amt Ccy="USD">42.17</Amt>
                 <CdtDbtInd>CRDT</CdtDbtInd>
                 <Sts>
@@ -169,11 +169,11 @@
                             </Domn>
                         </BkTxCd>
                         <RltdAgts>
-                            <DbtrAgt>
+                            <CdtrAgt>
                                 <FinInstnId>
                                     <Nm>xrpl</Nm>
                                 </FinInstnId>
-                            </DbtrAgt>
+                            </CdtrAgt>
                         </RltdAgts>
                         <RmtInf>
                             <Strd>
@@ -191,7 +191,7 @@
                 </NtryDtls>
             </Ntry>
             <Ntry>
-                <NtryRef>rsDoF5udkeSJQcKNqPgHvqEyVBEX4ttoi4</NtryRef>
+                <NtryRef>rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY</NtryRef>
                 <Amt Ccy="USD">329.74</Amt>
                 <CdtDbtInd>CRDT</CdtDbtInd>
                 <Sts>
@@ -253,11 +253,11 @@
                             </Domn>
                         </BkTxCd>
                         <RltdAgts>
-                            <DbtrAgt>
+                            <CdtrAgt>
                                 <FinInstnId>
                                     <Nm>xrpl</Nm>
                                 </FinInstnId>
-                            </DbtrAgt>
+                            </CdtrAgt>
                         </RltdAgts>
                         <RmtInf>
                             <Strd>

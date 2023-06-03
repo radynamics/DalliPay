@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL, COL_REMOVE};
     private final ArrayList<Record> data = new ArrayList<>();
     private Actor actor = Actor.Sender;
@@ -34,7 +34,6 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
     public static final String COL_SENDER_LEDGER = "senderLedger";
-    public static final String COL_SENDER_ACCOUNT = "senderAccount";
     public static final String COL_RECEIVER_ACCOUNT = "receiverAccount";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_BOOKED = "valuta";
@@ -75,8 +74,6 @@ public class PaymentTableModel extends AbstractTableModel {
             return item.status;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
             return item.getSenderLedger();
-        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
-            return item.getActorAddressOrAccount(Actor.Sender);
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
             return item.getActorAddressOrAccount(Actor.Receiver);
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
@@ -114,8 +111,6 @@ public class PaymentTableModel extends AbstractTableModel {
                 // If same keep old record with already loaded WalletInfo
                 item.setSenderLedger(cellValue);
             }
-        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
-            item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
             item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
@@ -181,7 +176,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return isSelectable(getHighestStatus(getValidationResults(row)));
         }
         if (actor == Actor.Receiver) {
-            return col == getColumnIndex(COL_SENDER_ACCOUNT) || col == getColumnIndex(COL_RECEIVER_ACCOUNT);
+            return col == getColumnIndex(COL_RECEIVER_ACCOUNT);
         }
         if (actor == Actor.Sender) {
             return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);
