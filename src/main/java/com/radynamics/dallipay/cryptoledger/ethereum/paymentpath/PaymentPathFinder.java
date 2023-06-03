@@ -1,4 +1,4 @@
-package com.radynamics.dallipay.cryptoledger.ethereum;
+package com.radynamics.dallipay.cryptoledger.ethereum.paymentpath;
 
 import com.radynamics.dallipay.cryptoledger.LedgerNativeCcyPath;
 import com.radynamics.dallipay.cryptoledger.PaymentPath;
