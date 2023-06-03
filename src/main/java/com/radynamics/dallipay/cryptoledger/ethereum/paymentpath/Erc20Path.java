@@ -4,7 +4,6 @@ import com.radynamics.dallipay.cryptoledger.PaymentPath;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
-import org.apache.commons.lang3.NotImplementedException;
 
 public class Erc20Path implements PaymentPath {
     private final Currency ccy;
@@ -34,7 +33,7 @@ public class Erc20Path implements PaymentPath {
 
     @Override
     public String getDisplayText() {
-        return ccy.getCode();
+        return ccy.getLedgerCode();
     }
 
     @Override
