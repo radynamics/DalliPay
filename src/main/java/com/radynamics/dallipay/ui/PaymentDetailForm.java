@@ -4,7 +4,6 @@ import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.MoneyFormatter;
-import com.radynamics.dallipay.cryptoledger.LookupProviderException;
 import com.radynamics.dallipay.cryptoledger.LookupProviderFactory;
 import com.radynamics.dallipay.cryptoledger.PaymentPath;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResultUtils;
@@ -398,7 +397,7 @@ public class PaymentDetailForm extends JDialog {
         try {
             var lp = LookupProviderFactory.createTransactionLookupProvider(payment.getLedger());
             lp.open(payment.getId());
-        } catch (LookupProviderException ex) {
+        } catch (Exception ex) {
             ExceptionDialog.show(this, ex);
         }
     }
