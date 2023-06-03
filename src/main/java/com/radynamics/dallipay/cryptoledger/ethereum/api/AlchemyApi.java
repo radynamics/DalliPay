@@ -123,14 +123,15 @@ public class AlchemyApi {
     }
 
     public void refreshBalance(com.radynamics.dallipay.cryptoledger.Wallet wallet, boolean useCache) {
+        var key = new WalletKey(wallet);
         if (!useCache) {
-            accountBalanceCache.evict(wallet);
+            accountBalanceCache.evict(key);
         }
 
         accountBalanceCache.evictOutdated();
-        var data = accountBalanceCache.get(wallet);
+        var data = accountBalanceCache.get(key);
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountBalanceCache.isPresent(wallet)) {
+        if (data != null || accountBalanceCache.isPresent(key)) {
             return;
         }
 
@@ -138,7 +139,7 @@ public class AlchemyApi {
         try {
             var result = web3.ethGetBalance(wallet.getPublicKey(), DefaultBlockParameterName.LATEST).sendAsync().get();
             wallet.getBalances().set(Money.of(weiToEth(result.getBalance()), new Currency(ledger.getNativeCcySymbol())));
-            accountBalanceCache.add(wallet, wallet.getBalances());
+            accountBalanceCache.add(key, wallet.getBalances());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

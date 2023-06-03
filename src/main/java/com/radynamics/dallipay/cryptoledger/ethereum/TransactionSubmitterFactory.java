@@ -5,6 +5,8 @@ import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory {
     private final Ledger ledger;
@@ -35,12 +37,8 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
 
     @Override
     public TransactionSubmitter getSuggested(Component parentComponent) {
-        var all = all(parentComponent);
-        for (var s : all) {
-            if (s.getInfo().isRecommended()) {
-                return s;
-            }
-        }
-        return all.length == 0 ? null : all[0];
+        var all = Arrays.asList(all(parentComponent));
+        all.sort(Comparator.comparingInt(o -> o.getInfo().getOrder()));
+        return all.size() == 0 ? null : all.get(all.size() - 1);
     }
 }
