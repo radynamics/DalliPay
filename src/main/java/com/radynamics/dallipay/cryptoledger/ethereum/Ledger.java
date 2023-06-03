@@ -3,7 +3,6 @@ package com.radynamics.dallipay.cryptoledger.ethereum;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.api.AlchemyApi;
-import com.radynamics.dallipay.cryptoledger.ethereum.paymentpath.PaymentPathFinder;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -131,7 +130,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentPathFinder createPaymentPathFinder() {
-        return new com.radynamics.dallipay.cryptoledger.ethereum.paymentpath.PaymentPathFinder();
+        return new com.radynamics.dallipay.cryptoledger.generic.paymentpath.PaymentPathFinder(
+                new com.radynamics.dallipay.cryptoledger.ethereum.paymentpath.PaymentPathFinder()
+        );
     }
 
     @Override

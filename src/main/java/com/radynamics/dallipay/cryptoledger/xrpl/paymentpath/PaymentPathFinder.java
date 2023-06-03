@@ -17,19 +17,6 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
 
         var list = new ArrayList<PaymentPath>();
 
-        var ledgerCcy = new Currency(p.getLedger().getNativeCcySymbol());
-        list.add(new LedgerNativeCcyPath(currencyConverter, ledgerCcy));
-
-        if (p.getUserCcy().equals(ledgerCcy)) {
-            return list.toArray(new PaymentPath[0]);
-        }
-
-        var senderValid = WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet());
-        var receiverValid = WalletValidator.isValidFormat(p.getLedger(), p.getReceiverWallet());
-        if (!senderValid || !receiverValid) {
-            return list.toArray(new PaymentPath[0]);
-        }
-
         var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
         {
             var candidates = new ArrayList<IssuedCurrencyPath>();

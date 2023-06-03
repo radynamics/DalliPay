@@ -157,7 +157,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentPathFinder createPaymentPathFinder() {
-        return new com.radynamics.dallipay.cryptoledger.xrpl.paymentpath.PaymentPathFinder();
+        return new com.radynamics.dallipay.cryptoledger.generic.paymentpath.PaymentPathFinder(
+                new com.radynamics.dallipay.cryptoledger.xrpl.paymentpath.PaymentPathFinder()
+        );
     }
 
     @Override

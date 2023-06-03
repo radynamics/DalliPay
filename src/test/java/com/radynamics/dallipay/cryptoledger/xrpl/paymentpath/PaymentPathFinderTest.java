@@ -23,11 +23,17 @@ import java.util.HashMap;
 public class PaymentPathFinderTest {
     private final Ledger ledger = new TestLedger();
 
+    private static com.radynamics.dallipay.cryptoledger.generic.paymentpath.PaymentPathFinder createPaymentPathFinderInstance() {
+        return new com.radynamics.dallipay.cryptoledger.generic.paymentpath.PaymentPathFinder(
+                new com.radynamics.dallipay.cryptoledger.xrpl.paymentpath.PaymentPathFinder()
+        );
+    }
+
     @Test
     public void findArgsNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(null, null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(new CurrencyConverter(), null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentPathFinder().find(null, new Payment(ledger.createTransaction())));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createPaymentPathFinderInstance().find(null, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createPaymentPathFinderInstance().find(new CurrencyConverter(), null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createPaymentPathFinderInstance().find(null, new Payment(ledger.createTransaction())));
     }
 
     @ParameterizedTest
@@ -38,7 +44,7 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet == null ? null : ledger.createWallet(senderWallet, ""));
         p.setReceiverWallet(receiverWallet == null ? null : ledger.createWallet(receiverWallet, ""));
         p.setAmount(amt);
-        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
 
         assertSingleLedgerNativeCcyPath(actual);
     }
@@ -79,7 +85,7 @@ public class PaymentPathFinderTest {
         map.put("BBB", ccyBBB);
         map.put("CCC", ccyCCC1);
         p.setAmount(Money.of(20.0, map.get(userCcyCode)));
-        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
 
         assertSingleLedgerNativeCcyPath(actual);
     }
@@ -102,7 +108,7 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(2, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
@@ -135,7 +141,7 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(3, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
@@ -181,7 +187,7 @@ public class PaymentPathFinderTest {
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
         p.setSubmitter(TestFactory.createSubmitter());
-        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(3, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
