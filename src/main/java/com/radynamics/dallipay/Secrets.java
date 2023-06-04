@@ -7,4 +7,18 @@ public final class Secrets {
     public static String getXummApiKey() {
         return SecretsProd.getXummApiKey();
     }
+
+    /**
+     * Return Alchemy API-Key for Ethereum Mainnet.
+     */
+    public static String getAlchemyApiKeyEthereumMainnnet() {
+        return SecretsProd.getAlchemyApiKeyEthereumMainnnet();
+    }
+
+    /**
+     * Return Alchemy API-Key for Ethereum Goerli.
+     */
+    public static String getAlchemyApiKeyEthereumGoerli() {
+        return SecretsProd.getAlchemyApiKeyEthereumGoerli();
+    }
 }
