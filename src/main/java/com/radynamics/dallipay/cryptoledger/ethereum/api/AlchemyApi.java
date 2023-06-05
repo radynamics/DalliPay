@@ -88,7 +88,10 @@ public class AlchemyApi {
     }
 
     private com.radynamics.dallipay.cryptoledger.xrpl.Transaction toTransaction(JSONObject t) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
-        var amt = Money.of(t.getDouble("value"), new Currency(t.getString("asset")));
+        var ccy = "erc20".equals(t.optString("category"))
+                ? new Currency(t.getString("asset"), ledger.createWallet(t.getJSONObject("rawContract").getString("address")))
+                : new Currency(t.getString("asset"));
+        var amt = Money.of(t.getDouble("value"), ccy);
         var trx = new com.radynamics.dallipay.cryptoledger.xrpl.Transaction(ledger, amt);
         trx.setId(t.getString("hash"));
         trx.setBooked(getDateTimeOfBlock(BigInteger.valueOf(Integer.decode(t.getString("blockNum")))));
