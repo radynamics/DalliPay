@@ -53,7 +53,7 @@ public class AlchemyApi {
         client.prepare("POST", network.getUrl().toString())
                 .setHeader("accept", "application/json")
                 .setHeader("content-type", "application/json")
-                .setBody("{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"alchemy_getAssetTransfers\",\"params\":[{\"fromBlock\":\"" + fromBlock + "\",\"toBlock\":\"" + toBlock + "\",\"toAddress\":\"" + wallet.getPublicKey() + "\",\"category\":[\"external\"],\"withMetadata\":false,\"excludeZeroValue\":true,\"maxCount\":\"" + maxCount + "\",\"order\":\"desc\"}]}")
+                .setBody("{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"alchemy_getAssetTransfers\",\"params\":[{\"fromBlock\":\"" + fromBlock + "\",\"toBlock\":\"" + toBlock + "\",\"toAddress\":\"" + wallet.getPublicKey() + "\",\"category\":[\"external\", \"erc20\"],\"withMetadata\":false,\"excludeZeroValue\":true,\"maxCount\":\"" + maxCount + "\",\"order\":\"desc\"}]}")
                 .execute()
                 .toCompletableFuture()
                 .thenAccept(response -> {
