@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.ethereum;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.*;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
@@ -35,6 +37,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public String getNativeCcySymbol() {
         return "ETH";
+    }
+
+    @Override
+    public Icon getIcon() {
+        return new FlatSVGIcon("svg/ethereum.svg", 10, 16);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Ethereum";
     }
 
     @Override
