@@ -133,8 +133,12 @@ public class AlchemyApi {
 
         accountBalanceCache.evictOutdated();
         var data = accountBalanceCache.get(key);
+        if (data != null) {
+            wallet.getBalances().replaceBy(data);
+            return;
+        }
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (data != null || accountBalanceCache.isPresent(key)) {
+        if (accountBalanceCache.isPresent(key)) {
             return;
         }
 
