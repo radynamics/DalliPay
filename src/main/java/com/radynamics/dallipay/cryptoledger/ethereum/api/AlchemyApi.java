@@ -26,6 +26,7 @@ import java.math.RoundingMode;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -37,12 +38,14 @@ public class AlchemyApi {
     private final NetworkInfo network;
     private final Web3j web3;
     private final Cache<MoneyBag> accountBalanceCache;
+    private final Cache<TokenMetaData> tokenMetadataCache;
 
     public AlchemyApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
         web3 = Web3j.build(new HttpService(network.getUrl().toString()));
         this.accountBalanceCache = new Cache<>(network.getUrl().toString());
+        this.tokenMetadataCache = new Cache<>(network.getUrl().toString(), Duration.ofDays(1));
     }
 
     public TransactionResult listPaymentsReceived(com.radynamics.dallipay.cryptoledger.Wallet wallet, DateTimeRange period) throws Exception {
@@ -197,13 +200,57 @@ public class AlchemyApi {
             return;
         }
 
-        // TODO: implement ERC20
         try {
             var result = web3.ethGetBalance(wallet.getPublicKey(), DefaultBlockParameterName.LATEST).sendAsync().get();
             wallet.getBalances().set(Money.of(weiToEth(result.getBalance()), new Currency(ledger.getNativeCcySymbol())));
+
+            // https://docs.alchemy.com/docs/how-to-get-all-tokens-owned-by-an-address
+            var params = new JSONArray();
+            params.put(wallet.getPublicKey());
+            params.put("erc20");
+            var requestData = createRequestData("alchemy_getTokenBalances", params);
+            var json = post(HttpRequest.BodyPublishers.ofString(requestData.toString()));
+            var tokenBalances = json.getJSONArray("tokenBalances");
+            for (var i = 0; i < tokenBalances.length(); i++) {
+                var balance = tokenBalances.getJSONObject(i);
+                var contractAddress = balance.getString("contractAddress");
+                var issuer = ledger.createWallet(contractAddress);
+                var tokenMetaData = getTokenMetadata(issuer);
+                if (tokenMetaData == null) {
+                    throw new AlchemyException("Could not find token metadata for %s.".formatted(issuer.getPublicKey()));
+                }
+                var ccy = new Currency(tokenMetaData.getSymbol(), issuer);
+                var amount = tokenMetaData.getAmount(balance.getString("tokenBalance"));
+                wallet.getBalances().set(Money.of(amount, ccy));
+            }
+
             accountBalanceCache.add(key, wallet.getBalances());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private TokenMetaData getTokenMetadata(com.radynamics.dallipay.cryptoledger.Wallet wallet) {
+        var key = new WalletKey(wallet);
+        tokenMetadataCache.evictOutdated();
+        var data = tokenMetadataCache.get(key);
+        // Contained without data means "wallet doesn't exist" (wasn't found previously)
+        if (data != null || tokenMetadataCache.isPresent(key)) {
+            return data;
+        }
+
+        try {
+            var params = new JSONArray();
+            params.put(wallet.getPublicKey());
+            var requestData = createRequestData("alchemy_getTokenMetadata", params);
+            var json = post(HttpRequest.BodyPublishers.ofString(requestData.toString()));
+
+            data = new TokenMetaData(wallet, json.getString("symbol"), json.getInt("decimals"));
+            tokenMetadataCache.add(key, data);
+            return data;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
