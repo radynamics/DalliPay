@@ -217,7 +217,7 @@ public class MainForm extends JFrame {
         var networkInfo = transformInstruction.getNetwork();
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), networkInfo.getUrl()));
+        cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(networkInfo.getUrl().uri())));
     }
 
     private void saveLastUsedNetwork(NetworkInfo selected) {
