@@ -179,6 +179,14 @@ public class MainForm extends JFrame {
             });
         }
 
+        var cmdLedger = new JButton();
+        cmdLedger.setBorder(BorderFactory.createEmptyBorder());
+        cmdLedger.setIcon(transformInstruction.getLedger().getIcon());
+        cmdLedger.setToolTipText(transformInstruction.getLedger().getDisplayText());
+        cmdLedger.setEnabled(false);
+        menuBar.add(cmdLedger);
+        menuBar.add(Box.createHorizontalStrut(10));
+
         var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
         popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
         popupMenu.addChangedListener(() -> {

@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
@@ -21,6 +22,7 @@ import org.xrpl.xrpl4j.model.transactions.CurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.ResourceBundle;
@@ -46,6 +48,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public String getNativeCcySymbol() {
         return nativeCcySymbol;
+    }
+
+    @Override
+    public Icon getIcon() {
+        return new FlatSVGIcon("svg/xrpl.svg", 16, 13);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "XRP Ledger";
     }
 
     @Override
