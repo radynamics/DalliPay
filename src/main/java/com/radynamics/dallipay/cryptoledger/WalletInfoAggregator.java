@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;

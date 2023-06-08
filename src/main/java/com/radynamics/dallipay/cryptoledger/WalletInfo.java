@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 
 import java.util.HashMap;
 

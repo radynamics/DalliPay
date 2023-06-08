@@ -1,4 +1,4 @@
-package com.radynamics.dallipay.cryptoledger.xrpl.walletinfo;
+package com.radynamics.dallipay.cryptoledger.generic.walletinfo;
 
 public enum InfoType {
     Undefined,
