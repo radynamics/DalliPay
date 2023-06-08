@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.walletinfo;
 
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
