@@ -182,4 +182,10 @@ public final class Utils {
         }
         return sb.toString();
     }
+
+    public static String withoutPath(URI uri) {
+        return uri.getRawPath().replace("/", "").length() == 0
+                ? uri.toString()
+                : uri.toString().substring(0, uri.toString().indexOf(uri.getPath()));
+    }
 }
