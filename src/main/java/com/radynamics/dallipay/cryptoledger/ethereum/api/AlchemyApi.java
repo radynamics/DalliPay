@@ -82,7 +82,7 @@ public class AlchemyApi {
         try {
             var json = new JSONObject(responseText);
             throwIfError(json);
-            return json;
+            return json.getJSONObject("result");
         } catch (Exception e) {
             throw new AlchemyException(e.getMessage(), e);
         }
@@ -136,7 +136,7 @@ public class AlchemyApi {
     }
 
     private void readTransactions(TransactionResult tr, JSONObject json) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
-        var transfers = json.getJSONObject("result").getJSONArray("transfers");
+        var transfers = json.getJSONArray("transfers");
         for (var i = 0; i < transfers.length(); i++) {
             tr.add(toTransaction(transfers.getJSONObject(i)));
         }
