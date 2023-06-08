@@ -11,21 +11,24 @@ import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.codec.DecoderException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 public class AlchemyApi {
@@ -43,41 +46,93 @@ public class AlchemyApi {
     }
 
     public TransactionResult listPaymentsReceived(com.radynamics.dallipay.cryptoledger.Wallet wallet, DateTimeRange period) throws Exception {
-        var tr = new TransactionResult();
         // https://docs.alchemy.com/reference/alchemy-getassettransfers
-        // TODO: overhaul and replace demo code
-        var client = new DefaultAsyncHttpClient();
-        var fromBlock = "0x0"; // "0x0", "0x103FDDA"
-        var toBlock = "latest"; // "latest", "0x103FDDF"
         var maxCount = "0x" + Integer.toHexString(3); // "0x3e8";
-        client.prepare("POST", network.getUrl().toString())
-                .setHeader("accept", "application/json")
-                .setHeader("content-type", "application/json")
-                .setBody("{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"alchemy_getAssetTransfers\",\"params\":[{\"fromBlock\":\"" + fromBlock + "\",\"toBlock\":\"" + toBlock + "\",\"toAddress\":\"" + wallet.getPublicKey() + "\",\"category\":[\"external\", \"erc20\"],\"withMetadata\":false,\"excludeZeroValue\":true,\"maxCount\":\"" + maxCount + "\",\"order\":\"desc\"}]}")
-                .execute()
-                .toCompletableFuture()
-                .thenAccept(response -> {
-                    try {
-                        var json = new JSONObject(response.getResponseBody());
-                        throwIfError(json);
-                        readTransactions(tr, json);
-                    } catch (Exception e) {
-                        throw new CompletionException(e);
-                    }
-                })
-                .join();
 
-        client.close();
+        var params = new JSONObject();
+        params.put("fromBlock", "0x0"); // "0x0", "0x103FDDA"
+        params.put("toBlock", "latest"); // "latest", "0x103FDDF"
+        params.put("toAddress", wallet.getPublicKey());
+        var categories = new JSONArray();
+        categories.put("external");
+        categories.put("erc20");
+        params.put("category", categories);
+        params.put("withMetadata", false);
+        params.put("excludeZeroValue", true);
+        params.put("maxCount", maxCount);
+        params.put("order", "desc");
+        var data = createRequestData("alchemy_getAssetTransfers", params);
+
+        var json = post(HttpRequest.BodyPublishers.ofString(data.toString()));
+
+        var tr = new TransactionResult();
+        readTransactions(tr, json);
         return tr;
     }
 
-    private void throwIfError(JSONObject json) throws LedgerException {
+    private JSONObject post(HttpRequest.BodyPublisher body) throws IOException, InterruptedException, AlchemyException {
+        return send(createRequestBuilder().POST(body).build());
+    }
+
+    private JSONObject send(HttpRequest request) throws IOException, InterruptedException, AlchemyException {
+        var client = HttpClient.newHttpClient();
+        var httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+        handleStatusCode(httpResponse.statusCode());
+        var responseText = httpResponse.body();
+        try {
+            var json = new JSONObject(responseText);
+            throwIfError(json);
+            return json;
+        } catch (Exception e) {
+            throw new AlchemyException(e.getMessage(), e);
+        }
+    }
+
+    private HttpRequest.Builder createRequestBuilder() {
+        return HttpRequest.newBuilder()
+                .uri(network.getUrl().uri())
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json");
+    }
+
+    private static JSONObject createRequestData(String method, JSONObject params) {
+        var paramsArray = new JSONArray();
+        paramsArray.put(params);
+        return createRequestData(method, paramsArray);
+    }
+
+    private static JSONObject createRequestData(String method, JSONArray params) {
+        var d = new JSONObject();
+        d.put("id", 1);
+        d.put("jsonrpc", "2.0");
+        d.put("method", method);
+        d.put("params", params);
+        return d;
+    }
+
+    private void handleStatusCode(Integer statusCode) throws AlchemyException {
+        var statusCodeText = statusCode.toString();
+        var msg = String.format("Alchemy API responded HTTP status code %s.", statusCodeText);
+        if (statusCodeText.startsWith("2")) {
+            log.debug(msg);
+            return;
+        }
+
+        if (statusCodeText.startsWith("1") || statusCodeText.startsWith("3")) {
+            log.info(msg);
+            return;
+        }
+
+        throw new AlchemyException(msg);
+    }
+
+    private void throwIfError(JSONObject json) throws AlchemyException {
         var error = json.optJSONObject("error");
         if (error == null) {
             return;
         }
 
-        throw new LedgerException(String.format("%s (Code %s)", error.getString("message"), error.getInt("code")));
+        throw new AlchemyException(String.format("%s (Code %s)", error.getString("message"), error.getInt("code")));
     }
 
     private void readTransactions(TransactionResult tr, JSONObject json) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
