@@ -138,7 +138,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public WalletInfoProvider[] getInfoProvider() {
-        return new WalletInfoProvider[0];
+        return new WalletInfoProvider[]{new StaticWalletInfoProvider(this)};
     }
 
     @Override
