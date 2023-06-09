@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
+import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
@@ -26,6 +27,7 @@ public class MainForm extends JFrame {
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
+    private JSplitButton cmdLedger;
     private JSplitButton cmdNetwork;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
@@ -179,15 +181,15 @@ public class MainForm extends JFrame {
             });
         }
 
-        var cmdLedger = new JButton();
+        final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
+        cmdLedger = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         cmdLedger.setBorder(BorderFactory.createEmptyBorder());
-        cmdLedger.setIcon(transformInstruction.getLedger().getIcon());
-        cmdLedger.setToolTipText(transformInstruction.getLedger().getDisplayText());
-        cmdLedger.setEnabled(false);
+        cmdLedger.setAlwaysPopup(true);
+        cmdLedger.setPopupMenu(createLedgerPopMenu());
         menuBar.add(cmdLedger);
+
         menuBar.add(Box.createHorizontalStrut(10));
 
-        final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
         cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         refreshNetworkButton();
         cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
@@ -197,6 +199,11 @@ public class MainForm extends JFrame {
         menuBar.add(cmdNetwork);
 
         return menuBar;
+    }
+
+    private void refreshLedgerButton(JMenuItem item) {
+        cmdLedger.setIcon(item.getIcon());
+        cmdLedger.setToolTipText(item.getText());
     }
 
     private void refreshNetworkButton() {
@@ -214,6 +221,22 @@ public class MainForm extends JFrame {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    private JPopupMenu createLedgerPopMenu() {
+        JMenuItem selected = null;
+        var popupMenu = new JPopupMenu();
+        for (var l : LedgerFactory.all()) {
+            var item = new JMenuItem(l.getDisplayText(), l.getIcon());
+            popupMenu.add(item);
+            selected = l.getId().numericId() == transformInstruction.getLedger().getId().numericId() ? item : selected;
+        }
+
+        if (selected != null) {
+            refreshLedgerButton(selected);
+        }
+
+        return popupMenu;
     }
 
     private NetworkPopMenu createNetworkPopMenu() {
