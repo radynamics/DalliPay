@@ -187,26 +187,13 @@ public class MainForm extends JFrame {
         menuBar.add(cmdLedger);
         menuBar.add(Box.createHorizontalStrut(10));
 
-        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
-        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
-        popupMenu.addChangedListener(() -> {
-            var selected = popupMenu.getSelectedNetwork();
-            if (selected == null) {
-                return;
-            }
-            transformInstruction.setNetwork(selected);
-            refreshNetworkButton();
-            sendingPanel.setNetwork(selected);
-            saveLastUsedNetwork(selected);
-        });
-
         final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
         cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         refreshNetworkButton();
         cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
         cmdNetwork.setBackground(getBackground());
         cmdNetwork.setAlwaysPopup(true);
-        cmdNetwork.setPopupMenu(popupMenu.get());
+        cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
         menuBar.add(cmdNetwork);
 
         return menuBar;
@@ -227,6 +214,22 @@ public class MainForm extends JFrame {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    private NetworkPopMenu createNetworkPopMenu() {
+        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
+        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        popupMenu.addChangedListener(() -> {
+            var selected = popupMenu.getSelectedNetwork();
+            if (selected == null) {
+                return;
+            }
+            transformInstruction.setNetwork(selected);
+            refreshNetworkButton();
+            sendingPanel.setNetwork(selected);
+            saveLastUsedNetwork(selected);
+        });
+        return popupMenu;
     }
 
     public void setInputFileName(String inputFileName) {
