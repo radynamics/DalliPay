@@ -115,6 +115,15 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
     }
 
+    public LedgerId getLastUsedLedger() throws Exception {
+        var value = single("lastUsedLedger").orElse("");
+        return value.length() == 0 ? null : LedgerId.of(value);
+    }
+
+    public void saveLastUsedLedger(LedgerId value) throws Exception {
+        saveOrUpdate("lastUsedLedger", value == null ? "" : value.textId());
+    }
+
     public TransactionSubmitter getLastUsedSubmitter(Component parentComponent, Ledger ledger) throws Exception {
         var value = single(createLastUsedSubmitterKey(ledger)).orElse(null);
         if (value == null) {

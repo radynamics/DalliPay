@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.db.Database;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.ui.*;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Optional;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
@@ -54,9 +56,6 @@ public class Main {
                 log.error(e.getMessage(), e);
             }
 
-            var ledger = LedgerFactory.create(LedgerId.Xrpl);
-            var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
-
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", Utils.toHexString(Consts.ColorAccent)));
                 FlatLightLaf.setup();
@@ -72,6 +71,9 @@ public class Main {
                 if (!existsDb && !askNewPassword()) {
                     return;
                 }
+
+                var ledger = LedgerFactory.create(getLastUsedLedger().orElse(LedgerId.Xrpl));
+                var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
 
                 var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
                 var frm = new MainForm();
@@ -102,6 +104,16 @@ public class Main {
             });
         } catch (Exception e) {
             log.error(String.format("Error during %s", action), e);
+        }
+    }
+
+    private static Optional<LedgerId> getLastUsedLedger() {
+        try (var repo = new ConfigRepo()) {
+            var value = repo.getLastUsedLedger();
+            return value == null ? Optional.empty() : Optional.of(value);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Optional.empty();
         }
     }
 
