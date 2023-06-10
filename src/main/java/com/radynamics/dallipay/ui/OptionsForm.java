@@ -19,7 +19,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
-    public OptionsForm(Ledger ledger) {
+    public OptionsForm() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         var pnlContent = new JPanel();
@@ -31,10 +31,10 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
-            generalPane = new GeneralPane(ledger);
+            generalPane = new GeneralPane();
             tabbedPane.addTab(res.getString("general"), generalPane);
             generalPane.setBorder(border);
-            senderPane = new SenderPane(ledger);
+            senderPane = new SenderPane();
             tabbedPane.addTab(res.getString("send"), senderPane);
             senderPane.setBorder(border);
             receiverPane = new ReceiverPane();
@@ -84,6 +84,11 @@ public class OptionsForm extends JPanel implements MainFormPane {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    public void init(Ledger ledger) {
+        generalPane.init(ledger);
+        senderPane.init(ledger);
     }
 
     @Override

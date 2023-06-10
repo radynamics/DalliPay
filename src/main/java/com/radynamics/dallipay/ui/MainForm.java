@@ -6,12 +6,15 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
+import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.transformation.TransformInstruction;
+import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.update.OnlineUpdate;
 
 import javax.swing.*;
@@ -22,18 +25,16 @@ import java.util.ResourceBundle;
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
 
 public class MainForm extends JFrame {
-    private final TransformInstruction transformInstruction;
+    private TransformInstruction transformInstruction;
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
+    private JSplitButton cmdLedger;
     private JSplitButton cmdNetwork;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public MainForm(TransformInstruction transformInstruction) {
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        this.transformInstruction = transformInstruction;
-
+    public MainForm() {
         setupUI();
     }
 
@@ -93,15 +94,12 @@ public class MainForm extends JFrame {
                 });
 
                 {
-                    var provider = transformInstruction.getExchangeRateProvider();
-                    provider.load();
-
-                    sendingPanel = new SendForm(transformInstruction, new CurrencyConverter(provider.latestRates()));
+                    sendingPanel = new SendForm();
                     sendingPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("send"), sendingPanel);
                 }
                 {
-                    receivingPanel = new ReceiveForm(transformInstruction, new CurrencyConverter());
+                    receivingPanel = new ReceiveForm();
                     receivingPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("receive"), receivingPanel);
                 }
@@ -110,11 +108,10 @@ public class MainForm extends JFrame {
                     tabbedPane.setEnabledAt(2, false);
                 }
                 {
-                    optionsPanel = new OptionsForm(transformInstruction.getLedger());
+                    optionsPanel = new OptionsForm();
                     optionsPanel.addChangedListener(this::refreshChangedSettings);
                     optionsPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("options"), optionsPanel);
-                    optionsPanel.load();
                 }
             }
         }
@@ -179,37 +176,34 @@ public class MainForm extends JFrame {
             });
         }
 
-        var cmdLedger = new JButton();
+        final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
+        cmdLedger = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         cmdLedger.setBorder(BorderFactory.createEmptyBorder());
-        cmdLedger.setIcon(transformInstruction.getLedger().getIcon());
-        cmdLedger.setToolTipText(transformInstruction.getLedger().getDisplayText());
-        cmdLedger.setEnabled(false);
+        cmdLedger.setAlwaysPopup(true);
         menuBar.add(cmdLedger);
+
         menuBar.add(Box.createHorizontalStrut(10));
 
-        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
-        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
-        popupMenu.addChangedListener(() -> {
-            var selected = popupMenu.getSelectedNetwork();
-            if (selected == null) {
-                return;
-            }
-            transformInstruction.setNetwork(selected);
-            refreshNetworkButton();
-            sendingPanel.setNetwork(selected);
-            saveLastUsedNetwork(selected);
-        });
-
-        final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
         cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
-        refreshNetworkButton();
         cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
         cmdNetwork.setBackground(getBackground());
         cmdNetwork.setAlwaysPopup(true);
-        cmdNetwork.setPopupMenu(popupMenu.get());
         menuBar.add(cmdNetwork);
 
         return menuBar;
+    }
+
+    private void refreshLedgerButton(JMenuItem item) {
+        cmdLedger.setIcon(item.getIcon());
+        cmdLedger.setToolTipText(item.getText());
+    }
+
+    private void onLedgerClicked(JMenuItem item, Ledger ledger) {
+        if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
+            return;
+        }
+        setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
+        refreshLedgerButton(item);
     }
 
     private void refreshNetworkButton() {
@@ -227,6 +221,58 @@ public class MainForm extends JFrame {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    public void setTransformInstruction(TransformInstruction transformInstruction) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        this.transformInstruction = transformInstruction;
+
+        var provider = transformInstruction.getExchangeRateProvider();
+        provider.load();
+
+        sendingPanel.init(transformInstruction, new CurrencyConverter(provider.latestRates()));
+        receivingPanel.init(transformInstruction, new CurrencyConverter());
+        optionsPanel.init(transformInstruction.getLedger());
+        optionsPanel.load();
+
+        cmdLedger.setPopupMenu(createLedgerPopMenu());
+        cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
+        refreshNetworkButton();
+
+        refreshChangedSettings();
+    }
+
+    private JPopupMenu createLedgerPopMenu() {
+        JMenuItem selected = null;
+        var popupMenu = new JPopupMenu();
+        for (var l : LedgerFactory.all()) {
+            var item = new JMenuItem(l.getDisplayText(), l.getIcon());
+            item.addActionListener(e -> onLedgerClicked(item, l));
+            popupMenu.add(item);
+            selected = l.getId().sameAs(transformInstruction.getLedger().getId()) ? item : selected;
+        }
+
+        if (selected != null) {
+            refreshLedgerButton(selected);
+        }
+
+        return popupMenu;
+    }
+
+    private NetworkPopMenu createNetworkPopMenu() {
+        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
+        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        popupMenu.addChangedListener(() -> {
+            var selected = popupMenu.getSelectedNetwork();
+            if (selected == null) {
+                return;
+            }
+            transformInstruction.setNetwork(selected);
+            refreshNetworkButton();
+            sendingPanel.setNetwork(selected);
+            saveLastUsedNetwork(selected);
+        });
+        return popupMenu;
     }
 
     public void setInputFileName(String inputFileName) {

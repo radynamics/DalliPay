@@ -18,6 +18,7 @@ public class Config {
     private final static Logger log = LogManager.getLogger(Config.class);
 
     private ArrayList<NetworkInfo> networkInfos = new ArrayList<>();
+    private String loadedFilePath;
 
     private Config() {
     }
@@ -26,9 +27,17 @@ public class Config {
         return load(ledger, null);
     }
 
+    public static Config loadOrFallback(Ledger ledger, String path) {
+        if (path == null) {
+            return fallback(ledger);
+        }
+        return new File(path).exists() ? load(ledger, path) : fallback(ledger);
+    }
+
     public static Config load(Ledger ledger, String path) {
         var c = new Config();
         c.networkInfos = loadFile(ledger, path);
+        c.loadedFilePath = path;
 
         if (c.networkInfos.size() == 0) {
             c.networkInfos.addAll(List.of(ledger.getDefaultNetworkInfo()));
@@ -101,5 +110,9 @@ public class Config {
             }
         }
         return networkInfos.get(0);
+    }
+
+    public String getLoadedFilePath() {
+        return loadedFilePath;
     }
 }

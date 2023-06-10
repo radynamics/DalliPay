@@ -32,6 +32,11 @@ public enum LedgerId {
         throw new NotImplementedException(String.format("LedgerId %s unknown.", id));
     }
 
+    public boolean sameAs(LedgerId ledgerId) {
+        if (ledgerId == null) return false;
+        return numericId() == ledgerId.numericId();
+    }
+
     public int numericId() {
         return numericId;
     }
