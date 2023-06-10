@@ -6,10 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
-import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.LedgerFactory;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -204,6 +201,7 @@ public class MainForm extends JFrame {
         }
         setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
         refreshLedgerButton(item);
+        saveLastUsedLedger(ledger.getId());
     }
 
     private void refreshNetworkButton() {
@@ -212,6 +210,15 @@ public class MainForm extends JFrame {
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
         cmdNetwork.setIcon(icon);
         cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(networkInfo.getUrl().uri())));
+    }
+
+    private void saveLastUsedLedger(LedgerId ledgerId) {
+        try (var repo = new ConfigRepo()) {
+            repo.saveLastUsedLedger(ledgerId);
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
     }
 
     private void saveLastUsedNetwork(NetworkInfo selected) {
