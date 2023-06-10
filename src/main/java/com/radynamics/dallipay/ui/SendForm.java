@@ -698,5 +698,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
         refreshExchange();
         table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
+        // Clear loaded payments
+        load(new ArrayList<>());
     }
 }

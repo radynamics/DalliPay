@@ -503,5 +503,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         refreshTargetCcys();
         lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
         table.init(transformInstruction, currencyConverter, new PaymentValidator(), transactionTranslator);
+        // Clear loaded payments
+        loadTable(new Payment[0]);
     }
 }

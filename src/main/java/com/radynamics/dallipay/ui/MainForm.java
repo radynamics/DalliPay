@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
@@ -13,6 +14,7 @@ import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.transformation.TransformInstruction;
+import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.update.OnlineUpdate;
 
 import javax.swing.*;
@@ -196,6 +198,14 @@ public class MainForm extends JFrame {
         cmdLedger.setToolTipText(item.getText());
     }
 
+    private void onLedgerClicked(JMenuItem item, Ledger ledger) {
+        if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
+            return;
+        }
+        setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
+        refreshLedgerButton(item);
+    }
+
     private void refreshNetworkButton() {
         var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
         var networkInfo = transformInstruction.getNetwork();
@@ -237,8 +247,9 @@ public class MainForm extends JFrame {
         var popupMenu = new JPopupMenu();
         for (var l : LedgerFactory.all()) {
             var item = new JMenuItem(l.getDisplayText(), l.getIcon());
+            item.addActionListener(e -> onLedgerClicked(item, l));
             popupMenu.add(item);
-            selected = l.getId().numericId() == transformInstruction.getLedger().getId().numericId() ? item : selected;
+            selected = l.getId().sameAs(transformInstruction.getLedger().getId()) ? item : selected;
         }
 
         if (selected != null) {
