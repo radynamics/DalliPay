@@ -41,10 +41,10 @@ import java.util.stream.Collectors;
 
 public class SendForm extends JPanel implements MainFormPane, MappingChangedListener {
     private final static Logger log = LogManager.getLogger(Database.class);
-    private final TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
-    private final TransactionTranslator transactionTranslator;
-    private final PaymentValidator validator;
+    private TransformInstruction transformInstruction;
+    private CurrencyConverter currencyConverter;
+    private TransactionTranslator transactionTranslator;
+    private PaymentValidator validator;
     private TransactionSubmitter submitter;
 
     private JLabel lblExchange;
@@ -59,14 +59,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public SendForm() {
         super(new GridLayout(1, 0));
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
-        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
-        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
 
         setupUI();
     }
@@ -138,7 +132,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 panel1.add(lbl);
 
                 lblExchange = new JLabel();
-                refreshExchange();
                 panel1Layout.putConstraint(SpringLayout.WEST, lblExchange, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblExchange, 30, SpringLayout.NORTH, panel1);
                 panel1.add(lblExchange);
@@ -209,7 +202,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator, transactionTranslator);
+            table = new PaymentTable(Actor.Sender);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
@@ -693,5 +686,17 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             p.getLedger().setNetwork(networkInfo);
         }
         load(payments);
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
+        this.transformInstruction = transformInstruction;
+        this.currencyConverter = currencyConverter;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
+        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
+
+        refreshExchange();
+        table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
     }
 }

@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
 
 public class MainForm extends JFrame {
-    private final TransformInstruction transformInstruction;
+    private TransformInstruction transformInstruction;
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
@@ -32,10 +32,7 @@ public class MainForm extends JFrame {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public MainForm(TransformInstruction transformInstruction) {
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        this.transformInstruction = transformInstruction;
-
+    public MainForm() {
         setupUI();
     }
 
@@ -95,15 +92,12 @@ public class MainForm extends JFrame {
                 });
 
                 {
-                    var provider = transformInstruction.getExchangeRateProvider();
-                    provider.load();
-
-                    sendingPanel = new SendForm(transformInstruction, new CurrencyConverter(provider.latestRates()));
+                    sendingPanel = new SendForm();
                     sendingPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("send"), sendingPanel);
                 }
                 {
-                    receivingPanel = new ReceiveForm(transformInstruction, new CurrencyConverter());
+                    receivingPanel = new ReceiveForm();
                     receivingPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("receive"), receivingPanel);
                 }
@@ -112,11 +106,10 @@ public class MainForm extends JFrame {
                     tabbedPane.setEnabledAt(2, false);
                 }
                 {
-                    optionsPanel = new OptionsForm(transformInstruction.getLedger());
+                    optionsPanel = new OptionsForm();
                     optionsPanel.addChangedListener(this::refreshChangedSettings);
                     optionsPanel.setBorder(mainContentBorder);
                     tabbedPane.addTab(res.getString("options"), optionsPanel);
-                    optionsPanel.load();
                 }
             }
         }
@@ -185,17 +178,14 @@ public class MainForm extends JFrame {
         cmdLedger = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
         cmdLedger.setBorder(BorderFactory.createEmptyBorder());
         cmdLedger.setAlwaysPopup(true);
-        cmdLedger.setPopupMenu(createLedgerPopMenu());
         menuBar.add(cmdLedger);
 
         menuBar.add(Box.createHorizontalStrut(10));
 
         cmdNetwork = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
-        refreshNetworkButton();
         cmdNetwork.setBorder(BorderFactory.createEmptyBorder());
         cmdNetwork.setBackground(getBackground());
         cmdNetwork.setAlwaysPopup(true);
-        cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
         menuBar.add(cmdNetwork);
 
         return menuBar;
@@ -221,6 +211,25 @@ public class MainForm extends JFrame {
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    public void setTransformInstruction(TransformInstruction transformInstruction) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        this.transformInstruction = transformInstruction;
+
+        var provider = transformInstruction.getExchangeRateProvider();
+        provider.load();
+
+        sendingPanel.init(transformInstruction, new CurrencyConverter(provider.latestRates()));
+        receivingPanel.init(transformInstruction, new CurrencyConverter());
+        optionsPanel.init(transformInstruction.getLedger());
+        optionsPanel.load();
+
+        cmdLedger.setPopupMenu(createLedgerPopMenu());
+        cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
+        refreshNetworkButton();
+
+        refreshChangedSettings();
     }
 
     private JPopupMenu createLedgerPopMenu() {

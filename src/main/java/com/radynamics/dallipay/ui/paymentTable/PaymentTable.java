@@ -37,7 +37,7 @@ public class PaymentTable extends JPanel {
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
+    private CurrencyConverter currencyConverter;
     private final Actor actor;
     private PaymentValidator validator;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
@@ -49,18 +49,14 @@ public class PaymentTable extends JPanel {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+    public PaymentTable(Actor actor) {
         super(new GridLayout(1, 0));
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
         this.actor = actor;
-        this.validator = validator;
 
-        var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel();
         table = new JTable(model);
         model.setActor(actor);
-        dataLoader = new DataLoader(model, exchangeRateLoader, validator, transactionTranslator);
+        dataLoader = new DataLoader(model);
         dataLoader.addProgressListener(progress -> {
             table.revalidate();
             table.repaint();
@@ -432,5 +428,14 @@ public class PaymentTable extends JPanel {
 
     public DataLoader getDataLoader() {
         return dataLoader;
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+        this.transformInstruction = transformInstruction;
+        this.currencyConverter = currencyConverter;
+        this.validator = validator;
+
+        var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
+        dataLoader.init(exchangeRateLoader, validator, transactionTranslator);
     }
 }

@@ -74,7 +74,8 @@ public class Main {
                 }
 
                 var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
-                var frm = new MainForm(transformInstruction);
+                var frm = new MainForm();
+                frm.setTransformInstruction(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
                 frm.setLocationByPlatform(true);

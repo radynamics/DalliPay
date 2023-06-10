@@ -42,9 +42,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
-    private final TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
-    private final TransactionTranslator transactionTranslator;
+    private TransformInstruction transformInstruction;
+    private TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
     private boolean isLoading;
 
@@ -65,13 +64,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public ReceiveForm() {
         super(new GridLayout(1, 0));
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
-        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
 
         setupUI();
     }
@@ -124,7 +118,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 txtInput = new WalletField(this);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
-                txtInput.setLedger(transformInstruction.getLedger());
                 panel1.add(txtInput);
             }
             {
@@ -140,7 +133,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                         onSelectedTargetCcyChanged((String) e.getItem());
                     }
                 });
-                refreshTargetCcys();
                 panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(cboTargetCcy);
@@ -151,7 +143,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFrom, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFrom);
 
-                lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFromSource, 0, SpringLayout.EAST, lblUsingExchangeRatesFrom);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFromSource, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFromSource);
@@ -191,7 +182,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator(), transactionTranslator);
+            table = new PaymentTable(Actor.Receiver);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
@@ -500,5 +491,17 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     @Override
     public String getTitle() {
         return res.getString("title");
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
+        this.transformInstruction = transformInstruction;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
+
+        txtInput.setLedger(transformInstruction.getLedger());
+        refreshTargetCcys();
+        lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
+        table.init(transformInstruction, currencyConverter, new PaymentValidator(), transactionTranslator);
     }
 }

@@ -17,18 +17,15 @@ import java.util.concurrent.Executors;
 
 public class DataLoader {
     private final PaymentTableModel model;
-    private final HistoricExchangeRateLoader exchangeRateLoader;
-    private final PaymentValidator validator;
-    private final TransactionTranslator transactionTranslator;
+    private HistoricExchangeRateLoader exchangeRateLoader;
+    private PaymentValidator validator;
+    private TransactionTranslator transactionTranslator;
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private final ArrayList<ProgressListener> progressListener = new ArrayList<>();
     private final ArrayList<Record> payments = new ArrayList<>();
 
-    public DataLoader(PaymentTableModel model, HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+    public DataLoader(PaymentTableModel model) {
         this.model = model;
-        this.exchangeRateLoader = exchangeRateLoader;
-        this.validator = validator;
-        this.transactionTranslator = transactionTranslator;
     }
 
     public void loadAsync(Record[] payments) {
@@ -149,5 +146,11 @@ public class DataLoader {
         for (var l : progressListener) {
             l.onProgress(progress);
         }
+    }
+
+    public void init(HistoricExchangeRateLoader exchangeRateLoader, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+        this.exchangeRateLoader = exchangeRateLoader;
+        this.validator = validator;
+        this.transactionTranslator = transactionTranslator;
     }
 }
