@@ -168,9 +168,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         if (e.getClickCount() == 1) {
-                            for (var ledger : PaymentUtils.distinctLedgers(payments.toArray(new Payment[0]))) {
-                                showSigningEdit(ledger);
-                            }
+                            showSigningEdit(transformInstruction.getLedger());
                         }
                     }
                 });
