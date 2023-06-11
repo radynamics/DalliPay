@@ -695,6 +695,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
 
         refreshExchange();
+        // Signing method maybe not supported on different ledger
+        setSubmitter((TransactionSubmitter) null);
         table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
         // Clear loaded payments
         load(new ArrayList<>());
