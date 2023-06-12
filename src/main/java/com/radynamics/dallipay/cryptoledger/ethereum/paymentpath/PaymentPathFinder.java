@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.ethereum.paymentpath;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.PaymentPath;
+import com.radynamics.dallipay.cryptoledger.generic.paymentpath.BothHolding;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.iso20022.Payment;
@@ -17,6 +18,10 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
         var list = new ArrayList<PaymentPath>();
 
         list.addAll(List.of(knownTokensOf(p.getUserCcy().getCode(), p.getLedger())));
+
+        for (var ccy : BothHolding.list(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy())) {
+            list.add(new Erc20Path(ccy));
+        }
 
         return list.toArray(new PaymentPath[0]);
     }
