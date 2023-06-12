@@ -1,8 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.paymentpath;
 
-import com.radynamics.dallipay.cryptoledger.LedgerNativeCcyPath;
 import com.radynamics.dallipay.cryptoledger.PaymentPath;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.generic.paymentpath.BothHolding;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
