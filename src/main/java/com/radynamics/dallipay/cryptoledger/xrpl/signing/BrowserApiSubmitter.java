@@ -2,7 +2,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing;
 
 import com.radynamics.dallipay.browserwalletbridge.BridgeException;
 import com.radynamics.dallipay.browserwalletbridge.BrowserApi;
-import com.radynamics.dallipay.browserwalletbridge.gemwallet.PayloadConverter;
+import com.radynamics.dallipay.browserwalletbridge.PayloadConverter;
 import com.radynamics.dallipay.browserwalletbridge.httpserver.BridgeEventListener;
 import com.radynamics.dallipay.browserwalletbridge.httpserver.EmbeddedServer;
 import com.radynamics.dallipay.cryptoledger.Ledger;
@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 public abstract class BrowserApiSubmitter implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(BrowserApiSubmitter.class);
     private final Ledger ledger;
+    private final PayloadConverter payloadConverter;
     private final EmbeddedServer server;
 
     private final TransactionSubmitterInfo info;
@@ -33,6 +34,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
         if (id == null) throw new IllegalArgumentException("Parameter 'id' cannot be null");
         if (api == null) throw new IllegalArgumentException("Parameter 'api' cannot be null");
         this.ledger = ledger;
+        payloadConverter = api.createPayloadConverter();
         this.id = id;
         server = new EmbeddedServer(api);
         info = createInfo();
@@ -90,7 +92,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
         for (var trx : transactions) {
             var t = (com.radynamics.dallipay.cryptoledger.xrpl.Transaction) trx;
             try {
-                var future = server.sendPayment(new TransactionDto(t), PayloadConverter.toJson(t));
+                var future = server.sendPayment(new TransactionDto(t), payloadConverter.toJson(t));
                 future.join();
             } catch (Exception e) {
                 t.refreshTransmission(e);

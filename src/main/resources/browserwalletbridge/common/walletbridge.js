@@ -18,6 +18,7 @@ class WalletBridge {
     }
 
     reportRejected(key, message) {
+        this.hide('cancel')
         this.hide('waiting')
         this.hide('walletApiNotAvailable')
         this.show('rejected')

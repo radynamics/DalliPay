@@ -1,11 +1,11 @@
-package com.radynamics.dallipay.browserwalletbridge.gemwallet;
+package com.radynamics.dallipay.browserwalletbridge.metamask;
 
 import com.radynamics.dallipay.browserwalletbridge.BrowserApi;
 
-public class GemWallet implements BrowserApi {
+public class MetaMask implements BrowserApi {
     @Override
     public String getContentRoot() {
-        return "gemwallet";
+        return "metamask";
     }
 
     @Override

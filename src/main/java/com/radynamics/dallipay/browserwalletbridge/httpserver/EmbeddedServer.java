@@ -138,7 +138,7 @@ public class EmbeddedServer {
 
             if ("GET".equals(httpExchange.getRequestMethod())) {
                 if (uri.getPath().equals("/" + SendPath)) {
-                    response(httpExchange, browserApi.createSendRequestResponse());
+                    response(httpExchange, getContent("/%s/index.html".formatted(browserApi.getContentRoot())));
                     return;
                 }
 
