@@ -36,6 +36,11 @@ public class NullSubmitter implements TransactionSubmitter {
     }
 
     @Override
+    public boolean supportIssuedTokens() {
+        return false;
+    }
+
+    @Override
     public boolean supportsPathFinding() {
         return false;
     }

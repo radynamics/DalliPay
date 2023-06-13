@@ -152,10 +152,10 @@ public class SubmitterSelectionForm extends JDialog {
         sb.append("<br>");
         sb.append(res.getString("supports"));
         sb.append("<br>");
-        sb.append(String.format("- [%s] Pathfinding", toYesNo(submitter.supportsPathFinding())));
+        sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportIssuedTokens()), res.getString("issuedTokens")));
+        sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportsPathFinding()), res.getString("pathfinding")));
 
         if (info.getDetailUri() != null) {
-            sb.append("<br>");
             sb.append("<br>");
             sb.append(info.getDetailUri());
         }

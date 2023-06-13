@@ -34,7 +34,7 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
         }
 
         var cf = new CurrencyFormatter(p.getLedger().getInfoProvider());
-        {
+        if (p.getSubmitter().supportIssuedTokens()) {
             var candidates = new ArrayList<IssuedCurrencyPath>();
             var ccysBothAccepting = BothHolding.list(p.getSenderWallet(), p.getReceiverWallet(), p.getUserCcy());
             for (var i = 0; i < ccysBothAccepting.length; i++) {

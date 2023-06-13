@@ -28,6 +28,11 @@ public class GemWallet extends BrowserApiSubmitter {
     }
 
     @Override
+    public boolean supportIssuedTokens() {
+        return false;
+    }
+
+    @Override
     public boolean supportsPathFinding() {
         return false;
     }

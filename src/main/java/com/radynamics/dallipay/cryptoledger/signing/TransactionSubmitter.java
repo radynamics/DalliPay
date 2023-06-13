@@ -19,5 +19,7 @@ public interface TransactionSubmitter {
 
     void addStateListener(TransactionStateListener l);
 
+    boolean supportIssuedTokens();
+
     boolean supportsPathFinding();
 }

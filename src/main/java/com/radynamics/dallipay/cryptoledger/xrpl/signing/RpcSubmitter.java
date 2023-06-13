@@ -173,6 +173,11 @@ public class RpcSubmitter implements TransactionSubmitter {
     }
 
     @Override
+    public boolean supportIssuedTokens() {
+        return true;
+    }
+
+    @Override
     public boolean supportsPathFinding() {
         return false;
     }
