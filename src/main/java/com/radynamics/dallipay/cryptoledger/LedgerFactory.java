@@ -15,4 +15,13 @@ public final class LedgerFactory {
                 throw new NotImplementedException(String.format("Ledger %s unknown.", ledgerId));
         }
     }
+
+    public static Ledger[] all() {
+        var ledgerIds = LedgerId.values();
+        var result = new Ledger[ledgerIds.length];
+        for (var i = 0; i < ledgerIds.length; i++) {
+            result[i] = create(ledgerIds[i]);
+        }
+        return result;
+    }
 }

@@ -2,7 +2,6 @@ package com.radynamics.dallipay.ui;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -127,7 +126,7 @@ public class SubmitterSelectionForm extends JDialog {
         var borderOffset = 50;
         var cmd = new JToggleButton("<html><center style='width: %spx'>%s</center></html>".formatted(size.width - borderOffset, title));
         cmd.setIcon(info.getIcon());
-        cmd.setToolTipText(Utils.wrapText(createToolTipText(info), 80));
+        cmd.setToolTipText(createToolTipText(submitter));
         cmd.putClientProperty("JButton.buttonType", "toolBarButton");
         // Text below image
         cmd.setVerticalTextPosition(JButton.BOTTOM);
@@ -143,15 +142,30 @@ public class SubmitterSelectionForm extends JDialog {
         buttonGroup.add(cmd);
     }
 
-    private String createToolTipText(TransactionSubmitterInfo info) {
+    private String createToolTipText(TransactionSubmitter submitter) {
         var sb = new StringBuilder();
+        sb.append("<html><p width=500>");
+        var info = submitter.getInfo();
         sb.append(info.getDescription());
+
+        sb.append("<br>");
+        sb.append("<br>");
+        sb.append(res.getString("supports"));
+        sb.append("<br>");
+        sb.append(String.format("- [%s] Pathfinding", toYesNo(submitter.supportsPathFinding())));
+
         if (info.getDetailUri() != null) {
-            sb.append(System.lineSeparator());
-            sb.append(System.lineSeparator());
+            sb.append("<br>");
+            sb.append("<br>");
             sb.append(info.getDetailUri());
         }
+
+        sb.append("</p></html>");
         return sb.toString();
+    }
+
+    private String toYesNo(boolean value) {
+        return value ? res.getString("yes") : res.getString("no");
     }
 
     static TransactionSubmitter showDialog(Component parentComponent, Ledger ledger, TransactionSubmitter selected) {

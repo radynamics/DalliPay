@@ -86,17 +86,16 @@ public class NetworkPopMenu {
         item.setToolTipText(res.getString("loading"));
 
         futureInfo.thenAccept(endpointInfo -> {
-            if (endpointInfo == null) {
-                item.setToolTipText(res.getString("noInfo"));
-                return;
-            }
-
             var sb = new StringBuilder();
-            sb.append(String.format("%s: %s", res.getString("url"), endpointInfo.getNetworkInfo().getUrl()) + System.lineSeparator());
-            if (endpointInfo.getHostId() != null) {
-                sb.append(String.format("%s: %s", res.getString("hostId"), endpointInfo.getHostId()) + System.lineSeparator());
+            sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getUrl()) + System.lineSeparator());
+            if (endpointInfo == null) {
+                sb.append(res.getString("noInfo"));
+            } else {
+                if (endpointInfo.getHostId() != null) {
+                    sb.append(String.format("%s: %s", res.getString("hostId"), endpointInfo.getHostId()) + System.lineSeparator());
+                }
+                sb.append(String.format("%s: %s", res.getString("serverVersion"), endpointInfo.getServerVersion()));
             }
-            sb.append(String.format("%s: %s", res.getString("serverVersion"), endpointInfo.getServerVersion()));
             item.setToolTipText(sb.toString());
         });
 

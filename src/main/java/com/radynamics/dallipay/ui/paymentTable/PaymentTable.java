@@ -37,7 +37,7 @@ public class PaymentTable extends JPanel {
     private final JTable table;
     private final PaymentTableModel model;
     private TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
+    private CurrencyConverter currencyConverter;
     private final Actor actor;
     private PaymentValidator validator;
     private ArrayList<ProgressListener> progressListener = new ArrayList<>();
@@ -49,18 +49,14 @@ public class PaymentTable extends JPanel {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public PaymentTable(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, Actor actor, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+    public PaymentTable(Actor actor) {
         super(new GridLayout(1, 0));
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
         this.actor = actor;
-        this.validator = validator;
 
-        var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
         model = new PaymentTableModel();
         table = new JTable(model);
         model.setActor(actor);
-        dataLoader = new DataLoader(model, exchangeRateLoader, validator, transactionTranslator);
+        dataLoader = new DataLoader(model);
         dataLoader.addProgressListener(progress -> {
             table.revalidate();
             table.repaint();
@@ -111,14 +107,6 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_SENDER_ACCOUNT).headerValue(res.getString("senderAccount")).width(200).getColumn();
-            c.setCellEditor(new AccountCellEditor(true));
-            c.setCellRenderer(new AccountCellRenderer());
-            if (actor == Actor.Sender) {
-                cb.hide();
-            }
-        }
-        {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue(res.getString("receiverAccount")).width(200).getColumn();
             c.setCellEditor(new AccountCellEditor(true));
             c.setCellRenderer(new AccountCellRenderer());
@@ -128,7 +116,7 @@ public class PaymentTable extends JPanel {
             c.setCellRenderer(new WalletCellRenderer());
         }
         {
-            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue(res.getString("booked")).width(90).getColumn();
+            var c = cb.forColumn(PaymentTableModel.COL_BOOKED).headerValue(res.getString("booked")).width(60).getColumn();
             c.setCellRenderer(new DateTimeCellRenderer());
             if (model.getActor() == Actor.Sender) {
                 cb.hide();
@@ -142,7 +130,7 @@ public class PaymentTable extends JPanel {
             var c = cb.forColumn(PaymentTableModel.COL_CCY).headerValue("").maxWidth(50).getColumn();
             c.setCellRenderer(new CurrencyCellRenderer(table.getColumn(PaymentTableModel.COL_OBJECT)));
         }
-        cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(50);
+        cb.forColumn(PaymentTableModel.COL_TRX_STATUS).headerValue("").maxWidth(40);
         {
             var c = cb.forColumn(PaymentTableModel.COL_DETAIL).headerValue("").maxWidth(50).headerCenter().getColumn();
             c.setCellRenderer(new ShowDetailCellRenderer());
@@ -192,9 +180,6 @@ public class PaymentTable extends JPanel {
 
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_LEDGER)) {
             onWalletEdited(t, tcl, ChangedValue.SenderWallet);
-        }
-        if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_SENDER_ACCOUNT)) {
-            onAccountEdited(t, tcl, ChangedValue.SenderAccount);
         }
         if (tcl.getColumn() == table.getColumnModel().getColumnIndex(PaymentTableModel.COL_RECEIVER_ACCOUNT)) {
             onAccountEdited(t, tcl, ChangedValue.ReceiverAccount);
@@ -333,6 +318,10 @@ public class PaymentTable extends JPanel {
                 : transformInstruction.getHistoricExchangeRateSource();
     }
 
+    public int paymentCount() {
+        return model.getRowCount();
+    }
+
     public Payment[] checkedPayments() {
         return model.checkedPayments();
     }
@@ -439,5 +428,14 @@ public class PaymentTable extends JPanel {
 
     public DataLoader getDataLoader() {
         return dataLoader;
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter, PaymentValidator validator, TransactionTranslator transactionTranslator) {
+        this.transformInstruction = transformInstruction;
+        this.currencyConverter = currencyConverter;
+        this.validator = validator;
+
+        var exchangeRateLoader = new HistoricExchangeRateLoader(transformInstruction, currencyConverter);
+        dataLoader.init(exchangeRateLoader, validator, transactionTranslator);
     }
 }

@@ -2,18 +2,12 @@ package com.radynamics.dallipay;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.db.Database;
-import com.radynamics.dallipay.exchange.Coinbase;
-import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
-import com.radynamics.dallipay.transformation.DbAccountMappingSource;
-import com.radynamics.dallipay.transformation.TransformInstruction;
+import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.ui.*;
-import okhttp3.HttpUrl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,13 +15,12 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Locale;
+import java.util.Optional;
 
 public class Main {
     final static Logger log = LogManager.getLogger(Main.class);
@@ -63,13 +56,6 @@ public class Main {
                 log.error(e.getMessage(), e);
             }
 
-            var f = new File(configFilePath);
-
-            var ledger = LedgerFactory.create(LedgerId.Xrpl);
-            var config = f.exists() ? Config.load(ledger, configFilePath) : Config.fallback(ledger);
-
-            var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
-
             javax.swing.SwingUtilities.invokeLater(() -> {
                 FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", Utils.toHexString(Consts.ColorAccent)));
                 FlatLightLaf.setup();
@@ -86,8 +72,12 @@ public class Main {
                     return;
                 }
 
-                var transformInstruction = createTransformInstruction(ledger, config, getNetworkOrDefault(ledger, config, networkId));
-                var frm = new MainForm(transformInstruction);
+                var ledger = LedgerFactory.create(getLastUsedLedger().orElse(LedgerId.Xrpl));
+                var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
+
+                var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
+                var frm = new MainForm();
+                frm.setTransformInstruction(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
                 frm.setLocationByPlatform(true);
@@ -117,49 +107,14 @@ public class Main {
         }
     }
 
-    private static NetworkInfo getNetworkOrDefault(Ledger ledger, Config config, String networkId) {
-        if (!StringUtils.isEmpty(networkId)) {
-            var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
-            if (networkByParam.isPresent()) {
-                return networkByParam.get();
-            }
-        }
-
-        HttpUrl lastUsed = null;
+    private static Optional<LedgerId> getLastUsedLedger() {
         try (var repo = new ConfigRepo()) {
-            lastUsed = repo.getLastUsedRpcUrl(ledger);
+            var value = repo.getLastUsedLedger();
+            return value == null ? Optional.empty() : Optional.of(value);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return Optional.empty();
         }
-
-        if (lastUsed == null) {
-            return config.getDefaultNetworkInfo();
-        }
-
-        for (var ni : config.getNetworkInfos()) {
-            if (ni.getUrl().equals(lastUsed)) {
-                return ni;
-            }
-        }
-
-        return NetworkInfo.create(lastUsed);
-    }
-
-    private static TransformInstruction createTransformInstruction(Ledger ledger, Config config, NetworkInfo network) {
-        var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
-        t.setNetwork(network);
-        try (var repo = new ConfigRepo()) {
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider(), ledger));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID, ledger));
-        }
-        t.getExchangeRateProvider().init();
-
-        // Different ledgers/sidechains may provide different sources for historic exchange rates.
-        t.setHistoricExchangeRateSource(ledger.createHistoricExchangeRateSource());
-        t.getHistoricExchangeRateSource().init();
-        return t;
     }
 
     private static boolean showTerms() {

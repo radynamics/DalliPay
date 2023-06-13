@@ -172,6 +172,11 @@ public class RpcSubmitter implements TransactionSubmitter {
         stateListener.add(l);
     }
 
+    @Override
+    public boolean supportsPathFinding() {
+        return false;
+    }
+
     private void raiseSuccess(Transaction t) {
         for (var l : stateListener) {
             l.onSuccess(t);

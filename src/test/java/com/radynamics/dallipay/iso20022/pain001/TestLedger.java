@@ -11,6 +11,7 @@ import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Random;
@@ -30,6 +31,16 @@ public class TestLedger implements Ledger {
     @Override
     public String getNativeCcySymbol() {
         return nativeCcySymbol;
+    }
+
+    @Override
+    public Icon getIcon() {
+        return null;
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Test";
     }
 
     @Override
@@ -206,5 +217,15 @@ public class TestLedger implements Ledger {
     @Override
     public DestinationTagBuilder createDestinationTagBuilder() {
         return null;
+    }
+
+    @Override
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        return true;
+    }
+
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return true;
     }
 }

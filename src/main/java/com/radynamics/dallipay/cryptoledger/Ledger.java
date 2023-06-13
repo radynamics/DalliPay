@@ -6,10 +6,16 @@ import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import okhttp3.HttpUrl;
 
+import javax.swing.*;
+
 public interface Ledger {
     LedgerId getId();
 
     String getNativeCcySymbol();
+
+    Icon getIcon();
+
+    String getDisplayText();
 
     Transaction createTransaction();
 
@@ -62,4 +68,8 @@ public interface Ledger {
     boolean supportsDestinationTag();
 
     DestinationTagBuilder createDestinationTagBuilder();
+
+    boolean existsPath(Wallet sender, Wallet receiver, Money amount);
+
+    boolean existsSellOffer(Money minimum);
 }

@@ -33,6 +33,10 @@ public class XummApi {
         var json = new JSONObject();
         json.put("txjson", payload);
 
+        var options = new JSONObject();
+        json.put("options", options);
+        options.put("pathfinding", true);
+
         return post("/payload", HttpRequest.BodyPublishers.ofString(json.toString()));
     }
 

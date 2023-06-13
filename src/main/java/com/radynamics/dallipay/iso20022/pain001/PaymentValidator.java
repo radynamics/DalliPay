@@ -47,7 +47,9 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
                 var ccy = t.getAmountTransaction().getCcy();
                 var currentBalance = t.getSenderWallet().getBalances().get(ccy).orElse(null);
                 if (currentBalance == null) {
-                    list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderDoesntHold"), ccy.getCode())));
+                    if (!t.getSubmitter().supportsPathFinding()) {
+                        list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderDoesntHold"), ccy.getCode())));
+                    }
                 } else if (currentBalance.lessThan(t.getAmountTransaction())) {
                     list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderBalanceTooLow"), MoneyFormatter.formatFiat(currentBalance))));
                 }
@@ -104,7 +106,9 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         var sendingWallets = PaymentUtils.distinctSendingWallets(payments);
         for (var w : sendingWallets) {
             var affectedPayments = PaymentUtils.fromSender(w, payments);
-            Ledger l = affectedPayments.get(0).getLedger();
+            if (affectedPayments.get(0).getSubmitter().supportsPathFinding()) {
+                continue;
+            }
             var sums = PaymentUtils.sumLedgerUnit(affectedPayments);
             for (var ccy : sums.currencies()) {
                 // If sender is issuer of the transferred ccy, its balance doesn't matter due it can issue always more.

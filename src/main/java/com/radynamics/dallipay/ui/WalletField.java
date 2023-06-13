@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.lang3.StringUtils;

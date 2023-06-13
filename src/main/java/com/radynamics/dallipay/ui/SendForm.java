@@ -3,6 +3,7 @@ package com.radynamics.dallipay.ui;
 import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
@@ -40,12 +41,14 @@ import java.util.stream.Collectors;
 
 public class SendForm extends JPanel implements MainFormPane, MappingChangedListener {
     private final static Logger log = LogManager.getLogger(Database.class);
-    private final TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
-    private final TransactionTranslator transactionTranslator;
-    private final PaymentValidator validator;
+    private TransformInstruction transformInstruction;
+    private CurrencyConverter currencyConverter;
+    private TransactionTranslator transactionTranslator;
+    private PaymentValidator validator;
+    private TransactionSubmitter submitter;
 
     private JLabel lblExchange;
+    private JLabel lblSigningText;
     private PaymentTable table;
     private FilePathField txtInput;
     private ArrayList<Payment> payments = new ArrayList<>();
@@ -56,14 +59,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public SendForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public SendForm() {
         super(new GridLayout(1, 0));
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
-        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
-        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
 
         setupUI();
     }
@@ -85,15 +82,18 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         JPanel panel3 = new JPanel();
         panel3.setBorder(innerBorder);
         var panel3Layout = new SpringLayout();
-        panel3.setLayout(panel3Layout/*new FlowLayout(FlowLayout.RIGHT)*/);
+        panel3.setLayout(panel3Layout);
 
         pnlMain.add(panel1);
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setPreferredSize(new Dimension(500, 70));
+        final var lineCount = 3;
+        final var lineHeight = 30;
+        var panel1Height = lineCount * lineHeight;
+        panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
+        panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
+        panel1.setPreferredSize(new Dimension(500, panel1Height));
         panel2.setPreferredSize(new Dimension(500, 500));
         panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -132,7 +132,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 panel1.add(lbl);
 
                 lblExchange = new JLabel();
-                refreshExchange();
                 panel1Layout.putConstraint(SpringLayout.WEST, lblExchange, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblExchange, 30, SpringLayout.NORTH, panel1);
                 panel1.add(lblExchange);
@@ -149,6 +148,33 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                     }
                 });
                 panel1.add(lbl3);
+            }
+            {
+                var lbl = new JLabel(res.getString("transmission"));
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, panel1);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, 60, SpringLayout.NORTH, panel1);
+                lbl.setOpaque(true);
+                panel1.add(lbl);
+
+                lblSigningText = new JLabel();
+                panel1Layout.putConstraint(SpringLayout.WEST, lblSigningText, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblSigningText, 60, SpringLayout.NORTH, panel1);
+                panel1.add(lblSigningText);
+
+                var lbl3 = Utils.createLinkLabel(pnlMain, res.getString("edit"));
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblSigningText);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 60, SpringLayout.NORTH, panel1);
+                lbl3.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 1) {
+                            showSigningEdit(transformInstruction.getLedger());
+                        }
+                    }
+                });
+                panel1.add(lbl3);
+
+                refreshSigningText();
             }
             {
                 var popupMenu = new JPopupMenu();
@@ -174,7 +200,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Sender, validator, transactionTranslator);
+            table = new PaymentTable(Actor.Sender);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
@@ -253,8 +279,11 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
 
         }
-        payments.add(mp.getPayment());
-        table.add(mp.getPayment());
+        var p = mp.getPayment();
+        payments.add(p);
+        initSubmitter();
+        setSubmitter(p);
+        table.add(p);
     }
 
     @Override
@@ -333,6 +362,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 transactionTranslator.applyDefaultSender(payments);
+                initSubmitter();
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -437,8 +467,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private void sendPayments(Ledger ledger, Payment[] payments) {
         try {
-            var submitter = showConfirmationForm(ledger, getLastUsedSubmitter(ledger), payments);
-            if (submitter == null) {
+            if (submitter == null && !showSigningEdit(ledger)) {
                 return;
             }
 
@@ -447,6 +476,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 repo.commit();
             } catch (Exception e) {
                 ExceptionDialog.show(this, e);
+            }
+
+            if (!showConfirmationForm(ledger, payments)) {
+                return;
             }
 
             var results = validator.validate(payments);
@@ -482,6 +515,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
+    }
+
+    private void initSubmitter() {
+        if (submitter != null || payments.size() == 0) {
+            return;
+        }
+        setSubmitter(getLastUsedSubmitter(payments.get(0).getLedger()));
     }
 
     private TransactionSubmitter getLastUsedSubmitter(Ledger ledger) {
@@ -565,23 +605,48 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         table.refresh(paymentArray);
     }
 
-    private TransactionSubmitter showConfirmationForm(Ledger ledger, TransactionSubmitter submitter, Payment[] payments) {
-        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.size(), submitter);
+    private boolean showSigningEdit(Ledger ledger) {
+        var submitter = SubmitterSelectionForm.showDialog(this, ledger, this.submitter);
+        if (submitter == null) {
+            return false;
+        }
+        setSubmitter(submitter);
+        return true;
+    }
+
+    private void setSubmitter(TransactionSubmitter submitter) {
+        this.submitter = submitter;
+        refreshSigningText();
+
+        for (var p : payments) {
+            setSubmitter(p);
+        }
+
+        // While reading an input file there aren't yet any loaded payments.
+        if (table.paymentCount() > 0) {
+            table.refresh(payments.toArray(new Payment[0]));
+        }
+    }
+
+    private void setSubmitter(Payment p) {
+        // Prevent setting null to payments
+        p.setSubmitter(this.submitter == null ? new NullSubmitter() : this.submitter);
+        // Eg. pathfinding is supported only by specific signers.
+        p.refreshPaymentPath(currencyConverter);
+    }
+
+    private void refreshSigningText() {
+        lblSigningText.setText(String.format(res.getString("signUsing"), submitter == null ? res.getString("unknown") : submitter.getInfo().getTitle()));
+    }
+
+    private boolean showConfirmationForm(Ledger ledger, Payment[] payments) {
+        var frm = new SendConfirmationForm(ledger, payments, transformInstruction.getExchangeRateProvider(), this.payments.size());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 410);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setVisible(true);
-        if (!frm.isDialogAccepted()) {
-            return null;
-        }
-
-        var selectedSubmitter = frm.getTransactionSubmitter();
-        if (selectedSubmitter == null) {
-            selectedSubmitter = SubmitterSelectionForm.showDialog(this, ledger, submitter);
-        }
-
-        return selectedSubmitter;
+        return frm.isDialogAccepted();
     }
 
     private void load(ArrayList<Payment> payments) {
@@ -619,5 +684,19 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             p.getLedger().setNetwork(networkInfo);
         }
         load(payments);
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
+        this.transformInstruction = transformInstruction;
+        this.currencyConverter = currencyConverter;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
+        validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
+
+        refreshExchange();
+        table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
+        // Clear loaded payments
+        load(new ArrayList<>());
     }
 }

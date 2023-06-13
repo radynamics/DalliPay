@@ -21,6 +21,7 @@ Following formats for *sending payments* are tested. Other ISO 20022 versions ma
 - CSV text file (see pain.001.001.03_USD_EUR.csv in testfiles)
 
 Following ISO 20022 formats for *received payments* are available for export.
+- camt.053.001.08
 - camt.054.001.02
 - camt.054.001.04
 - camt.054.001.09
