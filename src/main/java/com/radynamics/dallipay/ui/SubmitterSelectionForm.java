@@ -152,6 +152,7 @@ public class SubmitterSelectionForm extends JDialog {
         sb.append("<br>");
         sb.append(res.getString("supports"));
         sb.append("<br>");
+        sb.append(String.format("- [%s] %s<br>", toYesNo(true), String.format(res.getString("nativeToken"), submitter.getLedger().getNativeCcySymbol())));
         sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportIssuedTokens()), res.getString("issuedTokens")));
         sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportsPathFinding()), res.getString("pathfinding")));
 
