@@ -26,4 +26,9 @@ public class GemWallet extends BrowserApiSubmitter {
         info.setIcon(new FlatSVGIcon("img/gemwallet.svg", 64, 64));
         return info;
     }
+
+    @Override
+    public boolean supportsPathFinding() {
+        return false;
+    }
 }
