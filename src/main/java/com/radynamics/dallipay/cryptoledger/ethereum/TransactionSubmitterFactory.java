@@ -1,7 +1,8 @@
 package com.radynamics.dallipay.cryptoledger.ethereum;
 
+import com.radynamics.dallipay.cryptoledger.ethereum.api.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.ethereum.signing.MetaMask;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -21,6 +22,9 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
             case RpcSubmitter.Id: {
                 return ledger.createRpcTransactionSubmitter(parentComponent);
             }
+            case MetaMask.Id: {
+                return new MetaMask(ledger);
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -31,6 +35,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
         var list = new ArrayList<TransactionSubmitter>();
 
         list.add(create(RpcSubmitter.Id, parentComponent));
+        list.add(create(MetaMask.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }
