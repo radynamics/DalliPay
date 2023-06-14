@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.signing;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.radynamics.dallipay.browserwalletbridge.BrowserApiSubmitter;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
 
