@@ -22,5 +22,6 @@ public class StaticWalletInfoProvider extends com.radynamics.dallipay.cryptoledg
         add("rs5hzzF7RzdV2Ub7Fv14Z1ShjuCrnL7FEX", "STASIS");
         add("rEaC7oNDB34K6CiSbSrA6xEPeVhXNgDZRY", "Xago");
         add("rEn9eRkX25wfGPLysUMAvZ84jAzFNpT5fL", "Stably");
+        add("rUN5Zxt3K1AnMRJgEWywDJT8QDMMeLH5ok", "Novatti"); // AUDD
     }
 }

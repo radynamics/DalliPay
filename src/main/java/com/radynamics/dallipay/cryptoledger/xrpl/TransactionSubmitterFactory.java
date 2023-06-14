@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.xrpl.signing.GemWallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm.DatabaseStorage;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm.XummSigner;
@@ -35,6 +36,9 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
                 signer.setVerifier(new OnchainVerifier(ledger));
                 return signer;
             }
+            case GemWallet.Id: {
+                return new GemWallet(ledger);
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -48,6 +52,8 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
         if (Secrets.getXummApiKey() != null) {
             list.add(create(XummSigner.Id, parentComponent));
         }
+        // Not yet available due missing ability to append Memos.
+        //list.add(create(GemWallet.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }

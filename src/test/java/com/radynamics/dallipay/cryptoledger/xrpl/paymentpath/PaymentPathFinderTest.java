@@ -108,7 +108,8 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
+        p.setSubmitter(TestFactory.createSubmitter());
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(2, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
@@ -141,7 +142,7 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
-        var actual = createPaymentPathFinderInstance().find(new CurrencyConverter(), p);
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(3, actual.length);
         assertLedgerNativeCcyPath(actual[0]);

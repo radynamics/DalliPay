@@ -189,6 +189,11 @@ public class TestFactory {
             }
 
             @Override
+            public boolean supportIssuedTokens() {
+                return true;
+            }
+
+            @Override
             public boolean supportsPathFinding() {
                 return true;
             }
