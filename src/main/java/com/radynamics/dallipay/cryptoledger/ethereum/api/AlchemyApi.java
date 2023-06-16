@@ -54,7 +54,9 @@ public class AlchemyApi {
 
     public TransactionResult listPaymentsReceived(com.radynamics.dallipay.cryptoledger.Wallet wallet, DateTimeRange period) throws Exception {
         // https://docs.alchemy.com/reference/alchemy-getassettransfers
-        var maxCount = "0x" + Integer.toHexString(3); // "0x3e8";
+        final int limit = 10;
+        final int hardLimit = limit + 1;
+        var maxCount = "0x" + Integer.toHexString(hardLimit);
 
         var params = new JSONObject();
         params.put("fromBlock", "0x0"); // "0x0", "0x103FDDA"
@@ -73,7 +75,7 @@ public class AlchemyApi {
         var json = post(HttpRequest.BodyPublishers.ofString(data.toString()));
 
         var tr = new TransactionResult();
-        readTransactions(tr, json);
+        readTransactions(tr, json, limit);
         return tr;
     }
 
@@ -146,9 +148,9 @@ public class AlchemyApi {
         throw new AlchemyException(String.format("%s (Code %s)", error.getString("message"), error.getInt("code")));
     }
 
-    private void readTransactions(TransactionResult tr, JSONObject json) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
+    private void readTransactions(TransactionResult tr, JSONObject json, int limit) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
         var transfers = json.getJSONArray("transfers");
-        for (var i = 0; i < transfers.length(); i++) {
+        for (var i = 0; i < transfers.length() && i < limit; i++) {
             var tx = transfers.getJSONObject(i);
             var txDetail = transactionByHash(tx.getString("hash")).getTransaction().orElseThrow();
             String plainMemo = null;
@@ -158,6 +160,8 @@ public class AlchemyApi {
             }
             tr.add(toTransaction(tx, plainMemo));
         }
+        tr.setHasNoTransactions(transfers.length() == 0);
+        tr.setHasMaxPageCounterReached(transfers.length() > limit);
     }
 
     private com.radynamics.dallipay.cryptoledger.xrpl.Transaction toTransaction(JSONObject t, String plainMemo) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
