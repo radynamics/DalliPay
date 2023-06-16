@@ -4,11 +4,14 @@ import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.ethereum.Ledger;
+import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -16,6 +19,7 @@ import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
@@ -71,6 +75,10 @@ public class AlchemyApi {
         var tr = new TransactionResult();
         readTransactions(tr, json);
         return tr;
+    }
+
+    private EthTransaction transactionByHash(String hash) throws ExecutionException, InterruptedException {
+        return web3.ethGetTransactionByHash(hash).sendAsync().get();
     }
 
     private JSONObject post(HttpRequest.BodyPublisher body) throws IOException, InterruptedException, AlchemyException {
@@ -141,11 +149,18 @@ public class AlchemyApi {
     private void readTransactions(TransactionResult tr, JSONObject json) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
         var transfers = json.getJSONArray("transfers");
         for (var i = 0; i < transfers.length(); i++) {
-            tr.add(toTransaction(transfers.getJSONObject(i)));
+            var tx = transfers.getJSONObject(i);
+            var txDetail = transactionByHash(tx.getString("hash")).getTransaction().orElseThrow();
+            String plainMemo = null;
+            // ERC20 trx have contract function call in input. There is no sender payload data.
+            if (!"erc20".equals(tx.optString("category")) && !StringUtils.isEmpty(txDetail.getInput())) {
+                plainMemo = Utils.hexToString(txDetail.getInput().startsWith("0x") ? txDetail.getInput().substring(2) : txDetail.getInput());
+            }
+            tr.add(toTransaction(tx, plainMemo));
         }
     }
 
-    private com.radynamics.dallipay.cryptoledger.xrpl.Transaction toTransaction(JSONObject t) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
+    private com.radynamics.dallipay.cryptoledger.xrpl.Transaction toTransaction(JSONObject t, String plainMemo) throws DecoderException, UnsupportedEncodingException, ExecutionException, InterruptedException {
         var ccy = "erc20".equals(t.optString("category"))
                 ? new Currency(t.getString("asset"), ledger.createWallet(t.getJSONObject("rawContract").getString("address")))
                 : new Currency(t.getString("asset"));
@@ -156,21 +171,16 @@ public class AlchemyApi {
         trx.setSender(ledger.createWallet(t.getString("from")));
         trx.setReceiver(ledger.createWallet(t.getString("to")));
 
-        // TODO: read transaction data/messages
-        /*for (MemoWrapper mw : t.memos()) {
-            if (!mw.memo().memoData().isPresent()) {
-                continue;
-            }
-            var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
+        if (plainMemo != null) {
+            var unwrappedMemo = PayloadConverter.fromMemo(plainMemo);
             for (var ft : unwrappedMemo.freeTexts()) {
                 trx.addMessage(ft);
             }
-        }
 
-        var l = new StructuredReferenceLookup(t);
-        for (var r : l.find()) {
-            trx.addStructuredReference(r);
-        }*/
+            for (var r : com.radynamics.dallipay.cryptoledger.generic.StructuredReferenceLookup.find(plainMemo)) {
+                trx.addStructuredReference(r);
+            }
+        }
 
         return trx;
     }
