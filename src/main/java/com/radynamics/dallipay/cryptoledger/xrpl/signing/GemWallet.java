@@ -30,7 +30,7 @@ public class GemWallet extends BrowserApiSubmitter {
 
     @Override
     public boolean supportIssuedTokens() {
-        return false;
+        return true;
     }
 
     @Override

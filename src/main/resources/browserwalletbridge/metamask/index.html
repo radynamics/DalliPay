@@ -35,6 +35,7 @@ function onLoad() {
                 from: accounts[0],
                 to: bridge._tx.destination,
                 value: web3.utils.toBN(bridge._tx.amount).toString(16), // amount in wei
+                data: bridge._tx.memo === null ? null : web3.utils.utf8ToHex(bridge._tx.memo),
             }
         } else {
             const TRANSFER_FUNCTION_ABI = {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"};
