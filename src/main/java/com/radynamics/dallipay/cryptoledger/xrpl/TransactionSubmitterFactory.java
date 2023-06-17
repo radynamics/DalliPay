@@ -52,8 +52,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
         if (Secrets.getXummApiKey() != null) {
             list.add(create(XummSigner.Id, parentComponent));
         }
-        // Not yet available due missing ability to append Memos.
-        //list.add(create(GemWallet.Id, parentComponent));
+        list.add(create(GemWallet.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }

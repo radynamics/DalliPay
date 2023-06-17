@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" href="data:;base64,=">
     <title>GemWallet</title>
-    <script src="https://unpkg.com/@gemwallet/api@2.2.1/umd/gemwallet-api.js"></script>
+    <script src="https://unpkg.com/@gemwallet/api@3.0.0/umd/gemwallet-api.js"></script>
     <script type="text/javascript"  src="/send/common/walletbridge.js"></script>
     <link rel="stylesheet" href="/send/common/main.css">
 </head>
@@ -19,18 +19,18 @@ function onLoad() {
         return
     }
 
-    GemWalletApi.isConnected().then((isConnected) => {
-        if(!isConnected) {
+    GemWalletApi.isInstalled().then((response) => {
+        if(!response.result.isInstalled) {
             bridge.hide('waiting')
             bridge.show('walletApiNotAvailable')
             return;
         }
 
-        GemWalletApi.sendPayment(bridge._tx).then((txHash) => {
-            if(txHash == null) {
+        GemWalletApi.sendPayment(bridge._tx).then((response) => {
+            if(response.result == null) {
                 bridge.reject()
             } else {
-                bridge.success(txHash);
+                bridge.success(response.result.hash);
             }
         });
     });
