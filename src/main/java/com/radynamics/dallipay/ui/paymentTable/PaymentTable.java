@@ -153,8 +153,13 @@ public class PaymentTable extends JPanel {
         var owner = this;
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
+                var p = getSelectedRow(table);
+                if (p == null) {
+                    return;
+                }
+
                 if (e.getClickCount() == 2) {
-                    showMore(getSelectedRow(table));
+                    showMore(p);
                     return;
                 }
 
@@ -164,12 +169,11 @@ public class PaymentTable extends JPanel {
 
                 var clickedColumn = table.getColumnModel().getColumn(table.columnAtPoint(e.getPoint()));
                 if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_DETAIL)) {
-                    showMore(getSelectedRow(table));
+                    showMore(p);
                     return;
 
                 }
                 if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_REMOVE)) {
-                    var p = getSelectedRow(table);
                     if (p.getOrigin().isDeletable()) {
                         raiseRemove(p);
                     }
@@ -303,6 +307,9 @@ public class PaymentTable extends JPanel {
 
     private Payment getSelectedRow(JTable table) {
         var row = table.getSelectedRow();
+        if (row == -1) {
+            return null;
+        }
         var col = table.getColumn(PaymentTableModel.COL_OBJECT).getModelIndex();
         return (Payment) table.getModel().getValueAt(row, col);
     }
@@ -337,7 +344,8 @@ public class PaymentTable extends JPanel {
     }
 
     public Payment[] selectedPayments() {
-        return new Payment[]{getSelectedRow(table)};
+        var selected = getSelectedRow(table);
+        return selected == null ? new Payment[0] : new Payment[]{selected};
     }
 
     public ValidationResult[] getValidationResults(Payment[] payments) {
