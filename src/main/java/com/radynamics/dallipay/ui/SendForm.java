@@ -208,6 +208,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             table.addPaymentListener(p -> remove(p));
             table.addMappingChangedListener(this);
             table.addSelectorChangedListener(() -> SwingUtilities.invokeLater(() -> cmdSendPayments.setEnabled(table.checkedPayments().length > 0)));
+            table.setEmptyBackgroundText(res.getString("noPayments"));
             panel2.add(table);
         }
         {

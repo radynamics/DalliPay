@@ -46,6 +46,7 @@ public class PaymentTable extends JPanel {
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
     private final ArrayList<PaymentListener> paymentListener = new ArrayList<>();
     private final DataLoader dataLoader;
+    private String emptyBackgroundText;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -91,6 +92,15 @@ public class PaymentTable extends JPanel {
         new MultiRowChecker(table, selectorColumn, row -> model.isCellEditable(row, selectorColumn.getModelIndex()));
 
         add(new JScrollPane(table));
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        if (paymentCount() == 0) {
+            StringDrawer.draw(g, emptyBackgroundText, getWidth(), getHeight());
+        }
     }
 
     private void initColumns() {
@@ -424,6 +434,10 @@ public class PaymentTable extends JPanel {
 
     public void setEditable(boolean editable) {
         model.setEditable(editable);
+    }
+
+    public void setEmptyBackgroundText(String emptyBackgroundText) {
+        this.emptyBackgroundText = emptyBackgroundText;
     }
 
     public DataLoader getDataLoader() {

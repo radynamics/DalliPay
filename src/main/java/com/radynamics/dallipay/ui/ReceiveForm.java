@@ -188,6 +188,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 enableInputControls(progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
+            table.setEmptyBackgroundText(res.getString("noPayments"));
             panel2.add(table);
         }
         {
