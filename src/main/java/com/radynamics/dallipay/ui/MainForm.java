@@ -175,6 +175,7 @@ public class MainForm extends JFrame {
 
         final String DROPDOWN_ARROW_OVERLAP_HACK = "     ";
         cmdLedger = new JSplitButton(DROPDOWN_ARROW_OVERLAP_HACK);
+        cmdLedger.setBackground(getBackground());
         cmdLedger.setBorder(BorderFactory.createEmptyBorder());
         cmdLedger.setAlwaysPopup(true);
         menuBar.add(cmdLedger);
