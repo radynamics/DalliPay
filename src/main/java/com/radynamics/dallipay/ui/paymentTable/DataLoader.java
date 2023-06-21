@@ -23,6 +23,7 @@ public class DataLoader {
     private final AsyncWalletInfoLoader walletInfoLoader = new AsyncWalletInfoLoader();
     private final ArrayList<ProgressListener> progressListener = new ArrayList<>();
     private final ArrayList<Record> payments = new ArrayList<>();
+    private final ConcurrentLinkedQueue<CompletableFuture<Payment>> queue = new ConcurrentLinkedQueue<>();
 
     public DataLoader(PaymentTableModel model) {
         this.model = model;
@@ -47,8 +48,8 @@ public class DataLoader {
     }
 
     private void load(Record[] payments) {
+        raiseProgress(new Progress(0, payments.length));
         var br = new BalanceRefresher(payments[0].payment.getLedger().getNetwork());
-        var queue = new ConcurrentLinkedQueue<CompletableFuture<Payment>>();
         for (var p : payments) {
             var future = loadAsync(p, br);
             future.thenAccept((result) -> {
@@ -152,5 +153,9 @@ public class DataLoader {
         this.exchangeRateLoader = exchangeRateLoader;
         this.validator = validator;
         this.transactionTranslator = transactionTranslator;
+    }
+
+    public boolean isLoading() {
+        return !queue.isEmpty();
     }
 }

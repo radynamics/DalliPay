@@ -449,7 +449,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 })
                 .whenComplete((unused, e) -> {
                     isLoading = false;
-                    lblLoading.hideLoading();
+                    if (!table.getDataLoader().isLoading()) {
+                        lblLoading.hideLoading();
+                    }
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
                         enableInputControls(true);
