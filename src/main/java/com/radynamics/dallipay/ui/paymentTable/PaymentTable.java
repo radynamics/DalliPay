@@ -118,7 +118,7 @@ public class PaymentTable extends JPanel {
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue(res.getString("receiverAccount")).width(200).getColumn();
-            c.setCellEditor(new AccountCellEditor(true));
+            c.setCellEditor(new AccountCellEditor(this, true));
             c.setCellRenderer(new AccountCellRenderer());
         }
         {
