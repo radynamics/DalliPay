@@ -43,10 +43,11 @@ public class Main {
             var now = LocalDateTime.now();
             var start = now.minusDays(7);
             var from = getParam(args, "-from", start.format(DateFormatter)); // timerange in UTC
-            var until = getParam(args, "-until", now.format(DateFormatter)); // timerange in UTC
+            var endOfToday = com.radynamics.dallipay.iso20022.Utils.endOfToday().toLocalDateTime();
+            var until = getParam(args, "-until", endOfToday.format(DateFormatter)); // timerange in UTC
             // TODO: validate format
-            var untilEndOfDay = com.radynamics.dallipay.iso20022.Utils.endOfDay(LocalDateTime.parse(until, DateFormatter).atZone(ZoneId.systemDefault()));
-            var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), untilEndOfDay.toLocalDateTime());
+            var untilDt = LocalDateTime.parse(until, DateFormatter).atZone(ZoneId.systemDefault());
+            var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), untilDt.toLocalDateTime());
 
             try {
                 if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
