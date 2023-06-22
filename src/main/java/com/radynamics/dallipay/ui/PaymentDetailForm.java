@@ -178,7 +178,7 @@ public class PaymentDetailForm extends JDialog {
             northPad += gap;
             {
                 {
-                    var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getReceiverAccount(), payment.getReceiverAddress()));
+                    var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getSenderAccount(), payment.getSenderAddress()));
                     createRow(northPad, res.getString("sender"), lbl, null);
                     northPad += groupedLabelLineHeigth;
                 }
