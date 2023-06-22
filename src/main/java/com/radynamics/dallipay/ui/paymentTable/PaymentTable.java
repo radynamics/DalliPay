@@ -230,8 +230,11 @@ public class PaymentTable extends JPanel {
         raiseWalletMappingChanged(new MappingInfo(mapping, changedValue));
     }
 
-    private void onAccountEdited(Payment t, TableCellListener tcl, ChangedValue changedValue) {
-        var newAccount = (Account) tcl.getNewValue();
+    private void onAccountEdited(Payment payment, TableCellListener tcl, ChangedValue changedValue) {
+        onAccountEdited(payment, (Account) tcl.getNewValue(), changedValue);
+    }
+
+    private void onAccountEdited(Payment t, Account newAccount, ChangedValue changedValue) {
         var wallet = changedValue == ChangedValue.SenderAccount ? t.getSenderWallet() : t.getReceiverWallet();
         var address = changedValue == ChangedValue.SenderAccount ? t.getSenderAddress() : t.getReceiverAddress();
 
@@ -316,6 +319,7 @@ public class PaymentTable extends JPanel {
 
     private void showMore(Payment obj) {
         var senderWallet = obj.getSenderWallet();
+        var receiverAccount = obj.getReceiverAccount();
         var receiverWallet = obj.getReceiverWallet();
         var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor, model.getEditable());
         if (frm.getPaymentChanged()) {
@@ -324,6 +328,9 @@ public class PaymentTable extends JPanel {
             }
             if (!WalletCompare.isSame(receiverWallet, obj.getReceiverWallet())) {
                 onWalletEdited(obj, obj.getReceiverWallet(), ChangedValue.ReceiverWallet);
+            }
+            if (!AccountCompare.isSame(receiverAccount, obj.getReceiverAccount())) {
+                onAccountEdited(obj, obj.getReceiverAccount(), ChangedValue.ReceiverAccount);
             }
             refresh(obj);
         }

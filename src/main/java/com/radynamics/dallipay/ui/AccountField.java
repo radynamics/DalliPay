@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.iso20022.Account;
 import com.radynamics.dallipay.iso20022.AccountFactory;
 import com.radynamics.dallipay.iso20022.IbanAccount;
@@ -92,12 +93,12 @@ public class AccountField extends JPanel {
         }
     }
 
-    public Account getAccount() {
+    public Account getAccount(Wallet fallback) {
         var account = accountValidator.getValidOrNull(getText());
         if (account != null) {
             return account;
         }
 
-        return getText().length() == 0 ? null : AccountFactory.create(txt.getText());
+        return AccountFactory.create(txt.getText(), fallback);
     }
 }

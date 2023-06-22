@@ -39,6 +39,7 @@ public class PaymentDetailForm extends JDialog {
     private JLabel lblLedgerAmount;
     private MoneyTextField txtAmount;
     private WalletField txtSenderWallet;
+    private AccountField txtReceiverAccount;
     private WalletField txtReceiverWallet;
     private StructuredReferencesTextArea txtStructuredReferences;
     private JTextArea txtMessages;
@@ -200,9 +201,9 @@ public class PaymentDetailForm extends JDialog {
                     northPad += groupedLabelLineHeigth;
                 }
                 {
-                    var txtReceiverAccount = new AccountField(pnlMain);
+                    txtReceiverAccount = new AccountField(pnlMain);
                     txtReceiverAccount.setAccount(payment.getReceiverAccount());
-                    txtReceiverAccount.setEditable(false);
+                    enableReceiverAccount(true);
                     createDetailRow(northPad, res.getString("account"), txtReceiverAccount, null, false, 0);
                     northPad += groupedInputLineHeight;
                 }
@@ -284,18 +285,18 @@ public class PaymentDetailForm extends JDialog {
 
     private void accept() {
         if (edit.editable()) {
-            applyUIValues();
+            payment.setSenderWallet(txtSenderWallet.getWallet());
+            payment.setReceiverWallet(txtReceiverWallet.getWallet());
+            payment.setDestinationTag(txtReceiverWallet.getDestinationTag());
+            payment.setStructuredReference(txtStructuredReferences.getValue());
+            payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
+            setPaymentChanged(true);
+        }
+        if (edit.receiverAccountEditable(actor)) {
+            payment.setReceiverAccount(txtReceiverAccount.getAccount(payment.getReceiverWallet()));
+            setPaymentChanged(true);
         }
         close();
-    }
-
-    private void applyUIValues() {
-        payment.setSenderWallet(txtSenderWallet.getWallet());
-        payment.setReceiverWallet(txtReceiverWallet.getWallet());
-        payment.setDestinationTag(txtReceiverWallet.getDestinationTag());
-        payment.setStructuredReference(txtStructuredReferences.getValue());
-        payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
-        setPaymentChanged(true);
     }
 
     private void onAmountChanged() {
@@ -513,9 +514,15 @@ public class PaymentDetailForm extends JDialog {
         txtAmount.setEditable(e);
         cmdPaymentPath.setEnabled(e);
         txtSenderWallet.setEditable(e);
+        enableReceiverAccount(enabled);
         txtReceiverWallet.setEditable(e);
         txtStructuredReferences.setEditable(e);
         txtMessages.setEditable(e);
+    }
+
+    private void enableReceiverAccount(boolean enabled) {
+        var e = enabled && edit.receiverAccountEditable(actor);
+        txtReceiverAccount.setEditable(e);
     }
 
     private void setPaymentChanged(boolean changed) {
