@@ -178,7 +178,12 @@ public class PaymentDetailForm extends JDialog {
             northPad += gap;
             {
                 {
-                    var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getSenderAccount(), payment.getSenderAddress()));
+                    // For export without a defined account senders publicKey is taken as value. Don't consider that value as "defined" in UI.
+                    var account = payment.getSenderAccount() != null && payment.getSenderWallet() != null
+                            && payment.getSenderAccount().getUnformatted().equals(payment.getSenderWallet().getPublicKey())
+                            ? null
+                            : payment.getSenderAccount();
+                    var lbl = new JLabel(PaymentFormatter.singleLineText(account, payment.getSenderAddress()));
                     createRow(northPad, res.getString("sender"), lbl, null);
                     northPad += groupedLabelLineHeigth;
                 }
