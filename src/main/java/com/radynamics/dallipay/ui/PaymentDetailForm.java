@@ -178,7 +178,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 {
                     var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getReceiverAccount(), payment.getReceiverAddress()));
-                    createRow(northPad, res.getString("sender"), lbl, txtSenderWallet, false, 0);
+                    createRow(northPad, res.getString("sender"), lbl, null);
                     northPad += groupedLabelLineHeigth;
                 }
                 {
@@ -196,7 +196,7 @@ public class PaymentDetailForm extends JDialog {
             {
                 {
                     var lbl = new JLabel(PaymentFormatter.singleLineText(null, payment.getReceiverAddress()));
-                    createRow(northPad, res.getString("receiver"), lbl, txtReceiverWallet, false, 0);
+                    createRow(northPad, res.getString("receiver"), lbl, null);
                     northPad += groupedLabelLineHeigth;
                 }
                 {
