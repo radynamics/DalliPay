@@ -186,6 +186,7 @@ public class PaymentTable extends JPanel {
                 onCellEdited((TableCellListener) e.getSource());
             }
         });
+        TableCellMouseOverCursor.set(owner, table, PaymentTableModel.COL_DETAIL);
     }
 
     private void onCellEdited(TableCellListener tcl) {
