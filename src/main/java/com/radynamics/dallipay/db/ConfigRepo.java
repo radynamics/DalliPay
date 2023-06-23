@@ -14,6 +14,7 @@ import com.radynamics.dallipay.iso20022.camt054.DateFormatHelper;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import okhttp3.HttpUrl;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -193,6 +194,22 @@ public class ConfigRepo implements AutoCloseable {
     public HttpUrl getFaucetUrl(Ledger ledger) throws Exception {
         var value = single(String.format("%s_faucetUrl", ledger.getId())).orElse("");
         return value.length() == 0 ? ledger.getDefaultFaucetUrl() : HttpUrl.get(value);
+    }
+
+    public Optional<String> getApiKeyXumm() throws Exception {
+        return single("xummApi");
+    }
+
+    public void setApiKeyXumm(String value) throws Exception {
+        saveOrDeleteIfEmpty("xummApi", value);
+    }
+
+    private void saveOrDeleteIfEmpty(String key, String value) throws Exception {
+        if (StringUtils.isEmpty(value)) {
+            delete(key);
+        } else {
+            saveOrUpdate(key, value);
+        }
     }
 
     private Optional<String> single(String key) throws Exception {

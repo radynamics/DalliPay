@@ -2,6 +2,7 @@ package com.radynamics.dallipay.iso20022;
 
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
+import com.radynamics.dallipay.ui.paymentTable.Actor;
 
 public class PaymentEdit {
     private final Payment payment;
@@ -39,6 +40,10 @@ public class PaymentEdit {
 
     public boolean accountMappingEditable() {
         return editable && !transmitting();
+    }
+
+    public boolean receiverAccountEditable(Actor actor) {
+        return editable && actor == Actor.Receiver && accountMappingEditable();
     }
 
     public boolean removable() {

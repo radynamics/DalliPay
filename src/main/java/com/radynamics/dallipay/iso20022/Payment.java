@@ -26,6 +26,7 @@ public class Payment {
     private Origin origin;
     private ExpectedCurrency expectedCcy;
     private TransactionSubmitter submitter = new NullSubmitter();
+    private Exception historicExchangeRateException;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -365,5 +366,13 @@ public class Payment {
     public void setSubmitter(TransactionSubmitter submitter) {
         if (submitter == null) throw new IllegalArgumentException("Parameter 'submitter' cannot be null");
         this.submitter = submitter;
+    }
+
+    public void setHistoricExchangeRateException(Exception e) {
+        historicExchangeRateException = e;
+    }
+
+    public Exception getHistoricExchangeRateException() {
+        return historicExchangeRateException;
     }
 }

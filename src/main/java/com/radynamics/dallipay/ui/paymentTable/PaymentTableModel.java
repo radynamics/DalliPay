@@ -1,18 +1,15 @@
 package com.radynamics.dallipay.ui.paymentTable;
 
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 import com.radynamics.dallipay.exchange.Currency;
-import com.radynamics.dallipay.iso20022.Account;
 import com.radynamics.dallipay.iso20022.AccountFactory;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -112,7 +109,7 @@ public class PaymentTableModel extends AbstractTableModel {
                 item.setSenderLedger(cellValue);
             }
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
-            item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
+            item.payment.setReceiverAccount(AccountFactory.create((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
             var cellValue = getAsValidCellValueOrNull(item.payment, value);
             // Invalid wallet address
@@ -147,16 +144,6 @@ public class PaymentTableModel extends AbstractTableModel {
             }
         }
 
-        return null;
-    }
-
-    private Account createAccountOrNull(String text, Wallet wallet) {
-        if (!StringUtils.isEmpty(text)) {
-            return AccountFactory.create(text);
-        }
-        if (wallet != null && !StringUtils.isEmpty(wallet.getPublicKey())) {
-            return AccountFactory.create(wallet.getPublicKey());
-        }
         return null;
     }
 

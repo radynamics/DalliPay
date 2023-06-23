@@ -86,7 +86,7 @@ public class JsonRpcApi implements TransactionSource {
     @Override
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
         var params = createAccountTransactionsRequestParams(wallet, period, null);
-        return listPayments(params, 200, (Payment p) -> StringUtils.equals(p.destination().value(), wallet.getPublicKey()));
+        return listPayments(params, 100, (Payment p) -> StringUtils.equals(p.destination().value(), wallet.getPublicKey()));
     }
 
     private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, int limit, Function<Payment, Boolean> include) throws Exception {

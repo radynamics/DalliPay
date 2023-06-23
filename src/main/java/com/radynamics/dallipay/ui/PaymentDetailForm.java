@@ -38,6 +38,7 @@ public class PaymentDetailForm extends JDialog {
     private JLabel lblLedgerAmount;
     private MoneyTextField txtAmount;
     private WalletField txtSenderWallet;
+    private AccountField txtReceiverAccount;
     private WalletField txtReceiverWallet;
     private StructuredReferencesTextArea txtStructuredReferences;
     private JTextArea txtMessages;
@@ -67,7 +68,7 @@ public class PaymentDetailForm extends JDialog {
     public static PaymentDetailForm showModal(Component c, Payment obj, PaymentValidator validator, ExchangeRateProvider exchangeRateProvider, CurrencyConverter currencyConverter, Actor actor, boolean editable) {
         var frm = new PaymentDetailForm(obj, validator, exchangeRateProvider, currencyConverter, actor, editable);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frm.setSize(650, 495);
+        frm.setSize(650, 541);
         frm.setModal(true);
         frm.setLocationRelativeTo(c);
         frm.setVisible(true);
@@ -130,8 +131,11 @@ public class PaymentDetailForm extends JDialog {
         {
             int northPad = 0;
             final var lineHeight = 30;
-            final var walletEditLineHeight = 55;
+            final var walletEditLineHeight = 35;
+            final var groupedLabelLineHeigth = 20;
+            final var groupedInputLineHeight = 25;
             final var walletEditOffsetNorth = 5;
+            final var gap = 7;
             {
                 var secondLine = new JPanel();
                 secondLine.setLayout(new BoxLayout(secondLine, BoxLayout.X_AXIS));
@@ -170,30 +174,58 @@ public class PaymentDetailForm extends JDialog {
                 anchorComponentTopLeft = createRow(northPad, res.getString("amount"), pnlFirstLine, secondLine, false, 7);
                 northPad += lineHeight + 4;
             }
+            northPad += gap;
             {
-                var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getSenderAccount(), payment.getSenderAddress()));
-                txtSenderWallet = new WalletField(pnlMain);
-                txtSenderWallet.setLedger(payment.getLedger());
-                txtSenderWallet.setWallet(payment.getSenderWallet());
-                txtSenderWallet.setShowDetailVisible(true);
-                txtSenderWallet.setInfoTextVisible(true);
-                txtSenderWallet.setEditable(edit.editable());
-                createRow(northPad, res.getString("sender"), lbl, txtSenderWallet, false, walletEditOffsetNorth);
-                northPad += walletEditLineHeight;
+                {
+                    // For export without a defined account senders publicKey is taken as value. Don't consider that value as "defined" in UI.
+                    var account = payment.getSenderAccount() != null && payment.getSenderWallet() != null
+                            && payment.getSenderAccount().getUnformatted().equals(payment.getSenderWallet().getPublicKey())
+                            ? null
+                            : payment.getSenderAccount();
+                    var lbl = new JLabel(PaymentFormatter.singleLineText(account, payment.getSenderAddress()));
+                    createRow(northPad, res.getString("sender"), lbl, null);
+                    northPad += groupedLabelLineHeigth;
+                }
+                {
+                    txtSenderWallet = new WalletField(pnlMain);
+                    txtSenderWallet.setLedger(payment.getLedger());
+                    txtSenderWallet.setWallet(payment.getSenderWallet());
+                    txtSenderWallet.setShowDetailVisible(true);
+                    txtSenderWallet.setInfoTextVisible(true);
+                    txtSenderWallet.setEditable(edit.editable());
+                    createDetailRow(northPad, res.getString("wallet"), txtSenderWallet, null, false, 0);
+                    northPad += walletEditLineHeight;
+                }
             }
+            northPad += gap;
             {
-                var lbl = new JLabel(PaymentFormatter.singleLineText(payment.getReceiverAccount(), payment.getReceiverAddress()));
-                txtReceiverWallet = new WalletField(pnlMain);
-                txtReceiverWallet.setLedger(payment.getLedger());
-                txtReceiverWallet.setWallet(payment.getReceiverWallet());
-                txtReceiverWallet.setDestinationTag(payment.getDestinationTag());
-                txtReceiverWallet.setDestinationTagVisible(payment.getLedger().supportsDestinationTag());
-                txtReceiverWallet.setShowDetailVisible(true);
-                txtReceiverWallet.setInfoTextVisible(true);
-                txtReceiverWallet.setEditable(edit.editable());
-                createRow(northPad, res.getString("receiver"), lbl, txtReceiverWallet, false, walletEditOffsetNorth);
-                northPad += walletEditLineHeight;
+                {
+                    var lbl = new JLabel(PaymentFormatter.singleLineText(null, payment.getReceiverAddress()));
+                    createRow(northPad, res.getString("receiver"), lbl, null);
+                    northPad += groupedLabelLineHeigth;
+                }
+                {
+                    txtReceiverAccount = new AccountField(pnlMain);
+                    txtReceiverAccount.setAccount(payment.getReceiverAccount());
+                    enableReceiverAccount(true);
+                    createDetailRow(northPad, res.getString("account"), txtReceiverAccount, null, false, 0);
+                    northPad += groupedInputLineHeight;
+                }
+                {
+                    txtReceiverWallet = new WalletField(pnlMain);
+                    txtReceiverWallet.setLedger(payment.getLedger());
+                    txtReceiverWallet.setWallet(payment.getReceiverWallet());
+                    txtReceiverWallet.setDestinationTag(payment.getDestinationTag());
+                    txtReceiverWallet.setDestinationTagVisible(payment.getLedger().supportsDestinationTag());
+                    txtReceiverWallet.setShowDetailVisible(true);
+                    txtReceiverWallet.setInfoTextVisible(true);
+                    txtReceiverWallet.setEditable(edit.editable());
+                    var secondLineNorthOffset = walletEditOffsetNorth + 30;
+                    createDetailRow(northPad, res.getString("wallet"), txtReceiverWallet, null, false, secondLineNorthOffset);
+                    northPad += walletEditLineHeight;
+                }
             }
+            northPad += gap;
             {
                 JLabel secondLine = null;
                 if (payment.getId() != null) {
@@ -257,18 +289,18 @@ public class PaymentDetailForm extends JDialog {
 
     private void accept() {
         if (edit.editable()) {
-            applyUIValues();
+            payment.setSenderWallet(txtSenderWallet.getWallet());
+            payment.setReceiverWallet(txtReceiverWallet.getWallet());
+            payment.setDestinationTag(txtReceiverWallet.getDestinationTag());
+            payment.setStructuredReference(txtStructuredReferences.getValue());
+            payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
+            setPaymentChanged(true);
+        }
+        if (edit.receiverAccountEditable(actor)) {
+            payment.setReceiverAccount(txtReceiverAccount.getAccount(payment.getReceiverWallet()));
+            setPaymentChanged(true);
         }
         close();
-    }
-
-    private void applyUIValues() {
-        payment.setSenderWallet(txtSenderWallet.getWallet());
-        payment.setReceiverWallet(txtReceiverWallet.getWallet());
-        payment.setDestinationTag(txtReceiverWallet.getDestinationTag());
-        payment.setStructuredReference(txtStructuredReferences.getValue());
-        payment.setMessage(Utils.fromMultilineText(txtMessages.getText()));
-        setPaymentChanged(true);
     }
 
     private void onAmountChanged() {
@@ -438,6 +470,16 @@ public class PaymentDetailForm extends JDialog {
         return createRow(northPad, labelText, firstLine, secondLine, growBottomRight, 0);
     }
 
+    private Component createDetailRow(int northPad, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
+        var lbl = Utils.formatSecondaryInfo(new JLabel(labelText));
+        panel1Layout.putConstraint(SpringLayout.EAST, lbl, 80, SpringLayout.WEST, pnlContent);
+        panel1Layout.putConstraint(SpringLayout.NORTH, lbl, northPad, SpringLayout.NORTH, pnlContent);
+        lbl.setOpaque(true);
+        pnlContent.add(lbl);
+
+        return createRow(northPad, lbl, firstLine, secondLine, growBottomRight, secondLineNorthOffset);
+    }
+
     private Component createRow(int northPad, String labelText, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
         var lbl = new JLabel(labelText);
         panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
@@ -445,6 +487,10 @@ public class PaymentDetailForm extends JDialog {
         lbl.setOpaque(true);
         pnlContent.add(lbl);
 
+        return createRow(northPad, lbl, firstLine, secondLine, growBottomRight, secondLineNorthOffset);
+    }
+
+    private Component createRow(int northPad, JLabel lbl, Component firstLine, Component secondLine, boolean growBottomRight, int secondLineNorthOffset) {
         panel1Layout.putConstraint(SpringLayout.WEST, firstLine, 50, SpringLayout.EAST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
         panel1Layout.putConstraint(SpringLayout.NORTH, firstLine, northPad, SpringLayout.NORTH, pnlContent);
         if (growBottomRight) {
@@ -472,9 +518,15 @@ public class PaymentDetailForm extends JDialog {
         txtAmount.setEditable(e);
         cmdPaymentPath.setEnabled(e);
         txtSenderWallet.setEditable(e);
+        enableReceiverAccount(enabled);
         txtReceiverWallet.setEditable(e);
         txtStructuredReferences.setEditable(e);
         txtMessages.setEditable(e);
+    }
+
+    private void enableReceiverAccount(boolean enabled) {
+        var e = enabled && edit.receiverAccountEditable(actor);
+        txtReceiverAccount.setEditable(e);
     }
 
     private void setPaymentChanged(boolean changed) {

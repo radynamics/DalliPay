@@ -88,7 +88,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
             var initialOffsetMinutes = 1;
             transactions = loadTransactions(issuedCcy.getReceiver(), pointInTime, initialOffsetMinutes, issuedCcy.getIssuer(), targetCcy);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
 
         if (transactions.length == 0) {

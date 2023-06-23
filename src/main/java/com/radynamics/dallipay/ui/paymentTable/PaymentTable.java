@@ -46,6 +46,7 @@ public class PaymentTable extends JPanel {
     private ArrayList<RefreshListener> refreshListener = new ArrayList<>();
     private final ArrayList<PaymentListener> paymentListener = new ArrayList<>();
     private final DataLoader dataLoader;
+    private String emptyBackgroundText;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -93,6 +94,15 @@ public class PaymentTable extends JPanel {
         add(new JScrollPane(table));
     }
 
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        if (paymentCount() == 0) {
+            StringDrawer.draw(g, emptyBackgroundText, getWidth(), getHeight());
+        }
+    }
+
     private void initColumns() {
         var cb = new TableColumnBuilder(table);
         cb.forColumn(PaymentTableModel.COL_OBJECT).headerCenter().hide();
@@ -108,7 +118,7 @@ public class PaymentTable extends JPanel {
         }
         {
             var c = cb.forColumn(PaymentTableModel.COL_RECEIVER_ACCOUNT).headerValue(res.getString("receiverAccount")).width(200).getColumn();
-            c.setCellEditor(new AccountCellEditor(true));
+            c.setCellEditor(new AccountCellEditor(this, true));
             c.setCellRenderer(new AccountCellRenderer());
         }
         {
@@ -143,8 +153,13 @@ public class PaymentTable extends JPanel {
         var owner = this;
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
+                var p = getSelectedRow(table);
+                if (p == null) {
+                    return;
+                }
+
                 if (e.getClickCount() == 2) {
-                    showMore(getSelectedRow(table));
+                    showMore(p);
                     return;
                 }
 
@@ -154,12 +169,11 @@ public class PaymentTable extends JPanel {
 
                 var clickedColumn = table.getColumnModel().getColumn(table.columnAtPoint(e.getPoint()));
                 if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_DETAIL)) {
-                    showMore(getSelectedRow(table));
+                    showMore(p);
                     return;
 
                 }
                 if (StringUtils.equals((String) clickedColumn.getIdentifier(), PaymentTableModel.COL_REMOVE)) {
-                    var p = getSelectedRow(table);
                     if (p.getOrigin().isDeletable()) {
                         raiseRemove(p);
                     }
@@ -172,6 +186,7 @@ public class PaymentTable extends JPanel {
                 onCellEdited((TableCellListener) e.getSource());
             }
         });
+        TableCellMouseOverCursor.set(owner, table, PaymentTableModel.COL_DETAIL);
     }
 
     private void onCellEdited(TableCellListener tcl) {
@@ -216,8 +231,11 @@ public class PaymentTable extends JPanel {
         raiseWalletMappingChanged(new MappingInfo(mapping, changedValue));
     }
 
-    private void onAccountEdited(Payment t, TableCellListener tcl, ChangedValue changedValue) {
-        var newAccount = (Account) tcl.getNewValue();
+    private void onAccountEdited(Payment payment, TableCellListener tcl, ChangedValue changedValue) {
+        onAccountEdited(payment, (Account) tcl.getNewValue(), changedValue);
+    }
+
+    private void onAccountEdited(Payment t, Account newAccount, ChangedValue changedValue) {
         var wallet = changedValue == ChangedValue.SenderAccount ? t.getSenderWallet() : t.getReceiverWallet();
         var address = changedValue == ChangedValue.SenderAccount ? t.getSenderAddress() : t.getReceiverAddress();
 
@@ -293,12 +311,16 @@ public class PaymentTable extends JPanel {
 
     private Payment getSelectedRow(JTable table) {
         var row = table.getSelectedRow();
+        if (row == -1) {
+            return null;
+        }
         var col = table.getColumn(PaymentTableModel.COL_OBJECT).getModelIndex();
         return (Payment) table.getModel().getValueAt(row, col);
     }
 
     private void showMore(Payment obj) {
         var senderWallet = obj.getSenderWallet();
+        var receiverAccount = obj.getReceiverAccount();
         var receiverWallet = obj.getReceiverWallet();
         var frm = PaymentDetailForm.showModal(this, obj, validator, getExchangeRateProvider(), currencyConverter, actor, model.getEditable());
         if (frm.getPaymentChanged()) {
@@ -307,6 +329,9 @@ public class PaymentTable extends JPanel {
             }
             if (!WalletCompare.isSame(receiverWallet, obj.getReceiverWallet())) {
                 onWalletEdited(obj, obj.getReceiverWallet(), ChangedValue.ReceiverWallet);
+            }
+            if (!AccountCompare.isSame(receiverAccount, obj.getReceiverAccount())) {
+                onAccountEdited(obj, obj.getReceiverAccount(), ChangedValue.ReceiverAccount);
             }
             refresh(obj);
         }
@@ -327,7 +352,8 @@ public class PaymentTable extends JPanel {
     }
 
     public Payment[] selectedPayments() {
-        return new Payment[]{getSelectedRow(table)};
+        var selected = getSelectedRow(table);
+        return selected == null ? new Payment[0] : new Payment[]{selected};
     }
 
     public ValidationResult[] getValidationResults(Payment[] payments) {
@@ -424,6 +450,10 @@ public class PaymentTable extends JPanel {
 
     public void setEditable(boolean editable) {
         model.setEditable(editable);
+    }
+
+    public void setEmptyBackgroundText(String emptyBackgroundText) {
+        this.emptyBackgroundText = emptyBackgroundText;
     }
 
     public DataLoader getDataLoader() {

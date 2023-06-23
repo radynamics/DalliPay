@@ -188,6 +188,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 enableInputControls(progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
+            table.setEmptyBackgroundText(res.getString("noPayments"));
             panel2.add(table);
         }
         {
@@ -448,7 +449,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 })
                 .whenComplete((unused, e) -> {
                     isLoading = false;
-                    lblLoading.hideLoading();
+                    if (!table.getDataLoader().isLoading()) {
+                        lblLoading.hideLoading();
+                    }
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
                         enableInputControls(true);

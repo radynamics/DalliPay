@@ -208,6 +208,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             table.addPaymentListener(p -> remove(p));
             table.addMappingChangedListener(this);
             table.addSelectorChangedListener(() -> SwingUtilities.invokeLater(() -> cmdSendPayments.setEnabled(table.checkedPayments().length > 0)));
+            table.setEmptyBackgroundText(res.getString("noPayments"));
             panel2.add(table);
         }
         {
@@ -281,7 +282,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
         var p = mp.getPayment();
         payments.add(p);
-        initSubmitter();
         setSubmitter(p);
         table.add(p);
     }
@@ -362,7 +362,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 transactionTranslator.applyDefaultSender(payments);
-                initSubmitter();
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -518,10 +517,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void initSubmitter() {
-        if (submitter != null || payments.size() == 0) {
+        if (submitter != null) {
             return;
         }
-        setSubmitter(getLastUsedSubmitter(payments.get(0).getLedger()));
+        setSubmitter(getLastUsedSubmitter(transformInstruction.getLedger()));
     }
 
     private TransactionSubmitter getLastUsedSubmitter(Ledger ledger) {
@@ -695,8 +694,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         validator = new PaymentValidator(new SenderHistoryValidator(transformInstruction.getNetwork()));
 
         refreshExchange();
-        // Signing method maybe not supported on different ledger
-        setSubmitter((TransactionSubmitter) null);
+        initSubmitter();
         table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
         // Clear loaded payments
         load(new ArrayList<>());

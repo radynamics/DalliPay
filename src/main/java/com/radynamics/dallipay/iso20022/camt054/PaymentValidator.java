@@ -20,7 +20,10 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         list.addAll(Arrays.asList(new Validator().validate(t)));
 
         if (t.isAmountUnknown()) {
-            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("amountUnknown"), Utils.createFormatDate().format(t.getBooked()))));
+            var msg = t.getHistoricExchangeRateException() == null
+                    ? String.format(res.getString("amountUnknown"), Utils.createFormatDate().format(t.getBooked()))
+                    : String.format(res.getString("historyFxRateLoadError"), Utils.createFormatDate().format(t.getBooked()), t.getHistoricExchangeRateException().getMessage());
+            list.add(new ValidationResult(ValidationState.Error, msg));
         }
 
         return list.toArray(new ValidationResult[0]);

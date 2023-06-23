@@ -1,46 +1,23 @@
 package com.radynamics.dallipay.ui.paymentTable;
 
-import com.radynamics.dallipay.iso20022.IbanAccount;
-import com.radynamics.dallipay.iso20022.OtherAccount;
+import com.radynamics.dallipay.iso20022.Account;
+import com.radynamics.dallipay.ui.AccountField;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
 
 public class AccountCellEditor extends AbstractCellEditor implements TableCellEditor {
-    private final JTextField component;
+    private final AccountField component;
 
-    public AccountCellEditor(boolean editable) {
-        this.component = new JTextField();
+    public AccountCellEditor(JComponent owner, boolean editable) {
+        this.component = new AccountField(owner);
         this.component.setEditable(editable);
-        this.component.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                var text = ((JTextField) input).getText();
-                if (text.length() > 0) {
-                    component.putClientProperty("JComponent.outline", null);
-                    return true;
-                } else {
-                    component.putClientProperty("JComponent.outline", "error");
-                    return false;
-                }
-            }
-        });
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        var field = ((JTextField) component);
-
-        if (value instanceof IbanAccount) {
-            var iban = (IbanAccount) value;
-            field.setText(iban.getFormatted());
-        } else if (value instanceof OtherAccount) {
-            var iban = (OtherAccount) value;
-            field.setText(iban.getUnformatted());
-        } else {
-            field.setText(value.toString());
-        }
-        component.getInputVerifier().verify(component);
+        var field = ((AccountField) component);
+        field.setAccount((Account) value);
         return component;
     }
 
