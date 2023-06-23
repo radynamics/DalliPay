@@ -74,6 +74,7 @@ public class AccountField extends JPanel {
 
     public void setEditable(boolean b) {
         txt.setEditable(b);
+        txt.setEnabled(b);
     }
 
     public void setAccount(Account account) {
