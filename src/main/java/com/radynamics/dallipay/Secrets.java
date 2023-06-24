@@ -24,13 +24,25 @@ public final class Secrets {
      * Return Alchemy API-Key for Ethereum Mainnet.
      */
     public static String getAlchemyApiKeyEthereumMainnnet() {
-        return SecretsProd.getAlchemyApiKeyEthereumMainnnet();
+        var fallback = SecretsProd.getAlchemyApiKeyEthereumMainnnet();
+        try (var repo = new ConfigRepo()) {
+            return repo.getApiKeyAlchemyEthereumMainnet().orElse(fallback);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return fallback;
+        }
     }
 
     /**
      * Return Alchemy API-Key for Ethereum Goerli.
      */
     public static String getAlchemyApiKeyEthereumGoerli() {
-        return SecretsProd.getAlchemyApiKeyEthereumGoerli();
+        var fallback = SecretsProd.getAlchemyApiKeyEthereumGoerli();
+        try (var repo = new ConfigRepo()) {
+            return repo.getApiKeyAlchemyEthereumGoerli().orElse(fallback);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return fallback;
+        }
     }
 }

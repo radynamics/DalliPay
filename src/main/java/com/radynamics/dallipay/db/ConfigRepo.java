@@ -204,6 +204,22 @@ public class ConfigRepo implements AutoCloseable {
         saveOrDeleteIfEmpty("xummApi", value);
     }
 
+    public Optional<String> getApiKeyAlchemyEthereumGoerli() throws Exception {
+        return single("apiKeyAlchemyEthereumGoerli");
+    }
+
+    public void setApiKeyAlchemyEthereumGoerli(String value) throws Exception {
+        saveOrDeleteIfEmpty("apiKeyAlchemyEthereumGoerli", value);
+    }
+
+    public Optional<String> getApiKeyAlchemyEthereumMainnet() throws Exception {
+        return single("apiKeyAlchemyEthereumMainnet");
+    }
+
+    public void setApiKeyAlchemyEthereumMainnet(String value) throws Exception {
+        saveOrDeleteIfEmpty("apiKeyAlchemyEthereumMainnet", value);
+    }
+
     private void saveOrDeleteIfEmpty(String key, String value) throws Exception {
         if (StringUtils.isEmpty(value)) {
             delete(key);
