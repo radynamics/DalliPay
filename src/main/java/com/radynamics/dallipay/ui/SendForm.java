@@ -27,6 +27,10 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -70,6 +74,24 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         add(pnlMain);
 
         pnlMain.setLayout(new BoxLayout(pnlMain, BoxLayout.Y_AXIS));
+        pnlMain.setDropTarget(new DropTarget() {
+            public synchronized void drop(DropTargetDropEvent evt) {
+                try {
+                    if (lblLoading.isLoading()) {
+                        return;
+                    }
+                    evt.acceptDrop(DnDConstants.ACTION_COPY);
+                    var droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (droppedFiles.size() == 0) {
+                        return;
+                    }
+                    var file = droppedFiles.get(0);
+                    txtInput.setText(file.getAbsolutePath());
+                } catch (Exception e) {
+                    ExceptionDialog.show(table, e, res.getString("readPain001Failed"));
+                }
+            }
+        });
 
         var innerBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
         JPanel panel1 = new JPanel();
