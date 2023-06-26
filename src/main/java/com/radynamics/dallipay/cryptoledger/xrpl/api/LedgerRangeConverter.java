@@ -12,6 +12,7 @@ import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 public class LedgerRangeConverter {
     final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
@@ -23,15 +24,34 @@ public class LedgerRangeConverter {
         this.xrplClient = xrplClient;
     }
 
-    public LedgerIndex estimatedDaysAgo(long daysAgo) throws JsonRpcClientErrorException {
+    public Optional<LedgerIndex> estimatedDaysAgo(long daysAgo) throws JsonRpcClientErrorException {
         if (this.latestLedgerFirstCall == null) {
             this.latestLedgerFirstCall = getEstimatedLatestLedger();
         }
 
         // Assuming average ledger close time
         final int AVG_LEDGER_CLOSE_TIME_SEC = 4;
-        var estimatedPassedLedgers = ((60 / AVG_LEDGER_CLOSE_TIME_SEC) * 60 * 24 * daysAgo);
-        return latestLedgerFirstCall.getLedgerIndex().minus(UnsignedInteger.valueOf(estimatedPassedLedgers));
+        var estimatedPassedLedgers = UnsignedInteger.valueOf(((60 / AVG_LEDGER_CLOSE_TIME_SEC) * 60 * 24 * daysAgo));
+        if (latestLedgerFirstCall.getLedgerIndex().unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
+            return Optional.empty();
+        }
+        return Optional.of(latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers));
+    }
+
+    public LedgerIndex estimatedAgoFallback(long daysAgo) throws JsonRpcClientErrorException {
+        log.trace(String.format("Getting estimated fallback %s days ago.", daysAgo));
+
+        var deduction = Math.round(daysAgo * 0.2);
+        long remaining = daysAgo - deduction;
+        while (remaining > 0) {
+            var candidate = estimatedDaysAgo(remaining).orElse(null);
+            if (candidate != null) {
+                return candidate;
+            }
+            remaining -= deduction;
+        }
+
+        return LedgerIndex.VALIDATED;
     }
 
     public LedgerIndex findOrNull(ZonedDateTime dt) throws JsonRpcClientErrorException {

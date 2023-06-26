@@ -76,7 +76,7 @@ public class JsonRpcApi implements TransactionSource {
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
-        var start = ledgerRangeConverter.estimatedDaysAgo(sinceDaysAgo);
+        var start = ledgerRangeConverter.estimatedDaysAgo(sinceDaysAgo).orElse(ledgerRangeConverter.estimatedAgoFallback(sinceDaysAgo));
         // Use endOfToday to ensure data until latest ledger is loaded.
         var end = Utils.endOfToday();
         var params = createAccountTransactionsRequestParams(wallet, start, end, null);
