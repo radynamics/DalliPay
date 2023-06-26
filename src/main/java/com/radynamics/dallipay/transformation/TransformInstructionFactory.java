@@ -59,6 +59,6 @@ public final class TransformInstructionFactory {
             }
         }
 
-        return NetworkInfo.create(lastUsed);
+        return NetworkInfo.create(lastUsed, lastUsed.toString());
     }
 }

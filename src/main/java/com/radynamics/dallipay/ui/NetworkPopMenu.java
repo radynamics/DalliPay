@@ -31,7 +31,7 @@ public class NetworkPopMenu {
 
         var index = 0;
         for (var network : networks) {
-            addEntry(network, String.format(res.getString("network"), network.getShortText()), loadAsync(network), index++);
+            addEntry(network, network.getShortText(), loadAsync(network), index++);
         }
 
         {
@@ -56,7 +56,7 @@ public class NetworkPopMenu {
                     return;
                 }
 
-                var networkInfo = NetworkInfo.create(httpUrl);
+                var networkInfo = NetworkInfo.create(httpUrl, value);
                 var info = ledger.getEndpointInfo(networkInfo);
                 if (info == null) {
                     JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("retrieveServerInfoFailed"), httpUrl), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
@@ -138,7 +138,7 @@ public class NetworkPopMenu {
             }
         }
 
-        var text = network.getId() == null ? network.getUrl().toString() : String.format(res.getString("network"), network.getShortText());
+        var text = network.getId() == null ? network.getUrl().toString() : network.getShortText();
         var item = addEntryAtEnd(network, text, loadAsync(network));
         onNetworkChanged(item);
     }
