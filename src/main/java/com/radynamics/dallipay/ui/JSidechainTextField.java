@@ -1,6 +1,9 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import okhttp3.HttpUrl;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -10,7 +13,7 @@ import java.util.ResourceBundle;
 public class JSidechainTextField extends JTextField {
     private final ArrayList<SidechainChangedListener> sidechainChangedListener = new ArrayList<>();
 
-    private final ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public JSidechainTextField() {
         putClientProperty("JTextField.placeholderText", res.getString("addCustomSidechain"));
@@ -22,16 +25,29 @@ public class JSidechainTextField extends JTextField {
     private void onAccept() {
         var value = getText();
         setText("");
-        raiseSidechainChanged(value);
+
+        if (StringUtils.isEmpty(value)) {
+            return;
+        }
+
+        HttpUrl httpUrl;
+        try {
+            httpUrl = HttpUrl.get(value);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, String.format(res.getString("urlParseFailed"), value), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        raiseSidechainChanged(NetworkInfo.create(httpUrl, value));
     }
 
     public void addChangedListener(SidechainChangedListener l) {
         sidechainChangedListener.add(l);
     }
 
-    private void raiseSidechainChanged(String value) {
+    private void raiseSidechainChanged(NetworkInfo networkInfo) {
         for (var l : sidechainChangedListener) {
-            l.onChanged(value);
+            l.onChanged(networkInfo);
         }
     }
 }
