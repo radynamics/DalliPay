@@ -183,8 +183,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://eth-mainnet.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumMainnnet()));
-        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://eth-goerli.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumGoerli()));
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://eth-mainnet.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumMainnnet()), "Mainnet");
+        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://eth-goerli.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumGoerli()), "Goerli Testnet");
         return networks;
     }
 
