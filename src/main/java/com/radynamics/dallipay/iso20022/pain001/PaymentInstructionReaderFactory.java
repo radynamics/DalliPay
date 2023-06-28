@@ -20,7 +20,11 @@ public final class PaymentInstructionReaderFactory {
             return reader;
         }
 
-        throw new Exception("Could not determine format if the given file based on its file extension.");
+        if (ext.equals("aba")) {
+            return new AbaReader(ledger);
+        }
+
+        throw new Exception("Could not determine format for the given file based on its file extension.");
     }
 
     public static boolean supportsExport(File file) {
