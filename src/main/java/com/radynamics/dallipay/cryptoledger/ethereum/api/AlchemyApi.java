@@ -72,7 +72,7 @@ public class AlchemyApi {
         params.put("order", "desc");
         var data = createRequestData("alchemy_getAssetTransfers", params);
 
-        var json = post(HttpRequest.BodyPublishers.ofString(data.toString()));
+        var json = postAndGetResult(HttpRequest.BodyPublishers.ofString(data.toString()));
 
         var tr = new TransactionResult();
         readTransactions(tr, json, limit);
@@ -81,6 +81,10 @@ public class AlchemyApi {
 
     private EthTransaction transactionByHash(String hash) throws ExecutionException, InterruptedException {
         return web3.ethGetTransactionByHash(hash).sendAsync().get();
+    }
+
+    private JSONObject postAndGetResult(HttpRequest.BodyPublisher body) throws IOException, InterruptedException, AlchemyException {
+        return send(createRequestBuilder().POST(body).build()).getJSONObject("result");
     }
 
     private JSONObject post(HttpRequest.BodyPublisher body) throws IOException, InterruptedException, AlchemyException {
@@ -95,7 +99,7 @@ public class AlchemyApi {
         try {
             var json = new JSONObject(responseText);
             throwIfError(json);
-            return json.getJSONObject("result");
+            return json;
         } catch (Exception e) {
             throw new AlchemyException(e.getMessage(), e);
         }
@@ -223,7 +227,7 @@ public class AlchemyApi {
             params.put(wallet.getPublicKey());
             params.put("erc20");
             var requestData = createRequestData("alchemy_getTokenBalances", params);
-            var json = post(HttpRequest.BodyPublishers.ofString(requestData.toString()));
+            var json = postAndGetResult(HttpRequest.BodyPublishers.ofString(requestData.toString()));
             var tokenBalances = json.getJSONArray("tokenBalances");
             for (var i = 0; i < tokenBalances.length(); i++) {
                 var balance = tokenBalances.getJSONObject(i);
@@ -257,7 +261,7 @@ public class AlchemyApi {
             var params = new JSONArray();
             params.put(wallet.getPublicKey());
             var requestData = createRequestData("alchemy_getTokenMetadata", params);
-            var json = post(HttpRequest.BodyPublishers.ofString(requestData.toString()));
+            var json = postAndGetResult(HttpRequest.BodyPublishers.ofString(requestData.toString()));
 
             data = new TokenMetaData(wallet, json.getString("symbol"), json.getInt("decimals"));
             tokenMetadataCache.add(key, data);
@@ -287,5 +291,16 @@ public class AlchemyApi {
 
     public TransactionSubmitter createTransactionSubmitter(UserDialogPrivateKeyProvider privateKeyProvider) {
         return new RpcSubmitter(ledger, web3, privateKeyProvider);
+    }
+
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) throws AlchemyException, IOException, InterruptedException {
+        var api = new AlchemyApi(ledger, networkInfo);
+
+        // Dummy call to test apiKey is working
+        var requestData = api.createRequestData("net_version", (JSONArray) null);
+        api.post(HttpRequest.BodyPublishers.ofString(requestData.toString())).getString("result");
+
+        // No information about endpoint available.
+        return null;
     }
 }
