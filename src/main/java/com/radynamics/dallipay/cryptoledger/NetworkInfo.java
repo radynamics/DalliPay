@@ -8,6 +8,7 @@ public class NetworkInfo {
     private HttpUrl url;
     private String networkId;
     private String displayName;
+    private String displayUrl;
 
     private static final String liveId = "livenet";
     private static final String testnetId = "testnet";
@@ -31,6 +32,7 @@ public class NetworkInfo {
         o.networkId = networkId;
         o.url = url;
         o.displayName = displayName;
+        o.displayUrl = url.toString();
         return o;
     }
 
@@ -48,6 +50,14 @@ public class NetworkInfo {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public void setDisplayUrl(String displayUrl) {
+        this.displayUrl = displayUrl;
+    }
+
+    public String getDisplayUrl() {
+        return displayUrl;
     }
 
     public boolean matches(String text) {

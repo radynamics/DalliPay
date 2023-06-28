@@ -73,7 +73,7 @@ public class NetworkPopMenu {
 
         futureInfo.thenAccept(endpointInfo -> {
             var sb = new StringBuilder();
-            sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getUrl()) + System.lineSeparator());
+            sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getDisplayUrl()) + System.lineSeparator());
             if (endpointInfo == null) {
                 sb.append(res.getString("noInfo"));
             } else {

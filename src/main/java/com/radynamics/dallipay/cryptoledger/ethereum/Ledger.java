@@ -183,9 +183,21 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://eth-mainnet.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumMainnnet()), "Mainnet");
-        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://eth-goerli.g.alchemy.com/v2/" + Secrets.getAlchemyApiKeyEthereumGoerli()), "Goerli Testnet");
+        {
+            var apiKey = Secrets.getAlchemyApiKeyEthereumMainnnet();
+            networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://eth-mainnet.g.alchemy.com/v2/" + apiKey), "Mainnet");
+            networks[0].setDisplayUrl(createDisplayUrl(networks[0], apiKey));
+        }
+        {
+            var apiKey = Secrets.getAlchemyApiKeyEthereumGoerli();
+            networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://eth-goerli.g.alchemy.com/v2/" + apiKey), "Goerli Testnet");
+            networks[1].setDisplayUrl(createDisplayUrl(networks[1], apiKey));
+        }
         return networks;
+    }
+
+    private static String createDisplayUrl(NetworkInfo networkInfo, String apiKey) {
+        return networkInfo.getUrl().toString().replace(apiKey, apiKey.subSequence(0, 3) + "...");
     }
 
     @Override
@@ -212,7 +224,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
-        throw new NotImplementedException();
+        return null;
     }
 
     @Override
