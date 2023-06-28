@@ -32,7 +32,6 @@ import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.path.RipplePathFindRequestParams;
 import org.xrpl.xrpl4j.model.client.path.RipplePathFindResult;
-import org.xrpl.xrpl4j.model.client.serverinfo.ServerInfoResult;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
@@ -560,15 +559,9 @@ public class JsonRpcApi implements TransactionSource {
         return wallet;
     }
 
-    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
-        ServerInfoResult serverInfo;
-        try {
-            var c = new XrplClient(networkInfo.getUrl());
-            serverInfo = c.serverInformation();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) throws JsonRpcClientErrorException {
+        var c = new XrplClient(networkInfo.getUrl());
+        var serverInfo = c.serverInformation();
 
         var future = new CompletableFuture<EndpointInfo>();
         serverInfo.info().handle(rippledServerInfo -> future.complete(EndpointInfo.builder()

@@ -6,6 +6,8 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class NetworkPopMenu {
+    private final static Logger log = LogManager.getLogger(NetworkPopMenu.class);
     private final Ledger ledger;
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final ArrayList<Pair<JCheckBoxMenuItem, NetworkInfo>> selectableEntries = new ArrayList<>();
@@ -43,7 +46,12 @@ public class NetworkPopMenu {
             txt.addChangedListener(networkInfo -> {
                 popupMenu.setVisible(false);
 
-                var info = ledger.getEndpointInfo(networkInfo);
+                EndpointInfo info = null;
+                try {
+                    info = ledger.getEndpointInfo(networkInfo);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
                 if (info == null) {
                     JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("retrieveServerInfoFailed"), networkInfo.getUrl()), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
                     return;
@@ -58,7 +66,11 @@ public class NetworkPopMenu {
     private CompletableFuture<EndpointInfo> loadAsync(NetworkInfo networkInfo) {
         var future = new CompletableFuture<EndpointInfo>();
         Executors.newCachedThreadPool().submit(() -> {
-            future.complete(ledger.getEndpointInfo(networkInfo));
+            try {
+                future.complete(ledger.getEndpointInfo(networkInfo));
+            } catch (Exception e) {
+                future.completeExceptionally(e);
+            }
         });
         return future;
     }
@@ -71,25 +83,37 @@ public class NetworkPopMenu {
         var item = new JCheckBoxMenuItem(text);
         item.setToolTipText(res.getString("loading"));
 
-        futureInfo.thenAccept(endpointInfo -> {
-            var sb = new StringBuilder();
-            sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getUrl()) + System.lineSeparator());
-            if (endpointInfo == null) {
-                sb.append(res.getString("noInfo"));
-            } else {
-                if (endpointInfo.getHostId() != null) {
-                    sb.append(String.format("%s: %s", res.getString("hostId"), endpointInfo.getHostId()) + System.lineSeparator());
-                }
-                sb.append(String.format("%s: %s", res.getString("serverVersion"), endpointInfo.getServerVersion()));
-            }
-            item.setToolTipText(sb.toString());
-        });
+        futureInfo.thenAccept(endpointInfo -> item.setToolTipText(createToolTipText(networkInfo, endpointInfo, null)))
+                .exceptionally((e) -> {
+                    log.error(e.getMessage(), e);
+                    item.setToolTipText(createToolTipText(networkInfo, null, e));
+                    return null;
+                });
 
         popupMenu.add(item, index);
         selectableEntries.add(new ImmutablePair<>(item, networkInfo));
         item.addActionListener((SplitButtonClickedActionListener) e -> onNetworkChanged(item));
 
         return item;
+    }
+
+    private String createToolTipText(NetworkInfo networkInfo, EndpointInfo endpointInfo, Throwable e) {
+        var sb = new StringBuilder();
+        sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getUrl()) + System.lineSeparator());
+        if (endpointInfo == null) {
+            sb.append(res.getString("noInfo"));
+        } else {
+            if (endpointInfo.getHostId() != null) {
+                sb.append(String.format("%s: %s", res.getString("hostId"), endpointInfo.getHostId()) + System.lineSeparator());
+            }
+            sb.append(String.format("%s: %s", res.getString("serverVersion"), endpointInfo.getServerVersion()));
+        }
+        if (e != null) {
+            sb.append(System.lineSeparator());
+            sb.append(System.lineSeparator());
+            sb.append(String.format("Error: %s", e.getCause().getMessage()));
+        }
+        return sb.toString();
     }
 
     private void onNetworkChanged(JCheckBoxMenuItem item) {

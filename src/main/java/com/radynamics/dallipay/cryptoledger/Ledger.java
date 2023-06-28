@@ -63,7 +63,7 @@ public interface Ledger {
 
     Money roundNativeCcy(Money amt);
 
-    EndpointInfo getEndpointInfo(NetworkInfo networkInfo);
+    EndpointInfo getEndpointInfo(NetworkInfo networkInfo) throws Exception;
 
     boolean supportsDestinationTag();
 
