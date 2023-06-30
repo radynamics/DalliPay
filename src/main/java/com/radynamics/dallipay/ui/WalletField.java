@@ -59,7 +59,11 @@ public class WalletField extends JPanel {
                     var text = ((JTextField) input).getText();
                     walletDecorator.update(text);
                     updateInfoText(text);
-                    return walletValidator.isValid(text);
+                    var isValid = walletValidator.isValid(text);
+                    if (isValid) {
+                        updateDestinationTag(text);
+                    }
+                    return isValid;
                 }
             });
             txt.addFocusListener(new FocusListener() {
@@ -161,6 +165,13 @@ public class WalletField extends JPanel {
             lblInfoText.setText("");
         }
         WalletInfoFormatter.format(lblInfoText, wi);
+    }
+
+    private void updateDestinationTag(String text) {
+        var addressInfo = ledger.createWalletAddressResolver().resolve(text);
+        if (addressInfo != null) {
+            setDestinationTag(addressInfo.getDestinationTag());
+        }
     }
 
     private void lookup() {
@@ -282,6 +293,10 @@ public class WalletField extends JPanel {
                 ? new DestinationTagInputValidator(ledger.createDestinationTagBuilder())
                 : new AlwaysValidInputValidator();
         destinationTagDecorator = new ValidationControlDecorator(destinationTag, destinationTagValidator);
+    }
+
+    public Ledger getLedger() {
+        return ledger;
     }
 
     public void setEditable(boolean b) {

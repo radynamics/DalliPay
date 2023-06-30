@@ -2,6 +2,7 @@ package com.radynamics.dallipay.iso20022.pain001;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -157,6 +158,11 @@ public class TestLedger implements Ledger {
             pp[0] = new LedgerNativeCcyPath(currencyConverter, new Currency(getNativeCcySymbol()));
             return pp;
         };
+    }
+
+    @Override
+    public WalletAddressResolver createWalletAddressResolver() {
+        return value -> null;
     }
 
     @Override

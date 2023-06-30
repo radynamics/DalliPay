@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
@@ -46,6 +47,8 @@ public interface Ledger {
     com.radynamics.dallipay.iso20022.PaymentValidator createPaymentValidator();
 
     PaymentPathFinder createPaymentPathFinder();
+
+    WalletAddressResolver createWalletAddressResolver();
 
     WalletInfoProvider[] getInfoProvider();
 

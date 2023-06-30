@@ -32,6 +32,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private TrustlineCache trustlineCache;
     private NetworkInfo network;
     private JsonRpcApi api;
+    private WalletAddressResolver walletAddressResolver;
 
     private static final String nativeCcySymbol = "XRP";
 
@@ -170,6 +171,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public PaymentPathFinder createPaymentPathFinder() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.paymentpath.PaymentPathFinder();
+    }
+
+    @Override
+    public com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver createWalletAddressResolver() {
+        if (walletAddressResolver == null) {
+            walletAddressResolver = new WalletAddressResolver(this);
+        }
+        return walletAddressResolver;
     }
 
     @Override

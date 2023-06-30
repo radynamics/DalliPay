@@ -100,7 +100,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_STATUS) == col) {
             item.status = (ValidationState) value;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
-            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            var cellValue = getAsValidCellValueOrNull(item.payment, value, COL_SENDER_LEDGER);
             // Invalid wallet address
             if (cellValue == null) {
                 item.setSenderLedger((String) value);
@@ -111,7 +111,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
             item.payment.setReceiverAccount(AccountFactory.create((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
-            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            var cellValue = getAsValidCellValueOrNull(item.payment, value, COL_RECEIVER_LEDGER);
             // Invalid wallet address
             if (cellValue == null) {
                 item.setReceiverLedger((String) value);
@@ -129,7 +129,7 @@ public class PaymentTableModel extends AbstractTableModel {
         fireTableCellUpdated(row, col);
     }
 
-    private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value) {
+    private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value, String columnName) {
         if (value instanceof WalletCellValue) {
             return (WalletCellValue) value;
         }
@@ -140,7 +140,7 @@ public class PaymentTableModel extends AbstractTableModel {
             var ledger = p.getLedger();
             var wallet = ledger.createWallet(userInput, "");
             if (WalletValidator.isValidFormat(ledger, wallet)) {
-                return new WalletCellValue(wallet);
+                return new WalletCellValue(wallet, COL_RECEIVER_LEDGER.equals(columnName) ? p.getDestinationTag() : null);
             }
         }
 
