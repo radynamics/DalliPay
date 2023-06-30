@@ -21,7 +21,8 @@ public class LedgerWalletAddressPayment {
         if (text == null) {
             return false;
         }
-        return ledger.isValidPublicKey(reduce(text));
+
+        return ledger.createWalletAddressResolver().resolve(text) != null;
     }
 
     private static String reduce(String text) {
@@ -44,7 +45,9 @@ public class LedgerWalletAddressPayment {
 
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(Money.zero(new Currency(ledger.getNativeCcySymbol())));
-        payment.setReceiverWallet(ledger.createWallet(reduced, null));
+        var addressInfo = ledger.createWalletAddressResolver().resolve(reduced);
+        payment.setReceiverWallet(addressInfo.getWallet());
+        payment.setDestinationTag(addressInfo.getDestinationTag());
         payment.setOrigin(Origin.Manual);
 
         return payment;
