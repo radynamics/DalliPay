@@ -34,6 +34,7 @@ public class WalletField extends JPanel {
     private ValidationControlDecorator walletDecorator;
     private InputControlValidator destinationTagValidator;
     private ValidationControlDecorator destinationTagDecorator;
+    private boolean isVerifing;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -57,12 +58,18 @@ public class WalletField extends JPanel {
                 @Override
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
+                    var isValid = walletValidator.isValid(text);
+                    if (isVerifing) {
+                        return isValid;
+                    }
+
+                    isVerifing = true;
                     walletDecorator.update(text);
                     updateInfoText(text);
-                    var isValid = walletValidator.isValid(text);
                     if (isValid) {
-                        updateDestinationTag(text);
+                        resolve(text);
                     }
+                    isVerifing = false;
                     return isValid;
                 }
             });
@@ -167,9 +174,13 @@ public class WalletField extends JPanel {
         WalletInfoFormatter.format(lblInfoText, wi);
     }
 
-    private void updateDestinationTag(String text) {
+    private void resolve(String text) {
         var addressInfo = ledger.createWalletAddressResolver().resolve(text);
         if (addressInfo != null) {
+            // Prevent raising InputVerifier listener if wallet doesn't change.
+            if (addressInfo.getWallet() != null && !getText().equals(addressInfo.getWallet().getPublicKey())) {
+                setWallet(addressInfo.getWallet());
+            }
             setDestinationTag(addressInfo.getDestinationTag());
         }
     }
