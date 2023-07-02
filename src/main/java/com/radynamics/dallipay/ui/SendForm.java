@@ -464,7 +464,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
             // Ensure payments are still valid (ex changed exchange rates leading to not enough funds)
             Executors.newCachedThreadPool().submit(() -> {
-                table.refresh(payments).thenRun(() -> sendPayments(table.checkedPayments()));
+                table.refresh(payments).thenRun(() -> sendPayments(payments));
             });
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
