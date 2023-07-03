@@ -6,8 +6,8 @@ import org.apache.commons.lang3.NotImplementedException;
 public class CreditorReferenceConverter {
     public static String toPrtry(ReferenceType value) {
         switch (value) {
-            case Isr:
-                return "ISR Reference";
+            case Unknown:
+                return null;
             case Scor:
                 return "SCOR";
             case SwissQrBill:

@@ -245,9 +245,12 @@ public class Camt05400102Writer implements Camt054Writer {
             }
             strd.setCdtrRefInf(new CreditorReferenceInformation2());
             for (var ref : structuredReferences) {
-                strd.getCdtrRefInf().setTp(new CreditorReferenceType2());
-                strd.getCdtrRefInf().getTp().setCdOrPrtry(new CreditorReferenceType1Choice());
-                strd.getCdtrRefInf().getTp().getCdOrPrtry().setPrtry(CreditorReferenceConverter.toPrtry(ref.getType()));
+                var prtry = CreditorReferenceConverter.toPrtry(ref.getType());
+                if (prtry != null) {
+                    strd.getCdtrRefInf().setTp(new CreditorReferenceType2());
+                    strd.getCdtrRefInf().getTp().setCdOrPrtry(new CreditorReferenceType1Choice());
+                    strd.getCdtrRefInf().getTp().getCdOrPrtry().setPrtry(prtry);
+                }
                 strd.getCdtrRefInf().setRef(ref.getUnformatted());
             }
         }

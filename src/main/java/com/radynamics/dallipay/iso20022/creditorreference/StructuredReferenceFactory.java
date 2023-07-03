@@ -34,11 +34,11 @@ public final class StructuredReferenceFactory {
                         return reference;
                     }
                 };
-            case Isr:
+            case Unknown:
                 return new StructuredReference() {
                     @Override
                     public ReferenceType getType() {
-                        return ReferenceType.Isr;
+                        return ReferenceType.Unknown;
                     }
 
                     @Override
@@ -58,7 +58,7 @@ public final class StructuredReferenceFactory {
         var map = new HashMap<String, ReferenceType>();
         map.put("qrr", ReferenceType.SwissQrBill);
         map.put("scor", ReferenceType.Scor);
-        map.put("isr", ReferenceType.Isr);
+        map.put("unk", ReferenceType.Unknown);
 
         for (var item : map.entrySet()) {
             if (item.getKey().equalsIgnoreCase(typeText)) {
@@ -82,6 +82,6 @@ public final class StructuredReferenceFactory {
             return ReferenceType.SwissQrBill;
         }
 
-        return ReferenceType.Isr;
+        return ReferenceType.Unknown;
     }
 }

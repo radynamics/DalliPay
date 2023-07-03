@@ -28,7 +28,7 @@ public class AbaReaderTest {
         Assertions.assertEquals("12223123", payments[0].getSenderAccount().getUnformatted());
         Assertions.assertEquals("MY ACCOUNT", payments[0].getSenderAddress().getName());
         Assertions.assertEquals(1, payments[0].getStructuredReferences().length);
-        Assertions.assertEquals(ReferenceType.Isr, payments[0].getStructuredReferences()[0].getType());
+        Assertions.assertEquals(ReferenceType.Unknown, payments[0].getStructuredReferences()[0].getType());
         Assertions.assertEquals("TEST BATCH", payments[0].getStructuredReferences()[0].getUnformatted());
 
         Assertions.assertEquals("12312312", payments[1].getReceiverAccount().getUnformatted());
@@ -37,7 +37,7 @@ public class AbaReaderTest {
         Assertions.assertEquals("12223123", payments[1].getSenderAccount().getUnformatted());
         Assertions.assertEquals("MY ACCOUNT", payments[1].getSenderAddress().getName());
         Assertions.assertEquals(1, payments[1].getStructuredReferences().length);
-        Assertions.assertEquals(ReferenceType.Isr, payments[1].getStructuredReferences()[0].getType());
+        Assertions.assertEquals(ReferenceType.Unknown, payments[1].getStructuredReferences()[0].getType());
         Assertions.assertEquals("TEST BATCH", payments[1].getStructuredReferences()[0].getUnformatted());
     }
     @Test
@@ -70,7 +70,7 @@ public class AbaReaderTest {
         Assertions.assertEquals("34567890", payments[0].getSenderAccount().getUnformatted());
         Assertions.assertEquals("WAGES Payment", payments[0].getSenderAddress().getName());
         Assertions.assertEquals(1, payments[0].getStructuredReferences().length);
-        Assertions.assertEquals(ReferenceType.Isr, payments[0].getStructuredReferences()[0].getType());
+        Assertions.assertEquals(ReferenceType.Unknown, payments[0].getStructuredReferences()[0].getType());
         Assertions.assertEquals("000005991", payments[0].getStructuredReferences()[0].getUnformatted());
 
         Assertions.assertEquals("234567890", payments[11].getReceiverAccount().getUnformatted());
@@ -79,7 +79,7 @@ public class AbaReaderTest {
         Assertions.assertEquals("34567890", payments[11].getSenderAccount().getUnformatted());
         Assertions.assertEquals("WAGES Payment", payments[11].getSenderAddress().getName());
         Assertions.assertEquals(1, payments[11].getStructuredReferences().length);
-        Assertions.assertEquals(ReferenceType.Isr, payments[11].getStructuredReferences()[0].getType());
+        Assertions.assertEquals(ReferenceType.Unknown, payments[11].getStructuredReferences()[0].getType());
         Assertions.assertEquals("CONTRA WAGES", payments[11].getStructuredReferences()[0].getUnformatted());
     }
 }

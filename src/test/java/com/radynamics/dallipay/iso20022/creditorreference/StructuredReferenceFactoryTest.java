@@ -25,7 +25,7 @@ public class StructuredReferenceFactoryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"qrr", "scor", "isr"})
+    @ValueSource(strings = {"qrr", "scor", "unk"})
     public void createReference(String typeText) {
         var type = StructuredReferenceFactory.getType(typeText);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -48,6 +48,6 @@ public class StructuredReferenceFactoryTest {
     public void detectType() {
         Assertions.assertEquals(ReferenceType.SwissQrBill, StructuredReferenceFactory.detectType("978670000000000002200047826"));
         Assertions.assertEquals(ReferenceType.Scor, StructuredReferenceFactory.detectType("RF18000000000539007547034"));
-        Assertions.assertEquals(ReferenceType.Isr, StructuredReferenceFactory.detectType("abcd"));
+        Assertions.assertEquals(ReferenceType.Unknown, StructuredReferenceFactory.detectType("abcd"));
     }
 }

@@ -30,8 +30,8 @@ public class StructuredReferenceConverterTest {
     }
 
     @Test
-    public void toMemoIsr() {
-        assertEquals("{\"t\":\"isr\",\"v\":\"814991000000006407610246697\"}",
-                StructuredReferenceConverter.toMemo(StructuredReferenceFactory.create(ReferenceType.Isr, "814991000000006407610246697")).toString());
+    public void toMemoUnk() {
+        assertEquals("{\"t\":\"unk\",\"v\":\"814991000000006407610246697\"}",
+                StructuredReferenceConverter.toMemo(StructuredReferenceFactory.create(ReferenceType.Unknown, "814991000000006407610246697")).toString());
     }
 }
