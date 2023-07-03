@@ -14,7 +14,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class LedgerRangeConverter {
+public class LedgerRangeConverter implements LedgerAtTimeProvider {
     final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
     private XrplClient xrplClient;
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
@@ -24,21 +24,26 @@ public class LedgerRangeConverter {
         this.xrplClient = xrplClient;
     }
 
-    public Optional<LedgerIndex> estimatedDaysAgo(long daysAgo) throws JsonRpcClientErrorException {
+    public Optional<LedgerAtTime> estimatedDaysAgo(long daysAgo) throws LedgerAtTimeException {
         if (this.latestLedgerFirstCall == null) {
-            this.latestLedgerFirstCall = getEstimatedLatestLedger();
+            try {
+                this.latestLedgerFirstCall = getEstimatedLatestLedger();
+            } catch (JsonRpcClientErrorException e) {
+                throw new LedgerAtTimeException(e.getMessage(), e);
+            }
         }
 
         // Assuming average ledger close time
         final int AVG_LEDGER_CLOSE_TIME_SEC = 4;
-        var estimatedPassedLedgers = UnsignedInteger.valueOf(((60 / AVG_LEDGER_CLOSE_TIME_SEC) * 60 * 24 * daysAgo));
+        var ago = Duration.ofDays(daysAgo);
+        var estimatedPassedLedgers = UnsignedInteger.valueOf(ago.getSeconds() / AVG_LEDGER_CLOSE_TIME_SEC);
         if (latestLedgerFirstCall.getLedgerIndex().unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
             return Optional.empty();
         }
-        return Optional.of(latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers));
+        return Optional.of(new LedgerAtTime(ZonedDateTime.now().minus(ago), latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers)));
     }
 
-    public LedgerIndex estimatedAgoFallback(long daysAgo) throws JsonRpcClientErrorException {
+    public LedgerAtTime estimatedAgoFallback(long daysAgo) throws LedgerAtTimeException {
         log.trace(String.format("Getting estimated fallback %s days ago.", daysAgo));
 
         var deduction = Math.round(daysAgo * 0.2);
@@ -51,12 +56,16 @@ public class LedgerRangeConverter {
             remaining -= deduction;
         }
 
-        return LedgerIndex.VALIDATED;
+        return new LedgerAtTime(ZonedDateTime.now(), LedgerIndex.VALIDATED);
     }
 
-    public LedgerIndex findOrNull(ZonedDateTime dt) throws JsonRpcClientErrorException {
-        var ledger = findLedger(dt);
-        return ledger == null ? null : ledger.getLedgerIndex();
+    public Optional<LedgerAtTime> at(ZonedDateTime dt) throws LedgerAtTimeException {
+        try {
+            var ledger = findLedger(dt);
+            return ledger == null ? Optional.empty() : Optional.of(ledger);
+        } catch (JsonRpcClientErrorException e) {
+            throw new LedgerAtTimeException(e.getMessage(), e);
+        }
     }
 
     private LedgerAtTime findLedger(ZonedDateTime dt) throws JsonRpcClientErrorException {

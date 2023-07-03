@@ -54,7 +54,7 @@ public class JsonRpcApi implements TransactionSource {
     private final Ledger ledger;
     private final NetworkInfo network;
     private final XrplClient xrplClient;
-    private final LedgerRangeConverter ledgerRangeConverter;
+    private final LedgerAtTimeProvider ledgerAtTimeProvider;
     private final Cache<AccountRootObject> accountDataCache;
     private final Cache<AccountLinesResult> accountTrustLineCache;
     private final Cache<RipplePathFindResultEntry> ripplePathFindCache;
@@ -66,7 +66,7 @@ public class JsonRpcApi implements TransactionSource {
         this.ledger = ledger;
         this.network = network;
         this.xrplClient = new XrplClient(network.getUrl());
-        this.ledgerRangeConverter = new LedgerRangeConverter(xrplClient);
+        this.ledgerAtTimeProvider = new LedgerRangeConverter(xrplClient);
         this.accountDataCache = new Cache<>(network.getUrl().toString());
         this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
         this.ripplePathFindCache = new Cache<>(network.getUrl().toString());
@@ -75,10 +75,10 @@ public class JsonRpcApi implements TransactionSource {
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
-        var start = ledgerRangeConverter.estimatedDaysAgo(sinceDaysAgo).orElse(ledgerRangeConverter.estimatedAgoFallback(sinceDaysAgo));
+        var start = ledgerAtTimeProvider.estimatedDaysAgo(sinceDaysAgo).orElse(ledgerAtTimeProvider.estimatedAgoFallback(sinceDaysAgo));
         // Use endOfToday to ensure data until latest ledger is loaded.
         var end = Utils.endOfToday();
-        var params = createAccountTransactionsRequestParams(wallet, start, end, null);
+        var params = createAccountTransactionsRequestParams(wallet, start.getLedgerIndex(), end, null);
         return listPayments(params, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
     }
 
@@ -199,26 +199,26 @@ public class JsonRpcApi implements TransactionSource {
         return future.join();
     }
 
-    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException {
-        var start = ledgerRangeConverter.findOrNull(period.getStart());
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException, LedgerAtTimeException {
+        var start = ledgerAtTimeProvider.at(period.getStart()).orElse(null);
         if (start == null) {
             throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), period.getStart()));
         }
 
-        return createAccountTransactionsRequestParams(wallet, start, period.getEnd(), marker);
+        return createAccountTransactionsRequestParams(wallet, start.getLedgerIndex(), period.getEnd(), marker);
     }
 
-    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerIndex start, ZonedDateTime end, Marker marker) throws JsonRpcClientErrorException, LedgerException {
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerIndex start, ZonedDateTime end, Marker marker) throws LedgerAtTimeException, LedgerException {
         var b = AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
                 .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()));
 
         if (end.isBefore(ZonedDateTime.now())) {
-            var endLedger = ledgerRangeConverter.findOrNull(end);
+            var endLedger = ledgerAtTimeProvider.at(end).orElse(null);
             if (endLedger == null) {
                 throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), end));
             }
-            b.ledgerIndexMaximum(LedgerIndexBound.of(endLedger.unsignedIntegerValue().intValue()));
+            b.ledgerIndexMaximum(LedgerIndexBound.of(endLedger.getLedgerIndex().unsignedIntegerValue().intValue()));
         }
         if (marker != null) {
             b.marker(marker);
