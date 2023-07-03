@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
+import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -54,6 +55,11 @@ public class AbaReader implements PaymentInstructionReader {
                 var cents = df.parse(r.amount.substring(8, 10)).doubleValue() / 100d;
                 t.setAmount(Money.of(dollars + cents, new Currency(r.currency)));
             }
+
+            if (!StringUtils.isEmpty(r.reference)) {
+                var typeText = StructuredReferenceFactory.detectType(r.reference);
+                t.addStructuredReference(StructuredReferenceFactory.create(typeText, r.reference));
+            }
             list.add(t);
         }
         return list.toArray(new Payment[0]);
@@ -100,6 +106,7 @@ public class AbaReader implements PaymentInstructionReader {
         r.senderName = line.substring(96, 112).trim();
         r.receiverAccount = line.substring(8, 17).trim();
         r.receiverName = line.substring(30, 62).trim();
+        r.reference = line.substring(62, 80).trim();
         return r;
     }
 
@@ -125,6 +132,7 @@ public class AbaReader implements PaymentInstructionReader {
         public String senderName;
         public String receiverAccount;
         public String receiverName;
+        public String reference;
 
         @Override
         public String toString() {

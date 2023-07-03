@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
+import com.radynamics.dallipay.iso20022.creditorreference.ReferenceType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,12 +27,18 @@ public class AbaReaderTest {
         Assertions.assertEquals("S R SMITH", payments[0].getReceiverAddress().getName());
         Assertions.assertEquals("12223123", payments[0].getSenderAccount().getUnformatted());
         Assertions.assertEquals("MY ACCOUNT", payments[0].getSenderAddress().getName());
+        Assertions.assertEquals(1, payments[0].getStructuredReferences().length);
+        Assertions.assertEquals(ReferenceType.Isr, payments[0].getStructuredReferences()[0].getType());
+        Assertions.assertEquals("TEST BATCH", payments[0].getStructuredReferences()[0].getUnformatted());
 
         Assertions.assertEquals("12312312", payments[1].getReceiverAccount().getUnformatted());
         Assertions.assertEquals(22.00, payments[1].getAmount());
         Assertions.assertEquals("J K MATTHEWS", payments[1].getReceiverAddress().getName());
         Assertions.assertEquals("12223123", payments[1].getSenderAccount().getUnformatted());
         Assertions.assertEquals("MY ACCOUNT", payments[1].getSenderAddress().getName());
+        Assertions.assertEquals(1, payments[1].getStructuredReferences().length);
+        Assertions.assertEquals(ReferenceType.Isr, payments[1].getStructuredReferences()[0].getType());
+        Assertions.assertEquals("TEST BATCH", payments[1].getStructuredReferences()[0].getUnformatted());
     }
     @Test
     public void readExample2() throws Exception {
@@ -62,11 +69,17 @@ public class AbaReaderTest {
         Assertions.assertEquals("EMPLOYEE 01", payments[0].getReceiverAddress().getName());
         Assertions.assertEquals("34567890", payments[0].getSenderAccount().getUnformatted());
         Assertions.assertEquals("WAGES Payment", payments[0].getSenderAddress().getName());
+        Assertions.assertEquals(1, payments[0].getStructuredReferences().length);
+        Assertions.assertEquals(ReferenceType.Isr, payments[0].getStructuredReferences()[0].getType());
+        Assertions.assertEquals("000005991", payments[0].getStructuredReferences()[0].getUnformatted());
 
         Assertions.assertEquals("234567890", payments[11].getReceiverAccount().getUnformatted());
         Assertions.assertEquals(446677.88, payments[11].getAmount());
         Assertions.assertEquals("Company Account", payments[11].getReceiverAddress().getName());
         Assertions.assertEquals("34567890", payments[11].getSenderAccount().getUnformatted());
         Assertions.assertEquals("WAGES Payment", payments[11].getSenderAddress().getName());
+        Assertions.assertEquals(1, payments[11].getStructuredReferences().length);
+        Assertions.assertEquals(ReferenceType.Isr, payments[11].getStructuredReferences()[0].getType());
+        Assertions.assertEquals("CONTRA WAGES", payments[11].getStructuredReferences()[0].getUnformatted());
     }
 }
