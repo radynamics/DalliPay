@@ -75,11 +75,27 @@ public class JsonRpcApi implements TransactionSource {
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
-        var start = ledgerAtTimeProvider.estimatedDaysAgo(sinceDaysAgo).orElse(ledgerAtTimeProvider.estimatedAgoFallback(sinceDaysAgo));
+        var start = ledgerAtTimeProvider.estimatedDaysAgo(sinceDaysAgo).orElse(estimatedAgoFallback(sinceDaysAgo));
         // Use endOfToday to ensure data until latest ledger is loaded.
         var end = Utils.endOfToday();
         var params = createAccountTransactionsRequestParams(wallet, start.getLedgerIndex(), end, null);
         return listPayments(params, limit, (Payment p) -> StringUtils.equals(p.account().value(), wallet.getPublicKey()));
+    }
+
+    private LedgerAtTime estimatedAgoFallback(long sinceDaysAgo) throws LedgerAtTimeException {
+        log.trace(String.format("Getting estimated fallback %s days ago.", sinceDaysAgo));
+
+        var deduction = Math.round(sinceDaysAgo * 0.2);
+        long remaining = sinceDaysAgo - deduction;
+        while (remaining > 0) {
+            var candidate = ledgerAtTimeProvider.estimatedDaysAgo(remaining).orElse(null);
+            if (candidate != null) {
+                return candidate;
+            }
+            remaining -= deduction;
+        }
+
+        return new LedgerAtTime(ZonedDateTime.now(), LedgerIndex.VALIDATED);
     }
 
     @Override

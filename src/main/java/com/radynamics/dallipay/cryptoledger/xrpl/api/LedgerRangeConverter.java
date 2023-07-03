@@ -43,22 +43,6 @@ public class LedgerRangeConverter implements LedgerAtTimeProvider {
         return Optional.of(new LedgerAtTime(ZonedDateTime.now().minus(ago), latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers)));
     }
 
-    public LedgerAtTime estimatedAgoFallback(long daysAgo) throws LedgerAtTimeException {
-        log.trace(String.format("Getting estimated fallback %s days ago.", daysAgo));
-
-        var deduction = Math.round(daysAgo * 0.2);
-        long remaining = daysAgo - deduction;
-        while (remaining > 0) {
-            var candidate = estimatedDaysAgo(remaining).orElse(null);
-            if (candidate != null) {
-                return candidate;
-            }
-            remaining -= deduction;
-        }
-
-        return new LedgerAtTime(ZonedDateTime.now(), LedgerIndex.VALIDATED);
-    }
-
     public Optional<LedgerAtTime> at(ZonedDateTime dt) throws LedgerAtTimeException {
         try {
             var ledger = findLedger(dt);
