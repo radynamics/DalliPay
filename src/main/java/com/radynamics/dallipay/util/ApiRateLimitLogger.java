@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpHeaders;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Optional;
 public class ApiRateLimitLogger {
     private final static Logger log = LogManager.getLogger(ApiRateLimitLogger.class);
     private final String apiName;
+    private ZonedDateTime retryAfter = ZonedDateTime.now();
 
     public ApiRateLimitLogger(String apiName) {
         if (apiName == null) throw new IllegalArgumentException("Parameter 'apiName' cannot be null");
@@ -47,6 +50,11 @@ public class ApiRateLimitLogger {
             return true;
         }
 
+        var retryAfterText = first(headers, "Retry-After").orElse(null);
+        if (retryAfterText != null) {
+            retryAfter = ZonedDateTime.parse(retryAfterText).withZoneSameInstant(ZoneId.of("UTC"));
+        }
+
         log.error(String.format("%s: call limit reached. %s", apiName, msg));
         return false;
     }
@@ -60,5 +68,9 @@ public class ApiRateLimitLogger {
             }
         }
         return elements.size() == 0 ? Optional.empty() : Optional.of(elements.get(0));
+    }
+
+    public boolean limited() {
+        return retryAfter.isAfter(ZonedDateTime.now());
     }
 }

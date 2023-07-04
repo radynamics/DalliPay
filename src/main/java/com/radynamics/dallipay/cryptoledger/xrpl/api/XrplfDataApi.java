@@ -25,31 +25,40 @@ public class XrplfDataApi implements LedgerAtTimeProvider {
     private final static Logger log = LogManager.getLogger(XrplfDataApi.class);
     private final static ApiRateLimitLogger apiRateLimit = new ApiRateLimitLogger("XrplfDataApi");
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
+    private final LedgerRangeConverter fallback;
+
+    public XrplfDataApi(LedgerRangeConverter fallback) {
+        this.fallback = fallback;
+    }
 
     @Override
     public Optional<LedgerAtTime> estimatedDaysAgo(long sinceDaysAgo) throws LedgerAtTimeException {
-        return Optional.of(getLedgerIndexAt(ZonedDateTime.now().minusDays(sinceDaysAgo)));
+        return getLedgerIndexAt(ZonedDateTime.now().minusDays(sinceDaysAgo));
     }
 
     @Override
     public Optional<LedgerAtTime> at(ZonedDateTime dt) throws LedgerAtTimeException {
-        return Optional.of(getLedgerIndexAt(dt));
+        return getLedgerIndexAt(dt);
     }
 
-    private LedgerAtTime getLedgerIndexAt(ZonedDateTime dt) throws LedgerAtTimeException {
+    private Optional<LedgerAtTime> getLedgerIndexAt(ZonedDateTime dt) throws LedgerAtTimeException {
+        if (fallback != null && apiRateLimit.limited()) {
+            return fallback.at(dt);
+        }
+
         final var utc = ZoneId.of("UTC");
         var inUtc = dt.withZoneSameInstant(utc);
         log.trace(String.format("Find ledger at %s", inUtc));
         var ledger = cache.find(inUtc);
         if (ledger != null) {
-            return ledger;
+            return Optional.of(ledger);
         }
         try {
             var json = get(new URL("https://data.xrplf.org/v1/ledgers/ledger_index?date=%s".formatted(inUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))));
             var closed = ZonedDateTime.parse(json.getString("closed")).withZoneSameInstant(utc);
             var ledgerIndex = LedgerIndex.of(UnsignedInteger.valueOf(json.getLong("ledger_index")));
             log.trace(String.format("ledgerIndex at %s: %s", closed, ledgerIndex));
-            return cache.add(closed, ledgerIndex);
+            return Optional.of(cache.add(closed, ledgerIndex));
         } catch (IOException e) {
             throw new LedgerAtTimeException(e.getMessage(), e);
         }

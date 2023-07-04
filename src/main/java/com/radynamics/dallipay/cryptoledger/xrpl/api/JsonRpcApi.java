@@ -66,7 +66,8 @@ public class JsonRpcApi implements TransactionSource {
         this.ledger = ledger;
         this.network = network;
         this.xrplClient = new XrplClient(network.getUrl());
-        this.ledgerAtTimeProvider = ledger.isKnownMainnet(network) ? new XrplfDataApi() : new LedgerRangeConverter(xrplClient);
+        var fallback = new LedgerRangeConverter(xrplClient);
+        this.ledgerAtTimeProvider = ledger.isKnownMainnet(network) ? new XrplfDataApi(fallback) : fallback;
         this.accountDataCache = new Cache<>(network.getUrl().toString());
         this.accountTrustLineCache = new Cache<>(network.getUrl().toString());
         this.ripplePathFindCache = new Cache<>(network.getUrl().toString());
