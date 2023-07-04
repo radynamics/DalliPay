@@ -384,6 +384,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 transactionTranslator.applyDefaultSender(payments);
+                setSubmitter(payments);
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -638,14 +639,17 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private void setSubmitter(TransactionSubmitter submitter) {
         this.submitter = submitter;
         refreshSigningText();
-
-        for (var p : payments) {
-            setSubmitter(p);
-        }
+        setSubmitter(payments);
 
         // While reading an input file there aren't yet any loaded payments.
         if (table.paymentCount() > 0) {
             table.refresh(payments.toArray(new Payment[0]));
+        }
+    }
+
+    private void setSubmitter(ArrayList<Payment> payments) {
+        for (var p : payments) {
+            setSubmitter(p);
         }
     }
 
