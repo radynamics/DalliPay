@@ -493,13 +493,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 return;
             }
 
-            try (var repo = new ConfigRepo()) {
-                repo.setLastUsedSubmitter(submitter);
-                repo.commit();
-            } catch (Exception e) {
-                ExceptionDialog.show(this, e);
-            }
-
             if (!showConfirmationForm(ledger, payments)) {
                 return;
             }
@@ -631,6 +624,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         var submitter = SubmitterSelectionForm.showDialog(this, ledger, this.submitter);
         if (submitter == null) {
             return false;
+        }
+
+        try (var repo = new ConfigRepo()) {
+            repo.setLastUsedSubmitter(submitter);
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
         }
         setSubmitter(submitter);
         return true;
