@@ -384,6 +384,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 payments.clear();
                 payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
                 transactionTranslator.applyDefaultSender(payments);
+                setSubmitter(payments);
                 cf.complete(payments);
             } catch (Exception e) {
                 cf.completeExceptionally(e);
@@ -490,13 +491,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         try {
             if (submitter == null && !showSigningEdit(ledger)) {
                 return;
-            }
-
-            try (var repo = new ConfigRepo()) {
-                repo.setLastUsedSubmitter(submitter);
-                repo.commit();
-            } catch (Exception e) {
-                ExceptionDialog.show(this, e);
             }
 
             if (!showConfirmationForm(ledger, payments)) {
@@ -631,6 +625,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         if (submitter == null) {
             return false;
         }
+
+        try (var repo = new ConfigRepo()) {
+            repo.setLastUsedSubmitter(submitter);
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         setSubmitter(submitter);
         return true;
     }
@@ -638,14 +639,17 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private void setSubmitter(TransactionSubmitter submitter) {
         this.submitter = submitter;
         refreshSigningText();
-
-        for (var p : payments) {
-            setSubmitter(p);
-        }
+        setSubmitter(payments);
 
         // While reading an input file there aren't yet any loaded payments.
         if (table.paymentCount() > 0) {
             table.refresh(payments.toArray(new Payment[0]));
+        }
+    }
+
+    private void setSubmitter(ArrayList<Payment> payments) {
+        for (var p : payments) {
+            setSubmitter(p);
         }
     }
 
