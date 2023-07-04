@@ -228,6 +228,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         }
     }
 
+    public boolean isKnownMainnet(NetworkInfo network) {
+        var url = network.getUrl().toString();
+        return url.startsWith("https://xrplcluster.com")
+                || url.startsWith("https://xrpl.ws")
+                || url.startsWith("https://s1.ripple.com:51234")
+                || url.startsWith("https://s2.ripple.com:51234");
+    }
+
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
