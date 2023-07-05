@@ -8,6 +8,7 @@ import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,6 +48,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
                 xrplTx.setBooked(ZonedDateTime.now());
 
                 if (verifier.verify(txHash, xrplTx)) {
+                    xrplTx.setBlock(Convert.toLedgerBlock(verifier.getOnchainTransaction().getBlock()));
                     xrplTx.refreshTransmission();
                     raiseSuccess(xrplTx);
                 } else {

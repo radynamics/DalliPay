@@ -9,6 +9,7 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -121,6 +122,7 @@ public class RpcSubmitter implements TransactionSubmitter {
             t.setBooked(ZonedDateTime.now());
 
             if (verifier.verify(transactionHash, t)) {
+                t.setBlock(Convert.toLedgerBlock(verifier.getOnchainTransaction().getBlock()));
                 t.refreshTransmission();
                 raiseSuccess(t);
             } else {
