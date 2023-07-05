@@ -3,6 +3,8 @@ package com.radynamics.dallipay.browserwalletbridge;
 import com.radynamics.dallipay.browserwalletbridge.httpserver.BridgeEventListener;
 import com.radynamics.dallipay.browserwalletbridge.httpserver.EmbeddedServer;
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.OnchainVerificationException;
+import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
@@ -20,6 +22,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
     private final PayloadConverter payloadConverter;
     private final EmbeddedServer server;
 
+    private OnchainVerifier verifier;
     private final TransactionSubmitterInfo info;
     private final String id;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
@@ -42,8 +45,14 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
                 var xrplTx = ((TransactionDto) t).getTransaction();
                 xrplTx.setId(txHash);
                 xrplTx.setBooked(ZonedDateTime.now());
-                xrplTx.refreshTransmission();
-                raiseSuccess(xrplTx);
+
+                if (verifier.verify(txHash, xrplTx)) {
+                    xrplTx.refreshTransmission();
+                    raiseSuccess(xrplTx);
+                } else {
+                    xrplTx.refreshTransmission(new OnchainVerificationException(res.getString("verifyFailed")));
+                    raiseFailure(xrplTx);
+                }
             }
 
             @Override
@@ -108,6 +117,10 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
     @Override
     public TransactionSubmitterInfo getInfo() {
         return info;
+    }
+
+    public void setVerifier(OnchainVerifier verifier) {
+        this.verifier = verifier;
     }
 
     @Override

@@ -3,9 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import com.google.common.primitives.UnsignedLong;
-import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.LedgerException;
-import com.radynamics.dallipay.cryptoledger.PaymentUtils;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
@@ -37,6 +35,7 @@ public class RpcSubmitter implements TransactionSubmitter {
     private final Ledger ledger;
     private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;
+    private OnchainVerifier verifier;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
@@ -120,8 +119,14 @@ public class RpcSubmitter implements TransactionSubmitter {
         if (transactionHash != null) {
             t.setId(transactionHash);
             t.setBooked(ZonedDateTime.now());
-            t.refreshTransmission();
-            raiseSuccess(t);
+
+            if (verifier.verify(transactionHash, t)) {
+                t.refreshTransmission();
+                raiseSuccess(t);
+            } else {
+                t.refreshTransmission(new OnchainVerificationException(res.getString("verifyFailed")));
+                raiseFailure(t);
+            }
         }
 
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
@@ -165,6 +170,10 @@ public class RpcSubmitter implements TransactionSubmitter {
     @Override
     public TransactionSubmitterInfo getInfo() {
         return info;
+    }
+
+    public void setVerifier(OnchainVerifier verifier) {
+        this.verifier = verifier;
     }
 
     @Override

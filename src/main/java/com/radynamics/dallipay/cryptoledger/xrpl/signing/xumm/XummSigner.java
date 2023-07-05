@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
+import com.radynamics.dallipay.cryptoledger.OnchainVerificationException;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
@@ -87,14 +88,13 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         t.setId(txid);
         t.setBooked(ZonedDateTime.now());
 
-        if (verifier != null && !verifier.verify(txid, t)) {
-            t.refreshTransmission(new XummException(res.getString("xumm.verifyFailed")));
+        if (verifier.verify(txid, t)) {
+            t.refreshTransmission();
+            raiseSuccess(t);
+        } else {
+            t.refreshTransmission(new OnchainVerificationException(res.getString("verifyFailed")));
             raiseFailure(t);
-            return;
         }
-
-        t.refreshTransmission();
-        raiseSuccess(t);
     }
 
     @Override
