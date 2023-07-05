@@ -25,9 +25,9 @@ public class XrplfDataApi implements LedgerAtTimeProvider {
     private final static Logger log = LogManager.getLogger(XrplfDataApi.class);
     private final static ApiRateLimitLogger apiRateLimit = new ApiRateLimitLogger("XrplfDataApi");
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
-    private final LedgerRangeConverter fallback;
+    private final OnchainLookupProvider fallback;
 
-    public XrplfDataApi(LedgerRangeConverter fallback) {
+    public XrplfDataApi(OnchainLookupProvider fallback) {
         this.fallback = fallback;
     }
 

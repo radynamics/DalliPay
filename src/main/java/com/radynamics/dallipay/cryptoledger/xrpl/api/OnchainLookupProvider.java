@@ -14,13 +14,13 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class LedgerRangeConverter implements LedgerAtTimeProvider {
-    final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
+public class OnchainLookupProvider implements LedgerAtTimeProvider {
+    final static Logger log = LogManager.getLogger(OnchainLookupProvider.class);
     private XrplClient xrplClient;
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
     private LedgerAtTime latestLedgerFirstCall;
 
-    public LedgerRangeConverter(XrplClient xrplClient) {
+    public OnchainLookupProvider(XrplClient xrplClient) {
         this.xrplClient = xrplClient;
     }
 
