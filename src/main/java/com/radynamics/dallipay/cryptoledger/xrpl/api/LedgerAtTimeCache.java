@@ -6,11 +6,11 @@ import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LedgerAtTimeCache {
     final static Logger log = LogManager.getLogger(LedgerAtTimeCache.class);
-    private HashMap<UnsignedInteger, LedgerAtTime> items = new HashMap<>();
+    private final ConcurrentHashMap<UnsignedInteger, LedgerAtTime> items = new ConcurrentHashMap<>();
 
     public LedgerAtTime add(ZonedDateTime pointInTime, LedgerIndex index) {
         var item = new LedgerAtTime(pointInTime, index);
