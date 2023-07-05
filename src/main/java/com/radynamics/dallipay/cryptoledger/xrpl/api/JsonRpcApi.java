@@ -226,17 +226,24 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerIndex start, ZonedDateTime end, Marker marker) throws LedgerAtTimeException, LedgerException {
-        var b = AccountTransactionsRequestParams.builder()
-                .account(Address.of(wallet.getPublicKey()))
-                .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()));
-
+        var endIndex = LedgerIndex.VALIDATED;
         if (end.isBefore(ZonedDateTime.now())) {
             var endLedger = ledgerAtTimeProvider.at(end).orElse(null);
             if (endLedger == null) {
                 throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), end));
             }
-            b.ledgerIndexMaximum(LedgerIndexBound.of(endLedger.getLedgerIndex().unsignedIntegerValue().intValue()));
+            endIndex = endLedger.getLedgerIndex();
         }
+        return createAccountTransactionsRequestParams(wallet, BlockRange.of(new LedgerBlock(start), new LedgerBlock(endIndex)), marker);
+    }
+
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, BlockRange period, Marker marker) throws LedgerAtTimeException, LedgerException {
+        var start = Convert.toLedgerBlock(period.getStart()).getLedgerIndex();
+        var end = Convert.toLedgerBlock(period.getEnd()).getLedgerIndex();
+        var b = AccountTransactionsRequestParams.builder()
+                .account(Address.of(wallet.getPublicKey()))
+                .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()))
+                .ledgerIndexMaximum(LedgerIndexBound.of(end.unsignedIntegerValue().intValue()));
         if (marker != null) {
             b.marker(marker);
         }
@@ -262,7 +269,7 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
-    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(Wallet wallet, BlockRange period, Wallet ccyIssuer, String ccy) throws Exception {
         var tr = new TransactionResult();
         var params = createAccountTransactionsRequestParams(wallet, period, null);
         final int limit = 200;
@@ -478,6 +485,7 @@ public class JsonRpcApi implements TransactionSource {
         var trx = new Transaction(ledger, Money.of(amt.doubleValue(), ccy));
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
+        trx.setBlock(new LedgerBlock(t.ledgerIndex().orElseThrow()));
         trx.setSender(WalletConverter.from(t.account()));
         for (MemoWrapper mw : t.memos()) {
             if (!mw.memo().memoData().isPresent()) {

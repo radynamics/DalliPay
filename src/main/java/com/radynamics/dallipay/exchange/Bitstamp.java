@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.exchange;
 
+import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,7 +103,7 @@ public class Bitstamp implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
+    public ExchangeRate rateAt(CurrencyPair pair, Block block) {
         return null;
     }
 }

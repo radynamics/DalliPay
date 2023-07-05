@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
+import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -34,9 +35,8 @@ public class OnchainLookupProvider implements LedgerAtTimeProvider {
         }
 
         // Assuming average ledger close time
-        final int AVG_LEDGER_CLOSE_TIME_SEC = 4;
         var ago = Duration.ofDays(daysAgo);
-        var estimatedPassedLedgers = UnsignedInteger.valueOf(ago.getSeconds() / AVG_LEDGER_CLOSE_TIME_SEC);
+        var estimatedPassedLedgers = UnsignedInteger.valueOf(ago.getSeconds() / Ledger.AVG_LEDGER_CLOSE_TIME_SEC);
         if (latestLedgerFirstCall.getLedgerIndex().unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
             return Optional.empty();
         }

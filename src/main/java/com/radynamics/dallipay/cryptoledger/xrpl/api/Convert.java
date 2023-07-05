@@ -1,10 +1,13 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
+import com.google.common.primitives.UnsignedInteger;
+import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.transactions.ImmutableMemo;
 import org.xrpl.xrpl4j.model.transactions.ImmutableMemoWrapper;
 
@@ -38,5 +41,13 @@ public final class Convert {
     public static String fromCurrencyCode(String code) {
         // value is always 20 bytes, filled with 0.
         return code.length() <= ccyCodeStandardFormatLength ? code : StringUtils.rightPad(Utils.stringToHex(code), 40, '0');
+    }
+
+    public static LedgerBlock toLedgerBlock(Block block) {
+        if (block == null) throw new IllegalArgumentException("Parameter 'block' cannot be null");
+        if (block == Block.validated) {
+            return new LedgerBlock(LedgerIndex.VALIDATED);
+        }
+        return new LedgerBlock(LedgerIndex.of(UnsignedInteger.valueOf(block.getId())));
     }
 }

@@ -1,7 +1,7 @@
 package com.radynamics.dallipay.cryptoledger;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.LedgerBlock;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 
@@ -15,6 +15,10 @@ public interface Transaction {
     ZonedDateTime getBooked();
 
     void setBooked(ZonedDateTime value);
+
+    Block getBlock();
+
+    void setBlock(LedgerBlock value);
 
     String getId();
 

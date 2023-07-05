@@ -1,5 +1,7 @@
 package com.radynamics.dallipay.exchange;
 
+import com.radynamics.dallipay.cryptoledger.Block;
+
 import java.time.ZonedDateTime;
 
 public class DemoExchange implements ExchangeRateProvider {
@@ -46,7 +48,7 @@ public class DemoExchange implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime) {
+    public ExchangeRate rateAt(CurrencyPair pair, Block block) {
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -24,13 +25,13 @@ public class ExchangeRatesForm extends JDialog {
     private Component anchorComponentTopLeft;
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
-    private ZonedDateTime pointInTime;
+    private Block pointInTime;
     private JComboBox<ExchangeRateProvider> cboExchange;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ExchangeRatesForm(Ledger ledger, ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime) {
+    public ExchangeRatesForm(Ledger ledger, ExchangeRateProvider selectedExchange, ExchangeRate[] rates, Block pointInTime) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");

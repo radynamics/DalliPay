@@ -73,6 +73,10 @@ public class Payment {
         return cryptoTrx.getBooked();
     }
 
+    public Block getBlock() {
+        return cryptoTrx.getBlock();
+    }
+
     public TransmissionState getTransmission() {
         return cryptoTrx.getTransmission();
     }
