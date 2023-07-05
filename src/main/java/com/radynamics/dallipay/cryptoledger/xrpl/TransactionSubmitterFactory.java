@@ -37,7 +37,9 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
                 return signer;
             }
             case GemWallet.Id: {
-                return new GemWallet(ledger);
+                var signer = new GemWallet(ledger);
+                signer.setVerifier(new OnchainVerifier(ledger));
+                return signer;
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);

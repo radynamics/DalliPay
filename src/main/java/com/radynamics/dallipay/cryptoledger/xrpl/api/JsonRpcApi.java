@@ -561,7 +561,9 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
-        return new RpcSubmitter(ledger, xrplClient, privateKeyProvider);
+        var signer = new RpcSubmitter(ledger, xrplClient, privateKeyProvider);
+        signer.setVerifier(new OnchainVerifier(ledger));
+        return signer;
     }
 
     public com.radynamics.dallipay.cryptoledger.Wallet createRandomWallet(HttpUrl faucetUrl) {
