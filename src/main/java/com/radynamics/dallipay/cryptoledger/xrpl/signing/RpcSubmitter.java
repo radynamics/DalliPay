@@ -185,7 +185,6 @@ public class RpcSubmitter implements TransactionSubmitter {
     private void wait(Duration sleep) {
         try {
             Thread.sleep(sleep.toMillis());
-            System.out.println("sleep ms " + sleep.toMillis());
         } catch (InterruptedException e) {
             // ignore
         }
