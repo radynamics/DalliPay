@@ -37,4 +37,9 @@ public class LedgerAtTimeCache {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "size: " + items.size();
+    }
 }
