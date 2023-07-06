@@ -234,16 +234,24 @@ public class JsonRpcApi implements TransactionSource {
             }
             endIndex = endLedger.getLedgerIndex();
         }
-        return createAccountTransactionsRequestParams(wallet, BlockRange.of(new LedgerBlock(start), new LedgerBlock(endIndex)), marker);
+
+        return createAccountTransactionsRequestParams(wallet, start, endIndex, marker);
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, BlockRange period, Marker marker) throws LedgerAtTimeException, LedgerException {
         var start = Convert.toLedgerBlock(period.getStart()).getLedgerIndex();
         var end = Convert.toLedgerBlock(period.getEnd()).getLedgerIndex();
+        return createAccountTransactionsRequestParams(wallet, start, end, marker);
+    }
+
+    private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerIndex start, LedgerIndex end, Marker marker) throws LedgerAtTimeException, LedgerException {
         var b = AccountTransactionsRequestParams.builder()
                 .account(Address.of(wallet.getPublicKey()))
-                .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()))
-                .ledgerIndexMaximum(LedgerIndexBound.of(end.unsignedIntegerValue().intValue()));
+                .ledgerIndexMinimum(LedgerIndexBound.of(start.unsignedIntegerValue().intValue()));
+        if (end != LedgerIndex.VALIDATED) {
+            b.ledgerIndexMaximum(LedgerIndexBound.of(end.unsignedIntegerValue().intValue()));
+        }
+
         if (marker != null) {
             b.marker(marker);
         }
