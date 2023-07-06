@@ -45,7 +45,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
     private TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
-    private boolean isLoading;
 
     private PaymentTable table;
     private WalletField txtInput;
@@ -306,7 +305,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportChecked() {
-        if (isLoading || table.checkedPayments().length == 0) {
+        if (lblLoading.isLoading() || table.checkedPayments().length == 0) {
             return;
         }
 
@@ -408,11 +407,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
-        if (isLoading) {
+        if (lblLoading.isLoading()) {
             return;
         }
 
-        isLoading = true;
         var selectedTargetCcy = cboTargetCcy.getSelectedItem().toString();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
@@ -448,7 +446,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     }
                 })
                 .whenComplete((unused, e) -> {
-                    isLoading = false;
                     if (!table.getDataLoader().isLoading()) {
                         lblLoading.hideLoading();
                     }
