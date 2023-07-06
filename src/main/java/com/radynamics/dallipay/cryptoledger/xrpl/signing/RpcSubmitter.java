@@ -23,10 +23,13 @@ import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
+import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
+import org.xrpl.xrpl4j.model.transactions.Hash256;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
 import org.xrpl.xrpl4j.model.transactions.Payment;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -148,7 +151,44 @@ public class RpcSubmitter implements TransactionSubmitter {
             throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
         }
 
-        return signed.hash().value();
+        var transactionHash = signed.hash().value();
+
+        var interval = Duration.ofMillis(500);
+        wait(interval);
+
+        final Duration timeout = Duration.ofSeconds(10);
+        var remaining = timeout;
+        while (!remaining.isNegative()) {
+            if (isValidated(transactionHash)) {
+                return transactionHash;
+            }
+
+            wait(interval);
+            remaining = remaining.minus(interval);
+        }
+
+        throw new LedgerException("Transaction was submitted but was not validated within %s seconds.".formatted(timeout.toSeconds()));
+    }
+
+    private boolean isValidated(String transactionHash) {
+        var params = ImmutableTransactionRequestParams.builder()
+                .transaction(Hash256.of(transactionHash));
+        try {
+            var result = xrplClient.transaction(params.build(), org.xrpl.xrpl4j.model.transactions.Transaction.class);
+            return result.validated();
+        } catch (JsonRpcClientErrorException e) {
+            log.trace(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private void wait(Duration sleep) {
+        try {
+            Thread.sleep(sleep.toMillis());
+            System.out.println("sleep ms " + sleep.toMillis());
+        } catch (InterruptedException e) {
+            // ignore
+        }
     }
 
     private SignedTransaction<Payment> sign(ImmutablePayment.Builder builder, String privateKeyPlain) {
