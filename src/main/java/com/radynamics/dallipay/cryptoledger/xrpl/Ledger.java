@@ -107,6 +107,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.listPaymentsReceived(WalletConverter.from(wallet), period);
     }
 
+    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+        return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
+    }
+
     public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, BlockRange period, Wallet ccyIssuer, String ccy) throws Exception {
         return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
     }

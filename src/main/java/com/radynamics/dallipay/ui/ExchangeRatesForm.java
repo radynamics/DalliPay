@@ -25,21 +25,24 @@ public class ExchangeRatesForm extends JDialog {
     private Component anchorComponentTopLeft;
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
-    private Block pointInTime;
+    private ZonedDateTime pointInTime;
+    private Block pointInTimeBlock;
     private JComboBox<ExchangeRateProvider> cboExchange;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ExchangeRatesForm(Ledger ledger, ExchangeRateProvider selectedExchange, ExchangeRate[] rates, Block pointInTime) {
+    public ExchangeRatesForm(Ledger ledger, ExchangeRateProvider selectedExchange, ExchangeRate[] rates, ZonedDateTime pointInTime, Block pointInTimeBlock) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");
+        if (pointInTimeBlock == null) throw new IllegalArgumentException("Parameter 'pointInTimeBlock' cannot be null");
         this.ledger = ledger;
         this.selectedExchange = selectedExchange;
         this.rates = rates;
         this.pointInTime = pointInTime;
+        this.pointInTimeBlock = pointInTimeBlock;
 
         setupUI();
     }
@@ -227,7 +230,7 @@ public class ExchangeRatesForm extends JDialog {
             var pair = rates[i].getPair();
             var exchangeRates = new ExchangeRate[0];
             if (selectedExchange.supportsRateAt()) {
-                var rate = selectedExchange.rateAt(pair, pointInTime);
+                var rate = selectedExchange.rateAt(pair, pointInTime, ledger.getNetwork(), pointInTimeBlock);
                 if (rate != null) {
                     exchangeRates = new ExchangeRate[]{rate};
                 }

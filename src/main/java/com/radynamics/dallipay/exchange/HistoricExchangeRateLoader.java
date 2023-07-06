@@ -42,7 +42,7 @@ public class HistoricExchangeRateLoader {
             var source = transformInstruction.getHistoricExchangeRateSource();
             ExchangeRate rate;
             try {
-                rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBlock()) : null;
+                rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked(), t.getLedger().getNetwork(), t.getBlock()) : null;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 t.setHistoricExchangeRateException(e);

@@ -277,6 +277,24 @@ public class JsonRpcApi implements TransactionSource {
         }
     }
 
+    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+        var startLedger = ledgerAtTimeProvider.at(period.getStart()).orElse(null);
+        if (startLedger == null) {
+            throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), period.getStart()));
+        }
+
+        var end = Block.VALIDATED;
+        if (period.getEnd().isBefore(ZonedDateTime.now())) {
+            var endLedger = ledgerAtTimeProvider.at(period.getEnd()).orElse(null);
+            if (endLedger == null) {
+                throw new LedgerException(String.format(res.getString("ledgerNotFoundAt"), period.getEnd()));
+            }
+            end = new LedgerBlock(endLedger.getLedgerIndex());
+        }
+
+        return listTrustlineTransactions(wallet, BlockRange.of(new LedgerBlock(startLedger.getLedgerIndex()), end), ccyIssuer, ccy);
+    }
+
     public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(Wallet wallet, BlockRange period, Wallet ccyIssuer, String ccy) throws Exception {
         var tr = new TransactionResult();
         var params = createAccountTransactionsRequestParams(wallet, period, null);

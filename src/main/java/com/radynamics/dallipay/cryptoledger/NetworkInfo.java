@@ -71,4 +71,11 @@ public class NetworkInfo {
     public boolean isTestnet() {
         return testnetId.equals(networkId);
     }
+
+    public boolean sameNet(NetworkInfo network) {
+        if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
+        if (url.equals(network.getUrl())) return true;
+        if (networkId.equals(network.networkId)) return true;
+        return false;
+    }
 }

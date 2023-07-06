@@ -36,6 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -584,7 +585,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
-        var frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), Block.VALIDATED);
+        var frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now(), Block.VALIDATED);
         frm.setAllowChangeExchange(true);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(500, 300);

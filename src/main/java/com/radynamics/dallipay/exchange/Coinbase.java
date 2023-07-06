@@ -2,6 +2,7 @@ package com.radynamics.dallipay.exchange;
 
 import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -102,7 +103,7 @@ public class Coinbase implements ExchangeRateProvider {
     }
 
     @Override
-    public ExchangeRate rateAt(CurrencyPair pair, Block block) {
+    public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime, NetworkInfo blockNetwork, Block block) {
         return null;
     }
 }
