@@ -20,4 +20,9 @@ public class LedgerAtTime {
     public LedgerIndex getLedgerIndex() {
         return index;
     }
+
+    @Override
+    public String toString() {
+        return "%s -> %s".formatted(pointInTime, index);
+    }
 }
