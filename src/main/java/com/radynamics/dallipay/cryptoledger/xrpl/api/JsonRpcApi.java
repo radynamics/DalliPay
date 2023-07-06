@@ -561,7 +561,7 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
-        var signer = new RpcSubmitter(ledger, xrplClient, privateKeyProvider);
+        var signer = new RpcSubmitter(ledger, privateKeyProvider);
         signer.setVerifier(new OnchainVerifier(ledger));
         return signer;
     }

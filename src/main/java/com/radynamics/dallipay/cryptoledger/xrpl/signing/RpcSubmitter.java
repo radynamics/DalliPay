@@ -36,7 +36,6 @@ import java.util.ResourceBundle;
 public class RpcSubmitter implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(RpcSubmitter.class);
     private final Ledger ledger;
-    private final XrplClient xrplClient;
     private final PrivateKeyProvider privateKeyProvider;
     private OnchainVerifier verifier;
     private final TransactionSubmitterInfo info;
@@ -46,9 +45,8 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     public final static String Id = "rpcSubmitter";
 
-    public RpcSubmitter(Ledger ledger, XrplClient xrplClient, PrivateKeyProvider privateKeyProvider) {
+    public RpcSubmitter(Ledger ledger, PrivateKeyProvider privateKeyProvider) {
         this.ledger = ledger;
-        this.xrplClient = xrplClient;
         this.privateKeyProvider = privateKeyProvider;
 
         info = new TransactionSubmitterInfo();
@@ -69,6 +67,7 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void submit(com.radynamics.dallipay.cryptoledger.Transaction[] transactions) {
+        var xrplClient = new XrplClient(ledger.getNetwork().getUrl());
         var sendingWallets = PaymentUtils.distinctSendingWallets(transactions);
         // Process by sending wallet to keep sequence number handling simple (prevent terPRE_SEQ).
         for (var sendingWallet : sendingWallets) {
@@ -77,7 +76,7 @@ public class RpcSubmitter implements TransactionSubmitter {
             for (var trx : trxByWallet) {
                 var t = (Transaction) trx;
                 try {
-                    sequences = submit(t, sequences);
+                    sequences = submit(xrplClient, t, sequences);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                     t.refreshTransmission(e);
@@ -87,7 +86,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         }
     }
 
-    private ImmutablePair<UnsignedInteger, UnsignedInteger> submit(Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences) throws Exception {
+    private ImmutablePair<UnsignedInteger, UnsignedInteger> submit(XrplClient xrplClient, Transaction t, ImmutablePair<UnsignedInteger, UnsignedInteger> sequences) throws Exception {
         var previousLastLedgerSequence = sequences.getLeft();
         var accountSequenceOffset = sequences.getRight();
 
@@ -118,7 +117,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         builder.sequence(sequence);
         builder.lastLedgerSequence(lastLedgerSequence);
 
-        var transactionHash = submit(builder);
+        var transactionHash = submit(xrplClient, builder);
         if (transactionHash != null) {
             t.setId(transactionHash);
             t.setBooked(ZonedDateTime.now());
@@ -135,7 +134,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         return new ImmutablePair<>(previousLastLedgerSequence, accountSequenceOffset);
     }
 
-    private String submit(ImmutablePayment.Builder builder) throws LedgerException, JsonRpcClientErrorException, JsonProcessingException {
+    private String submit(XrplClient xrplClient, ImmutablePayment.Builder builder) throws LedgerException, JsonRpcClientErrorException, JsonProcessingException {
         var publicKey = builder.build().account().value();
         var privateKey = privateKeyProvider.get(publicKey);
         if (privateKey == null) {
@@ -157,7 +156,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         final Duration timeout = Duration.ofSeconds(10);
         var remaining = timeout;
         while (!remaining.isNegative()) {
-            if (isValidated(transactionHash)) {
+            if (isValidated(xrplClient, transactionHash)) {
                 return transactionHash;
             }
 
@@ -168,7 +167,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         throw new LedgerException("Transaction was submitted but was not validated within %s seconds.".formatted(timeout.toSeconds()));
     }
 
-    private boolean isValidated(String transactionHash) {
+    private boolean isValidated(XrplClient xrplClient, String transactionHash) {
         var params = ImmutableTransactionRequestParams.builder()
                 .transaction(Hash256.of(transactionHash));
         try {
