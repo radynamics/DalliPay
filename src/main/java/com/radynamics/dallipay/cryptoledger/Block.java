@@ -4,7 +4,7 @@ public interface Block {
     /**
      * Most recent validated block.
      */
-    Block validated = () -> "validated";
+    Block VALIDATED = () -> "validated";
 
     String getId();
 }

@@ -45,7 +45,7 @@ public final class Convert {
 
     public static LedgerBlock toLedgerBlock(Block block) {
         if (block == null) throw new IllegalArgumentException("Parameter 'block' cannot be null");
-        if (block == Block.validated) {
+        if (block == Block.VALIDATED) {
             return new LedgerBlock(LedgerIndex.VALIDATED);
         }
         return new LedgerBlock(LedgerIndex.of(UnsignedInteger.valueOf(block.getId())));
