@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpHeaders;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +49,9 @@ public class ApiRateLimitLogger {
             return true;
         }
 
-        var retryAfterText = first(headers, "Retry-After").orElse(null);
-        if (retryAfterText != null) {
-            retryAfter = ZonedDateTime.parse(retryAfterText).withZoneSameInstant(ZoneId.of("UTC"));
+        var rateLimitResetText = first(headers, "X-RateLimit-Reset").orElse(null);
+        if (rateLimitResetText != null) {
+            retryAfter = ZonedDateTime.now().plusSeconds(Integer.parseInt(rateLimitResetText));
         }
 
         log.error(String.format("%s: call limit reached. %s", apiName, msg));
