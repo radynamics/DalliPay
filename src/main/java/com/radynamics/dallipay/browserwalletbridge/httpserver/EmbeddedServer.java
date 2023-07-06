@@ -6,6 +6,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -23,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class EmbeddedServer {
+    private final static Logger log = LogManager.getLogger(EmbeddedServer.class);
     private static HttpServer httpServer;
     private EmbeddedHttpHandler httpHandler;
 
@@ -190,7 +193,7 @@ public class EmbeddedServer {
             try {
                 return new String(is.readAllBytes(), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                System.out.println(e);
+                log.trace(e.getMessage(), e);
                 return null;
             }
         }
