@@ -66,7 +66,7 @@ public class XrplfDataApi implements LedgerAtTimeProvider {
 
     private JSONObject get(URL url) throws IOException, LedgerAtTimeException {
         var conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(2000);
+        conn.setConnectTimeout(1000);
         conn.setRequestMethod("GET");
         conn.connect();
 
