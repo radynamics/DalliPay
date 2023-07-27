@@ -357,6 +357,11 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             }
         }
 
+        // User should choose a submitter prior loading due suggested paymentPath could depend on it (eg. XRPL PathFinding, IOU).
+        if (submitter == null) {
+            showSigningEdit(transformInstruction.getLedger());
+        }
+
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         enableInputControls(false);
         lblLoading.showLoading();
