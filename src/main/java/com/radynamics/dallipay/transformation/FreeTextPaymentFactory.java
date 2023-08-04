@@ -3,6 +3,8 @@ package com.radynamics.dallipay.transformation;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.iso20022.Payment;
 
+import java.net.URI;
+
 public class FreeTextPaymentFactory {
     private final Ledger ledger;
 
@@ -29,6 +31,11 @@ public class FreeTextPaymentFactory {
         if (EpcPayment.matches(text)) {
             var o = new EpcPayment(ledger);
             return o.createOrNull(text);
+        }
+
+        if (PaymentRequestUri.matches(text)) {
+            var o = new PaymentRequestUri(ledger);
+            return o.createOrNull(URI.create(text));
         }
 
         return null;

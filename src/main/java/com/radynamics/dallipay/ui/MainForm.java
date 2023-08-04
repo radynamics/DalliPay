@@ -10,6 +10,7 @@ import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
+import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.update.OnlineUpdate;
@@ -17,6 +18,7 @@ import com.radynamics.dallipay.update.OnlineUpdate;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
@@ -72,12 +74,12 @@ public class MainForm extends JFrame {
                 lblTitle.putClientProperty("FlatLaf.styleClass", "h1");
             }
         }
+        var tabbedPane = new JTabbedPane();
         {
             var pnl = new JPanel();
             pnlMain.add(pnl);
             pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
             {
-                var tabbedPane = new JTabbedPane();
                 pnl.add(tabbedPane);
                 tabbedPane.putClientProperty(TABBED_PANE_MINIMUM_TAB_WIDTH, TABBEDPANE_WIDTH);
                 tabbedPane.setTabPlacement(JTabbedPane.LEFT);
@@ -111,6 +113,17 @@ public class MainForm extends JFrame {
                     tabbedPane.addTab(res.getString("options"), optionsPanel);
                 }
             }
+        }
+
+        var paymentRequestServer = new EmbeddedServer();
+        paymentRequestServer.addRequestListenerListener(requestUrl -> {
+            tabbedPane.setSelectedComponent(sendingPanel);
+            sendingPanel.addNewPaymentByRequest(requestUrl);
+        });
+        try {
+            paymentRequestServer.start();
+        } catch (IOException e) {
+            ExceptionDialog.show(this, e);
         }
     }
 

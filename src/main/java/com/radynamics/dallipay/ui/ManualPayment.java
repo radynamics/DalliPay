@@ -10,12 +10,14 @@ import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.pain001.PaymentValidator;
 import com.radynamics.dallipay.transformation.FreeTextPaymentFactory;
+import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
 import com.radynamics.dallipay.util.RequestFocusListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URI;
 import java.util.ResourceBundle;
 
 public class ManualPayment {
@@ -54,7 +56,10 @@ public class ManualPayment {
         }
 
         var factory = new FreeTextPaymentFactory(ledger);
-        var payment = factory.createOrNull(txt.getText());
+        return create(parentComponent, factory.createOrNull(txt.getText()), transactionTranslator);
+    }
+
+    private static ManualPayment create(Component parentComponent, Payment payment, TransactionTranslator transactionTranslator) {
         if (payment == null) {
             JOptionPane.showMessageDialog(parentComponent, res.getString("manualPayment.failed"), "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return null;
@@ -64,6 +69,15 @@ public class ManualPayment {
         o.applyDefaultSenderWallet();
         o.applyAccountMapping();
         return o;
+    }
+
+    public static ManualPayment createByRequestUri(Component parentComponent, Ledger ledger, TransactionTranslator transactionTranslator, URI requestUri) {
+        if (!PaymentRequestUri.matches(requestUri.toString())) {
+            return null;
+        }
+
+        var factory = new PaymentRequestUri(ledger);
+        return create(parentComponent, factory.createOrNull(requestUri), transactionTranslator);
     }
 
     private void applyDefaultSenderWallet() {
