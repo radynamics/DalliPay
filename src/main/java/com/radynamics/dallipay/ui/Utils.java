@@ -188,4 +188,11 @@ public final class Utils {
                 ? uri.toString()
                 : uri.toString().substring(0, uri.toString().indexOf(uri.getPath()));
     }
+
+    public static void bringToFront(JFrame frame) {
+        if (!frame.isActive()) {
+            frame.setState(JFrame.ICONIFIED);
+            frame.setState(JFrame.NORMAL);
+        }
+    }
 }

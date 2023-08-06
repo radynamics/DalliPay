@@ -115,8 +115,10 @@ public class MainForm extends JFrame {
             }
         }
 
+        var self = this;
         var paymentRequestServer = new EmbeddedServer();
         paymentRequestServer.addRequestListenerListener(requestUrl -> {
+            Utils.bringToFront(self);
             tabbedPane.setSelectedComponent(sendingPanel);
             sendingPanel.addNewPaymentByRequest(requestUrl);
         });
