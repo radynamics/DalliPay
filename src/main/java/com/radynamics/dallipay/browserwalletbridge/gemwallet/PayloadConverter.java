@@ -26,6 +26,7 @@ public class PayloadConverter implements com.radynamics.dallipay.browserwalletbr
             json.put("currency", ccy.getCode());
             json.put("issuer", ccy.getIssuer().getPublicKey());
         }
+        json.put("sourceTag", com.radynamics.dallipay.cryptoledger.xrpl.Ledger.APP_ID_TAG);
         json.put("destination", t.getReceiverWallet().getPublicKey());
 
         var destTagBuilder = t.getLedger().createDestinationTagBuilder();

@@ -13,6 +13,7 @@ public class PayloadConverter {
 
         json.put("TransactionType", "Payment");
         json.put("Account", payment.account().value());
+        json.put("SourceTag", com.radynamics.dallipay.cryptoledger.xrpl.Ledger.APP_ID_TAG);
         json.put("Destination", payment.destination().value());
         if (payment.destinationTag().isPresent()) {
             json.put("DestinationTag", payment.destinationTag().get());

@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
@@ -36,6 +37,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     private static final String nativeCcySymbol = "XRP";
     public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
+    public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 

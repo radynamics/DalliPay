@@ -49,6 +49,7 @@ public class PaymentBuilder {
 
         var builder = Payment.builder()
                 .account(sender)
+                .sourceTag(com.radynamics.dallipay.cryptoledger.xrpl.Ledger.APP_ID_TAG)
                 .amount(amount)
                 .addAllMemos(memos)
                 .destination(receiver)
