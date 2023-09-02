@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.radynamics.DalliPay'
-version '1.6.0-beta1'
+version '1.6.0'
 
 repositories {
     mavenCentral()

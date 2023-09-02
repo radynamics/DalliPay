@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.google.common.primitives.UnsignedInteger;
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
@@ -24,6 +26,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -36,6 +39,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     private static final String nativeCcySymbol = "XRP";
     public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
+    public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
@@ -74,6 +78,13 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     static Money dropsToXrp(long drops) {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
+    }
+
+    public static UnsignedLong xrpToDrops(Money xrpAmount) {
+        if (!xrpAmount.getCcy().getCode().equals("XRP")) {
+            throw new IllegalArgumentException("Amount expected in XRP and not " + xrpAmount.getCcy().getCode());
+        }
+        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(xrpAmount.getNumber().doubleValue())).value();
     }
 
     @Override

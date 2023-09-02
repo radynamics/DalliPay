@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/send/common/walletbridge.js"></script>
+    <script type="module" defer>
+import { default as sdk } from "https://unpkg.com/@crossmarkio/sdk@0.3.0-beta"
+
+const onLoad = async () => {
+    var bridge = new WalletBridge('Crossmark', 'https://crossmark.io')
+    if(!bridge.init()) {
+        return
+    }
+
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, 1000)
+    });
+
+    if(typeof window.xrpl === "undefined" || !window.xrpl.isCrossmark) {
+        bridge.hide('waiting')
+        bridge.show('walletApiNotAvailable')
+        return
+    }
+
+    // See https://github.com/crossmarkio/sdk/blob/main/src/services/index.ts
+    sdk.signAndSubmitAndWait(bridge._tx).then((resp) => {
+        console.log(resp)
+        if(resp.response.data.meta.isError) {
+            bridge.reportFailure('unknown', resp.response.data.errorMessage)
+            return
+        }
+        if(resp.response.data.meta.isSuccess) {
+            bridge.success(resp.response.data.resp.result.hash)
+            return
+        }
+        if(resp.response.data.meta.isRejected) {
+            bridge.reject()
+            return
+        }
+    })
+}
+
+window.addEventListener("load", onLoad)
+
+    </script>
+    <link rel="stylesheet" href="/send/common/main.css">
+</head>
+<body>
+</body>
+</html>

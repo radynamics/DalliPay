@@ -33,6 +33,7 @@ public class ResolverResult {
                 }
                 var addressInfo = new WalletAddressInfo(ledger.createWallet(addressText, null));
                 addressInfo.setDestinationTag(a.getDetails().getTag());
+                return addressInfo;
             }
         }
         return null;

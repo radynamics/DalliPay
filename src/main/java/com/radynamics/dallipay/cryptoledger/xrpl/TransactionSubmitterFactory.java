@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.xrpl.signing.Crossmark;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.GemWallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.RpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm.DatabaseStorage;
@@ -41,6 +42,11 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
                 signer.setVerifier(new OnchainVerifier(ledger));
                 return signer;
             }
+            case Crossmark.Id: {
+                var signer = new Crossmark(ledger);
+                signer.setVerifier(new OnchainVerifier(ledger));
+                return signer;
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -55,6 +61,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
             list.add(create(XummSigner.Id, parentComponent));
         }
         list.add(create(GemWallet.Id, parentComponent));
+        list.add(create(Crossmark.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }
