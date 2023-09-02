@@ -33,8 +33,8 @@ public class FreeTextPaymentFactory {
             return o.createOrNull(text);
         }
 
-        if (PaymentRequestUri.matches(text)) {
-            var o = new PaymentRequestUri(ledger);
+        if (Xls2d.matches(text)) {
+            var o = new Xls2d(ledger);
             return o.createOrNull(URI.create(text));
         }
 
