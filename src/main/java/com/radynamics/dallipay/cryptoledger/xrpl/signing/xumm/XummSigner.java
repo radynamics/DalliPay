@@ -2,11 +2,14 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
+import com.radynamics.dallipay.cryptoledger.OnchainVerificationException;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
+import com.radynamics.dallipay.ui.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -47,7 +50,8 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         info.setTitle(res.getString("xumm.title"));
         info.setDescription(res.getString("xumm.desc"));
         info.setDetailUri(URI.create("https://xumm.app"));
-        info.setRecommended(true);
+        info.setOrder(100);
+        info.setIcon(Utils.getScaled("img/xumm.png", 64, 64));
     }
 
     @Override
@@ -85,14 +89,14 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         t.setId(txid);
         t.setBooked(ZonedDateTime.now());
 
-        if (verifier != null && !verifier.verify(txid, t)) {
-            t.refreshTransmission(new XummException(res.getString("xumm.verifyFailed")));
+        if (verifier.verify(txid, t)) {
+            t.setBlock(Convert.toLedgerBlock(verifier.getOnchainTransaction().getBlock()));
+            t.refreshTransmission();
+            raiseSuccess(t);
+        } else {
+            t.refreshTransmission(new OnchainVerificationException(res.getString("verifyFailed")));
             raiseFailure(t);
-            return;
         }
-
-        t.refreshTransmission();
-        raiseSuccess(t);
     }
 
     @Override
@@ -212,6 +216,16 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
     @Override
     public void addStateListener(TransactionStateListener l) {
         stateListener.add(l);
+    }
+
+    @Override
+    public boolean supportIssuedTokens() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsPathFinding() {
+        return true;
     }
 
     private void raiseProgressChanged(Transaction t) {

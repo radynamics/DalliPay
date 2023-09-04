@@ -17,8 +17,8 @@ public class Record {
 
     public Record(Payment p) {
         payment = p;
-        senderLedger = new WalletCellValue(payment.getSenderWallet());
-        receiverLedger = new WalletCellValue(payment.getReceiverWallet());
+        senderLedger = new WalletCellValue(payment.getSenderWallet(), null);
+        receiverLedger = new WalletCellValue(payment.getReceiverWallet(), payment.getDestinationTag());
     }
 
     public Object getSenderLedger() {
@@ -41,6 +41,7 @@ public class Record {
     public void setReceiverLedger(WalletCellValue value) {
         receiverLedger = value;
         payment.setReceiverWallet(value.getWallet());
+        payment.setDestinationTag(value.getDestinationTag());
     }
 
     public void setReceiverLedger(String value) {

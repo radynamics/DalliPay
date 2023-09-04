@@ -5,16 +5,13 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class SubmitterSelectionForm extends JDialog {
-    private final Hashtable<JRadioButton, TransactionSubmitter> mapping = new Hashtable<>();
+    private final Hashtable<JComponent, TransactionSubmitter> mapping = new Hashtable<>();
     private boolean accepted;
 
     private final ButtonGroup buttonGroup = new ButtonGroup();
@@ -45,14 +42,14 @@ public class SubmitterSelectionForm extends JDialog {
         var panel1 = new JPanel();
         panel1.setBorder(innerBorder);
         panel1.setLayout(new BoxLayout(panel1, BoxLayout.X_AXIS));
-        FlowLayout panel1Layout = new FlowLayout(FlowLayout.LEADING, 0, 10);
         pnlContent = new JPanel();
-        pnlContent.setLayout(panel1Layout);
+        var contentLayout = new WrapLayout();
+        contentLayout.setAlignment(FlowLayout.LEADING);
+        pnlContent.setLayout(contentLayout);
         JPanel panel3 = new JPanel();
         var panel3Layout = new SpringLayout();
         panel3.setLayout(panel3Layout);
 
-        pnlContent.setPreferredSize(new Dimension(100, 200));
         var sp = new JScrollPane(pnlContent);
         sp.setBorder(BorderFactory.createEmptyBorder());
         panel1.add(sp);
@@ -92,12 +89,9 @@ public class SubmitterSelectionForm extends JDialog {
 
         {
             var sorted = new ArrayList<>(List.of(submitters));
-            sorted.sort((o1, o2) -> Boolean.compare(o2.getInfo().isRecommended(), o1.getInfo().isRecommended()));
+            sorted.sort((o1, o2) -> Integer.compare(o2.getInfo().getOrder(), o1.getInfo().getOrder()));
             for (var s : sorted) {
-                create(s, selected);
-            }
-            if (buttonGroup.getButtonCount() > 0 && buttonGroup.getSelection() == null) {
-                buttonGroup.setSelected(buttonGroup.getElements().nextElement().getModel(), true);
+                create(s, selected != null ? selected : sorted.get(0));
             }
         }
         {
@@ -124,90 +118,55 @@ public class SubmitterSelectionForm extends JDialog {
         var info = submitter.getInfo();
 
         var title = info.getTitle();
-        if (info.isRecommended()) {
-            title = String.format("%s (" + res.getString("recommended") + ")", title);
+        if (info.isNotRecommended()) {
+            title = String.format("%s (" + res.getString("notRecommended") + ")", title);
         }
-        var rdo = new JRadioButton(title);
 
-        var itemClickListener = new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                rdo.setSelected(true);
-            }
+        var size = new Dimension(150, 100);
+        var borderOffset = 50;
+        var cmd = new JToggleButton("<html><center style='width: %spx'>%s</center></html>".formatted(size.width - borderOffset, title));
+        cmd.setIcon(info.getIcon());
+        cmd.setToolTipText(createToolTipText(submitter));
+        cmd.putClientProperty("JButton.buttonType", "toolBarButton");
+        // Text below image
+        cmd.setVerticalTextPosition(JButton.BOTTOM);
+        cmd.setHorizontalTextPosition(JButton.CENTER);
+        cmd.setPreferredSize(size);
+        cmd.setMinimumSize(size);
+        cmd.setMaximumSize(size);
+        pnlContent.add(cmd);
 
-            @Override
-            public void mousePressed(MouseEvent e) {
+        cmd.setSelected(selected != null && info.getTitle().equals(selected.getInfo().getTitle()));
 
-            }
+        mapping.put(cmd, submitter);
+        buttonGroup.add(cmd);
+    }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
+    private String createToolTipText(TransactionSubmitter submitter) {
+        var sb = new StringBuilder();
+        sb.append("<html><p width=500>");
+        var info = submitter.getInfo();
+        sb.append(info.getDescription());
 
-            }
+        sb.append("<br>");
+        sb.append("<br>");
+        sb.append(res.getString("supports"));
+        sb.append("<br>");
+        sb.append(String.format("- [%s] %s<br>", toYesNo(true), String.format(res.getString("nativeToken"), submitter.getLedger().getNativeCcySymbol())));
+        sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportIssuedTokens()), res.getString("issuedTokens")));
+        sb.append(String.format("- [%s] %s<br>", toYesNo(submitter.supportsPathFinding()), res.getString("pathfinding")));
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        };
-
-        var pnl = new JPanel();
-        var layout = new GridBagLayout();
-        pnl.setLayout(layout);
-        pnlContent.add(pnl);
-        pnl.addMouseListener(itemClickListener);
-
-        var c = new GridBagConstraints();
-        c.weighty = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        {
-            c.gridx = 0;
-            c.gridy = 0;
-            pnl.add(rdo, c);
-
-            mapping.put(rdo, submitter);
-            buttonGroup.add(rdo);
-            rdo.setSelected(selected == null ? info.isRecommended() : info.getTitle().equals(selected.getInfo().getTitle()));
-            rdo.setOpaque(true);
-            rdo.putClientProperty("FlatLaf.styleClass", "h3");
+        if (info.getDetailUri() != null) {
+            sb.append("<br>");
+            sb.append(info.getDetailUri());
         }
-        var border = BorderFactory.createEmptyBorder(0, 22, 0, 0);
-        {
-            if (info.getDetailUri() != null) {
-                var lbl = Utils.createLinkLabel(pnl, info.getDetailUri().toString());
-                c.gridx = 0;
-                c.gridy = 1;
-                pnl.add(lbl, c);
 
-                lbl.setBorder(border);
-                lbl.setOpaque(true);
-                lbl.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        if (e.getClickCount() == 1) {
-                            Utils.openBrowser(pnl, info.getDetailUri());
-                        }
-                    }
-                });
-            }
-        }
-        {
-            var lbl = Utils.formatLabel(new JTextArea(info.getDescription()));
-            c.gridx = 0;
-            c.gridy = 2;
-            pnl.add(lbl, c);
+        sb.append("</p></html>");
+        return sb.toString();
+    }
 
-            lbl.setColumns(40);
-            lbl.setRows(3);
-            lbl.setBorder(border);
-            lbl.setOpaque(true);
-            lbl.addMouseListener(itemClickListener);
-        }
+    private String toYesNo(boolean value) {
+        return value ? res.getString("yes") : res.getString("no");
     }
 
     static TransactionSubmitter showDialog(Component parentComponent, Ledger ledger, TransactionSubmitter selected) {
@@ -241,9 +200,9 @@ public class SubmitterSelectionForm extends JDialog {
     public TransactionSubmitter getSelected() {
         var it = buttonGroup.getElements().asIterator();
         while (it.hasNext()) {
-            var rdo = (JRadioButton) it.next();
-            if (rdo.isSelected()) {
-                return mapping.get(rdo);
+            var obj = (JToggleButton) it.next();
+            if (obj.isSelected()) {
+                return mapping.get(obj);
             }
         }
         return null;

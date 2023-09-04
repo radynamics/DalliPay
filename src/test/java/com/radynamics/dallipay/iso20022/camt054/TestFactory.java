@@ -2,6 +2,10 @@ package com.radynamics.dallipay.iso20022.camt054;
 
 import com.radynamics.dallipay.Config;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
 import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -18,6 +22,7 @@ import com.radynamics.dallipay.transformation.AccountMappingSourceException;
 import com.radynamics.dallipay.transformation.MemoryAccountMappingSource;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
+import jakarta.ws.rs.NotSupportedException;
 import okhttp3.HttpUrl;
 
 import java.time.LocalDateTime;
@@ -32,7 +37,7 @@ public class TestFactory {
 
     public static TransformInstruction createTransformInstruction(Ledger ledger) {
         ledger.setInfoProvider(new WalletInfoProvider[]{new TestWalletInfoProvider()});
-        ledger.setNetwork(NetworkInfo.createTestnet(HttpUrl.get("https://test.url")));
+        ledger.setNetwork(NetworkInfo.createTestnet(HttpUrl.get("https://test.url"), "TestUrl"));
         var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
         var exchange = new DemoExchange();
         exchange.load();
@@ -149,5 +154,49 @@ public class TestFactory {
 
     public static ZonedDateTime createCreationDate() {
         return ZonedDateTime.of(2021, 06, 01, 16, 46, 10, 0, ZoneId.of("UTC"));
+    }
+
+    public static TransactionSubmitter createSubmitter() {
+        return new TransactionSubmitter() {
+            @Override
+            public String getId() {
+                return "testSubmitter";
+            }
+
+            @Override
+            public Ledger getLedger() {
+                return null;
+            }
+
+            @Override
+            public void submit(Transaction[] transactions) {
+                throw new NotSupportedException();
+            }
+
+            @Override
+            public PrivateKeyProvider getPrivateKeyProvider() {
+                return null;
+            }
+
+            @Override
+            public TransactionSubmitterInfo getInfo() {
+                return null;
+            }
+
+            @Override
+            public void addStateListener(TransactionStateListener l) {
+                throw new NotSupportedException();
+            }
+
+            @Override
+            public boolean supportIssuedTokens() {
+                return true;
+            }
+
+            @Override
+            public boolean supportsPathFinding() {
+                return true;
+            }
+        };
     }
 }

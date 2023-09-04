@@ -113,6 +113,17 @@ public class PayloadConverterTest {
         Assertions.assertEquals("{\"CdOrPrtry\":[],\"v\":1,\"ft\":[\"Test 1\",\"Test 2\"]}", Utils.hexToString(memoData.getString("MemoData")));
     }
 
+    @Test
+    public void toJsonValueRounding() throws LedgerException {
+        var t = createTransaction();
+        t.setAmount(Money.of(10.123456789012345, new Currency("EUR", ledger.createWallet("rB63KEdxKBqLuius5NFFagYPStg1EfP7hB", null))));
+        var builder = PaymentBuilder.builder().payment(t).build();
+        var json = PayloadConverter.toJson(builder.build());
+
+        Assertions.assertEquals(10.12345678901234, json.getJSONObject("Amount").getDouble("value"));
+        Assertions.assertEquals(10.12345678901234, json.getJSONObject("SendMax").getDouble("value"));
+    }
+
     private static Transaction createTransaction() {
         var ccy = new Currency(ledger.getNativeCcySymbol());
         var t = new TestTransaction(ledger, Money.of(100d, ccy));

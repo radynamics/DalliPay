@@ -2,6 +2,7 @@ package com.radynamics.dallipay.iso20022.pain001;
 
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -11,6 +12,7 @@ import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Random;
@@ -30,6 +32,16 @@ public class TestLedger implements Ledger {
     @Override
     public String getNativeCcySymbol() {
         return nativeCcySymbol;
+    }
+
+    @Override
+    public Icon getIcon() {
+        return null;
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Test";
     }
 
     @Override
@@ -149,6 +161,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public WalletAddressResolver createWalletAddressResolver() {
+        return value -> null;
+    }
+
+    @Override
     public WalletInfoProvider[] getInfoProvider() {
         return walletInfoProvider;
     }
@@ -206,5 +223,15 @@ public class TestLedger implements Ledger {
     @Override
     public DestinationTagBuilder createDestinationTagBuilder() {
         return null;
+    }
+
+    @Override
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        return true;
+    }
+
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return true;
     }
 }

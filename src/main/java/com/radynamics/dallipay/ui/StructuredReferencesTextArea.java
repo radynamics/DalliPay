@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.radynamics.dallipay.iso20022.creditorreference.ReferenceType;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -34,13 +35,14 @@ public class StructuredReferencesTextArea extends PlaceholderTextArea {
     private StructuredReference[] fromText() {
         var refs = new ArrayList<StructuredReference>();
         for (var word : Utils.fromMultilineText(getText())) {
-            var unformattedRef = StringUtils.deleteWhitespace(word);
-            if (unformattedRef.length() == 0) {
+            var removedSpaces = StringUtils.deleteWhitespace(word);
+            if (removedSpaces.length() == 0) {
                 continue;
             }
 
-            var type = StructuredReferenceFactory.detectType(unformattedRef);
-            refs.add(StructuredReferenceFactory.create(type, unformattedRef));
+            var type = StructuredReferenceFactory.detectType(removedSpaces);
+            // Don't modify unknown format values.
+            refs.add(StructuredReferenceFactory.create(type, type == ReferenceType.Unknown ? word : removedSpaces));
         }
 
         return refs.toArray(new StructuredReference[0]);

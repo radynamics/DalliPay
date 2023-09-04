@@ -55,7 +55,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
 
         loadHistory(ledger, p.getSenderWallet());
 
-        var paymentHistory = cache.get(p.getSenderWallet());
+        var paymentHistory = cache.get(new WalletKey(p.getSenderWallet()));
         var similar = paymentHistory.oldestSimilarOrDefault(p);
         if (similar != null) {
             list.add(new ValidationResult(ValidationState.Warning, String.format(res.getString("similarPaymentSent"), df.format(DateTimeConvert.toUserTimeZone(similar.getBooked())))));
@@ -79,7 +79,8 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
         }
 
         synchronized (this) {
-            if (!cache.isPresent(wallet)) {
+            var key = new WalletKey(wallet);
+            if (!cache.isPresent(key)) {
                 var paymentHistory = ledger.getPaymentHistoryProvider();
 
                 var desired = ZonedDateTime.now().minusDays(40);
@@ -89,7 +90,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
                 // Use endOfDay to ensure data until latest ledger is loaded. Ignoring time improves cache hits.
                 var sinceDaysAgo = Duration.between(Utils.endOfDay(since), ZonedDateTime.now()).toDays();
                 paymentHistory.load(ledger, wallet, sinceDaysAgo);
-                cache.add(wallet, paymentHistory);
+                cache.add(key, paymentHistory);
             }
         }
     }

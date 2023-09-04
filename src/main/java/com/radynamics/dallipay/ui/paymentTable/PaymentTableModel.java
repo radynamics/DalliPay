@@ -1,18 +1,15 @@
 package com.radynamics.dallipay.ui.paymentTable;
 
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 import com.radynamics.dallipay.exchange.Currency;
-import com.radynamics.dallipay.iso20022.Account;
 import com.radynamics.dallipay.iso20022.AccountFactory;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class PaymentTableModel extends AbstractTableModel {
-    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_SENDER_ACCOUNT, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
+    private final String[] columnNames = {COL_OBJECT, COL_VALIDATION_RESULTS, COL_SELECTOR, COL_STATUS, COL_SENDER_LEDGER, COL_RECEIVER_ACCOUNT, COL_RECEIVER_LEDGER,
             COL_BOOKED, COL_AMOUNT, COL_CCY, COL_TRX_STATUS, COL_DETAIL, COL_REMOVE};
     private final ArrayList<Record> data = new ArrayList<>();
     private Actor actor = Actor.Sender;
@@ -34,7 +31,6 @@ public class PaymentTableModel extends AbstractTableModel {
     public static final String COL_SELECTOR = "selector";
     public static final String COL_STATUS = "status";
     public static final String COL_SENDER_LEDGER = "senderLedger";
-    public static final String COL_SENDER_ACCOUNT = "senderAccount";
     public static final String COL_RECEIVER_ACCOUNT = "receiverAccount";
     public static final String COL_RECEIVER_LEDGER = "receiverLedger";
     public static final String COL_BOOKED = "valuta";
@@ -75,8 +71,6 @@ public class PaymentTableModel extends AbstractTableModel {
             return item.status;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
             return item.getSenderLedger();
-        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
-            return item.getActorAddressOrAccount(Actor.Sender);
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
             return item.getActorAddressOrAccount(Actor.Receiver);
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
@@ -106,7 +100,7 @@ public class PaymentTableModel extends AbstractTableModel {
         } else if (getColumnIndex(COL_STATUS) == col) {
             item.status = (ValidationState) value;
         } else if (getColumnIndex(COL_SENDER_LEDGER) == col) {
-            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            var cellValue = getAsValidCellValueOrNull(item.payment, value, COL_SENDER_LEDGER);
             // Invalid wallet address
             if (cellValue == null) {
                 item.setSenderLedger((String) value);
@@ -114,12 +108,10 @@ public class PaymentTableModel extends AbstractTableModel {
                 // If same keep old record with already loaded WalletInfo
                 item.setSenderLedger(cellValue);
             }
-        } else if (getColumnIndex(COL_SENDER_ACCOUNT) == col) {
-            item.payment.setSenderAccount(createAccountOrNull((String) value, item.payment.getSenderWallet()));
         } else if (getColumnIndex(COL_RECEIVER_ACCOUNT) == col) {
-            item.payment.setReceiverAccount(createAccountOrNull((String) value, item.payment.getReceiverWallet()));
+            item.payment.setReceiverAccount(AccountFactory.create((String) value, item.payment.getReceiverWallet()));
         } else if (getColumnIndex(COL_RECEIVER_LEDGER) == col) {
-            var cellValue = getAsValidCellValueOrNull(item.payment, value);
+            var cellValue = getAsValidCellValueOrNull(item.payment, value, COL_RECEIVER_LEDGER);
             // Invalid wallet address
             if (cellValue == null) {
                 item.setReceiverLedger((String) value);
@@ -137,7 +129,7 @@ public class PaymentTableModel extends AbstractTableModel {
         fireTableCellUpdated(row, col);
     }
 
-    private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value) {
+    private static WalletCellValue getAsValidCellValueOrNull(Payment p, Object value, String columnName) {
         if (value instanceof WalletCellValue) {
             return (WalletCellValue) value;
         }
@@ -148,20 +140,10 @@ public class PaymentTableModel extends AbstractTableModel {
             var ledger = p.getLedger();
             var wallet = ledger.createWallet(userInput, "");
             if (WalletValidator.isValidFormat(ledger, wallet)) {
-                return new WalletCellValue(wallet);
+                return new WalletCellValue(wallet, COL_RECEIVER_LEDGER.equals(columnName) ? p.getDestinationTag() : null);
             }
         }
 
-        return null;
-    }
-
-    private Account createAccountOrNull(String text, Wallet wallet) {
-        if (!StringUtils.isEmpty(text)) {
-            return AccountFactory.create(text);
-        }
-        if (wallet != null && !StringUtils.isEmpty(wallet.getPublicKey())) {
-            return AccountFactory.create(wallet.getPublicKey());
-        }
         return null;
     }
 
@@ -181,7 +163,7 @@ public class PaymentTableModel extends AbstractTableModel {
             return isSelectable(getHighestStatus(getValidationResults(row)));
         }
         if (actor == Actor.Receiver) {
-            return col == getColumnIndex(COL_SENDER_ACCOUNT) || col == getColumnIndex(COL_RECEIVER_ACCOUNT);
+            return col == getColumnIndex(COL_RECEIVER_ACCOUNT);
         }
         if (actor == Actor.Sender) {
             return col == getColumnIndex(COL_SENDER_LEDGER) || col == getColumnIndex(COL_RECEIVER_LEDGER);

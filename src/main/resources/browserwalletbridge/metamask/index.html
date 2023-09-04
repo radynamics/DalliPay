@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:;base64,=">
+    <title>MetaMask</title>
+    <script src="https://unpkg.com/web3@1.10.0/dist/web3.min.js"></script>
+    <script type="text/javascript" src="/send/common/walletbridge.js"></script>
+    <link rel="stylesheet" href="/send/common/main.css">
+</head>
+<body>
+</body>
+
+<script type="text/JavaScript">
+
+function onLoad() {
+    var bridge = new WalletBridge('MetaMask', 'https://metamask.io')
+    if(!bridge.init()) {
+        return
+    }
+
+    if(typeof window.ethereum === 'undefined') {
+        bridge.hide('waiting')
+        bridge.show('walletApiNotAvailable')
+        return
+    }
+
+    ethereum
+    .request({ method: 'eth_requestAccounts' })
+    .then((accounts) => {
+        const web3 = new Web3();
+        var params = null
+        if(bridge._ccy == 'ETH') {
+            params = {
+                from: accounts[0],
+                to: bridge._tx.destination,
+                value: web3.utils.toBN(bridge._tx.amount).toString(16), // amount in wei
+                data: bridge._tx.memo === null ? null : web3.utils.utf8ToHex(bridge._tx.memo),
+            }
+        } else {
+            const TRANSFER_FUNCTION_ABI = {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"};
+            params = {
+                from: accounts[0],
+                to: bridge._tx.issuer,
+                data: web3.eth.abi.encodeFunctionCall(TRANSFER_FUNCTION_ABI, [
+                    bridge._tx.destination,
+                    web3.utils.toBN(bridge._tx.amount)
+                ]),
+            }
+        }
+
+        return ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [ params ],
+        })
+    })
+    .then((transactionHash) => {
+        bridge.success(transactionHash)
+    })
+    .catch((error) => {
+        console.error(error)
+        bridge.hide('waiting')
+        if (error.code === 4001) {
+            bridge.reject()
+        } else {
+            bridge.show('walletApiNotAvailable')
+        }
+    });
+}
+
+window.addEventListener("load", onLoad)
+
+</script>
+</html>

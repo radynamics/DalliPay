@@ -42,11 +42,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class ReceiveForm extends JPanel implements MainFormPane {
-    private final TransformInstruction transformInstruction;
-    private final CurrencyConverter currencyConverter;
-    private final TransactionTranslator transactionTranslator;
+    private TransformInstruction transformInstruction;
+    private TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
-    private boolean isLoading;
 
     private PaymentTable table;
     private WalletField txtInput;
@@ -65,13 +63,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ReceiveForm(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+    public ReceiveForm() {
         super(new GridLayout(1, 0));
-        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
-        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
-        this.transformInstruction = transformInstruction;
-        this.currencyConverter = currencyConverter;
-        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
 
         setupUI();
     }
@@ -99,9 +92,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         pnlMain.add(panel2);
         pnlMain.add(panel3);
 
-        panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-        panel1.setPreferredSize(new Dimension(500, getNorthPad(3) + 20));
+        var panel1Height = getNorthPad(3);
+        panel1.setMinimumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
+        panel1.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel1Height));
+        panel1.setPreferredSize(new Dimension(500, panel1Height));
         panel2.setPreferredSize(new Dimension(500, 500));
         panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -123,7 +117,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 txtInput = new WalletField(this);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
-                txtInput.setLedger(transformInstruction.getLedger());
                 panel1.add(txtInput);
             }
             {
@@ -139,7 +132,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                         onSelectedTargetCcyChanged((String) e.getItem());
                     }
                 });
-                refreshTargetCcys();
                 panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(cboTargetCcy);
@@ -150,7 +142,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFrom, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFrom);
 
-                lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
                 panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFromSource, 0, SpringLayout.EAST, lblUsingExchangeRatesFrom);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFromSource, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFromSource);
@@ -185,17 +176,18 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     load();
                 });
                 panel1Layout.putConstraint(SpringLayout.EAST, cmdRefresh, 0, SpringLayout.EAST, panel1);
-                panel1Layout.putConstraint(SpringLayout.NORTH, cmdRefresh, getNorthPad(2), SpringLayout.NORTH, panel1);
+                panel1Layout.putConstraint(SpringLayout.SOUTH, cmdRefresh, 0, SpringLayout.SOUTH, panel1);
                 panel1.add(cmdRefresh);
             }
         }
         {
-            table = new PaymentTable(transformInstruction, currencyConverter, Actor.Receiver, new PaymentValidator(), transactionTranslator);
+            table = new PaymentTable(Actor.Receiver);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
                 enableInputControls(progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
+            table.setEmptyBackgroundText(res.getString("noPayments"));
             panel2.add(table);
         }
         {
@@ -313,7 +305,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportChecked() {
-        if (isLoading || table.checkedPayments().length == 0) {
+        if (lblLoading.isLoading() || table.checkedPayments().length == 0) {
             return;
         }
 
@@ -415,11 +407,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
-        if (isLoading) {
+        if (lblLoading.isLoading()) {
             return;
         }
 
-        isLoading = true;
         var selectedTargetCcy = cboTargetCcy.getSelectedItem().toString();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
@@ -455,8 +446,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     }
                 })
                 .whenComplete((unused, e) -> {
-                    isLoading = false;
-                    lblLoading.hideLoading();
+                    if (!table.getDataLoader().isLoading()) {
+                        lblLoading.hideLoading();
+                    }
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
                         enableInputControls(true);
@@ -499,5 +491,19 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     @Override
     public String getTitle() {
         return res.getString("title");
+    }
+
+    public void init(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
+        if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
+        if (currencyConverter == null) throw new IllegalArgumentException("Parameter 'currencyConverter' cannot be null");
+        this.transformInstruction = transformInstruction;
+        this.transactionTranslator = new TransactionTranslator(transformInstruction, currencyConverter);
+
+        txtInput.setLedger(transformInstruction.getLedger());
+        refreshTargetCcys();
+        lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
+        table.init(transformInstruction, currencyConverter, new PaymentValidator(), transactionTranslator);
+        // Clear loaded payments
+        loadTable(new Payment[0]);
     }
 }

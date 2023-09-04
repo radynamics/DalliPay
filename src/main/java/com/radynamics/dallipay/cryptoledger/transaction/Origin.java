@@ -2,7 +2,7 @@ package com.radynamics.dallipay.cryptoledger.transaction;
 
 public enum Origin {
     Manual,
-    Pain001,
+    Imported,
     Ledger,
     ;
 

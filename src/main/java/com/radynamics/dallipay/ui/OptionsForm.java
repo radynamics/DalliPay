@@ -2,6 +2,7 @@ package com.radynamics.dallipay.ui;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.db.ConfigRepo;
+import com.radynamics.dallipay.ui.options.ApiKeysPane;
 import com.radynamics.dallipay.ui.options.GeneralPane;
 import com.radynamics.dallipay.ui.options.ReceiverPane;
 import com.radynamics.dallipay.ui.options.SenderPane;
@@ -15,11 +16,12 @@ public class OptionsForm extends JPanel implements MainFormPane {
     private final GeneralPane generalPane;
     private final SenderPane senderPane;
     private final ReceiverPane receiverPane;
+    private final ApiKeysPane apiKeysPane;
     private final ArrayList<ChangedListener> listener = new ArrayList<>();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
-    public OptionsForm(Ledger ledger) {
+    public OptionsForm() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         var pnlContent = new JPanel();
@@ -31,15 +33,18 @@ public class OptionsForm extends JPanel implements MainFormPane {
             var tabbedPane = new JTabbedPane();
             pnlContent.add(tabbedPane);
 
-            generalPane = new GeneralPane(ledger);
+            generalPane = new GeneralPane();
             tabbedPane.addTab(res.getString("general"), generalPane);
             generalPane.setBorder(border);
-            senderPane = new SenderPane(ledger);
+            senderPane = new SenderPane();
             tabbedPane.addTab(res.getString("send"), senderPane);
             senderPane.setBorder(border);
             receiverPane = new ReceiverPane();
             tabbedPane.addTab(res.getString("receive"), receiverPane);
             receiverPane.setBorder(border);
+            apiKeysPane = new ApiKeysPane();
+            tabbedPane.addTab(res.getString("apiKeys"), apiKeysPane);
+            apiKeysPane.setBorder(border);
         }
         {
             var buttonPane = new JPanel();
@@ -66,6 +71,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
             generalPane.save(repo);
             senderPane.save(repo);
             receiverPane.save(repo);
+            apiKeysPane.save(repo);
             repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
@@ -81,9 +87,15 @@ public class OptionsForm extends JPanel implements MainFormPane {
             generalPane.load(repo);
             senderPane.load(repo);
             receiverPane.load(repo);
+            apiKeysPane.load(repo);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    public void init(Ledger ledger) {
+        generalPane.init(ledger);
+        senderPane.init(ledger);
     }
 
     @Override

@@ -1,18 +1,19 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.radynamics.dallipay.cryptoledger.FeeHelper;
-import com.radynamics.dallipay.cryptoledger.FeeType;
-import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
+import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.model.transactions.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PaymentBuilder {
     private Transaction transaction;
@@ -42,12 +43,13 @@ public class PaymentBuilder {
             memos.add(Convert.toMemoWrapper(memoData));
         }
 
-        var amount = toCurrencyAmount(transaction.getAmount());
+        var amount = toCurrencyAmount(transaction.getLedger(), transaction.getAmount());
         var lederTransactionFee = FeeHelper.get(transaction.getFees(), FeeType.LedgerTransactionFee).orElseThrow();
         var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
 
         var builder = Payment.builder()
                 .account(sender)
+                .sourceTag(com.radynamics.dallipay.cryptoledger.xrpl.Ledger.APP_ID_TAG)
                 .amount(amount)
                 .addAllMemos(memos)
                 .destination(receiver)
@@ -58,14 +60,14 @@ public class PaymentBuilder {
             var transferFee = ccy.getTransferFeeAmount(transaction.getAmount());
             // maximum including an additional tolerance
             var sendMax = transaction.getAmount().plus(transferFee).plus(transferFee.multiply(0.01));
-            builder.sendMax(toCurrencyAmount(sendMax));
+            builder.sendMax(toCurrencyAmount(transaction.getLedger(), sendMax));
         }
         return builder;
     }
 
-    private CurrencyAmount toCurrencyAmount(Money amount) throws LedgerException {
+    public static CurrencyAmount toCurrencyAmount(Ledger ledger, Money amount) throws LedgerException {
         var ccy = amount.getCcy();
-        if (ccy.getCode().equals(transaction.getLedger().getNativeCcySymbol())) {
+        if (ccy.getCode().equals(ledger.getNativeCcySymbol())) {
             return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue()));
         }
 
@@ -74,13 +76,27 @@ public class PaymentBuilder {
         }
 
         // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
-        var scale = Math.pow(10, 15);
-        var amt = Math.round(amount.getNumber().doubleValue() * scale) / scale;
+        var amt = BigDecimal.valueOf(amount.getNumber().doubleValue()).setScale(14, RoundingMode.HALF_UP).doubleValue();
         return IssuedCurrencyAmount.builder()
-                .currency(ccy.getCode())
+                .currency(Convert.fromCurrencyCode(ccy.getCode()))
                 .issuer(Address.of(ccy.getIssuer().getPublicKey()))
                 .value(String.valueOf(amt))
                 .build();
+    }
+
+    public static Money fromCurrencyAmount(Ledger ledger, CurrencyAmount amount) {
+        var future = new CompletableFuture<Money>();
+        amount.handle(xrpCurrencyAmount -> {
+            future.complete(Money.of(xrpCurrencyAmount.toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        }, issuedCurrencyAmount -> {
+            var ccyCode = Convert.toCurrencyCode(issuedCurrencyAmount.currency());
+            var amt = Double.parseDouble(issuedCurrencyAmount.value());
+            var issuer = ledger.createWallet(issuedCurrencyAmount.issuer().value(), "");
+            var ccy = new Currency(ccyCode, issuer);
+
+            future.complete(Money.of(amt, ccy));
+        });
+        return future.join();
     }
 
     public Address getSender() {

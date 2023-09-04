@@ -1,0 +1,19 @@
+body {
+    font: 16px Helvetica, sans-serif;
+}
+
+.block {
+    display: block;
+    border: none;
+    background-color: #2675BFFF;
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.block:hover {
+    background-color: #B7D7F5FF;
+    color: black;
+}

@@ -10,16 +10,14 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SenderPane extends JPanel {
-    private final Ledger ledger;
+    private Ledger ledger;
     private final SpringLayout contentLayout;
+    private final JLabel lblDefaultSenderWallet;
     private final WalletField txtDefaultSenderWallet;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
-    public SenderPane(Ledger ledger) {
-        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
-        this.ledger = ledger;
-
+    public SenderPane() {
         setPreferredSize(new Dimension(1000, 400));
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
@@ -29,9 +27,8 @@ public class SenderPane extends JPanel {
             final var topOffset = 5;
             var top = topOffset;
             {
-                builder.addRowLabel(top, String.format(res.getString("defaultSenderWallet"), ledger.getId().textId().toUpperCase(Locale.ROOT)));
+                lblDefaultSenderWallet = builder.addRowLabel(top, "");
                 txtDefaultSenderWallet = new WalletField(this);
-                txtDefaultSenderWallet.setLedger(this.ledger);
                 txtDefaultSenderWallet.setPreferredSize(new Dimension(330, 24));
                 builder.addRowContent(top, txtDefaultSenderWallet);
                 top += 30;
@@ -51,5 +48,13 @@ public class SenderPane extends JPanel {
     public void load(ConfigRepo repo) throws Exception {
         var defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
         txtDefaultSenderWallet.setText(defaultSenderWallet == null ? "" : defaultSenderWallet.getPublicKey());
+    }
+
+    public void init(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
+
+        lblDefaultSenderWallet.setText(String.format(res.getString("defaultSenderWallet"), ledger.getId().textId().toUpperCase(Locale.ROOT)));
+        txtDefaultSenderWallet.setLedger(this.ledger);
     }
 }

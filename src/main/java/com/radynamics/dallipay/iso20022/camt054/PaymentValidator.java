@@ -19,16 +19,11 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
         var list = new ArrayList<ValidationResult>();
         list.addAll(Arrays.asList(new Validator().validate(t)));
 
-        if (t.getSenderAccount() == null || t.getSenderAccount().getUnformatted().length() == 0) {
-            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("senderAccountMissing"))));
-        } else {
-            if (t.getSenderAccount().getUnformatted().equalsIgnoreCase(t.getSenderWallet().getPublicKey())) {
-                list.add(new ValidationResult(ValidationState.Info, String.format(res.getString("noAccountDefined"))));
-            }
-        }
-
         if (t.isAmountUnknown()) {
-            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("amountUnknown"), Utils.createFormatDate().format(t.getBooked()))));
+            var msg = t.getHistoricExchangeRateException() == null
+                    ? String.format(res.getString("amountUnknown"), Utils.createFormatDate().format(t.getBooked()))
+                    : String.format(res.getString("historyFxRateLoadError"), Utils.createFormatDate().format(t.getBooked()), t.getHistoricExchangeRateException().getMessage());
+            list.add(new ValidationResult(ValidationState.Error, msg));
         }
 
         return list.toArray(new ValidationResult[0]);

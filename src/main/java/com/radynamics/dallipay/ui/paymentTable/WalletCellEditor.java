@@ -34,6 +34,15 @@ public class WalletCellEditor extends AbstractCellEditor implements TableCellEdi
     }
 
     public Object getCellEditorValue() {
-        return component.getText();
+        if (component.getText().length() == 0) {
+            return "";
+        }
+
+        var addressInfo = component.getLedger().createWalletAddressResolver().resolve(component.getText());
+        return addressInfo == null
+                // User input is invalid
+                ? new WalletCellValue(component.getLedger().createWallet(component.getText(), null), component.getDestinationTag())
+                // User input is recognized
+                : new WalletCellValue(addressInfo.getWallet(), addressInfo.getDestinationTag());
     }
 }

@@ -3,7 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import com.radynamics.dallipay.exchange.CurrencyFormatter;
 

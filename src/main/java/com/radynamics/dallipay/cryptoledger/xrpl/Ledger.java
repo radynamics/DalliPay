@@ -1,12 +1,15 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.google.common.primitives.UnsignedInteger;
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -21,16 +24,22 @@ import org.xrpl.xrpl4j.model.transactions.CurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
+import javax.swing.*;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
+    private TrustlineCache trustlineCache;
     private NetworkInfo network;
     private JsonRpcApi api;
+    private WalletAddressResolver walletAddressResolver;
 
     private static final String nativeCcySymbol = "XRP";
+    public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
+    public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
@@ -48,6 +57,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public Icon getIcon() {
+        return new FlatSVGIcon("svg/xrpl.svg", 16, 13);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "XRP Ledger";
+    }
+
+    @Override
     public Transaction createTransaction() {
         return new Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
@@ -59,6 +78,13 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     static Money dropsToXrp(long drops) {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
+    }
+
+    public static UnsignedLong xrpToDrops(Money xrpAmount) {
+        if (!xrpAmount.getCcy().getCode().equals("XRP")) {
+            throw new IllegalArgumentException("Amount expected in XRP and not " + xrpAmount.getCcy().getCode());
+        }
+        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(xrpAmount.getNumber().doubleValue())).value();
     }
 
     @Override
@@ -93,6 +119,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {
+        return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
+    }
+
+    public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, BlockRange period, Wallet ccyIssuer, String ccy) throws Exception {
         return api.listTrustlineTransactions(wallet, period, WalletConverter.from(ccyIssuer), ccy);
     }
 
@@ -144,12 +174,27 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public com.radynamics.dallipay.iso20022.PaymentValidator createPaymentValidator() {
-        return new com.radynamics.dallipay.cryptoledger.xrpl.PaymentValidator(this, new TrustlineCache(this));
+        return new com.radynamics.dallipay.cryptoledger.xrpl.PaymentValidator(this, getTrustlineCache());
+    }
+
+    private TrustlineCache getTrustlineCache() {
+        if (trustlineCache == null || trustlineCache.networkChanged(getNetwork())) {
+            trustlineCache = new TrustlineCache(this);
+        }
+        return trustlineCache;
     }
 
     @Override
     public PaymentPathFinder createPaymentPathFinder() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.paymentpath.PaymentPathFinder();
+    }
+
+    @Override
+    public com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver createWalletAddressResolver() {
+        if (walletAddressResolver == null) {
+            walletAddressResolver = new WalletAddressResolver(this);
+        }
+        return walletAddressResolver;
     }
 
     @Override
@@ -159,7 +204,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
                     new CachedWalletInfoProvider(this, new WalletInfoProvider[]{
                             new StaticWalletInfoProvider(this), new LedgerWalletInfoProvider(this),
                             new Xumm()}),
-                    new TrustlineInfoProvider(new TrustlineCache(this))
+                    new TrustlineInfoProvider(getTrustlineCache())
             };
         }
         return walletInfoProvider;
@@ -199,11 +244,19 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         }
     }
 
+    public boolean isKnownMainnet(NetworkInfo network) {
+        var url = network.getUrl().toString();
+        return url.startsWith("https://xrplcluster.com")
+                || url.startsWith("https://xrpl.ws")
+                || url.startsWith("https://s1.ripple.com:51234")
+                || url.startsWith("https://s2.ripple.com:51234");
+    }
+
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"));
-        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"));
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"), "Mainnet");
+        networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), "Testnet");
         return networks;
     }
 
@@ -230,7 +283,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) throws Exception {
         return api.getEndpointInfo(networkInfo);
     }
 
@@ -242,6 +295,19 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public DestinationTagBuilder createDestinationTagBuilder() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.DestinationTagBuilder();
+    }
+
+    @Override
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        if (!exists(sender) || !exists(receiver)) {
+            return false;
+        }
+        return api.existsPath(WalletConverter.from(sender), WalletConverter.from(receiver), amount);
+    }
+
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return api.existsSellOffer(minimum);
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {

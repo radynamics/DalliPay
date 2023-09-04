@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
+import com.radynamics.dallipay.util.ApiRateLimitLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class XummApi {
     private final static Logger log = LogManager.getLogger(XummApi.class);
 
+    private final static ApiRateLimitLogger apiRateLimit = new ApiRateLimitLogger("Xumm");
     private String accessToken;
     private final ArrayList<XummApiListener> listener = new ArrayList<>();
 
@@ -32,6 +34,10 @@ public class XummApi {
     public JSONObject submit(JSONObject payload) throws IOException, InterruptedException, XummException {
         var json = new JSONObject();
         json.put("txjson", payload);
+
+        var options = new JSONObject();
+        json.put("options", options);
+        options.put("pathfinding", true);
 
         return post("/payload", HttpRequest.BodyPublishers.ofString(json.toString()));
     }
@@ -83,27 +89,11 @@ public class XummApi {
     }
 
     private void logRateLimit(HttpHeaders headers) throws XummException {
-        final String nameRemaining = "X-RateLimit-Remaining";
-        var remainingText = headers.firstValue(nameRemaining).orElse(null);
-        if (remainingText == null) {
-            log.warn(String.format("Header %s was not present in response.", nameRemaining));
+        if (apiRateLimit.log(headers)) {
             return;
         }
 
-        var limitText = headers.firstValue("X-RateLimit-Limit").orElse("0");
-        var msg = String.format("Remaining %s/%s calls within rateLimit.", remainingText, limitText);
-        if (Integer.parseInt(remainingText) >= 10) {
-            log.info(msg);
-            return;
-        }
-        if (Integer.parseInt(remainingText) > 0) {
-            log.warn(msg);
-            return;
-        }
-
-        var exceptionText = String.format("Xumm API call limit reached. %s", msg);
-        log.error(exceptionText);
-        throw new XummException(exceptionText);
+        throw new XummException("Xumm: API call limit reached");
     }
 
     private void handleStatusCode(Integer statusCode) throws XummException {

@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +34,7 @@ public class WalletField extends JPanel {
     private ValidationControlDecorator walletDecorator;
     private InputControlValidator destinationTagValidator;
     private ValidationControlDecorator destinationTagDecorator;
+    private boolean isVerifing;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -57,9 +58,19 @@ public class WalletField extends JPanel {
                 @Override
                 public boolean verify(JComponent input) {
                     var text = ((JTextField) input).getText();
+                    var isValid = walletValidator.isValid(text);
+                    if (isVerifing) {
+                        return isValid;
+                    }
+
+                    isVerifing = true;
                     walletDecorator.update(text);
                     updateInfoText(text);
-                    return walletValidator.isValid(text);
+                    if (isValid) {
+                        resolve(text);
+                    }
+                    isVerifing = false;
+                    return isValid;
                 }
             });
             txt.addFocusListener(new FocusListener() {
@@ -161,6 +172,17 @@ public class WalletField extends JPanel {
             lblInfoText.setText("");
         }
         WalletInfoFormatter.format(lblInfoText, wi);
+    }
+
+    private void resolve(String text) {
+        var addressInfo = ledger.createWalletAddressResolver().resolve(text);
+        if (addressInfo != null) {
+            // Prevent raising InputVerifier listener if wallet doesn't change.
+            if (addressInfo.getWallet() != null && !getText().equals(addressInfo.getWallet().getPublicKey())) {
+                setWallet(addressInfo.getWallet());
+            }
+            setDestinationTag(addressInfo.getDestinationTag());
+        }
     }
 
     private void lookup() {
@@ -282,6 +304,10 @@ public class WalletField extends JPanel {
                 ? new DestinationTagInputValidator(ledger.createDestinationTagBuilder())
                 : new AlwaysValidInputValidator();
         destinationTagDecorator = new ValidationControlDecorator(destinationTag, destinationTagValidator);
+    }
+
+    public Ledger getLedger() {
+        return ledger;
     }
 
     public void setEditable(boolean b) {

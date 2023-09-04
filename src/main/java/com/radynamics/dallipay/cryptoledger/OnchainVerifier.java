@@ -10,6 +10,7 @@ public class OnchainVerifier {
     private final static Logger log = LogManager.getLogger(OnchainVerifier.class);
 
     private final Ledger ledger;
+    private Transaction onchainTransaction;
 
     public OnchainVerifier(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
@@ -18,12 +19,12 @@ public class OnchainVerifier {
 
     public boolean verify(String transactionId, Transaction expected) {
         if (expected == null) throw new IllegalArgumentException("Parameter 'expected' cannot be null");
-        var actual = getOrNull(transactionId);
-        if (actual == null) {
+        onchainTransaction = getOrNull(transactionId);
+        if (onchainTransaction == null) {
             log.warn(String.format("Could not find on chain transactionId %s to verify result.", transactionId));
             return false;
         }
-        return areEqual(expected, actual);
+        return areEqual(expected, onchainTransaction);
     }
 
     private Transaction getOrNull(String transactionId) {
@@ -64,5 +65,9 @@ public class OnchainVerifier {
         }
 
         return true;
+    }
+
+    public Transaction getOnchainTransaction() {
+        return onchainTransaction;
     }
 }

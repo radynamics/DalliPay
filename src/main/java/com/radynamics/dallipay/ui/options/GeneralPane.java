@@ -26,15 +26,12 @@ public class GeneralPane extends JPanel {
     private HttpUrl faucetUrl;
 
     private final SpringLayout contentLayout;
-    private final Ledger ledger;
+    private Ledger ledger;
     private JComboBox<String> cboExplorer;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
-    public GeneralPane(Ledger ledger) {
-        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
-        this.ledger = ledger;
-
+    public GeneralPane() {
         setPreferredSize(new Dimension(1000, 400));
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
@@ -52,7 +49,6 @@ public class GeneralPane extends JPanel {
                         return super.getListCellRendererComponent(list, LookupProviderFactory.getDisplayText(value.toString()), index, isSelected, cellHasFocus);
                     }
                 });
-                refreshExplorer();
                 cboExplorer.setPreferredSize(new Dimension(150, 21));
                 builder.addRowContent(top, cboExplorer);
                 top += 30;
@@ -146,6 +142,8 @@ public class GeneralPane extends JPanel {
         sb.append("JUnit, Eclipse Public License - v 2.0, https://junit.org" + System.lineSeparator());
         sb.append(System.lineSeparator());
         sb.append("XMLUnit, Apache License 2.0, https://www.xmlunit.org" + System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append("Opencsv, Apache License 2.0, https://opencsv.sourceforge.net" + System.lineSeparator());
 
         var textArea = new JTextArea(sb.toString());
         textArea.setColumns(30);
@@ -213,5 +211,11 @@ public class GeneralPane extends JPanel {
     public void load(ConfigRepo repo) throws Exception {
         faucetUrl = repo.getFaucetUrl(ledger);
         cboExplorer.setSelectedItem(repo.getLookupProviderId());
+    }
+
+    public void init(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
+        refreshExplorer();
     }
 }

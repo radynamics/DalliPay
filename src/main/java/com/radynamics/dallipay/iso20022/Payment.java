@@ -1,8 +1,9 @@
 package com.radynamics.dallipay.iso20022;
 
-import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.exchange.*;
@@ -24,6 +25,8 @@ public class Payment {
     private ExchangeRate exchangeRate;
     private Origin origin;
     private ExpectedCurrency expectedCcy;
+    private TransactionSubmitter submitter = new NullSubmitter();
+    private Exception historicExchangeRateException;
 
     private static final Double UnknownAmount = Double.valueOf(0);
     private static final Currency UnknownCCy = null;
@@ -68,6 +71,10 @@ public class Payment {
 
     public ZonedDateTime getBooked() {
         return cryptoTrx.getBooked();
+    }
+
+    public Block getBlock() {
+        return cryptoTrx.getBlock();
     }
 
     public TransmissionState getTransmission() {
@@ -323,16 +330,21 @@ public class Payment {
 
     public void refreshPaymentPath(CurrencyConverter currencyConverter) {
         var availablePaths = getLedger().createPaymentPathFinder().find(currencyConverter, this);
+        if (availablePaths.length == 0) {
+            return;
+        }
+
         var pathSameCcyCode = Arrays.stream(availablePaths)
                 .filter(o -> o.getCcy().withoutIssuer().equals(getUserCcy()))
                 .findFirst()
                 .orElse(null);
         if (pathSameCcyCode == null) {
-            return;
+            Arrays.sort(availablePaths, (a, b) -> Integer.compare(b.getRank(), a.getRank()));
+            availablePaths[0].apply(this);
+        } else {
+            setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
+            pathSameCcyCode.apply(this);
         }
-
-        setAmount(Money.of(getAmount(), pathSameCcyCode.getCcy()));
-        pathSameCcyCode.apply(this);
     }
 
     public Origin getOrigin() {
@@ -349,5 +361,22 @@ public class Payment {
 
     public void setExpectedCurrency(ExpectedCurrency expectedCcy) {
         this.expectedCcy = expectedCcy;
+    }
+
+    public TransactionSubmitter getSubmitter() {
+        return this.submitter;
+    }
+
+    public void setSubmitter(TransactionSubmitter submitter) {
+        if (submitter == null) throw new IllegalArgumentException("Parameter 'submitter' cannot be null");
+        this.submitter = submitter;
+    }
+
+    public void setHistoricExchangeRateException(Exception e) {
+        historicExchangeRateException = e;
+    }
+
+    public Exception getHistoricExchangeRateException() {
+        return historicExchangeRateException;
     }
 }

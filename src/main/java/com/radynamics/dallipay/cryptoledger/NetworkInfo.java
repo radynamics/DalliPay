@@ -3,38 +3,39 @@ package com.radynamics.dallipay.cryptoledger;
 import okhttp3.HttpUrl;
 
 import java.time.ZonedDateTime;
-import java.util.Locale;
 
 public class NetworkInfo {
     private HttpUrl url;
     private String networkId;
+    private String displayName;
 
     private static final String liveId = "livenet";
     private static final String testnetId = "testnet";
 
-    public static NetworkInfo create(HttpUrl url) {
-        return create(url, null);
+    public static NetworkInfo create(HttpUrl url, String displayName) {
+        return create(url, displayName, null);
     }
 
-    public static NetworkInfo createLivenet(HttpUrl url) {
-        return create(url, liveId);
+    public static NetworkInfo createLivenet(HttpUrl url, String displayName) {
+        return create(url, displayName, liveId);
     }
 
-    public static NetworkInfo createTestnet(HttpUrl url) {
-        return create(url, testnetId);
+    public static NetworkInfo createTestnet(HttpUrl url, String displayName) {
+        return create(url, displayName, testnetId);
     }
 
-
-    public static NetworkInfo create(HttpUrl url, String networkId) {
+    public static NetworkInfo create(HttpUrl url, String displayName, String networkId) {
         if (url == null) throw new IllegalArgumentException("Parameter 'url' cannot be null");
+        if (displayName == null) throw new IllegalArgumentException("Parameter 'displayName' cannot be null");
         var o = new NetworkInfo();
         o.networkId = networkId;
         o.url = url;
+        o.displayName = displayName;
         return o;
     }
 
     public String getShortText() {
-        return getId() == null ? "UNKNOWN" : getId().toUpperCase(Locale.ROOT);
+        return getDisplayName();
     }
 
     public HttpUrl getUrl() {
@@ -43,6 +44,10 @@ public class NetworkInfo {
 
     public String getId() {
         return networkId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public boolean matches(String text) {
@@ -65,5 +70,12 @@ public class NetworkInfo {
 
     public boolean isTestnet() {
         return testnetId.equals(networkId);
+    }
+
+    public boolean sameNet(NetworkInfo network) {
+        if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
+        if (url.equals(network.getUrl())) return true;
+        if (networkId.equals(network.networkId)) return true;
+        return false;
     }
 }

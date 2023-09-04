@@ -27,9 +27,12 @@ public class WalletFieldInputValidator implements InputControlValidator {
             return null;
         }
 
-        var wallet = ledger.createWallet(text, null);
-        var result = new WalletValidator(ledger).validateFormat(wallet);
-        return result == null ? wallet : null;
+        var addressInfo = ledger.createWalletAddressResolver().resolve(text);
+        if (addressInfo == null) {
+            return null;
+        }
+        var result = new WalletValidator(ledger).validateFormat(addressInfo.getWallet());
+        return result == null ? addressInfo.getWallet() : null;
     }
 
     @Override

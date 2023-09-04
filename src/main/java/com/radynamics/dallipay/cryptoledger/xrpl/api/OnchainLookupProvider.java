@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
 import com.google.common.primitives.UnsignedInteger;
+import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
@@ -12,31 +13,43 @@ import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
-public class LedgerRangeConverter {
-    final static Logger log = LogManager.getLogger(LedgerRangeConverter.class);
+public class OnchainLookupProvider implements LedgerAtTimeProvider {
+    final static Logger log = LogManager.getLogger(OnchainLookupProvider.class);
     private XrplClient xrplClient;
     private final LedgerAtTimeCache cache = new LedgerAtTimeCache();
     private LedgerAtTime latestLedgerFirstCall;
 
-    public LedgerRangeConverter(XrplClient xrplClient) {
+    public OnchainLookupProvider(XrplClient xrplClient) {
         this.xrplClient = xrplClient;
     }
 
-    public LedgerIndex estimatedDaysAgo(long daysAgo) throws JsonRpcClientErrorException {
+    public Optional<LedgerAtTime> estimatedDaysAgo(long daysAgo) throws LedgerAtTimeException {
         if (this.latestLedgerFirstCall == null) {
-            this.latestLedgerFirstCall = getEstimatedLatestLedger();
+            try {
+                this.latestLedgerFirstCall = getEstimatedLatestLedger();
+            } catch (JsonRpcClientErrorException e) {
+                throw new LedgerAtTimeException(e.getMessage(), e);
+            }
         }
 
         // Assuming average ledger close time
-        final int AVG_LEDGER_CLOSE_TIME_SEC = 4;
-        var estimatedPassedLedgers = ((60 / AVG_LEDGER_CLOSE_TIME_SEC) * 60 * 24 * daysAgo);
-        return latestLedgerFirstCall.getLedgerIndex().minus(UnsignedInteger.valueOf(estimatedPassedLedgers));
+        var ago = Duration.ofDays(daysAgo);
+        var estimatedPassedLedgers = UnsignedInteger.valueOf(ago.getSeconds() / Ledger.AVG_LEDGER_CLOSE_TIME_SEC);
+        if (latestLedgerFirstCall.getLedgerIndex().unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new LedgerAtTime(ZonedDateTime.now().minus(ago), latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers)));
     }
 
-    public LedgerIndex findOrNull(ZonedDateTime dt) throws JsonRpcClientErrorException {
-        var ledger = findLedger(dt);
-        return ledger == null ? null : ledger.getLedgerIndex();
+    public Optional<LedgerAtTime> at(ZonedDateTime dt) throws LedgerAtTimeException {
+        try {
+            var ledger = findLedger(dt);
+            return ledger == null ? Optional.empty() : Optional.of(ledger);
+        } catch (JsonRpcClientErrorException e) {
+            throw new LedgerAtTimeException(e.getMessage(), e);
+        }
     }
 
     private LedgerAtTime findLedger(ZonedDateTime dt) throws JsonRpcClientErrorException {

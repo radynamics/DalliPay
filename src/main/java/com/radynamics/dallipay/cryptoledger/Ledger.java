@@ -1,15 +1,22 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import okhttp3.HttpUrl;
 
+import javax.swing.*;
+
 public interface Ledger {
     LedgerId getId();
 
     String getNativeCcySymbol();
+
+    Icon getIcon();
+
+    String getDisplayText();
 
     Transaction createTransaction();
 
@@ -41,6 +48,8 @@ public interface Ledger {
 
     PaymentPathFinder createPaymentPathFinder();
 
+    WalletAddressResolver createWalletAddressResolver();
+
     WalletInfoProvider[] getInfoProvider();
 
     void setInfoProvider(WalletInfoProvider[] walletInfoProvider);
@@ -57,9 +66,13 @@ public interface Ledger {
 
     Money roundNativeCcy(Money amt);
 
-    EndpointInfo getEndpointInfo(NetworkInfo networkInfo);
+    EndpointInfo getEndpointInfo(NetworkInfo networkInfo) throws Exception;
 
     boolean supportsDestinationTag();
 
     DestinationTagBuilder createDestinationTagBuilder();
+
+    boolean existsPath(Wallet sender, Wallet receiver, Money amount);
+
+    boolean existsSellOffer(Money minimum);
 }

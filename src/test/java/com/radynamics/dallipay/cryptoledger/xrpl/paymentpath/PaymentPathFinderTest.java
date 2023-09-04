@@ -8,6 +8,7 @@ import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.TestUtils;
+import com.radynamics.dallipay.iso20022.camt054.TestFactory;
 import com.radynamics.dallipay.iso20022.pain001.TestLedger;
 import com.radynamics.dallipay.iso20022.pain001.TestTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,7 @@ public class PaymentPathFinderTest {
     private void assertLedgerNativeCcyPath(PaymentPath actual) {
         Assertions.assertNotNull(actual);
         Assertions.assertInstanceOf(LedgerNativeCcyPath.class, actual);
-        Assertions.assertEquals(((LedgerNativeCcyPath) actual).getCcy(), new Currency("TEST"));
+        Assertions.assertEquals(new Currency("TEST"), actual.getCcy());
     }
 
     @ParameterizedTest
@@ -101,14 +102,15 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
+        p.setSubmitter(TestFactory.createSubmitter());
         var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(2, actual.length);
         assertLedgerNativeCcyPath(actual[0]);
 
         Assertions.assertInstanceOf(IssuedCurrencyPath.class, actual[1]);
-        Assertions.assertEquals(((IssuedCurrencyPath) actual[1]).getCcy(), ccyCCC);
-        Assertions.assertEquals(actual[1].getRank(), 10);
+        Assertions.assertEquals(ccyCCC, actual[1].getCcy());
+        Assertions.assertEquals(10, actual[1].getRank());
     }
 
     @Test
@@ -116,9 +118,9 @@ public class PaymentPathFinderTest {
         var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
         var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
         var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
-        ccyCCC1.setTransferFee(3);
+        ccyCCC1.setTransferFee(0.003);
         var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
-        ccyCCC2.setTransferFee(2);
+        ccyCCC2.setTransferFee(0.002);
 
         var senderWallet = ledger.createWallet("aaa", "");
         senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
@@ -134,6 +136,7 @@ public class PaymentPathFinderTest {
         p.setSenderWallet(senderWallet);
         p.setReceiverWallet(receiverWallet);
         p.setAmount(Money.of(20.0, new Currency("CCC")));
+        p.setSubmitter(TestFactory.createSubmitter());
         var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
 
         Assertions.assertEquals(3, actual.length);
@@ -143,14 +146,65 @@ public class PaymentPathFinderTest {
             var actualPath = actual[1];
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
             // CCC_issuer2 has lower transfer fee
-            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC2);
-            Assertions.assertEquals(actualPath.getRank(), 10);
+            Assertions.assertEquals(ccyCCC2, actualPath.getCcy());
+            Assertions.assertEquals(8, actualPath.getRank());
         }
         {
             var actualPath = actual[2];
             Assertions.assertInstanceOf(IssuedCurrencyPath.class, actualPath);
-            Assertions.assertEquals(((IssuedCurrencyPath) actualPath).getCcy(), ccyCCC1);
-            Assertions.assertEquals(actualPath.getRank(), 9);
+            Assertions.assertEquals(ccyCCC1, actualPath.getCcy());
+            Assertions.assertEquals(7, actualPath.getRank());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void findPathFindingPath(boolean senderHoldsCCC1) {
+        var ccyAAA = TestUtils.createIssuedCcy(ledger, "AAA");
+        var ccyBBB = TestUtils.createIssuedCcy(ledger, "BBB");
+        var ccyCCC1 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer1");
+        ccyCCC1.setTransferFee(0.003);
+        var ccyCCC2 = TestUtils.createIssuedCcy(ledger, "CCC", "CCC_issuer2");
+        ccyCCC2.setTransferFee(0.002);
+
+        var senderWallet = ledger.createWallet("aaa", "");
+        senderWallet.getBalances().set(Money.of(80.0, ccyAAA));
+        if (senderHoldsCCC1) {
+            senderWallet.getBalances().set(Money.of(800.0, ccyCCC1));
+        }
+
+        var receiverWallet = ledger.createWallet("bbb", "");
+        receiverWallet.getBalances().set(Money.of(100.0, ccyBBB));
+        receiverWallet.getBalances().set(Money.of(1000.0, ccyCCC1));
+        receiverWallet.getBalances().set(Money.of(10000.0, ccyCCC2));
+
+        var p = new Payment(new TestTransaction(ledger, 10.0, "TEST"));
+        p.setSenderWallet(senderWallet);
+        p.setReceiverWallet(receiverWallet);
+        p.setAmount(Money.of(20.0, new Currency("CCC")));
+        p.setSubmitter(TestFactory.createSubmitter());
+        var actual = new PaymentPathFinder().find(new CurrencyConverter(), p);
+
+        Assertions.assertEquals(3, actual.length);
+        assertLedgerNativeCcyPath(actual[0]);
+
+        if (senderHoldsCCC1) {
+            Assertions.assertInstanceOf(IssuedCurrencyPath.class, actual[1]);
+            Assertions.assertEquals(ccyCCC1, actual[1].getCcy());
+            Assertions.assertEquals(7, actual[1].getRank());
+
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[2]);
+            Assertions.assertEquals(ccyCCC2, actual[2].getCcy());
+            Assertions.assertEquals(4, actual[2].getRank());
+        } else {
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[1]);
+            // CCC_issuer2 has lower transfer fee
+            Assertions.assertEquals(ccyCCC2, actual[1].getCcy());
+            Assertions.assertEquals(4, actual[1].getRank());
+
+            Assertions.assertInstanceOf(PathFindingPath.class, actual[2]);
+            Assertions.assertEquals(ccyCCC1, actual[2].getCcy());
+            Assertions.assertEquals(3, actual[2].getRank());
         }
     }
 }

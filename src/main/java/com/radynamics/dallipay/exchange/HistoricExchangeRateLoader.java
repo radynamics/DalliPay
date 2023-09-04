@@ -40,7 +40,17 @@ public class HistoricExchangeRateLoader {
             }
 
             var source = transformInstruction.getHistoricExchangeRateSource();
-            var rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked()) : null;
+            ExchangeRate rate;
+            try {
+                rate = CurrencyPair.contains(source.getSupportedPairs(), ccyPair) ? source.rateAt(ccyPair, t.getBooked(), t.getLedger().getNetwork(), t.getBlock()) : null;
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                t.setHistoricExchangeRateException(e);
+                t.setAmountUnknown();
+                completableFuture.complete(t);
+                return;
+            }
+
             if (rate == null) {
                 log.info(String.format("No FX rate found for %s at %s with %s", ccyPair.getDisplayText(), t.getBooked(), source.getDisplayText()));
                 t.setAmountUnknown();

@@ -4,6 +4,8 @@ import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.ui.Utils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class MoneyFormatter {
     public static String formatLedger(Money amount) {
@@ -11,7 +13,9 @@ public class MoneyFormatter {
     }
 
     public static String formatExact(Money amount) {
-        return formatFiat(amount.getNumber().toString(), amount.getCcy().getCode());
+        var df = new DecimalFormat("0", DecimalFormatSymbols.getInstance());
+        df.setMaximumFractionDigits(340); // 340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+        return formatFiat(df.format(amount.getNumber()), amount.getCcy().getCode());
     }
 
     public static String formatFiat(Money amount) {

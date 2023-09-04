@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:;base64,=">
+    <title>GemWallet</title>
+    <script src="https://unpkg.com/@gemwallet/api@3.0.0/umd/gemwallet-api.js"></script>
+    <script type="text/javascript"  src="/send/common/walletbridge.js"></script>
+    <link rel="stylesheet" href="/send/common/main.css">
+</head>
+<body>
+</body>
+
+<script type="text/JavaScript">
+
+function onLoad() {
+    var bridge = new WalletBridge('GemWallet', 'https://gemwallet.app')
+    if(!bridge.init()) {
+        return
+    }
+
+    GemWalletApi.isInstalled().then((response) => {
+        if(!response.result.isInstalled) {
+            bridge.hide('waiting')
+            bridge.show('walletApiNotAvailable')
+            return;
+        }
+
+        GemWalletApi.sendPayment(bridge._tx).then((response) => {
+            if(response.result == null) {
+                bridge.reject()
+            } else {
+                bridge.success(response.result.hash);
+            }
+        });
+    });
+}
+
+window.addEventListener("load", onLoad);
+
+</script>
+</html>

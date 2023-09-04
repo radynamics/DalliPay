@@ -21,8 +21,8 @@ public final class StructuredReferenceConverter {
 
     private static String toType(ReferenceType t) {
         switch (t) {
-            case Isr -> {
-                return "isr";
+            case Unknown -> {
+                return "unk";
             }
             case Scor -> {
                 return "scor";

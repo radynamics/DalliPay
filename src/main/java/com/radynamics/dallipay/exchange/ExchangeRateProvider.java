@@ -1,5 +1,8 @@
 package com.radynamics.dallipay.exchange;
 
+import com.radynamics.dallipay.cryptoledger.Block;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+
 import java.time.ZonedDateTime;
 
 public interface ExchangeRateProvider {
@@ -17,5 +20,5 @@ public interface ExchangeRateProvider {
 
     ExchangeRate[] latestRates();
 
-    ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime);
+    ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime, NetworkInfo blockNetwork, Block block);
 }

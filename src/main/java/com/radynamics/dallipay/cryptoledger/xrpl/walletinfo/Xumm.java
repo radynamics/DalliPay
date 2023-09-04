@@ -1,9 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.walletinfo;
 
-import com.radynamics.dallipay.cryptoledger.Cache;
-import com.radynamics.dallipay.cryptoledger.Wallet;
-import com.radynamics.dallipay.cryptoledger.WalletInfo;
-import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
+import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -26,12 +24,13 @@ public class Xumm implements WalletInfoProvider {
     @Override
     public synchronized WalletInfo[] list(Wallet wallet) throws WalletInfoLookupException {
         cache.evictOutdated();
-        var data = cache.get(wallet);
+        var key = new WalletKey(wallet);
+        var data = cache.get(key);
         if (data != null) {
             return data;
         }
         // Contained without data means "wallet doesn't exist" (wasn't found previously)
-        if (cache.isPresent(wallet)) {
+        if (cache.isPresent(key)) {
             return new WalletInfo[0];
         }
 
@@ -92,7 +91,7 @@ public class Xumm implements WalletInfoProvider {
                 var o = thirdPartyProfiles.getJSONObject(i);
                 var accountAlias = get(o, "accountAlias").orElse(null);
                 if (accountAlias != null) {
-                    list.add(new WalletInfo(this, String.format(res.getString("accountAlias"), o.getString("source")), accountAlias, 40, InfoType.Name));
+                    list.add(new WalletInfo(this, o.getString("source"), accountAlias, 40, InfoType.Name));
                 }
             }
         }
@@ -111,7 +110,7 @@ public class Xumm implements WalletInfoProvider {
         }
 
         var infos = list.toArray(new WalletInfo[0]);
-        cache.add(wallet, infos);
+        cache.add(key, infos);
         return infos;
     }
 

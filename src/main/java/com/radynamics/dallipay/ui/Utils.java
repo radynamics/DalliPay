@@ -164,4 +164,28 @@ public final class Utils {
         frm.setLocationRelativeTo(null);
         return frm;
     }
+
+    public static String wrapText(String text, int aroundChar) {
+        var sb = new StringBuilder();
+        var counter = 0;
+        for (var i = 0; i < text.length(); i++) {
+            var c = text.charAt(i);
+            sb.append(c);
+
+            if (counter >= aroundChar && c == ' ') {
+                sb.append(System.lineSeparator());
+                counter = 0;
+                continue;
+            }
+
+            counter++;
+        }
+        return sb.toString();
+    }
+
+    public static String withoutPath(URI uri) {
+        return uri.getRawPath().replace("/", "").length() == 0
+                ? uri.toString()
+                : uri.toString().substring(0, uri.toString().indexOf(uri.getPath()));
+    }
 }

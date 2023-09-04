@@ -103,6 +103,8 @@ public class FilePathField extends JPanel {
         var fc = new JFileChooser();
         var xmlFilter = new FileTypeFilter(".xml", res.getString("fileTypeText"));
         fc.addChoosableFileFilter(xmlFilter);
+        fc.addChoosableFileFilter(new FileTypeFilter(".csv", res.getString("fileTypeTextCsv")));
+        fc.addChoosableFileFilter(new FileTypeFilter(".aba", res.getString("fileTypeTextAba")));
         fc.setFileFilter(xmlFilter);
         if (getText().length() > 0) {
             fc.setCurrentDirectory(new File(getText()).getParentFile());

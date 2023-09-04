@@ -3,7 +3,7 @@ package com.radynamics.dallipay.iso20022;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
-import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.InfoType;
+import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

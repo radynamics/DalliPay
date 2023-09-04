@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -16,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLInputFactory;
@@ -23,7 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class Pain001Reader {
+public class Pain001Reader implements PaymentInstructionReader {
     final static Logger log = LogManager.getLogger(Pain001Reader.class);
     private final Ledger ledger;
 
@@ -55,12 +55,12 @@ public class Pain001Reader {
                 var t = new Payment(ledger.createTransaction());
                 t.setEndToEndId(cdtTrfTxInf.getPmtId().getEndToEndId());
                 t.setSenderAccount(senderAccount);
-                t.setSenderWallet(toValidWalletOrNull(senderAccount));
+                t.setSenderWallet(ReaderUtils.toValidWalletOrNull(ledger, senderAccount));
                 t.setSenderAddress(senderAddress);
                 t.setReceiverAccount(receiverAccount);
-                t.setReceiverWallet(toValidWalletOrNull(receiverAccount));
+                t.setReceiverWallet(ReaderUtils.toValidWalletOrNull(ledger, receiverAccount));
                 t.setReceiverAddress(getAddress(cdtTrfTxInf.getCdtr()));
-                t.setOrigin(Origin.Pain001);
+                t.setOrigin(Origin.Imported);
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {
@@ -98,13 +98,6 @@ public class Pain001Reader {
 
         log.trace(String.format("%s payments read from pain001", list.size()));
         return list.toArray(new Payment[0]);
-    }
-
-    private Wallet toValidWalletOrNull(Account account) {
-        if (account == null || !ledger.isValidPublicKey(account.getUnformatted())) {
-            return null;
-        }
-        return ledger.createWallet(account.getUnformatted(), null);
     }
 
     private Address getAddress(PartyIdentification32 obj) {
@@ -178,5 +171,15 @@ public class Pain001Reader {
 
     public Ledger getLedger() {
         return ledger;
+    }
+
+    @Override
+    public JPanel createParameterPanel() {
+        return null;
+    }
+
+    @Override
+    public boolean applyParameters(JPanel parameterPanel) {
+        return true;
     }
 }
