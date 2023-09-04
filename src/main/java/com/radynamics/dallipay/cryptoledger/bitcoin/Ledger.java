@@ -1,8 +1,10 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.DemoExchange;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -12,6 +14,8 @@ import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
+
+import javax.swing.*;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -26,6 +30,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public String getNativeCcySymbol() {
         return "BTC";
+    }
+
+    @Override
+    public Icon getIcon() {
+        return new FlatSVGIcon("svg/bitcoin.svg", 16, 16);
+    }
+
+    @Override
+    public String getDisplayText() {
+        return "Bitcoin";
     }
 
     @Override
@@ -121,6 +135,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public WalletAddressResolver createWalletAddressResolver() {
+        return value -> null;
+    }
+
+    @Override
     public WalletInfoProvider[] getInfoProvider() {
         return new WalletInfoProvider[0];
     }
@@ -145,7 +164,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     public NetworkInfo[] getDefaultNetworkInfo() {
         // TODO: implement
         var networks = new NetworkInfo[1];
-        networks[0] = NetworkInfo.createTestnet(HttpUrl.get("http://user:pass@localhost:8332"));
+        networks[0] = NetworkInfo.createTestnet(HttpUrl.get("http://user:pass@localhost:8332"), "Testnet");
         return networks;
     }
 
@@ -184,5 +203,15 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public DestinationTagBuilder createDestinationTagBuilder() {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public boolean existsPath(Wallet sender, Wallet receiver, Money amount) {
+        return false;
+    }
+
+    @Override
+    public boolean existsSellOffer(Money minimum) {
+        return false;
     }
 }
