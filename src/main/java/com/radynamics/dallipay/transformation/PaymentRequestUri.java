@@ -14,11 +14,11 @@ import org.apache.logging.log4j.Logger;
 import java.net.URI;
 import java.util.Locale;
 
-public class Xls2d {
-    private final static Logger log = LogManager.getLogger(Xls2d.class);
+public class PaymentRequestUri {
+    private final static Logger log = LogManager.getLogger(PaymentRequestUri.class);
     private final Ledger ledger;
 
-    public Xls2d(Ledger ledger) {
+    public PaymentRequestUri(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
     }

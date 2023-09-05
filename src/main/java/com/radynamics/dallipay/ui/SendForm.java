@@ -295,7 +295,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     public void addNewPaymentByRequest(URI requestUri) {
-        var mp = ManualPayment.createByXls2d(this, transformInstruction.getLedger(), transactionTranslator, requestUri);
+        var mp = ManualPayment.createByRequestUri(this, transformInstruction.getLedger(), transactionTranslator, requestUri);
         if (mp == null) {
             return;
         }

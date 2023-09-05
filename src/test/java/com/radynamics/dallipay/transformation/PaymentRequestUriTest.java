@@ -8,31 +8,31 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.net.URI;
 
-public class Xls2dTest {
+public class PaymentRequestUriTest {
     @Test
     public void ctrNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new Xls2d(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentRequestUri(null));
     }
 
     @Test
     public void matches() {
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&dt=123"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.7654321"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=usd"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034"));
-        Assertions.assertTrue(Xls2d.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&dt=123"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.7654321"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=usd"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034"));
+        Assertions.assertTrue(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test"));
 
-        Assertions.assertFalse(Xls2d.matches("http://127.0.0.1:58909/request/?amount=98.7654321"));
-        Assertions.assertFalse(Xls2d.matches("http://127.0.0.1:58909/request/?dt=123"));
+        Assertions.assertFalse(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?amount=98.7654321"));
+        Assertions.assertFalse(PaymentRequestUri.matches("http://127.0.0.1:58909/request/?dt=123"));
     }
 
     @Test
     public void createOrNull() {
         var ledger = new TestLedger();
         {
-            var o = new Xls2d(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc"));
+            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc"));
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(0.0, o.getAmount());
             Assertions.assertEquals("TEST", o.getUserCcyCodeOrEmpty());
@@ -40,7 +40,7 @@ public class Xls2dTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new Xls2d(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD"));
+            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD"));
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(98.76, o.getAmount());
             Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
@@ -49,7 +49,7 @@ public class Xls2dTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new Xls2d(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&dt=123&amount=98.7654321"));
+            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&dt=123&amount=98.7654321"));
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals("123", o.getDestinationTag());
             Assertions.assertEquals(98.7654321, o.getAmount());
@@ -58,7 +58,7 @@ public class Xls2dTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new Xls2d(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test"));
+            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test"));
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(98.76, o.getAmount());
             Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
@@ -77,7 +77,7 @@ public class Xls2dTest {
     public void createOrNullCcyCasing(String ccy) {
         var ledger = new TestLedger();
 
-        var o = new Xls2d(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=" + ccy));
+        var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=" + ccy));
         Assertions.assertEquals(98.76, o.getAmount());
         Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
     }

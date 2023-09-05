@@ -10,7 +10,7 @@ import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.pain001.PaymentValidator;
 import com.radynamics.dallipay.transformation.FreeTextPaymentFactory;
-import com.radynamics.dallipay.transformation.Xls2d;
+import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
 import com.radynamics.dallipay.util.RequestFocusListener;
@@ -71,12 +71,12 @@ public class ManualPayment {
         return o;
     }
 
-    public static ManualPayment createByXls2d(Component parentComponent, Ledger ledger, TransactionTranslator transactionTranslator, URI requestUri) {
-        if (!Xls2d.matches(requestUri.toString())) {
+    public static ManualPayment createByRequestUri(Component parentComponent, Ledger ledger, TransactionTranslator transactionTranslator, URI requestUri) {
+        if (!PaymentRequestUri.matches(requestUri.toString())) {
             return null;
         }
 
-        var factory = new Xls2d(ledger);
+        var factory = new PaymentRequestUri(ledger);
         return create(parentComponent, factory.createOrNull(requestUri), transactionTranslator);
     }
 
