@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
+import com.radynamics.dallipay.exchange.ManualRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.EmptyPaymentValidator;
 import okhttp3.HttpUrl;
@@ -193,6 +194,16 @@ public class TestLedger implements Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         return new NetworkInfo[0];
+    }
+
+    @Override
+    public String[] getExchangeRateProviders() {
+        return new String[]{ManualRateProvider.ID};
+    }
+
+    @Override
+    public ExchangeRateProvider getDefaultExchangeRateProvider() {
+        return new ManualRateProvider();
     }
 
     @Override

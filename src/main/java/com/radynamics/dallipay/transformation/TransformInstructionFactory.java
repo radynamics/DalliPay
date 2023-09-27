@@ -5,6 +5,7 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Coinbase;
+import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,8 @@ public final class TransformInstructionFactory {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(getNetworkOrDefault(ledger, config, networkId));
         try (var repo = new ConfigRepo()) {
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider(), ledger));
+            var persistedProvider = repo.getExchangeRateProvider();
+            t.setExchangeRateProvider(createExchangeRateProvider(ledger, persistedProvider.orElse(null)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID, ledger));
@@ -32,6 +34,14 @@ public final class TransformInstructionFactory {
         t.setHistoricExchangeRateSource(ledger.createHistoricExchangeRateSource());
         t.getHistoricExchangeRateSource().init();
         return t;
+    }
+
+    private static ExchangeRateProvider createExchangeRateProvider(Ledger ledger, String id) {
+        if (id == null || !ExchangeRateProviderFactory.supports(ledger, id)) {
+            return ledger.getDefaultExchangeRateProvider();
+        }
+
+        return ExchangeRateProviderFactory.create(id, ledger);
     }
 
     private static NetworkInfo getNetworkOrDefault(Ledger ledger, Config config, String networkId) {

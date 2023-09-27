@@ -60,6 +60,10 @@ public interface Ledger {
 
     NetworkInfo[] getDefaultNetworkInfo();
 
+    String[] getExchangeRateProviders();
+
+    ExchangeRateProvider getDefaultExchangeRateProvider();
+
     HttpUrl getDefaultFaucetUrl();
 
     TransactionSubmitterFactory createTransactionSubmitterFactory();

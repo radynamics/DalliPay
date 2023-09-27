@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracle;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public final class ExchangeRateProviderFactory {
     public static final ExchangeRateProvider create(String id, Ledger ledger) {
@@ -20,6 +21,8 @@ public final class ExchangeRateProviderFactory {
                 return new Bitstamp(ledger);
             case Coinbase.ID:
                 return new Coinbase(ledger);
+            case ManualRateProvider.ID:
+                return new ManualRateProvider();
             case XrplPriceOracle.ID:
                 return new XrplPriceOracle(network);
             default:
@@ -29,8 +32,13 @@ public final class ExchangeRateProviderFactory {
 
     public static ExchangeRateProvider[] allExchanges(Ledger ledger) {
         var list = new ArrayList<ExchangeRateProvider>();
-        list.add(create(Bitstamp.ID, ledger));
-        list.add(create(Coinbase.ID, ledger));
+        for (var id : ledger.getExchangeRateProviders()) {
+            list.add(create(id, ledger));
+        }
         return list.toArray(new ExchangeRateProvider[0]);
+    }
+
+    public static boolean supports(Ledger ledger, String id) {
+        return Arrays.asList(ledger.getExchangeRateProviders()).contains(id);
     }
 }
