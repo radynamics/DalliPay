@@ -590,7 +590,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
-        var frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now(), Block.VALIDATED);
+        ExchangeRatesForm frm;
+        try {
+            frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now(), Block.VALIDATED);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
         frm.setAllowChangeExchange(true);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(500, 300);
