@@ -11,10 +11,7 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
-import com.radynamics.dallipay.exchange.Currency;
-import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
-import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -258,6 +255,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"), "Mainnet");
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), "Testnet");
         return networks;
+    }
+
+    @Override
+    public String[] getExchangeRateProviders() {
+        return new String[]{ManualRateProvider.ID, Coinbase.ID, Bitstamp.ID};
+    }
+
+    @Override
+    public ExchangeRateProvider getDefaultExchangeRateProvider() {
+        return ExchangeRateProviderFactory.create(Coinbase.ID, this);
     }
 
     @Override

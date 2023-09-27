@@ -5,7 +5,6 @@ import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
-import com.radynamics.dallipay.exchange.Coinbase;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
@@ -64,8 +63,8 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("xrplPriceOracleConfig", value.toString());
     }
 
-    public String getExchangeRateProvider() throws Exception {
-        return single("exchangeRateProvider").orElse(Coinbase.ID);
+    public Optional<String> getExchangeRateProvider() throws Exception {
+        return single("exchangeRateProvider");
     }
 
     public void setExchangeRateProvider(ExchangeRateProvider value) throws Exception {
