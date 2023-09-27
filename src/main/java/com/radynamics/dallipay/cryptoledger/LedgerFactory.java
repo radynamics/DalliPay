@@ -11,6 +11,8 @@ public final class LedgerFactory {
         switch (ledgerId) {
             case Xrpl:
                 return new com.radynamics.dallipay.cryptoledger.xrpl.Ledger();
+            case Xahau:
+                return new com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger();
             default:
                 throw new NotImplementedException(String.format("Ledger %s unknown.", ledgerId));
         }
