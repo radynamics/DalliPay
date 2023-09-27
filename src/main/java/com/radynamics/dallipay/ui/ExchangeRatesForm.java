@@ -26,7 +26,7 @@ public class ExchangeRatesForm extends JDialog {
     private final ArrayList<JTextField> txts = new ArrayList<>();
     private boolean accepted;
     private ZonedDateTime pointInTime;
-    private Block pointInTimeBlock;
+    private final Block pointInTimeBlock;
     private JComboBox<ExchangeRateProvider> cboExchange;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
@@ -37,7 +37,6 @@ public class ExchangeRatesForm extends JDialog {
         if (selectedExchange == null) throw new IllegalArgumentException("Parameter 'selectedExchange' cannot be null");
         if (rates == null) throw new IllegalArgumentException("Parameter 'rates' cannot be null");
         if (pointInTime == null) throw new IllegalArgumentException("Parameter 'pointInTime' cannot be null");
-        if (pointInTimeBlock == null) throw new IllegalArgumentException("Parameter 'pointInTimeBlock' cannot be null");
         this.ledger = ledger;
         this.selectedExchange = selectedExchange;
         this.rates = rates;
