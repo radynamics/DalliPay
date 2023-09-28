@@ -72,7 +72,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.getTransaction(transactionId);
     }
 
-    Money dropsToXrp(long drops) {
+    public Money dropsToXrp(long drops) {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(getNativeCcySymbol()));
     }
 

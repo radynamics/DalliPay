@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.FeeInfo;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
@@ -18,10 +19,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class WebSocketApi {
+    private final Ledger ledger;
     private final URI uri;
 
-    public WebSocketApi(URI uri) {
+    public WebSocketApi(Ledger ledger, URI uri) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         if (uri == null) throw new IllegalArgumentException("Parameter 'uri' cannot be null");
+        this.ledger = ledger;
         this.uri = uri;
     }
 
@@ -74,6 +78,6 @@ public class WebSocketApi {
     }
 
     private FeeInfo toFeeInfo(JSONObject json) {
-        return new FeeInfo(json.getJSONObject("result").getJSONObject("drops").getLong("base_fee"));
+        return new FeeInfo(ledger, json.getJSONObject("result").getJSONObject("drops").getLong("base_fee"));
     }
 }

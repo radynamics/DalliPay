@@ -6,19 +6,18 @@ import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.WebSocketApi;
-import com.radynamics.dallipay.exchange.*;
+import com.radynamics.dallipay.exchange.ExchangeRateProvider;
+import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
+import com.radynamics.dallipay.exchange.ManualRateProvider;
 import okhttp3.HttpUrl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 
 import javax.swing.*;
 import java.net.URI;
 
 public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     private final static Logger log = LogManager.getLogger(Ledger.class);
-
-    private static final String nativeCcySymbol = "XRP+";
 
     @Override
     public LedgerId getId() {
@@ -27,7 +26,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
 
     @Override
     public String getNativeCcySymbol() {
-        return nativeCcySymbol;
+        return "XRP+";
     }
 
     @Override
@@ -40,10 +39,6 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
         return "Xahau";
     }
 
-    static Money dropsToXrpPlus(long drops) {
-        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
-    }
-
     @Override
     public FeeSuggestion getFeeSuggestion() {
         // TODO: implement
@@ -51,7 +46,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     }
 
     public FeeSuggestion getFeeSuggestion(Transaction t) {
-        var api = new WebSocketApi(toWebSocketUri(getNetwork().getUrl().uri()));
+        var api = new WebSocketApi(this, toWebSocketUri(getNetwork().getUrl().uri()));
         try {
             var fees = api.fee(t);
             return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
