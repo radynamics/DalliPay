@@ -45,7 +45,7 @@ public class PaymentBuilder {
 
         var amount = toCurrencyAmount(transaction.getLedger(), transaction.getAmount());
         var lederTransactionFee = FeeHelper.get(transaction.getFees(), FeeType.LedgerTransactionFee).orElseThrow();
-        var fee = XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
+        var fee = XrpCurrencyAmount.ofXrp(lederTransactionFee.getNumber().doubleValue() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(lederTransactionFee.getNumber().doubleValue()));
 
         var builder = Payment.builder()
                 .account(sender)
