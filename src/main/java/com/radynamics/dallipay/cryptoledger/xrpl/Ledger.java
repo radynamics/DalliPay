@@ -34,7 +34,6 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private JsonRpcApi api;
     private WalletAddressResolver walletAddressResolver;
 
-    private static final String nativeCcySymbol = "XRP";
     public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
     public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
 
@@ -50,7 +49,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public String getNativeCcySymbol() {
-        return nativeCcySymbol;
+        return "XRP";
     }
 
     @Override
@@ -73,8 +72,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.getTransaction(transactionId);
     }
 
-    static Money dropsToXrp(long drops) {
-        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
+    Money dropsToXrp(long drops) {
+        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(getNativeCcySymbol()));
     }
 
     public static UnsignedLong xrpToDrops(Money xrpAmount) {
