@@ -455,7 +455,7 @@ public class JsonRpcApi implements TransactionSource {
             var fee = xrplClient.fee();
             var drops = fee.drops();
             var queuePercentage = fee.currentQueueSize().longValue() / fee.maxQueueSize().orElse(UnsignedInteger.ONE).longValue();
-            return new FeeInfo(drops.minimumFee().value().longValue(), drops.openLedgerFee().value().longValue(), drops.medianFee().value().longValue(), queuePercentage);
+            return new FeeInfo(ledger, drops.minimumFee().value().longValue(), drops.openLedgerFee().value().longValue(), drops.medianFee().value().longValue(), queuePercentage);
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return null;
