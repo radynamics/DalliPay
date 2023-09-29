@@ -5,6 +5,7 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
+import com.radynamics.dallipay.util.RequestFocusListener;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -156,6 +157,10 @@ public class ExchangeRatesForm extends JDialog {
             for (var rate : rates) {
                 var created = createRow(row++, rate);
                 anchorComponentTopLeft = anchorComponentTopLeft == null ? created : anchorComponentTopLeft;
+            }
+
+            if (txts.size() > 0) {
+                txts.get(0).addAncestorListener(new RequestFocusListener());
             }
         }
         {
