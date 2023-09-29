@@ -24,6 +24,7 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
     private String invoiceId;
     private Ledger ledger;
     private Money fee;
+    private FeeSuggestion feeSuggestion;
 
     public TestTransaction(Ledger ledger, Double amt, String ccy) {
         this(ledger, Money.of(amt, new Currency(ccy)));
@@ -169,6 +170,16 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
     @Override
     public void setLedgerTransactionFee(Money value) {
         fee = value;
+    }
+
+    @Override
+    public FeeSuggestion getFeeSuggestion() {
+        return feeSuggestion;
+    }
+
+    @Override
+    public void setFeeSuggestion(FeeSuggestion value) {
+        this.feeSuggestion = value;
     }
 
     public void setSenderWallet(Wallet wallet) {

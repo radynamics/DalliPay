@@ -288,15 +288,6 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void showFeeEdit() {
-        var ledgerTransactionFee = payments.length == 0
-                ? null
-                : FeeHelper.get(payments[0].getFees(), FeeType.LedgerTransactionFee).orElse(null);
-        showFeeEdit(ledgerTransactionFee);
-    }
-
-    private void showFeeEdit(Money currentFee) {
-        var fees = ledger.getFeeSuggestion();
-
         var pnl = new JPanel();
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
         pnl.setMinimumSize(new Dimension(Integer.MAX_VALUE, 80));
@@ -311,13 +302,14 @@ public class SendConfirmationForm extends JDialog {
         var rdoHigh = new JRadioButton(res.getString("fees.high"));
         group.add(rdoHigh);
 
-        rdoLow.setSelected(currentFee == null || fees.getLow().equals(currentFee));
-        rdoMedium.setSelected(fees.getMedium().equals(currentFee));
-        rdoHigh.setSelected(fees.getHigh().equals(currentFee));
+        var fr = new FeeRefresher(payments);
+        rdoLow.setSelected(fr.allLow());
+        rdoMedium.setSelected(fr.allMedium());
+        rdoHigh.setSelected(fr.allHigh());
 
-        pnl.add(createFeeRow(rdoLow, fees.getLow()));
-        pnl.add(createFeeRow(rdoMedium, fees.getMedium()));
-        pnl.add(createFeeRow(rdoHigh, fees.getHigh()));
+        pnl.add(createFeeRow(rdoLow));
+        pnl.add(createFeeRow(rdoMedium));
+        pnl.add(createFeeRow(rdoHigh));
 
         var optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
@@ -327,31 +319,26 @@ public class SendConfirmationForm extends JDialog {
             return;
         }
 
-        var fr = new FeeRefresher(payments);
         if (rdoLow.isSelected()) {
-            fr.refresh(fees.getLow());
+            fr.setAllLow();
         }
         if (rdoMedium.isSelected()) {
-            fr.refresh(fees.getMedium());
+            fr.setAllMedium();
         }
         if (rdoHigh.isSelected()) {
-            fr.refresh(fees.getHigh());
+            fr.setAllHigh();
         }
 
         refreshTotalFee();
     }
 
-    private Component createFeeRow(JRadioButton rdo, Money fee) {
+    private Component createFeeRow(JRadioButton rdo) {
         var pnl = new JPanel();
         var layout = new SpringLayout();
         pnl.setLayout(layout);
 
         pnl.add(rdo);
         layout.putConstraint(SpringLayout.WEST, rdo, 0, SpringLayout.WEST, pnl);
-
-        var lblFee = new JLabel(MoneyFormatter.formatLedger(fee));
-        pnl.add(lblFee);
-        layout.putConstraint(SpringLayout.EAST, lblFee, 0, SpringLayout.EAST, pnl);
 
         return pnl;
     }

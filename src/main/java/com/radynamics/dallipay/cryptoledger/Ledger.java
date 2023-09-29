@@ -22,7 +22,9 @@ public interface Ledger {
 
     Transaction getTransaction(String transactionId);
 
-    FeeSuggestion getFeeSuggestion();
+    FeeSuggestion getFeeSuggestion(Transaction t);
+
+    boolean equalTransactionFees();
 
     Wallet createWallet(String publicKey, String secret);
 

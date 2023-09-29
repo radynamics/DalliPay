@@ -28,6 +28,7 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     private TransmissionState transmission = TransmissionState.Pending;
     private Throwable transmissionError;
     private Money fee;
+    private FeeSuggestion feeSuggestion;
 
     public Transaction(Ledger ledger, Money amt) {
         if (amt == null) throw new IllegalArgumentException("Parameter 'amt' cannot be null");
@@ -182,6 +183,16 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
             throw new IllegalArgumentException(String.format("Currency of fee must be %s", ledger.getNativeCcySymbol()));
         }
         fee = value;
+    }
+
+    @Override
+    public FeeSuggestion getFeeSuggestion() {
+        return feeSuggestion;
+    }
+
+    @Override
+    public void setFeeSuggestion(FeeSuggestion value) {
+        this.feeSuggestion = value;
     }
 
     public void setSender(com.radynamics.dallipay.cryptoledger.Wallet sender) {

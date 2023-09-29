@@ -40,11 +40,6 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     }
 
     @Override
-    public FeeSuggestion getFeeSuggestion() {
-        // TODO: implement
-        return super.getFeeSuggestion();
-    }
-
     public FeeSuggestion getFeeSuggestion(Transaction t) {
         var api = new WebSocketApi(this, toWebSocketUri(getNetwork().getUrl().uri()));
         try {
@@ -54,6 +49,12 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
             log.error(e.getMessage(), e);
             return FeeSuggestion.None(getNativeCcySymbol());
         }
+    }
+
+    @Override
+    public boolean equalTransactionFees() {
+        // Fees vary depending on hooks installed on destination wallet
+        return false;
     }
 
     private URI toWebSocketUri(URI uri) {

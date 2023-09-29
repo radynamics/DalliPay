@@ -63,4 +63,8 @@ public interface Transaction {
     Fee[] getFees();
 
     void setLedgerTransactionFee(Money value);
+
+    FeeSuggestion getFeeSuggestion();
+
+    void setFeeSuggestion(FeeSuggestion value);
 }
