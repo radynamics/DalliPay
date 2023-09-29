@@ -41,7 +41,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
 
     @Override
     public FeeSuggestion getFeeSuggestion(Transaction t) {
-        var api = new WebSocketApi(this, toWebSocketUri(getNetwork().getUrl().uri()));
+        var api = new WebSocketApi(this, getNetwork().getWebSocketUri());
         try {
             var fees = api.fee(t);
             return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
@@ -57,16 +57,13 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
         return false;
     }
 
-    private URI toWebSocketUri(URI uri) {
-        // TODO: Hack
-        return URI.create(uri.toString().replace("https://", "wss://"));
-    }
-
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xahau.network/"), "Mainnet");
+        networks[0].setWebSocketUri(URI.create("wss://xahau.network"));
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://xahau-test.net/"), "Testnet");
+        networks[1].setWebSocketUri(URI.create("wss://xahau-test.net"));
         return networks;
     }
 
