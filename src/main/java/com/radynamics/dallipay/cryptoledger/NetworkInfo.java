@@ -34,6 +34,10 @@ public class NetworkInfo {
         return o;
     }
 
+    public static String createDisplayName(HttpUrl url) {
+        return url.host();
+    }
+
     public String getShortText() {
         return getDisplayName();
     }

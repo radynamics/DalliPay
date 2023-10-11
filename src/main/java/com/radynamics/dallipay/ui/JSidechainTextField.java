@@ -30,15 +30,23 @@ public class JSidechainTextField extends JTextField {
             return;
         }
 
-        HttpUrl httpUrl;
-        try {
-            httpUrl = HttpUrl.get(value);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, String.format(res.getString("urlParseFailed"), value), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+        var networkInfo = createNetworkInfo(value);
+        if (networkInfo == null) {
             return;
         }
+        raiseSidechainChanged(networkInfo);
+    }
 
-        raiseSidechainChanged(NetworkInfo.create(httpUrl, value));
+    private NetworkInfo createNetworkInfo(String value) {
+        NetworkInfo ni;
+        try {
+            var url = HttpUrl.get(value);
+            ni = NetworkInfo.create(url, NetworkInfo.createDisplayName(url));
+        } catch (Exception ex) {
+            ni = NetworkInfo.create(HttpUrl.get("https://REPLACE_ME.com"), value);
+        }
+
+        return NetworkInfoEdit.show(this, ni);
     }
 
     public void addChangedListener(SidechainChangedListener l) {
