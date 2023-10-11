@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.radynamics.dallipay.cryptoledger.EndpointInfo;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.db.ConfigRepo;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +14,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -43,24 +45,54 @@ public class NetworkPopMenu {
             var txt = new JSidechainTextField();
             pnl.add(txt);
             txt.setPreferredSize(new Dimension(180, 21));
-            txt.addChangedListener(networkInfo -> {
-                popupMenu.setVisible(false);
+            txt.addChangedListener(new SidechainChangedListener() {
+                @Override
+                public void onChanged(NetworkInfo networkInfo) {
+                    popupMenu.setVisible(false);
 
-                EndpointInfo info = null;
-                try {
-                    info = ledger.getEndpointInfo(networkInfo);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-                if (info == null) {
-                    JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("retrieveServerInfoFailed"), networkInfo.getUrl()), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
-                    return;
+                    EndpointInfo info = null;
+                    try {
+                        info = ledger.getEndpointInfo(networkInfo);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                    if (info == null) {
+                        JOptionPane.showMessageDialog(popupMenu, String.format(res.getString("retrieveServerInfoFailed"), networkInfo.getUrl()), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+
+                    var item = addEntryAtEnd(networkInfo, networkInfo.getShortText(), CompletableFuture.completedFuture(info));
+                    onNetworkChanged(item);
                 }
 
-                var item = addEntryAtEnd(networkInfo, networkInfo.getShortText(), CompletableFuture.completedFuture(info));
-                onNetworkChanged(item);
+                @Override
+                public void onCreated(NetworkInfo networkInfo) {
+                    saveCustoms(networkInfo);
+                }
             });
         }
+    }
+
+    private void saveCustoms(NetworkInfo networkInfo) {
+        var entries = getCustomEntries();
+        entries.add(networkInfo);
+
+        try (var repo = new ConfigRepo()) {
+            repo.setCustomSidechains(ledger, entries.toArray(NetworkInfo[]::new));
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(null, e);
+        }
+    }
+
+    private ArrayList<NetworkInfo> getCustomEntries() {
+        var list = new ArrayList<NetworkInfo>();
+        for (var e : selectableEntries) {
+            if (Arrays.stream(ledger.getDefaultNetworkInfo()).noneMatch(o -> o.sameNet(e.getValue()))) {
+                list.add(e.getValue());
+            }
+        }
+        return list;
     }
 
     private CompletableFuture<EndpointInfo> loadAsync(NetworkInfo networkInfo) {

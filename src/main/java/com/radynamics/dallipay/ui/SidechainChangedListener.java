@@ -4,4 +4,6 @@ import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 
 public interface SidechainChangedListener {
     void onChanged(NetworkInfo networkInfo);
+
+    void onCreated(NetworkInfo networkInfo);
 }

@@ -1,8 +1,6 @@
 package com.radynamics.dallipay.db;
 
-import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.LedgerId;
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -14,6 +12,7 @@ import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -113,6 +112,15 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setLastUsedRpcUrl(Ledger ledger, HttpUrl value) throws Exception {
         saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
+    }
+
+    public NetworkInfo[] getCustomSidechains(Ledger ledger) throws Exception {
+        var value = single(createLedgerSpecificKey(ledger, "customSidechains")).orElse("");
+        return value.length() == 0 ? new NetworkInfo[0] : NetworkInfoJsonSerializer.parse(new JSONArray(value));
+    }
+
+    public void setCustomSidechains(Ledger ledger, NetworkInfo[] entries) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledger, "customSidechains"), NetworkInfoJsonSerializer.toJsonArray(entries).toString());
     }
 
     public LedgerId getLastUsedLedger() throws Exception {

@@ -34,6 +34,8 @@ public class JSidechainTextField extends JTextField {
         if (networkInfo == null) {
             return;
         }
+
+        raiseSidechainCreated(networkInfo);
         raiseSidechainChanged(networkInfo);
     }
 
@@ -56,6 +58,12 @@ public class JSidechainTextField extends JTextField {
     private void raiseSidechainChanged(NetworkInfo networkInfo) {
         for (var l : sidechainChangedListener) {
             l.onChanged(networkInfo);
+        }
+    }
+
+    private void raiseSidechainCreated(NetworkInfo networkInfo) {
+        for (var l : sidechainChangedListener) {
+            l.onCreated(networkInfo);
         }
     }
 }
