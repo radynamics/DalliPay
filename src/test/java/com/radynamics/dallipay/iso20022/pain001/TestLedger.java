@@ -212,6 +212,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        return new PriceOracle[0];
+    }
+
+    @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         throw new NotImplementedException();
     }

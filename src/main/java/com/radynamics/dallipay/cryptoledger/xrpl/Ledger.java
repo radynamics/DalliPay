@@ -24,6 +24,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -269,6 +270,40 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public HttpUrl getDefaultFaucetUrl() {
         return HttpUrl.get("https://faucet.altnet.rippletest.net");
+    }
+
+    @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        var list = new ArrayList<PriceOracle>();
+        {
+            var o = new PriceOracle("XRPL Labs Price Aggregator");
+            list.add(o);
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
+        }
+        {
+            var o = new PriceOracle("radynamics Price Oracle");
+            list.add(o);
+            var issuer = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
+            var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "KRW"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "TRY"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "GBP"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "THB"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "RUB"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "BRL"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "AUD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "MXN"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "ZAR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "MYR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "IDR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "SGD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "CHF"), issuer, receiver));
+        }
+        return list.toArray(PriceOracle[]::new);
     }
 
     @Override

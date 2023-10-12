@@ -66,6 +66,8 @@ public interface Ledger {
 
     HttpUrl getDefaultFaucetUrl();
 
+    PriceOracle[] getDefaultPriceOracles();
+
     TransactionSubmitterFactory createTransactionSubmitterFactory();
 
     Money roundNativeCcy(Money amt);
