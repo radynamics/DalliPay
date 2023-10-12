@@ -156,6 +156,9 @@ public class NetworkPopMenu {
     private String createToolTipText(NetworkInfo networkInfo, EndpointInfo endpointInfo, Throwable e) {
         var sb = new StringBuilder();
         sb.append(String.format("%s: %s", res.getString("url"), networkInfo.getUrl()) + System.lineSeparator());
+        if (networkInfo.getWebSocketUri() != null) {
+            sb.append(String.format("%s: %s", res.getString("websocketUrl"), networkInfo.getWebSocketUri()) + System.lineSeparator());
+        }
         if (endpointInfo == null) {
             sb.append(res.getString("noInfo"));
         } else {
