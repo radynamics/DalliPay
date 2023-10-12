@@ -93,8 +93,11 @@ public class NetworkInfo {
         return false;
     }
 
-    public boolean sameNetAndDisplayText(NetworkInfo network) {
-        if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
-        return sameNet(network) && displayName.equals(network.displayName);
+    public boolean sameAs(NetworkInfo network) {
+        if (network == null) return false;
+        return url.equals(network.url)
+                && StringUtils.equals(networkId, network.networkId)
+                && StringUtils.equals(displayName, network.displayName)
+                && isPredefined == network.isPredefined;
     }
 }

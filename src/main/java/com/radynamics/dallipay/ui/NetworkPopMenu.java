@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui;
 
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.EndpointInfo;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
@@ -111,6 +112,7 @@ public class NetworkPopMenu {
 
     private JCheckBoxMenuItem addEntry(NetworkInfo networkInfo, String text, CompletableFuture<EndpointInfo> futureInfo, int index) {
         var item = new JCheckBoxMenuItem(text);
+        item.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         item.setToolTipText(res.getString("loading"));
 
         futureInfo.thenAccept(endpointInfo -> item.setToolTipText(createToolTipText(networkInfo, endpointInfo, null)))
@@ -120,11 +122,35 @@ public class NetworkPopMenu {
                     return null;
                 });
 
+        if (!networkInfo.isPredefined()) {
+            var cmd = new JButton();
+            item.add(cmd);
+            cmd.setIcon(new FlatSVGIcon("svg/delete.svg", 16, 16));
+            cmd.setMargin(new Insets(0, 2, 0, 2));
+            cmd.addActionListener(e -> onDelete(item, networkInfo));
+        }
         popupMenu.add(item, index);
         selectableEntries.add(new ImmutablePair<>(item, networkInfo));
         item.addActionListener((SplitButtonClickedActionListener) e -> onNetworkChanged(item));
 
         return item;
+    }
+
+    private void onDelete(JCheckBoxMenuItem item, NetworkInfo networkInfo) {
+        var entries = getCustomEntries();
+        entries.removeIf(o -> o.sameAs(networkInfo));
+        saveCustoms(entries);
+
+        selectableEntries.removeIf(o -> o.getRight().sameAs(networkInfo));
+        popupMenu.remove(item);
+
+        if (item.isSelected()) {
+            setSelectedNetwork(selectableEntries.get(0).getRight());
+        }
+
+        // Force correct repaint
+        popupMenu.setVisible(false);
+        popupMenu.setVisible(true);
     }
 
     private String createToolTipText(NetworkInfo networkInfo, EndpointInfo endpointInfo, Throwable e) {
@@ -174,6 +200,7 @@ public class NetworkPopMenu {
         for (var item : selectableEntries) {
             if (item.getValue().getUrl().equals(network.getUrl())) {
                 item.getKey().setSelected(true);
+                onNetworkChanged(item.getLeft());
                 return;
             }
         }
