@@ -262,7 +262,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void refreshTargetCcys() {
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig();
+        var xrplOracleConfig = new XrplPriceOracleConfig(transformInstruction.getLedger().getId());
         try (var repo = new ConfigRepo()) {
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
             xrplOracleConfig.load(repo);

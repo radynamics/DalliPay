@@ -18,6 +18,7 @@ public class DbMigration {
     public void migrateToLatest() throws Exception {
         ensureVersion(1, this::migrateTo1);
         ensureVersion(2, this::migrateTo2);
+        ensureVersion(3, this::migrateTo3);
 
         conn.commit();
     }
@@ -52,6 +53,12 @@ public class DbMigration {
 
     private Void migrateTo2() throws SQLException {
         var ps = conn.prepareStatement("ALTER TABLE accountmapping ADD COLUMN partyId TEXT NOT NULL DEFAULT ''");
+        ps.execute();
+        return null;
+    }
+
+    private Void migrateTo3() throws SQLException {
+        var ps = conn.prepareStatement("UPDATE config SET key = 'Xrpl_priceOracleConfig' WHERE key = 'xrplPriceOracleConfig'");
         ps.execute();
         return null;
     }
