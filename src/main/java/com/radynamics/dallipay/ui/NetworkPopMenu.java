@@ -14,7 +14,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -67,16 +66,15 @@ public class NetworkPopMenu {
 
                 @Override
                 public void onCreated(NetworkInfo networkInfo) {
-                    saveCustoms(networkInfo);
+                    var entries = getCustomEntries();
+                    entries.add(networkInfo);
+                    saveCustoms(entries);
                 }
             });
         }
     }
 
-    private void saveCustoms(NetworkInfo networkInfo) {
-        var entries = getCustomEntries();
-        entries.add(networkInfo);
-
+    private void saveCustoms(ArrayList<NetworkInfo> entries) {
         try (var repo = new ConfigRepo()) {
             repo.setCustomSidechains(ledger, entries.toArray(NetworkInfo[]::new));
             repo.commit();
@@ -88,7 +86,7 @@ public class NetworkPopMenu {
     private ArrayList<NetworkInfo> getCustomEntries() {
         var list = new ArrayList<NetworkInfo>();
         for (var e : selectableEntries) {
-            if (Arrays.stream(ledger.getDefaultNetworkInfo()).noneMatch(o -> o.sameNet(e.getValue()))) {
+            if (!e.getValue().isPredefined()) {
                 list.add(e.getValue());
             }
         }

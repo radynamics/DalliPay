@@ -8,6 +8,7 @@ public class NetworkInfo {
     private HttpUrl url;
     private String networkId;
     private String displayName;
+    private boolean isPredefined;
 
     private static final String liveId = "livenet";
     private static final String testnetId = "testnet";
@@ -17,11 +18,15 @@ public class NetworkInfo {
     }
 
     public static NetworkInfo createLivenet(HttpUrl url, String displayName) {
-        return create(url, displayName, liveId);
+        var ni = create(url, displayName, liveId);
+        ni.isPredefined = true;
+        return ni;
     }
 
     public static NetworkInfo createTestnet(HttpUrl url, String displayName) {
-        return create(url, displayName, testnetId);
+        var ni = create(url, displayName, testnetId);
+        ni.isPredefined = true;
+        return ni;
     }
 
     public static NetworkInfo create(HttpUrl url, String displayName, String networkId) {
@@ -54,6 +59,10 @@ public class NetworkInfo {
         return displayName;
     }
 
+    public boolean isPredefined() {
+        return isPredefined;
+    }
+
     public boolean matches(String text) {
         if (isLivenet() && "main".equalsIgnoreCase(text)) {
             return true;
@@ -81,5 +90,10 @@ public class NetworkInfo {
         if (url.equals(network.getUrl())) return true;
         if (networkId.equals(network.networkId)) return true;
         return false;
+    }
+
+    public boolean sameNetAndDisplayText(NetworkInfo network) {
+        if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
+        return sameNet(network) && displayName.equals(network.displayName);
     }
 }
