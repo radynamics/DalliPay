@@ -14,11 +14,17 @@ import java.util.*;
 public class XrplPriceOracleConfig {
     final static Logger log = LogManager.getLogger(XrplPriceOracleConfig.class);
     private final HashSet<IssuedCurrency> issuedCurrencies = new HashSet<>();
+    private final LedgerId ledgerId;
 
     private final static ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
     public final static String AsReceived = "asReceived";
     public final static String AsReceivedText = res.getString("asReceived");
+
+    public XrplPriceOracleConfig(LedgerId ledgerId) {
+        if (ledgerId == null) throw new IllegalArgumentException("Parameter 'ledgerId' cannot be null");
+        this.ledgerId = ledgerId;
+    }
 
     public void load() {
         try (var repo = new ConfigRepo()) {
@@ -30,7 +36,7 @@ public class XrplPriceOracleConfig {
 
     public void load(ConfigRepo repo) throws Exception {
         issuedCurrencies.clear();
-        issuedCurrencies.addAll(Arrays.asList(fromJson(repo.getXrplPriceOracleConfig())));
+        issuedCurrencies.addAll(Arrays.asList(fromJson(repo.getXrplPriceOracleConfig(ledgerId))));
     }
 
     public void save() throws Exception {
@@ -43,7 +49,7 @@ public class XrplPriceOracleConfig {
     }
 
     public void save(ConfigRepo repo) throws Exception {
-        repo.setXrplPriceOracleConfig(toJson(issuedCurrencies));
+        repo.setXrplPriceOracleConfig(ledgerId, toJson(issuedCurrencies));
     }
 
     private JSONObject toJson(Collection<IssuedCurrency> ccys) {

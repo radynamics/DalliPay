@@ -54,12 +54,12 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("valutaFormat", DateFormatHelper.toKey(value));
     }
 
-    public JSONObject getXrplPriceOracleConfig() throws Exception {
-        return new JSONObject(single("xrplPriceOracleConfig").orElseThrow());
+    public JSONObject getXrplPriceOracleConfig(LedgerId ledgerId) throws Exception {
+        return new JSONObject(single(createLedgerSpecificKey(ledgerId, "priceOracleConfig")).orElseThrow());
     }
 
-    public void setXrplPriceOracleConfig(JSONObject value) throws Exception {
-        saveOrUpdate("xrplPriceOracleConfig", value.toString());
+    public void setXrplPriceOracleConfig(LedgerId ledgerId, JSONObject value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledgerId, "priceOracleConfig"), value.toString());
     }
 
     public Optional<String> getExchangeRateProvider() throws Exception {
@@ -145,7 +145,11 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     private static String createLedgerSpecificKey(Ledger ledger, String key) {
-        return String.format("%s_%s", ledger.getId(), key);
+        return createLedgerSpecificKey(ledger.getId(), key);
+    }
+
+    private static String createLedgerSpecificKey(LedgerId ledgerId, String key) {
+        return String.format("%s_%s", ledgerId, key);
     }
 
     public void setLastUsedSubmitter(TransactionSubmitter submitter) throws Exception {

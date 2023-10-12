@@ -121,8 +121,8 @@ public class MainForm extends JFrame {
 
         Wallet defaultSenderWallet = null;
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig();
         var ledger = transformInstruction.getLedger();
+        var xrplOracleConfig = new XrplPriceOracleConfig(ledger.getId());
         try (var repo = new ConfigRepo()) {
             defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
