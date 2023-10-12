@@ -54,8 +54,9 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("valutaFormat", DateFormatHelper.toKey(value));
     }
 
-    public JSONObject getXrplPriceOracleConfig(LedgerId ledgerId) throws Exception {
-        return new JSONObject(single(createLedgerSpecificKey(ledgerId, "priceOracleConfig")).orElseThrow());
+    public Optional<JSONObject> getXrplPriceOracleConfig(LedgerId ledgerId) throws Exception {
+        var value = single(createLedgerSpecificKey(ledgerId, "priceOracleConfig"));
+        return value.isPresent() ? Optional.of(new JSONObject(value.get())) : Optional.empty();
     }
 
     public void setXrplPriceOracleConfig(LedgerId ledgerId, JSONObject value) throws Exception {

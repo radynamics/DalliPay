@@ -95,6 +95,7 @@ public class ReceiverPane extends JPanel {
 
     public void init(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        xrplPriceOracleEditor.init(ledger);
         xrplPriceOracleConfig = new XrplPriceOracleConfig(ledger.getId());
     }
 }
