@@ -1,10 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.xahau;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.radynamics.dallipay.cryptoledger.FeeSuggestion;
-import com.radynamics.dallipay.cryptoledger.LedgerId;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.WebSocketApi;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
@@ -80,5 +77,10 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     @Override
     public HttpUrl getDefaultFaucetUrl() {
         return HttpUrl.get("https://xahau-test.net/faucet");
+    }
+
+    @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        return new PriceOracle[0];
     }
 }
