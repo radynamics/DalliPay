@@ -19,6 +19,7 @@ public class XrplPriceOracleEditor extends JPanel {
     private final JTable table;
     private final IssuedCurrencyTableModel model = new IssuedCurrencyTableModel();
     private JSplitButton defaultPriceOracles;
+    private Ledger ledger;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -69,7 +70,10 @@ public class XrplPriceOracleEditor extends JPanel {
     }
 
     private void onAdd() {
-        var index = model.getRowIndex(model.newRecord());
+        var issuer = new com.radynamics.dallipay.cryptoledger.generic.Wallet(ledger.getId(), "rKaEc...");
+        var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(ledger.getId(), "rKaEc...");
+        var ic = new IssuedCurrency(new CurrencyPair(ledger.getNativeCcySymbol(), "USD"), issuer, receiver);
+        var index = model.getRowIndex(model.newRecord(ic));
         table.setRowSelectionInterval(index, index);
     }
 
@@ -115,10 +119,11 @@ public class XrplPriceOracleEditor extends JPanel {
 
     public void init(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
-        refreshDefaultPopupMenu(ledger);
+        this.ledger = ledger;
+        refreshDefaultPopupMenu();
     }
 
-    private void refreshDefaultPopupMenu(Ledger ledger) {
+    private void refreshDefaultPopupMenu() {
         var popupMenu = new JPopupMenu();
         for (var o : ledger.getDefaultPriceOracles()) {
             var item = new JMenuItem(o.getDisplayText());
