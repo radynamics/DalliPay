@@ -36,7 +36,10 @@ public class XrplPriceOracleConfig {
 
     public void load(ConfigRepo repo) throws Exception {
         issuedCurrencies.clear();
-        issuedCurrencies.addAll(Arrays.asList(fromJson(repo.getXrplPriceOracleConfig(ledgerId))));
+        var json = repo.getXrplPriceOracleConfig(ledgerId);
+        if (json.isPresent()) {
+            issuedCurrencies.addAll(Arrays.asList(fromJson(json.get())));
+        }
     }
 
     public void save() throws Exception {
