@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import okhttp3.HttpUrl;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
 
@@ -88,7 +89,7 @@ public class NetworkInfo {
     public boolean sameNet(NetworkInfo network) {
         if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
         if (url.equals(network.getUrl())) return true;
-        if (networkId.equals(network.networkId)) return true;
+        if (StringUtils.equals(networkId, network.networkId)) return true;
         return false;
     }
 
