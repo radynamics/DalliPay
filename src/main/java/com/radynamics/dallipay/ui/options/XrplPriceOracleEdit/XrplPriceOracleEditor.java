@@ -125,6 +125,13 @@ public class XrplPriceOracleEditor extends JPanel {
             popupMenu.add(item);
             item.addActionListener((SplitButtonClickedActionListener) e -> load(o.getIssuedCurrencies()));
         }
+
+        if (popupMenu.getComponentCount() == 0) {
+            var item = new JMenuItem(res.getString("noneAvailable"));
+            popupMenu.add(item);
+            item.setEnabled(false);
+        }
+
         defaultPriceOracles.setPopupMenu(popupMenu);
     }
 }
