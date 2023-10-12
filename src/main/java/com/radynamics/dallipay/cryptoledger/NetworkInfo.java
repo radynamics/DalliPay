@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import okhttp3.HttpUrl;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
@@ -10,6 +11,7 @@ public class NetworkInfo {
     private URI webSocketUri;
     private String networkId;
     private String displayName;
+    private boolean isPredefined;
 
     private static final String liveId = "livenet";
     private static final String testnetId = "testnet";
@@ -19,11 +21,15 @@ public class NetworkInfo {
     }
 
     public static NetworkInfo createLivenet(HttpUrl url, String displayName) {
-        return create(url, displayName, liveId);
+        var ni = create(url, displayName, liveId);
+        ni.isPredefined = true;
+        return ni;
     }
 
     public static NetworkInfo createTestnet(HttpUrl url, String displayName) {
-        return create(url, displayName, testnetId);
+        var ni = create(url, displayName, testnetId);
+        ni.isPredefined = true;
+        return ni;
     }
 
     public static NetworkInfo create(HttpUrl url, String displayName, String networkId) {
@@ -34,6 +40,10 @@ public class NetworkInfo {
         o.url = url;
         o.displayName = displayName;
         return o;
+    }
+
+    public static String createDisplayName(HttpUrl url) {
+        return url.host();
     }
 
     public String getShortText() {
@@ -58,6 +68,10 @@ public class NetworkInfo {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public boolean isPredefined() {
+        return isPredefined;
     }
 
     public boolean matches(String text) {
@@ -85,7 +99,15 @@ public class NetworkInfo {
     public boolean sameNet(NetworkInfo network) {
         if (network == null) throw new IllegalArgumentException("Parameter 'network' cannot be null");
         if (url.equals(network.getUrl())) return true;
-        if (networkId.equals(network.networkId)) return true;
+        if (StringUtils.equals(networkId, network.networkId)) return true;
         return false;
+    }
+
+    public boolean sameAs(NetworkInfo network) {
+        if (network == null) return false;
+        return url.equals(network.url)
+                && StringUtils.equals(networkId, network.networkId)
+                && StringUtils.equals(displayName, network.displayName)
+                && isPredefined == network.isPredefined;
     }
 }
