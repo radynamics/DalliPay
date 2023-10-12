@@ -26,7 +26,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
 
     @Override
     public String getNativeCcySymbol() {
-        return "XRP+";
+        return "XAH";
     }
 
     @Override
