@@ -17,7 +17,8 @@ public class XrplPriceOracleConfig {
 
     private final static ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
-    public final static String AsReceived = res.getString("asReceived");
+    public final static String AsReceived = "asReceived";
+    public final static String AsReceivedText = res.getString("asReceived");
 
     public void load() {
         try (var repo = new ConfigRepo()) {
