@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -42,10 +43,13 @@ public class JSidechainTextField extends JTextField {
     private NetworkInfo createNetworkInfo(String value) {
         NetworkInfo ni;
         try {
-            var url = HttpUrl.get(value);
+            // Accept "https://test.com", "wss://test.com"
+            var url = HttpUrl.get(value.replace("wss://", "https://"));
             ni = NetworkInfo.create(url, NetworkInfo.createDisplayName(url));
+            ni.setWebSocketUri(URI.create(value.replace("https://", "wss://")));
         } catch (Exception ex) {
             ni = NetworkInfo.create(HttpUrl.get("https://REPLACE_ME.com"), value);
+            ni.setWebSocketUri(URI.create("wss://REPLACE_ME.com"));
         }
 
         return NetworkInfoEdit.show(this, ni);

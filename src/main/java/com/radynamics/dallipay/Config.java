@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +88,12 @@ public class Config {
             return null;
         }
 
-        return NetworkInfo.create(HttpUrl.get(endpoint.getString("url")), endpoint.getString("id"));
+        var info = NetworkInfo.create(HttpUrl.get(endpoint.getString("url")), endpoint.getString("id"));
+        var websocketUri = endpoint.optString("websocketUrl");
+        if (websocketUri != null) {
+            info.setWebSocketUri(URI.create(websocketUri));
+        }
+        return info;
     }
 
     public NetworkInfo[] getNetworkInfos() {
