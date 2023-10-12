@@ -12,6 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public final class TransformInstructionFactory {
@@ -53,8 +56,10 @@ public final class TransformInstructionFactory {
         }
 
         HttpUrl lastUsed = null;
+        var customSidechains = new NetworkInfo[0];
         try (var repo = new ConfigRepo()) {
             lastUsed = repo.getLastUsedRpcUrl(ledger);
+            customSidechains = repo.getCustomSidechains(ledger);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -63,7 +68,11 @@ public final class TransformInstructionFactory {
             return config.getDefaultNetworkInfo();
         }
 
-        for (var ni : config.getNetworkInfos()) {
+        var available = new ArrayList<NetworkInfo>();
+        available.addAll(List.of(ledger.getDefaultNetworkInfo()));
+        available.addAll(List.of(customSidechains));
+        available.addAll(Arrays.asList(config.getNetworkInfos()));
+        for (var ni : available) {
             if (ni.getUrl().equals(lastUsed)) {
                 return ni;
             }
