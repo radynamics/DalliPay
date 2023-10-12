@@ -100,4 +100,9 @@ public class NetworkInfo {
                 && StringUtils.equals(displayName, network.displayName)
                 && isPredefined == network.isPredefined;
     }
+
+    @Override
+    public String toString() {
+        return "displayName: %s, rpcUrl: %s".formatted(displayName, url);
+    }
 }
