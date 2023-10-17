@@ -16,11 +16,13 @@ public class NetworkInfoEdit {
         var txtName = new JTextField();
         var txtRpcUrl = new JTextField();
         var txtWebsocketUrl = new JTextField();
+        var txtNetworkId = new JTextField();
 
         txtName.setText(ni.getDisplayName());
         txtName.addAncestorListener(new RequestFocusListener());
         txtRpcUrl.setText(ni.getUrl().toString());
         txtWebsocketUrl.setText(ni.getWebSocketUri().toString());
+        txtNetworkId.setText(ni.getNetworkId() == null ? "" : String.valueOf(ni.getNetworkId()));
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
@@ -31,6 +33,8 @@ public class NetworkInfoEdit {
         pnl.add(txtRpcUrl, createGridConstraints(0.7, 1, 1, 1));
         pnl.add(new JLabel(res.getString("websocketUrl")), createGridConstraints(0.3, 1, 0, 2));
         pnl.add(txtWebsocketUrl, createGridConstraints(0.7, 1, 1, 2));
+        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 2));
+        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 2));
 
         int result = JOptionPane.showConfirmDialog(null, pnl, res.getString("descText"), JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
@@ -41,6 +45,7 @@ public class NetworkInfoEdit {
         var rpcUrlText = txtRpcUrl.getText().trim();
         // Websocket is not needed on XRPL mainnet (but for Xahau).
         var websocketUrlText = txtWebsocketUrl.getText().trim();
+        var networkIdText = txtNetworkId.getText().trim();
         if (displayText.length() == 0 || rpcUrlText.length() == 0) {
             return null;
         }
@@ -65,7 +70,16 @@ public class NetworkInfoEdit {
 
         var info = NetworkInfo.create(httpUrl, displayText);
         info.setWebSocketUri(websocketUri);
+        info.setNetworkId(toIntegerOrNull(networkIdText));
         return info;
+    }
+
+    private static Integer toIntegerOrNull(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static GridBagConstraints createGridConstraints(double weightx, double weighty, int x, int y) {

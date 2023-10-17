@@ -20,6 +20,7 @@ public final class NetworkInfoJsonSerializer {
             json.put("displayName", e.getDisplayName());
             json.put("rpcUrl", e.getUrl());
             json.put("websocketUrl", e.getWebSocketUri() == null ? null : e.getWebSocketUri().toString());
+            json.put("networkId", e.getNetworkId());
         }
 
         return a;
@@ -33,6 +34,9 @@ public final class NetworkInfoJsonSerializer {
             var websocketUrl = e.optString("websocketUrl", "");
             if (websocketUrl.length() > 0) {
                 ni.setWebSocketUri(URI.create(websocketUrl));
+            }
+            if (e.has("networkId") && !e.isNull("networkId")) {
+                ni.setNetworkId(e.getInt("networkId"));
             }
             list.add(ni);
         }
