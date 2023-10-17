@@ -18,6 +18,7 @@ public final class NetworkInfoJsonSerializer {
             a.put(json);
             json.put("displayName", e.getDisplayName());
             json.put("rpcUrl", e.getUrl());
+            json.put("networkId", e.getNetworkId());
         }
 
         return a;
@@ -27,7 +28,11 @@ public final class NetworkInfoJsonSerializer {
         var list = new ArrayList<NetworkInfo>();
         for (var i = 0; i < json.length(); i++) {
             var e = json.getJSONObject(i);
-            list.add(NetworkInfo.create(HttpUrl.get(e.getString("rpcUrl")), e.getString("displayName")));
+            var ni = NetworkInfo.create(HttpUrl.get(e.getString("rpcUrl")), e.getString("displayName"));
+            if (e.has("networkId") && !e.isNull("networkId")) {
+                ni.setNetworkId(e.getInt("networkId"));
+            }
+            list.add(ni);
         }
         return list.toArray(NetworkInfo[]::new);
     }
