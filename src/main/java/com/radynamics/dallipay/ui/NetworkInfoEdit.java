@@ -26,15 +26,15 @@ public class NetworkInfoEdit {
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
-        pnl.setPreferredSize(new Dimension(350, 70));
+        pnl.setPreferredSize(new Dimension(350, 90));
         pnl.add(new JLabel(res.getString("displayName")), createGridConstraints(0.3, 1, 0, 0));
         pnl.add(txtName, createGridConstraints(0.7, 1, 1, 0));
         pnl.add(new JLabel(res.getString("rpcUrl")), createGridConstraints(0.3, 1, 0, 1));
         pnl.add(txtRpcUrl, createGridConstraints(0.7, 1, 1, 1));
         pnl.add(new JLabel(res.getString("websocketUrl")), createGridConstraints(0.3, 1, 0, 2));
         pnl.add(txtWebsocketUrl, createGridConstraints(0.7, 1, 1, 2));
-        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 2));
-        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 2));
+        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 3));
+        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 3));
 
         int result = JOptionPane.showConfirmDialog(null, pnl, res.getString("descText"), JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
