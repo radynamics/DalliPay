@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.net.URI;
+import java.util.Objects;
 
 public class Bithomp implements WalletLookupProvider, TransactionLookupProvider {
     final static Logger log = LogManager.getLogger(Bithomp.class);
@@ -16,9 +17,9 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "Bithomp";
 
     public Bithomp(NetworkInfo network) throws LookupProviderException {
-        if (network.isLivenet()) {
+        if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
             this.baseUrl = "https://www.bithomp.com/explorer/";
-        } else if (network.isTestnet()) {
+        } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://test.bithomp.com/explorer/";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));

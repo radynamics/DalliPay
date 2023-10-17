@@ -37,6 +37,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
     public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
+    public static final Integer NETWORKID_LIVENET = 0;
+    public static final Integer NETWORKID_TESTNET = 1;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
@@ -253,7 +255,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"), "Mainnet");
+        networks[0].setNetworkId(NETWORKID_LIVENET);
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), "Testnet");
+        networks[1].setNetworkId(NETWORKID_TESTNET);
         return networks;
     }
 
