@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
@@ -7,7 +8,7 @@ import org.xrpl.xrpl4j.model.transactions.IssuedCurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.Memo;
 
 public class PayloadConverter {
-    static JSONObject toJson(ImmutablePayment payment) {
+    static JSONObject toJson(ImmutablePayment payment, NetworkInfo networkInfo) {
         if (payment == null) throw new IllegalArgumentException("Parameter 'payment' cannot be null");
         var json = new JSONObject();
 
@@ -47,6 +48,12 @@ public class PayloadConverter {
         }
         if (memos.length() > 0) {
             json.put("Memos", memos);
+        }
+
+        // For compatibility with existing chains, the NetworkID field must be omitted on any network with a Network ID of 1024 or less,
+        // but must be included on any network with a Network ID of 1025 or greater. (https://xrpl.org/transaction-common-fields.html#networkid-field)
+        if (networkInfo != null && networkInfo.getNetworkId() != null && networkInfo.getNetworkId() >= 1025) {
+            json.put("NetworkID", networkInfo.getNetworkId());
         }
 
         return json;

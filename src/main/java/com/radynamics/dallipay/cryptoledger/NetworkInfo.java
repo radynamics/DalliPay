@@ -10,6 +10,7 @@ public class NetworkInfo {
     private String networkId;
     private String displayName;
     private boolean isPredefined;
+    private Integer ledgerNetworkId;
 
     private static final String liveId = "livenet";
     private static final String testnetId = "testnet";
@@ -54,6 +55,14 @@ public class NetworkInfo {
 
     public String getId() {
         return networkId;
+    }
+
+    public Integer getNetworkId() {
+        return ledgerNetworkId;
+    }
+
+    public void setNetworkId(Integer id) {
+        this.ledgerNetworkId = id;
     }
 
     public String getDisplayName() {
