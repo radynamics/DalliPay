@@ -68,7 +68,7 @@ public class WebSocketApi {
 
             @Override
             public void onError(Exception ex) {
-                // TODO: implement
+                future.completeExceptionally(ex);
             }
         };
 
