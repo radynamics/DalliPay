@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.util.RequestFocusListener;
 import okhttp3.HttpUrl;
@@ -18,8 +19,11 @@ public class NetworkInfoEdit {
 
         txtName.setText(ni.getDisplayName());
         txtName.addAncestorListener(new RequestFocusListener());
+        txtName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("displayName.placeholderText"));
         txtRpcUrl.setText(ni.getUrl().toString());
+        txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
         txtNetworkId.setText(ni.getNetworkId() == null ? "" : String.valueOf(ni.getNetworkId()));
+        txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
