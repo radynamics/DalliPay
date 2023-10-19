@@ -40,15 +40,15 @@ public class JSidechainTextField extends JTextField {
     }
 
     private NetworkInfo createNetworkInfo(String value) {
-        NetworkInfo ni;
+        HttpUrl url = null;
+        var displayName = value;
         try {
-            var url = HttpUrl.get(value);
-            ni = NetworkInfo.create(url, NetworkInfo.createDisplayName(url));
+            url = HttpUrl.get(value);
+            displayName = NetworkInfo.createDisplayName(url);
         } catch (Exception ex) {
-            ni = NetworkInfo.create(HttpUrl.get("https://REPLACE_ME.com"), value);
         }
 
-        return NetworkInfoEdit.show(this, ni);
+        return NetworkInfoEdit.show(this, url, displayName);
     }
 
     public void addChangedListener(SidechainChangedListener l) {

@@ -12,17 +12,16 @@ import java.util.ResourceBundle;
 public class NetworkInfoEdit {
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
 
-    public static NetworkInfo show(Component parent, NetworkInfo ni) {
+    public static NetworkInfo show(Component parent, HttpUrl url, String displayName) {
         var txtName = new JTextField();
         var txtRpcUrl = new JTextField();
         var txtNetworkId = new JTextField();
 
-        txtName.setText(ni.getDisplayName());
+        txtName.setText(displayName);
         txtName.addAncestorListener(new RequestFocusListener());
         txtName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("displayName.placeholderText"));
-        txtRpcUrl.setText(ni.getUrl().toString());
+        txtRpcUrl.setText(url == null ? "" : url.toString());
         txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
-        txtNetworkId.setText(ni.getNetworkId() == null ? "" : String.valueOf(ni.getNetworkId()));
         txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
         var pnl = new JPanel();
