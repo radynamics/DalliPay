@@ -37,32 +37,24 @@ public class JSidechainTextField extends JTextField {
         }
 
         raiseSidechainCreated(networkInfo);
-        raiseSidechainChanged(networkInfo);
     }
 
     private NetworkInfo createNetworkInfo(String value) {
-        NetworkInfo ni;
+        HttpUrl url = null;
+        var displayName = value;
+        URI websocketUri = null;
         try {
-            // Accept "https://test.com", "wss://test.com"
-            var url = HttpUrl.get(value.replace("wss://", "https://"));
-            ni = NetworkInfo.create(url, NetworkInfo.createDisplayName(url));
-            ni.setWebSocketUri(URI.create(value.replace("https://", "wss://")));
+            url = HttpUrl.get(value);
+            displayName = NetworkInfo.createDisplayName(url);
+            websocketUri = URI.create(value.replace("https://", "wss://"));
         } catch (Exception ex) {
-            ni = NetworkInfo.create(HttpUrl.get("https://REPLACE_ME.com"), value);
-            ni.setWebSocketUri(URI.create("wss://REPLACE_ME.com"));
         }
 
-        return NetworkInfoEdit.show(this, ni);
+        return NetworkInfoEdit.show(this, url, displayName, websocketUri);
     }
 
     public void addChangedListener(SidechainChangedListener l) {
         sidechainChangedListener.add(l);
-    }
-
-    private void raiseSidechainChanged(NetworkInfo networkInfo) {
-        for (var l : sidechainChangedListener) {
-            l.onChanged(networkInfo);
-        }
     }
 
     private void raiseSidechainCreated(NetworkInfo networkInfo) {

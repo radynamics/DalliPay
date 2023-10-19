@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.util.RequestFocusListener;
 import okhttp3.HttpUrl;
@@ -12,17 +13,20 @@ import java.util.ResourceBundle;
 public class NetworkInfoEdit {
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
 
-    public static NetworkInfo show(Component parent, NetworkInfo ni) {
+    public static NetworkInfo show(Component parent, HttpUrl url, String displayName, URI websocket) {
         var txtName = new JTextField();
         var txtRpcUrl = new JTextField();
         var txtWebsocketUrl = new JTextField();
         var txtNetworkId = new JTextField();
 
-        txtName.setText(ni.getDisplayName());
+        txtName.setText(displayName);
         txtName.addAncestorListener(new RequestFocusListener());
-        txtRpcUrl.setText(ni.getUrl().toString());
-        txtWebsocketUrl.setText(ni.getWebSocketUri().toString());
-        txtNetworkId.setText(ni.getNetworkId() == null ? "" : String.valueOf(ni.getNetworkId()));
+        txtName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("displayName.placeholderText"));
+        txtRpcUrl.setText(url == null ? "" : url.toString());
+        txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
+        txtWebsocketUrl.setText(websocket == null ? "" : websocket.toString());
+        txtWebsocketUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("websocketUrl.placeholderText"));
+        txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
