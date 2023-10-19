@@ -47,7 +47,7 @@ public class NetworkPopMenu {
             txt.setPreferredSize(new Dimension(180, 21));
             txt.addChangedListener(new SidechainChangedListener() {
                 @Override
-                public void onChanged(NetworkInfo networkInfo) {
+                public void onCreated(NetworkInfo networkInfo) {
                     popupMenu.setVisible(false);
 
                     EndpointInfo info = null;
@@ -61,15 +61,12 @@ public class NetworkPopMenu {
                         return;
                     }
 
-                    var item = addEntryAtEnd(networkInfo, networkInfo.getShortText(), CompletableFuture.completedFuture(info));
-                    onNetworkChanged(item);
-                }
-
-                @Override
-                public void onCreated(NetworkInfo networkInfo) {
                     var entries = getCustomEntries();
                     entries.add(networkInfo);
                     saveCustoms(entries);
+
+                    var item = addEntryAtEnd(networkInfo, networkInfo.getShortText(), CompletableFuture.completedFuture(info));
+                    onNetworkChanged(item);
                 }
             });
         }
