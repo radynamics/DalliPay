@@ -62,7 +62,7 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     public void init() {
         issuedCurrencies.clear();
 
-        var config = new XrplPriceOracleConfig();
+        var config = new XrplPriceOracleConfig(ledger.getId());
         config.load();
         for (var o : config.issuedCurrencies()) {
             var nonLedgerCcy = o.getPair().getFirstCode().equals(ledger.getNativeCcySymbol()) ? o.getPair().getSecondCode() : o.getPair().getFirstCode();

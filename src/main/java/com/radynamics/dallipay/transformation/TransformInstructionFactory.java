@@ -5,12 +5,16 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Coinbase;
+import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public final class TransformInstructionFactory {
@@ -21,7 +25,8 @@ public final class TransformInstructionFactory {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
         t.setNetwork(getNetworkOrDefault(ledger, config, networkId));
         try (var repo = new ConfigRepo()) {
-            t.setExchangeRateProvider(ExchangeRateProviderFactory.create(repo.getExchangeRateProvider(), ledger));
+            var persistedProvider = repo.getExchangeRateProvider();
+            t.setExchangeRateProvider(createExchangeRateProvider(ledger, persistedProvider.orElse(null)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             t.setExchangeRateProvider(ExchangeRateProviderFactory.create(Coinbase.ID, ledger));
@@ -34,6 +39,14 @@ public final class TransformInstructionFactory {
         return t;
     }
 
+    private static ExchangeRateProvider createExchangeRateProvider(Ledger ledger, String id) {
+        if (id == null || !ExchangeRateProviderFactory.supports(ledger, id)) {
+            return ledger.getDefaultExchangeRateProvider();
+        }
+
+        return ExchangeRateProviderFactory.create(id, ledger);
+    }
+
     private static NetworkInfo getNetworkOrDefault(Ledger ledger, Config config, String networkId) {
         if (!StringUtils.isEmpty(networkId)) {
             var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
@@ -43,8 +56,10 @@ public final class TransformInstructionFactory {
         }
 
         HttpUrl lastUsed = null;
+        var customSidechains = new NetworkInfo[0];
         try (var repo = new ConfigRepo()) {
             lastUsed = repo.getLastUsedRpcUrl(ledger);
+            customSidechains = repo.getCustomSidechains(ledger);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -53,7 +68,11 @@ public final class TransformInstructionFactory {
             return config.getDefaultNetworkInfo();
         }
 
-        for (var ni : config.getNetworkInfos()) {
+        var available = new ArrayList<NetworkInfo>();
+        available.addAll(List.of(ledger.getDefaultNetworkInfo()));
+        available.addAll(List.of(customSidechains));
+        available.addAll(Arrays.asList(config.getNetworkInfos()));
+        for (var ni : available) {
             if (ni.getUrl().equals(lastUsed)) {
                 return ni;
             }

@@ -14,10 +14,17 @@ import java.util.*;
 public class XrplPriceOracleConfig {
     final static Logger log = LogManager.getLogger(XrplPriceOracleConfig.class);
     private final HashSet<IssuedCurrency> issuedCurrencies = new HashSet<>();
+    private final LedgerId ledgerId;
 
     private final static ResourceBundle res = ResourceBundle.getBundle("i18n.Various");
 
-    public final static String AsReceived = res.getString("asReceived");
+    public final static String AsReceived = "asReceived";
+    public final static String AsReceivedText = res.getString("asReceived");
+
+    public XrplPriceOracleConfig(LedgerId ledgerId) {
+        if (ledgerId == null) throw new IllegalArgumentException("Parameter 'ledgerId' cannot be null");
+        this.ledgerId = ledgerId;
+    }
 
     public void load() {
         try (var repo = new ConfigRepo()) {
@@ -29,7 +36,10 @@ public class XrplPriceOracleConfig {
 
     public void load(ConfigRepo repo) throws Exception {
         issuedCurrencies.clear();
-        issuedCurrencies.addAll(Arrays.asList(fromJson(repo.getXrplPriceOracleConfig())));
+        var json = repo.getXrplPriceOracleConfig(ledgerId);
+        if (json.isPresent()) {
+            issuedCurrencies.addAll(Arrays.asList(fromJson(json.get())));
+        }
     }
 
     public void save() throws Exception {
@@ -42,7 +52,7 @@ public class XrplPriceOracleConfig {
     }
 
     public void save(ConfigRepo repo) throws Exception {
-        repo.setXrplPriceOracleConfig(toJson(issuedCurrencies));
+        repo.setXrplPriceOracleConfig(ledgerId, toJson(issuedCurrencies));
     }
 
     private JSONObject toJson(Collection<IssuedCurrency> ccys) {
@@ -74,36 +84,6 @@ public class XrplPriceOracleConfig {
         }
 
         return list.toArray(new IssuedCurrency[0]);
-    }
-
-    public static List<IssuedCurrency> defaultsXumm() {
-        var list = new ArrayList<IssuedCurrency>();
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet(LedgerId.Xrpl, "rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new Wallet(LedgerId.Xrpl, "rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
-        return list;
-    }
-
-    public static List<IssuedCurrency> defaultsRadyamics() {
-        var issuer = new Wallet(LedgerId.Xrpl, "rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
-        var receiver = new Wallet(LedgerId.Xrpl, "rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
-        var list = new ArrayList<IssuedCurrency>();
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "KRW"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "TRY"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "GBP"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "THB"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "RUB"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "BRL"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "AUD"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "MXN"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "ZAR"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "MYR"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "IDR"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "SGD"), issuer, receiver));
-        list.add(new IssuedCurrency(new CurrencyPair("XRP", "CHF"), issuer, receiver));
-        return list;
     }
 
     public IssuedCurrency[] issuedCurrencies() {

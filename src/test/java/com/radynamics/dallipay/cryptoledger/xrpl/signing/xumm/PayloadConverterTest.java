@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
@@ -11,11 +12,14 @@ import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Utils;
 import com.radynamics.dallipay.iso20022.pain001.TestTransaction;
+import okhttp3.HttpUrl;
 import org.apache.commons.codec.DecoderException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.IssuedCurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
@@ -29,7 +33,7 @@ public class PayloadConverterTest {
 
     @Test
     public void toJsonParamNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> PayloadConverter.toJson(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> PayloadConverter.toJson(null, null));
     }
 
     @ParameterizedTest
@@ -40,7 +44,7 @@ public class PayloadConverterTest {
         if (destinationTag != null) {
             builder.destinationTag(UnsignedInteger.valueOf(destinationTag));
         }
-        var json = PayloadConverter.toJson(builder.build());
+        var json = PayloadConverter.toJson(builder.build(), null);
 
         Assertions.assertEquals("Payment", json.getString("TransactionType"));
         Assertions.assertEquals("rhEo7YkHrxMzqwPhCASpeNwL2HNMqfsb87", json.getString("Account"));
@@ -61,7 +65,7 @@ public class PayloadConverterTest {
         var t = createTransaction();
         t.setAmount(Money.of(1234.56, eur));
         var builder = PaymentBuilder.builder().payment(t).build();
-        var json = PayloadConverter.toJson(builder.build());
+        var json = PayloadConverter.toJson(builder.build(), null);
 
         var amt = json.optJSONObject("Amount");
         Assertions.assertNotNull(amt);
@@ -83,7 +87,7 @@ public class PayloadConverterTest {
             var issuedAmount = IssuedCurrencyAmount.builder().value(String.valueOf(amount)).currency(ccy).issuer(Address.of(eur.getIssuer().getPublicKey())).build();
             builder.sendMax(issuedAmount);
         }
-        var json = PayloadConverter.toJson(builder.build());
+        var json = PayloadConverter.toJson(builder.build(), null);
 
         if (isNativeCcyAmount) {
             Assertions.assertEquals("100", json.getString("SendMax"));
@@ -102,7 +106,7 @@ public class PayloadConverterTest {
         t.addMessage("Test 1");
         t.addMessage("Test 2");
         var builder = PaymentBuilder.builder().payment(t).build();
-        var json = PayloadConverter.toJson(builder.build());
+        var json = PayloadConverter.toJson(builder.build(), null);
 
         var memos = json.optJSONArray("Memos");
         Assertions.assertNotNull(memos);
@@ -118,10 +122,40 @@ public class PayloadConverterTest {
         var t = createTransaction();
         t.setAmount(Money.of(10.123456789012345, new Currency("EUR", ledger.createWallet("rB63KEdxKBqLuius5NFFagYPStg1EfP7hB", null))));
         var builder = PaymentBuilder.builder().payment(t).build();
-        var json = PayloadConverter.toJson(builder.build());
+        var json = PayloadConverter.toJson(builder.build(), null);
 
         Assertions.assertEquals(10.12345678901234, json.getJSONObject("Amount").getDouble("value"));
         Assertions.assertEquals(10.12345678901234, json.getJSONObject("SendMax").getDouble("value"));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(ints = {0, 1, 10, 1024})
+    public void toJsonNetworkIdOmitted(Integer networkId) throws LedgerException {
+        var t = createTransaction();
+        var builder = PaymentBuilder.builder().payment(t).build();
+        var json = PayloadConverter.toJson(builder.build(), createNetworkInfo(networkId));
+
+        Assertions.assertEquals(-1, json.optInt("NetworkID", -1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1025, 21338})
+    public void toJsonNetworkIdSet(Integer networkId) throws LedgerException {
+        var t = createTransaction();
+        var builder = PaymentBuilder.builder().payment(t).build();
+        var json = PayloadConverter.toJson(builder.build(), createNetworkInfo(networkId));
+
+        Assertions.assertEquals(networkId, json.optInt("NetworkID", -1));
+    }
+
+    private static NetworkInfo createNetworkInfo(Integer networkId) {
+        if (networkId == null) {
+            return null;
+        }
+        var ni = NetworkInfo.create(HttpUrl.get("https://www.test.com"), "Test");
+        ni.setNetworkId(networkId);
+        return ni;
     }
 
     private static Transaction createTransaction() {

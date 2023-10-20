@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.net.URI;
+import java.util.Objects;
 
 public class XrpScan implements WalletLookupProvider, TransactionLookupProvider {
     private final static Logger log = LogManager.getLogger(XrpScan.class);
@@ -16,7 +17,7 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "XRPScan";
 
     public XrpScan(NetworkInfo network) throws LookupProviderException {
-        if (!network.isLivenet()) {
+        if (!Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getShortText()));
         }
     }

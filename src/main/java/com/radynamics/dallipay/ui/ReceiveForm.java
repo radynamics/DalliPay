@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -55,7 +56,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private JButton cmdRefresh;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
-    private JComboBox<String> cboTargetCcy;
+    private JComboBox<StringPairEntry> cboTargetCcy;
     private JPanel pnlInfo;
     private JLabel lblInfoText;
     private final JLabel lblUsingExchangeRatesFrom = new JLabel();
@@ -127,9 +128,15 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 cboTargetCcy = new JComboBox<>();
+                cboTargetCcy.setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        return super.getListCellRendererComponent(list, ((StringPairEntry) value).getDisplayText(), index, isSelected, cellHasFocus);
+                    }
+                });
                 cboTargetCcy.addItemListener(e -> {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
-                        onSelectedTargetCcyChanged((String) e.getItem());
+                        onSelectedTargetCcyChanged(((StringPairEntry) e.getItem()).key);
                     }
                 });
                 panel1Layout.putConstraint(SpringLayout.WEST, cboTargetCcy, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
@@ -255,7 +262,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void refreshTargetCcys() {
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig();
+        var xrplOracleConfig = new XrplPriceOracleConfig(transformInstruction.getLedger().getId());
         try (var repo = new ConfigRepo()) {
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
             xrplOracleConfig.load(repo);
@@ -269,17 +276,18 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     public void refreshTargetCcys(String selectedCcy, XrplPriceOracleConfig xrplOracleConfig) {
         var issuedCurrencies = xrplOracleConfig.issuedCurrencies();
 
-        var ccys = new ArrayList<String>();
+        var ccys = new ArrayList<StringPairEntry>();
         for (var ic : issuedCurrencies) {
-            ccys.add(ic.getPair().getSecondCode());
+            var ccy = ic.getPair().getSecondCode();
+            ccys.add(new StringPairEntry(ccy, ccy));
         }
 
         cboTargetCcy.removeAllItems();
-        ccys.sort(String::compareTo);
-        ccys.add(0, XrplPriceOracleConfig.AsReceived);
+        ccys.sort(Comparator.comparing(o -> o.displayText));
+        cboTargetCcy.addItem(new StringPairEntry(XrplPriceOracleConfig.AsReceived, XrplPriceOracleConfig.AsReceivedText));
         for (var ccy : ccys) {
             cboTargetCcy.addItem(ccy);
-            if (ccy.equalsIgnoreCase(selectedCcy)) {
+            if (ccy.getKey().equalsIgnoreCase(selectedCcy)) {
                 cboTargetCcy.setSelectedItem(ccy);
             }
         }
@@ -411,7 +419,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
-        var selectedTargetCcy = cboTargetCcy.getSelectedItem().toString();
+        var selectedTargetCcy = ((StringPairEntry) cboTargetCcy.getSelectedItem()).getKey();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
             var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy.getCode());
@@ -505,5 +513,28 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         table.init(transformInstruction, currencyConverter, new PaymentValidator(), transactionTranslator);
         // Clear loaded payments
         loadTable(new Payment[0]);
+    }
+
+    private class StringPairEntry {
+        private final String key;
+        private final String displayText;
+
+        public StringPairEntry(String key, String displayText) {
+            this.key = key;
+            this.displayText = displayText;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getDisplayText() {
+            return displayText;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s, %s", key, displayText);
+        }
     }
 }
