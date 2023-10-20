@@ -81,8 +81,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
 
     @Override
     public HttpUrl getDefaultFaucetUrl() {
-        // API (https://xahau-test.net/newcreds) is not supported by xrpl4j.
-        return null;
+        return HttpUrl.get("https://xahau-test.net");
     }
 
     @Override
