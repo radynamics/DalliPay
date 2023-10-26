@@ -3,12 +3,10 @@ package com.radynamics.dallipay.cryptoledger;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 
 public class NetworkInfo {
     private HttpUrl url;
-    private URI webSocketUri;
     private String networkId;
     private String displayName;
     private boolean isPredefined;
@@ -57,14 +55,6 @@ public class NetworkInfo {
 
     public String getId() {
         return networkId;
-    }
-
-    public void setWebSocketUri(URI uri) {
-        this.webSocketUri = uri;
-    }
-
-    public URI getWebSocketUri() {
-        return this.webSocketUri;
     }
 
     public Integer getNetworkId() {

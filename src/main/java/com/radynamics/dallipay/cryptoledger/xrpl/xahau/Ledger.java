@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
-import java.net.URI;
 
 public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     private final static Logger log = LogManager.getLogger(Ledger.class);
@@ -61,10 +60,8 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xahau.network/"), "Mainnet");
-        networks[0].setWebSocketUri(URI.create("wss://xahau.network"));
         networks[0].setNetworkId(NETWORKID_LIVENET);
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://xahau-test.net/"), "Testnet");
-        networks[1].setWebSocketUri(URI.create("wss://xahau-test.net"));
         networks[1].setNetworkId(NETWORKID_TESTNET);
         return networks;
     }

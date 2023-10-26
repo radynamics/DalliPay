@@ -7,16 +7,14 @@ import okhttp3.HttpUrl;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URI;
 import java.util.ResourceBundle;
 
 public class NetworkInfoEdit {
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
 
-    public static NetworkInfo show(Component parent, HttpUrl url, String displayName, URI websocket) {
+    public static NetworkInfo show(Component parent, HttpUrl url, String displayName) {
         var txtName = new JTextField();
         var txtRpcUrl = new JTextField();
-        var txtWebsocketUrl = new JTextField();
         var txtNetworkId = new JTextField();
 
         txtName.setText(displayName);
@@ -24,21 +22,17 @@ public class NetworkInfoEdit {
         txtName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("displayName.placeholderText"));
         txtRpcUrl.setText(url == null ? "" : url.toString());
         txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
-        txtWebsocketUrl.setText(websocket == null ? "" : websocket.toString());
-        txtWebsocketUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("websocketUrl.placeholderText"));
         txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
-        pnl.setPreferredSize(new Dimension(350, 90));
+        pnl.setPreferredSize(new Dimension(350, 70));
         pnl.add(new JLabel(res.getString("displayName")), createGridConstraints(0.3, 1, 0, 0));
         pnl.add(txtName, createGridConstraints(0.7, 1, 1, 0));
         pnl.add(new JLabel(res.getString("rpcUrl")), createGridConstraints(0.3, 1, 0, 1));
         pnl.add(txtRpcUrl, createGridConstraints(0.7, 1, 1, 1));
-        pnl.add(new JLabel(res.getString("websocketUrl")), createGridConstraints(0.3, 1, 0, 2));
-        pnl.add(txtWebsocketUrl, createGridConstraints(0.7, 1, 1, 2));
-        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 3));
-        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 3));
+        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 2));
+        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 2));
 
         int result = JOptionPane.showConfirmDialog(null, pnl, res.getString("descText"), JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
@@ -47,8 +41,6 @@ public class NetworkInfoEdit {
 
         var displayText = txtName.getText().trim();
         var rpcUrlText = txtRpcUrl.getText().trim();
-        // Websocket is not needed on XRPL mainnet (but for Xahau).
-        var websocketUrlText = txtWebsocketUrl.getText().trim();
         var networkIdText = txtNetworkId.getText().trim();
         if (displayText.length() == 0 || rpcUrlText.length() == 0) {
             return null;
@@ -62,18 +54,7 @@ public class NetworkInfoEdit {
             return null;
         }
 
-        URI websocketUri = null;
-        if (websocketUrlText.length() > 0) {
-            try {
-                websocketUri = URI.create(websocketUrlText);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(parent, String.format(res.getString("websocketParseFailed"), websocketUrlText), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
-                return null;
-            }
-        }
-
         var info = NetworkInfo.create(httpUrl, displayText);
-        info.setWebSocketUri(websocketUri);
         info.setNetworkId(toIntegerOrNull(networkIdText));
         return info;
     }
