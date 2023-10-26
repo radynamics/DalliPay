@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui.options.XrplPriceOracleEdit;
 
+import com.radynamics.dallipay.cryptoledger.xrpl.IssuedCurrency;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.table.AbstractTableModel;
@@ -82,8 +83,8 @@ public class IssuedCurrencyTableModel extends AbstractTableModel {
         return list;
     }
 
-    public Record newRecord() {
-        var o = new Record();
+    public Record newRecord(IssuedCurrency ic) {
+        var o = new Record(ic);
         list.add(o);
         int row = getRowIndex(o);
         fireTableRowsInserted(row, row);

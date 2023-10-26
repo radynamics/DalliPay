@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.net.URI;
+import java.util.Objects;
 
 public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider {
     private final static Logger log = LogManager.getLogger(XrplOrg.class);
@@ -18,9 +19,9 @@ public class XrplOrg implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "XRPL Explorer";
 
     public XrplOrg(NetworkInfo network) {
-        if (network.isLivenet()) {
+        if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
             this.baseUrl = "https://livenet.xrpl.org";
-        } else if (network.isTestnet()) {
+        } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://testnet.xrpl.org";
         } else {
             this.baseUrl = String.format("https://custom.xrpl.org/%s", network.getUrl().host());

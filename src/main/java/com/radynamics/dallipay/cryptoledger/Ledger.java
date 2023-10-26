@@ -60,7 +60,13 @@ public interface Ledger {
 
     NetworkInfo[] getDefaultNetworkInfo();
 
+    String[] getExchangeRateProviders();
+
+    ExchangeRateProvider getDefaultExchangeRateProvider();
+
     HttpUrl getDefaultFaucetUrl();
+
+    PriceOracle[] getDefaultPriceOracles();
 
     TransactionSubmitterFactory createTransactionSubmitterFactory();
 

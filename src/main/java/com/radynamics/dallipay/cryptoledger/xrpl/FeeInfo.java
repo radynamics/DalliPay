@@ -3,12 +3,15 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.radynamics.dallipay.cryptoledger.FeeSuggestion;
 
 public class FeeInfo {
+    private final Ledger ledger;
     private final long minimum;
     private final long openLedger;
     private final long median;
     private final double queuePercentage;
 
-    public FeeInfo(long minimum, long openLedger, long median, double queuePercentage) {
+    public FeeInfo(Ledger ledger, long minimum, long openLedger, long median, double queuePercentage) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
         this.minimum = minimum;
         this.openLedger = openLedger;
         this.median = median;
@@ -27,7 +30,7 @@ public class FeeInfo {
         var highValue = Math.round(Long.max(median, openLedger)) * loadFactor;
         var high = Long.min(Math.round(highValue), 100000);
 
-        return new FeeSuggestion(Ledger.dropsToXrp(low), Ledger.dropsToXrp(medium), Ledger.dropsToXrp(high));
+        return new FeeSuggestion(ledger.dropsToXrp(low), ledger.dropsToXrp(medium), ledger.dropsToXrp(high));
     }
 
     @Override

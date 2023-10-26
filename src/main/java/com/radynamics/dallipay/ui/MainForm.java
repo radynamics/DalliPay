@@ -19,6 +19,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
@@ -134,8 +136,8 @@ public class MainForm extends JFrame {
 
         Wallet defaultSenderWallet = null;
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig();
         var ledger = transformInstruction.getLedger();
+        var xrplOracleConfig = new XrplPriceOracleConfig(ledger.getId());
         try (var repo = new ConfigRepo()) {
             defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
@@ -246,6 +248,15 @@ public class MainForm extends JFrame {
         }
     }
 
+    private NetworkInfo[] getCustomSidechains() {
+        try (var repo = new ConfigRepo()) {
+            return repo.getCustomSidechains(transformInstruction.getLedger());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+        return new NetworkInfo[0];
+    }
+
     public void setTransformInstruction(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         this.transformInstruction = transformInstruction;
@@ -283,7 +294,10 @@ public class MainForm extends JFrame {
     }
 
     private NetworkPopMenu createNetworkPopMenu() {
-        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
+        var networkInfos = new ArrayList<>(List.of(transformInstruction.getConfig().getNetworkInfos()));
+        networkInfos.addAll(List.of(getCustomSidechains()));
+
+        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), networkInfos.toArray(NetworkInfo[]::new));
         popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
         popupMenu.addChangedListener(() -> {
             var selected = popupMenu.getSelectedNetwork();

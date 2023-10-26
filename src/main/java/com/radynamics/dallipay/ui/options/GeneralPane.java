@@ -182,6 +182,11 @@ public class GeneralPane extends JPanel {
             return;
         }
 
+        if (faucetUrl == null) {
+            JOptionPane.showMessageDialog(this, String.format(res.getString("faucetNotAvailable"), ledger.getNetwork().getDisplayName(), ledger.getNetwork().getUrl().toString()), ledger.getNetwork().getDisplayName(), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         var wallet = ledger.createRandomWallet(faucetUrl);
 
         var sb = new StringBuilder();
