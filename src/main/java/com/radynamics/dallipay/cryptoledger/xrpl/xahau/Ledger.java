@@ -3,7 +3,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl.xahau;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.WebSocketApi;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.JsonRpcApi;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
 import com.radynamics.dallipay.exchange.ManualRateProvider;
@@ -41,7 +41,7 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
 
     @Override
     public FeeSuggestion getFeeSuggestion(Transaction t) {
-        var api = new WebSocketApi(this, getNetwork().getWebSocketUri());
+        var api = new JsonRpcApi(this, getNetwork().getUrl());
         try {
             var fees = api.fee(t);
             return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
