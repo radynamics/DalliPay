@@ -32,6 +32,7 @@ public class MainForm extends JFrame {
     private JSplitButton cmdNetwork;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+    private final String ITEM_OBJECT_ID = "itemObjectId";
 
     public MainForm() {
         setupUI();
@@ -193,17 +194,35 @@ public class MainForm extends JFrame {
         return menuBar;
     }
 
-    private void refreshLedgerButton(JMenuItem item) {
+    private void refreshLedgerButton(Ledger ledger) throws Exception {
+        JMenuItem item = null;
+        var compareValue = ledger.getId().numericId();
+        for (var e : cmdLedger.getPopupMenu().getSubElements()) {
+            var mi = (JMenuItem) e;
+            if (mi.getClientProperty(ITEM_OBJECT_ID).equals(compareValue)) {
+                item = mi;
+                break;
+            }
+        }
+
+        if (item == null) {
+            throw new Exception("MenuItem for %s not found.".formatted(compareValue));
+        }
+
         cmdLedger.setIcon(item.getIcon());
         cmdLedger.setToolTipText(item.getText());
     }
 
-    private void onLedgerClicked(JMenuItem item, Ledger ledger) {
+    private void onLedgerClicked(Ledger ledger) {
         if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
             return;
         }
         setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
-        refreshLedgerButton(item);
+        try {
+            refreshLedgerButton(ledger);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         saveLastUsedLedger(ledger.getId());
     }
 
@@ -255,6 +274,11 @@ public class MainForm extends JFrame {
         optionsPanel.load();
 
         cmdLedger.setPopupMenu(createLedgerPopMenu());
+        try {
+            refreshLedgerButton(transformInstruction.getLedger());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
         refreshNetworkButton();
 
@@ -262,17 +286,12 @@ public class MainForm extends JFrame {
     }
 
     private JPopupMenu createLedgerPopMenu() {
-        JMenuItem selected = null;
         var popupMenu = new JPopupMenu();
         for (var l : LedgerFactory.all()) {
             var item = new JMenuItem(l.getDisplayText(), l.getIcon());
-            item.addActionListener(e -> onLedgerClicked(item, l));
+            item.putClientProperty(ITEM_OBJECT_ID, l.getId().numericId());
+            item.addActionListener(e -> onLedgerClicked(l));
             popupMenu.add(item);
-            selected = l.getId().sameAs(transformInstruction.getLedger().getId()) ? item : selected;
-        }
-
-        if (selected != null) {
-            refreshLedgerButton(selected);
         }
 
         return popupMenu;
