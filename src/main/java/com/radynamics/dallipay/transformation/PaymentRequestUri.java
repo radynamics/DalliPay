@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.transformation;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.LedgerFactory;
+import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -42,6 +44,40 @@ public class PaymentRequestUri {
         }
 
         return true;
+    }
+
+    public Ledger ledger(URI uri) {
+        var networkId = getNetworkIdOrNull(uri);
+        if (networkId == null) {
+            return null;
+        }
+
+        for (var l : LedgerFactory.all()) {
+            for (var n : l.getDefaultNetworkInfo()) {
+                if (n.getNetworkId().equals(networkId)) {
+                    return l;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public NetworkInfo networkInfo(URI uri) {
+        var networkId = getNetworkIdOrNull(uri);
+        if (networkId == null) {
+            return null;
+        }
+
+        for (var l : LedgerFactory.all()) {
+            for (var n : l.getDefaultNetworkInfo()) {
+                if (n.getNetworkId().equals(networkId)) {
+                    return n;
+                }
+            }
+        }
+
+        return null;
     }
 
     public Payment createOrNull(URI uri) {
@@ -111,6 +147,17 @@ public class PaymentRequestUri {
 
     private static String getTo(URI uri) {
         return firstOrNull(uri, "to");
+    }
+
+    private Integer getNetworkIdOrNull(URI uri) {
+        if (!matches(uri)) {
+            return null;
+        }
+
+        var networkIdText = firstOrNull(uri, "networkId");
+        return StringUtils.isEmpty(networkIdText) || !isNumeric(networkIdText)
+                ? null
+                : Integer.parseInt(networkIdText);
     }
 
     private static String firstOrNull(URI uri, String param) {

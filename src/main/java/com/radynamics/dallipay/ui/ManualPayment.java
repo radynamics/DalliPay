@@ -71,13 +71,8 @@ public class ManualPayment {
         return o;
     }
 
-    public static ManualPayment createByRequestUri(Component parentComponent, Ledger ledger, TransactionTranslator transactionTranslator, URI requestUri) {
-        if (!PaymentRequestUri.matches(requestUri.toString())) {
-            return null;
-        }
-
-        var factory = new PaymentRequestUri(ledger);
-        return create(parentComponent, factory.createOrNull(requestUri), transactionTranslator);
+    public static ManualPayment createByRequestUri(Component parentComponent, PaymentRequestUri paymentRequestUri, TransactionTranslator transactionTranslator, URI requestUri) {
+        return create(parentComponent, paymentRequestUri.createOrNull(requestUri), transactionTranslator);
     }
 
     private void applyDefaultSenderWallet() {

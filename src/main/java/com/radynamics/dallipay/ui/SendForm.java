@@ -16,6 +16,7 @@ import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.pain001.*;
+import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
@@ -294,8 +295,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         showNewPayment(mp);
     }
 
-    public void addNewPaymentByRequest(URI requestUri) {
-        var mp = ManualPayment.createByRequestUri(this, transformInstruction.getLedger(), transactionTranslator, requestUri);
+    public void addNewPaymentByRequest(PaymentRequestUri paymentRequestUri, URI requestUri) {
+        var mp = ManualPayment.createByRequestUri(this, paymentRequestUri, transactionTranslator, requestUri);
         if (mp == null) {
             return;
         }
