@@ -12,7 +12,7 @@ public class LookupProviderFactory {
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(Bithomp.Id);
+                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
@@ -30,7 +30,7 @@ public class LookupProviderFactory {
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(Bithomp.Id);
+                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {

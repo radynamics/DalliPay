@@ -4,7 +4,6 @@ import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.VersionController;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LookupProviderFactory;
-import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.db.Database;
 import com.radynamics.dallipay.exchange.Money;
@@ -216,7 +215,7 @@ public class GeneralPane extends JPanel {
 
     public void load(ConfigRepo repo) throws Exception {
         faucetUrl = repo.getFaucetUrl(ledger);
-        cboExplorer.setSelectedItem(repo.getLookupProviderId(ledger.getId()).orElse(Bithomp.Id));
+        cboExplorer.setSelectedItem(repo.getLookupProviderId(ledger.getId()).orElse(ledger.getDefaultLookupProviderId()));
     }
 
     public void init(Ledger ledger) {
