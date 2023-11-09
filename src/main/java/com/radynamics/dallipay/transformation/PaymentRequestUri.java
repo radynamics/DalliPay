@@ -25,22 +25,19 @@ public class PaymentRequestUri {
     private final String ccy;
     private final String refNo;
     private final String msg;
-    private final Ledger expectedLedger;
     private final NetworkInfo expectedNetwork;
 
-    private PaymentRequestUri(Ledger ledger, URI uri) {
-        this.ledger = ledger;
+    private PaymentRequestUri(Ledger defaultLedger, URI uri) {
         this.uri = uri;
 
         amount = parseAmount();
-        receiverWallet = ledger.createWallet(getTo(uri), null);
         destinationTag = firstOrNull(uri, "dt");
         ccy = firstOrNull(uri, "currency");
         refNo = firstOrNull(uri, "refno");
         msg = firstOrNull(uri, "msg");
 
-        Ledger tmpLedger = null;
-        NetworkInfo tmpNetwork = null;
+        Ledger tmpLedger = defaultLedger;
+        NetworkInfo tmpNetwork = defaultLedger.getNetwork();
         var networkId = getNetworkIdOrNull();
         if (networkId != null) {
             for (var l : LedgerFactory.all()) {
@@ -52,8 +49,9 @@ public class PaymentRequestUri {
                 }
             }
         }
-        expectedLedger = tmpLedger;
+        ledger = tmpLedger;
         expectedNetwork = tmpNetwork;
+        receiverWallet = ledger.createWallet(getTo(uri), null);
     }
 
     public static boolean matches(String text) {
@@ -89,7 +87,7 @@ public class PaymentRequestUri {
     }
 
     public Ledger ledger() {
-        return expectedLedger;
+        return ledger;
     }
 
     public NetworkInfo networkInfo() {
