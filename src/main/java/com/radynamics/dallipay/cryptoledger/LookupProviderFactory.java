@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public class LookupProviderFactory {
     public static WalletLookupProvider createWalletLookupProvider(Ledger ledger) throws LookupProviderException {
+        var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
@@ -31,10 +31,10 @@ public class LookupProviderFactory {
     }
 
     public static TransactionLookupProvider createTransactionLookupProvider(Ledger ledger) throws LookupProviderException {
+        var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
