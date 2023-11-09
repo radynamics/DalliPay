@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
@@ -21,6 +22,8 @@ public interface Ledger {
     Transaction createTransaction();
 
     Transaction getTransaction(String transactionId);
+
+    UnsignedLong toSmallestUnit(Money amount);
 
     FeeSuggestion getFeeSuggestion(Transaction t);
 

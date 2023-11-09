@@ -79,11 +79,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(getNativeCcySymbol()));
     }
 
-    public static UnsignedLong xrpToDrops(Money xrpAmount) {
-        if (!xrpAmount.getCcy().getCode().equals("XRP")) {
-            throw new IllegalArgumentException("Amount expected in XRP and not " + xrpAmount.getCcy().getCode());
+    @Override
+    public UnsignedLong toSmallestUnit(Money amount) {
+        if (!amount.getCcy().getCode().equals(getNativeCcySymbol())) {
+            throw new IllegalArgumentException("Amount expected in %s and not %s".formatted(getNativeCcySymbol(), amount.getCcy().getCode()));
         }
-        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(xrpAmount.getNumber().doubleValue())).value();
+        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue())).value();
     }
 
     @Override
