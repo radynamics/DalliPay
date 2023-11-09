@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.signing.xumm;
 
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.cryptoledger.xrpl.XrplUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
@@ -50,11 +51,7 @@ public class PayloadConverter {
             json.put("Memos", memos);
         }
 
-        // For compatibility with existing chains, the NetworkID field must be omitted on any network with a Network ID of 1024 or less,
-        // but must be included on any network with a Network ID of 1025 or greater. (https://xrpl.org/transaction-common-fields.html#networkid-field)
-        if (networkInfo != null && networkInfo.getNetworkId() != null && networkInfo.getNetworkId() >= 1025) {
-            json.put("NetworkID", networkInfo.getNetworkId());
-        }
+        XrplUtils.networkId(networkInfo).ifPresent(networkID -> json.put("NetworkID", networkID));
 
         return json;
     }
