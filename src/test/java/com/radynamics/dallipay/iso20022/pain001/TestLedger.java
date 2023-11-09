@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
@@ -53,6 +54,11 @@ public class TestLedger implements Ledger {
     @Override
     public Transaction getTransaction(String transactionId) {
         return null;
+    }
+
+    @Override
+    public UnsignedLong toSmallestUnit(Money amount) {
+        return UnsignedLong.valueOf(amount.getNumber().longValue() * FACTOR);
     }
 
     static Money convertToNativeCcyAmount(long amountSmallestUnit) {
