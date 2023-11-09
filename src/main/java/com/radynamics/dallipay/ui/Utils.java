@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class Utils {
+    private final static Logger log = LogManager.getLogger(Utils.class);
+
     public static final NumberFormat createFormatFiat() {
         var df = DecimalFormat.getInstance();
         setDigits(df, 2);
@@ -144,6 +148,8 @@ public final class Utils {
             } catch (IOException ex) {
                 ExceptionDialog.show(parent, ex);
             }
+        } else {
+            log.warn("No desktop or no browsing supported");
         }
     }
 
