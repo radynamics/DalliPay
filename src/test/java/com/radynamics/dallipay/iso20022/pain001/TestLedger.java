@@ -129,7 +129,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public NetworkInfo getNetwork() {
-        throw new NotImplementedException();
+        return this.network;
     }
 
     @Override

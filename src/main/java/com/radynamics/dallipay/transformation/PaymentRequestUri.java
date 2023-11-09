@@ -30,7 +30,6 @@ public class PaymentRequestUri {
     private PaymentRequestUri(Ledger defaultLedger, URI uri) {
         this.uri = uri;
 
-        amount = parseAmount();
         destinationTag = firstOrNull(uri, "dt");
         ccy = firstOrNull(uri, "currency");
         refNo = firstOrNull(uri, "refno");
@@ -52,6 +51,7 @@ public class PaymentRequestUri {
         ledger = tmpLedger;
         expectedNetwork = tmpNetwork;
         receiverWallet = ledger.createWallet(getTo(uri), null);
+        amount = parseAmount();
     }
 
     public static boolean matches(String text) {
