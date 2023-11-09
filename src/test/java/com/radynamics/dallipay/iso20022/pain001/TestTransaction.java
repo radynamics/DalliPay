@@ -6,7 +6,6 @@ import com.radynamics.dallipay.cryptoledger.xrpl.api.LedgerBlock;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
-import jakarta.ws.rs.NotSupportedException;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
     private Block block;
     private Wallet senderWallet;
     private Wallet receiverWallet;
+    private String destinationTag;
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<StructuredReference> references = new ArrayList<>();
     private String invoiceId;
@@ -98,12 +98,12 @@ public class TestTransaction implements com.radynamics.dallipay.cryptoledger.Tra
 
     @Override
     public String getDestinationTag() {
-        return null;
+        return destinationTag;
     }
 
     @Override
     public void setDestinationTag(String destinationTag) {
-        throw new NotSupportedException();
+        this.destinationTag = destinationTag;
     }
 
     @Override
