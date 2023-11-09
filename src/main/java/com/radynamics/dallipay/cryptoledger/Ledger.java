@@ -73,6 +73,8 @@ public interface Ledger {
 
     PriceOracle[] getDefaultPriceOracles();
 
+    String getDefaultLookupProviderId();
+
     TransactionSubmitterFactory createTransactionSubmitterFactory();
 
     Money roundNativeCcy(Money amt);

@@ -60,6 +60,8 @@ public class DbMigration {
     private Void migrateTo3() throws SQLException {
         var ps = conn.prepareStatement("UPDATE config SET key = 'Xrpl_priceOracleConfig' WHERE key = 'xrplPriceOracleConfig'");
         ps.execute();
+        ps = conn.prepareStatement("UPDATE config SET key = 'Xrpl_lookupProviderId' WHERE key = 'lookupProviderId'");
+        ps.execute();
         return null;
     }
 

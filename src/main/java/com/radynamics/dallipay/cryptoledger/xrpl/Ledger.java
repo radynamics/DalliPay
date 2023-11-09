@@ -317,6 +317,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public String getDefaultLookupProviderId() {
+        return Bithomp.Id;
+    }
+
+    @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.TransactionSubmitterFactory(this);
     }

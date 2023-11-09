@@ -228,6 +228,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public String getDefaultLookupProviderId() {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         throw new NotImplementedException();
     }
