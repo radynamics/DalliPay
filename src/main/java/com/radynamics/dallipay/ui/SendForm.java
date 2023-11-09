@@ -37,7 +37,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.*;
@@ -295,8 +294,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         showNewPayment(mp);
     }
 
-    public void addNewPaymentByRequest(PaymentRequestUri paymentRequestUri, URI requestUri) {
-        var mp = ManualPayment.createByRequestUri(this, paymentRequestUri, transactionTranslator, requestUri);
+    public void addNewPaymentByRequest(PaymentRequestUri paymentRequestUri) {
+        var mp = ManualPayment.createByRequestUri(this, paymentRequestUri, transactionTranslator);
         if (mp == null) {
             return;
         }

@@ -2,10 +2,13 @@ package com.radynamics.dallipay.transformation;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.iso20022.Payment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.URI;
 
 public class FreeTextPaymentFactory {
+    private final static Logger log = LogManager.getLogger(FreeTextPaymentFactory.class);
     private final Ledger ledger;
 
     public FreeTextPaymentFactory(Ledger ledger) {
@@ -34,8 +37,13 @@ public class FreeTextPaymentFactory {
         }
 
         if (PaymentRequestUri.matches(text)) {
-            var o = new PaymentRequestUri(ledger);
-            return o.createOrNull(URI.create(text));
+            try {
+                var o = PaymentRequestUri.create(ledger, URI.create(text));
+                return o.create();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return null;
+            }
         }
 
         return null;

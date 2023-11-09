@@ -11,7 +11,7 @@ import java.net.URI;
 public class PaymentRequestUriTest {
     @Test
     public void ctrNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new PaymentRequestUri(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> PaymentRequestUri.create(null, null));
     }
 
     @Test
@@ -29,10 +29,10 @@ public class PaymentRequestUriTest {
     }
 
     @Test
-    public void createOrNull() {
+    public void createOrNull() throws Exception {
         var ledger = new TestLedger();
         {
-            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc"));
+            var o = PaymentRequestUri.create(ledger, URI.create("http://127.0.0.1:58909/request/?to=aBc")).create();
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(0.0, o.getAmount());
             Assertions.assertEquals("TEST", o.getUserCcyCodeOrEmpty());
@@ -40,7 +40,7 @@ public class PaymentRequestUriTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD"));
+            var o = PaymentRequestUri.create(ledger, URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD")).create();
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(98.76, o.getAmount());
             Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
@@ -49,7 +49,7 @@ public class PaymentRequestUriTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&dt=123&amount=98.7654321"));
+            var o = PaymentRequestUri.create(ledger, URI.create("http://127.0.0.1:58909/request/?to=aBc&dt=123&amount=98.7654321")).create();
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals("123", o.getDestinationTag());
             Assertions.assertEquals(98.7654321, o.getAmount());
@@ -58,7 +58,7 @@ public class PaymentRequestUriTest {
             Assertions.assertEquals("TEST", o.getAmountTransaction().getCcy().getCode());
         }
         {
-            var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test"));
+            var o = PaymentRequestUri.create(ledger, URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=USD&refno=RF18539007547034&msg=test")).create();
             Assertions.assertEquals("aBc", o.getReceiverWallet().getPublicKey());
             Assertions.assertEquals(98.76, o.getAmount());
             Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
@@ -74,10 +74,10 @@ public class PaymentRequestUriTest {
 
     @ParameterizedTest
     @CsvSource({"USD", "usd"})
-    public void createOrNullCcyCasing(String ccy) {
+    public void createOrNullCcyCasing(String ccy) throws Exception {
         var ledger = new TestLedger();
 
-        var o = new PaymentRequestUri(ledger).createOrNull(URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=" + ccy));
+        var o = PaymentRequestUri.create(ledger, URI.create("http://127.0.0.1:58909/request/?to=aBc&amount=98.76&currency=" + ccy)).create();
         Assertions.assertEquals(98.76, o.getAmount());
         Assertions.assertEquals("USD", o.getUserCcyCodeOrEmpty());
     }

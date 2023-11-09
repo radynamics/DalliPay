@@ -17,7 +17,6 @@ import com.radynamics.dallipay.util.RequestFocusListener;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URI;
 import java.util.ResourceBundle;
 
 public class ManualPayment {
@@ -71,8 +70,8 @@ public class ManualPayment {
         return o;
     }
 
-    public static ManualPayment createByRequestUri(Component parentComponent, PaymentRequestUri paymentRequestUri, TransactionTranslator transactionTranslator, URI requestUri) {
-        return create(parentComponent, paymentRequestUri.createOrNull(requestUri), transactionTranslator);
+    public static ManualPayment createByRequestUri(Component parentComponent, PaymentRequestUri paymentRequestUri, TransactionTranslator transactionTranslator) {
+        return create(parentComponent, paymentRequestUri.create(), transactionTranslator);
     }
 
     private void applyDefaultSenderWallet() {

@@ -139,15 +139,20 @@ public class MainForm extends JFrame {
         Utils.bringToFront(this);
         tabbedPane.setSelectedComponent(sendingPanel);
 
-        var paymentRequestUri = new PaymentRequestUri(transformInstruction.getLedger());
+        PaymentRequestUri paymentRequestUri;
+        try {
+            paymentRequestUri = PaymentRequestUri.create(transformInstruction.getLedger(), requestUrl);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
         var actual = transformInstruction.getNetwork();
-        var expected = paymentRequestUri.networkInfo(requestUrl);
+        var expected = paymentRequestUri.networkInfo();
         if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
-            var expectedLedger = paymentRequestUri.ledger(requestUrl);
-            askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
+            askSwitchingNetwork(transformInstruction.getLedger(), actual, paymentRequestUri.ledger(), expected);
         }
 
-        sendingPanel.addNewPaymentByRequest(paymentRequestUri, requestUrl);
+        sendingPanel.addNewPaymentByRequest(paymentRequestUri);
     }
 
     private void askSwitchingNetwork(Ledger actualLedger, NetworkInfo actual, Ledger expectedLedger, NetworkInfo expected) {
