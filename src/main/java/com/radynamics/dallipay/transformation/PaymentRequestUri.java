@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.util.Locale;
+import java.util.Objects;
 
 public class PaymentRequestUri {
     private final Ledger ledger;
@@ -38,7 +39,7 @@ public class PaymentRequestUri {
         Ledger tmpLedger = defaultLedger;
         NetworkInfo tmpNetwork = defaultLedger.getNetwork();
         var networkId = getNetworkIdOrNull();
-        if (networkId != null) {
+        if (networkId != null && !Objects.equals(tmpNetwork.getNetworkId(), networkId)) {
             for (var l : LedgerFactory.all()) {
                 for (var n : l.getDefaultNetworkInfo()) {
                     if (n.getNetworkId().equals(networkId)) {
