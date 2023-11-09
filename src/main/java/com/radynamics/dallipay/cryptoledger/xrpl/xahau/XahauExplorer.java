@@ -16,9 +16,9 @@ public class XahauExplorer implements WalletLookupProvider, TransactionLookupPro
     public static final String displayName = "Xahau Explorer";
 
     public XahauExplorer(NetworkInfo network) throws LookupProviderException {
-        if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
+        if (Objects.equals(network.getNetworkId(), com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger.NETWORKID_LIVENET)) {
             this.baseUrl = "https://explorer.xahau.net";
-        } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
+        } else if (Objects.equals(network.getNetworkId(), com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://explorer.xahau-test.net";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
