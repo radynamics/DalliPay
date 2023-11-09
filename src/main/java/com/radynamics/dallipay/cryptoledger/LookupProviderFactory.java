@@ -3,6 +3,8 @@ package com.radynamics.dallipay.cryptoledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrpScan;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplOrg;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.BithompXahau;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.XahScan;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.XahauExplorer;
 import com.radynamics.dallipay.db.ConfigRepo;
 
@@ -24,7 +26,14 @@ public class LookupProviderFactory {
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
             case Xahau -> {
-                return new XahauExplorer(network);
+                if (lookupProviderId.equals(BithompXahau.Id)) {
+                    return new BithompXahau(network);
+                } else if (lookupProviderId.equals(XahauExplorer.Id)) {
+                    return new XahauExplorer(network);
+                } else if (lookupProviderId.equals(XahScan.Id)) {
+                    return new XahScan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
             default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
@@ -45,7 +54,14 @@ public class LookupProviderFactory {
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
             case Xahau -> {
-                return new XahauExplorer(network);
+                if (lookupProviderId.equals(BithompXahau.Id)) {
+                    return new BithompXahau(network);
+                } else if (lookupProviderId.equals(XahauExplorer.Id)) {
+                    return new XahauExplorer(network);
+                } else if (lookupProviderId.equals(XahScan.Id)) {
+                    return new XahScan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
             default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
@@ -57,7 +73,7 @@ public class LookupProviderFactory {
                 return new String[]{Bithomp.Id, XrplOrg.Id, XrpScan.Id};
             }
             case Xahau -> {
-                return new String[]{XahauExplorer.Id};
+                return new String[]{BithompXahau.Id, XahauExplorer.Id, XahScan.Id};
             }
             default -> throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -70,8 +86,12 @@ public class LookupProviderFactory {
             return XrplOrg.displayName;
         } else if (lookupProviderId.equals(XrpScan.Id)) {
             return XrpScan.displayName;
+        } else if (lookupProviderId.equals(BithompXahau.Id)) {
+            return BithompXahau.displayName;
         } else if (lookupProviderId.equals(XahauExplorer.Id)) {
             return XahauExplorer.displayName;
+        } else if (lookupProviderId.equals(XahScan.Id)) {
+            return XahScan.displayName;
         }
         throw new IllegalStateException("Unexpected value: " + lookupProviderId);
     }
