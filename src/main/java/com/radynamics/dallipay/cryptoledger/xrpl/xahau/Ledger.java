@@ -87,6 +87,11 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     }
 
     @Override
+    public String getDefaultLookupProviderId() {
+        return XahauExplorer.Id;
+    }
+
+    @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.xahau.TransactionSubmitterFactory(this);
     }
