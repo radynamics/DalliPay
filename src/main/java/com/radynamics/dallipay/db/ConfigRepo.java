@@ -2,7 +2,6 @@ package com.radynamics.dallipay.db;
 
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
@@ -183,12 +182,12 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("exportFormat", CamtFormatHelper.toKey(value));
     }
 
-    public String getLookupProviderId() throws Exception {
-        return single("lookupProviderId").orElse(Bithomp.Id);
+    public Optional<String> getLookupProviderId(LedgerId ledgerId) throws Exception {
+        return single(createLedgerSpecificKey(ledgerId, "lookupProviderId"));
     }
 
-    public void setLookupProviderId(String value) throws Exception {
-        saveOrUpdate("lookupProviderId", value);
+    public void setLookupProviderId(LedgerId ledgerId, String value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledgerId, "lookupProviderId"), value);
     }
 
     public String getXummAccessToken() throws Exception {
