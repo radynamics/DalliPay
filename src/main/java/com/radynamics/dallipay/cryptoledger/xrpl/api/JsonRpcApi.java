@@ -513,19 +513,22 @@ public class JsonRpcApi implements TransactionSource {
         trx.setBooked(t.closeDateHuman().get());
         trx.setBlock(new LedgerBlock(t.ledgerIndex().orElseThrow()));
         trx.setSender(WalletConverter.from(t.account()));
+        var messages = new ArrayList<String>();
         for (MemoWrapper mw : t.memos()) {
             if (!mw.memo().memoData().isPresent()) {
                 continue;
             }
             var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
-            for (var ft : unwrappedMemo.freeTexts()) {
-                trx.addMessage(ft);
-            }
+            messages.addAll(Arrays.asList(unwrappedMemo.freeTexts()));
         }
 
         var l = new StructuredReferenceLookup(t);
         for (var r : l.find()) {
             trx.addStructuredReference(r);
+            messages.removeIf(o -> o.equals(r.getUnformatted()));
+        }
+        for (var m : messages) {
+            trx.addMessage(m);
         }
 
         if (t.transactionType() == TransactionType.PAYMENT) {
