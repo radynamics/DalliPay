@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.paystring;
 
 import com.google.common.primitives.UnsignedInteger;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
@@ -22,7 +23,7 @@ public class ResolverResult {
         }
 
         for (var a : addresses) {
-            if ("xrpl".equalsIgnoreCase(a.getPaymentNetwork())) {
+            if (ledger.getId().sameAs(LedgerId.Xrpl) && "xrpl".equalsIgnoreCase(a.getPaymentNetwork())) {
                 var addressText = a.getDetails().getAddress();
                 var addressCodec = AddressCodec.getInstance();
                 if (addressCodec.isValidXAddress(XAddress.of(addressText))) {
