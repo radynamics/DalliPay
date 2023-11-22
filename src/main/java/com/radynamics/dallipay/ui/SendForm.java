@@ -547,9 +547,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void initSubmitter() {
-        if (submitter != null) {
-            return;
-        }
         setSubmitter(getLastUsedSubmitter(transformInstruction.getLedger()));
     }
 
