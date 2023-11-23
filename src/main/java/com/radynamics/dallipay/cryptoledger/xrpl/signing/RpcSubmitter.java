@@ -231,6 +231,10 @@ public class RpcSubmitter implements TransactionSubmitter {
         return false;
     }
 
+    @Override
+    public void deleteSettings() {
+    }
+
     private void raiseSuccess(Transaction t) {
         for (var l : stateListener) {
             l.onSuccess(t);

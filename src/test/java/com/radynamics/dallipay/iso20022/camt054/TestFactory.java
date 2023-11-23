@@ -197,6 +197,10 @@ public class TestFactory {
             public boolean supportsPathFinding() {
                 return true;
             }
+
+            @Override
+            public void deleteSettings() {
+            }
         };
     }
 }

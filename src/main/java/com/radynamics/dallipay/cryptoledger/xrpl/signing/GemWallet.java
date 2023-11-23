@@ -37,4 +37,8 @@ public class GemWallet extends BrowserApiSubmitter {
     public boolean supportsPathFinding() {
         return false;
     }
+
+    @Override
+    public void deleteSettings() {
+    }
 }

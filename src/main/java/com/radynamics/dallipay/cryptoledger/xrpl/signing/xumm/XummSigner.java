@@ -228,6 +228,11 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         return true;
     }
 
+    @Override
+    public void deleteSettings() {
+        storage.setAccessToken(null);
+    }
+
     private void raiseProgressChanged(Transaction t) {
         for (var l : stateListener) {
             l.onProgressChanged(t);
