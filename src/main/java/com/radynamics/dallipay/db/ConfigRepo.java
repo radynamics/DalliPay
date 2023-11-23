@@ -195,7 +195,12 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public void setXummAccessToken(String value) throws Exception {
-        saveOrUpdate("xummAccessToken", value);
+        var key = "xummAccessToken";
+        if (StringUtils.isEmpty(value)) {
+            delete(key);
+        } else {
+            saveOrUpdate(key, value);
+        }
     }
 
     public Optional<Integer> getXummLocalHttpServerPort() throws Exception {

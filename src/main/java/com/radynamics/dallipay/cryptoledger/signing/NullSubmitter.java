@@ -44,4 +44,8 @@ public class NullSubmitter implements TransactionSubmitter {
     public boolean supportsPathFinding() {
         return false;
     }
+
+    @Override
+    public void deleteSettings() {
+    }
 }
