@@ -39,7 +39,7 @@ public class FreeTextPaymentFactory {
         if (PaymentRequestUri.matches(text)) {
             try {
                 var o = PaymentRequestUri.create(ledger, URI.create(text));
-                return o.create();
+                return o.create(ledger);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 return null;

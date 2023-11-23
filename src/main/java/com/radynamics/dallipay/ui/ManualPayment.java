@@ -10,7 +10,6 @@ import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.pain001.PaymentValidator;
 import com.radynamics.dallipay.transformation.FreeTextPaymentFactory;
-import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
 import com.radynamics.dallipay.util.RequestFocusListener;
@@ -58,7 +57,7 @@ public class ManualPayment {
         return create(parentComponent, factory.createOrNull(txt.getText()), transactionTranslator);
     }
 
-    private static ManualPayment create(Component parentComponent, Payment payment, TransactionTranslator transactionTranslator) {
+    public static ManualPayment create(Component parentComponent, Payment payment, TransactionTranslator transactionTranslator) {
         if (payment == null) {
             JOptionPane.showMessageDialog(parentComponent, res.getString("manualPayment.failed"), "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return null;
@@ -68,10 +67,6 @@ public class ManualPayment {
         o.applyDefaultSenderWallet();
         o.applyAccountMapping();
         return o;
-    }
-
-    public static ManualPayment createByRequestUri(Component parentComponent, PaymentRequestUri paymentRequestUri, TransactionTranslator transactionTranslator) {
-        return create(parentComponent, paymentRequestUri.create(), transactionTranslator);
     }
 
     private void applyDefaultSenderWallet() {

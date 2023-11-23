@@ -2,8 +2,8 @@ package com.radynamics.dallipay.transformation;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
@@ -17,11 +17,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class PaymentRequestUri {
-    private final Ledger ledger;
+    private final LedgerId ledgerId;
+    private final String ledgerNativeCcy;
     private final URI uri;
 
     private final Money amount;
-    private final Wallet receiverWallet;
     private final String destinationTag;
     private final String ccy;
     private final String refNo;
@@ -49,9 +49,11 @@ public class PaymentRequestUri {
                 }
             }
         }
-        ledger = tmpLedger;
+
+        // Don't store ledger reference due temporary instances aren't initialized (various fields null).
+        ledgerId = tmpLedger.getId();
+        ledgerNativeCcy = tmpLedger.getNativeCcySymbol();
         expectedNetwork = tmpNetwork;
-        receiverWallet = ledger.createWallet(getTo(uri), null);
         amount = parseAmount();
     }
 
@@ -87,18 +89,18 @@ public class PaymentRequestUri {
         return new PaymentRequestUri(ledger, uri);
     }
 
-    public Ledger ledger() {
-        return ledger;
+    public LedgerId ledgerId() {
+        return ledgerId;
     }
 
     public NetworkInfo networkInfo() {
         return expectedNetwork;
     }
 
-    public Payment create() {
+    public Payment create(Ledger ledger) {
         var payment = new Payment(ledger.createTransaction());
         payment.setAmount(amount != null ? amount : Money.zero(new Currency(ledger.getNativeCcySymbol())));
-        payment.setReceiverWallet(receiverWallet);
+        payment.setReceiverWallet(ledger.createWallet(getTo(uri), null));
         payment.setOrigin(Origin.Manual);
 
         if (!StringUtils.isEmpty(destinationTag)) {
@@ -128,7 +130,7 @@ public class PaymentRequestUri {
 
         var ccy = firstOrNull(uri, "currency");
         if (StringUtils.isEmpty(ccy)) {
-            ccy = ledger.getNativeCcySymbol();
+            ccy = ledgerNativeCcy;
         }
 
         return Money.of(amount, new Currency(ccy));
