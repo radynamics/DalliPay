@@ -149,7 +149,8 @@ public class MainForm extends JFrame {
         var actual = transformInstruction.getNetwork();
         var expected = paymentRequestUri.networkInfo();
         if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
-            askSwitchingNetwork(transformInstruction.getLedger(), actual, paymentRequestUri.ledger(), expected);
+            var expectedLedger = LedgerFactory.create(paymentRequestUri.ledgerId());
+            askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
         }
 
         sendingPanel.addNewPaymentByRequest(paymentRequestUri);
