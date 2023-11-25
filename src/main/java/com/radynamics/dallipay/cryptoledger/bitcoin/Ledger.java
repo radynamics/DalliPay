@@ -1,14 +1,13 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.exchange.DemoExchange;
-import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
@@ -21,6 +20,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
     private NetworkInfo network;
     private JsonRpcApi api;
+
+    private final Long SATOSHI_PER_BTC = 100_000_000_000l;
 
     @Override
     public LedgerId getId() {
@@ -50,6 +51,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public Transaction getTransaction(String transactionId) {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public UnsignedLong toSmallestUnit(Money amount) {
+        if (!amount.getCcy().getCode().equals(getNativeCcySymbol())) {
+            throw new IllegalArgumentException("Amount expected in %s and not %s".formatted(getNativeCcySymbol(), amount.getCcy().getCode()));
+        }
+        return UnsignedLong.valueOf(Double.valueOf(amount.getNumber().doubleValue() * SATOSHI_PER_BTC).longValue());
     }
 
     @Override
@@ -169,8 +178,28 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public String[] getExchangeRateProviders() {
+        return new String[]{ManualRateProvider.ID, Coinbase.ID, Bitstamp.ID};
+    }
+
+    @Override
+    public ExchangeRateProvider getDefaultExchangeRateProvider() {
+        return ExchangeRateProviderFactory.create(Coinbase.ID, this);
+    }
+
+    @Override
     public HttpUrl getDefaultFaucetUrl() {
         return HttpUrl.get("https://bitcoinfaucet.uo1.net");
+    }
+
+    @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        return new PriceOracle[0];
+    }
+
+    @Override
+    public String getDefaultLookupProviderId() {
+        return MempoolSpace.Id;
     }
 
     @Override
