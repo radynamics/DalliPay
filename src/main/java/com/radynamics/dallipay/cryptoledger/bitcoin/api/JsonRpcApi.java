@@ -51,7 +51,7 @@ public class JsonRpcApi {
 
     private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) {
         var amt = Money.of(t.amount().doubleValue(), new Currency(ledger.getNativeCcySymbol()));
-        var trx = new com.radynamics.dallipay.cryptoledger.xrpl.Transaction(ledger, amt);
+        var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
         trx.setId(t.txId());
         // Null uncomfirmed tx
         if (t.blockTime() != null) {
