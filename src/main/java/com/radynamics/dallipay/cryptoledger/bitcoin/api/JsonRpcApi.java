@@ -3,9 +3,13 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
+import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
+import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import org.apache.logging.log4j.LogManager;
@@ -82,5 +86,11 @@ public class JsonRpcApi {
 
     private ZonedDateTime toUserTimeZone(Date dt) {
         return DateTimeConvert.toUserTimeZone(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dt.getTime()), ZoneId.of("UTC")));
+    }
+
+    public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
+        var signer = new RpcSubmitter(ledger, privateKeyProvider);
+        signer.setVerifier(new OnchainVerifier(ledger));
+        return signer;
     }
 }
