@@ -3,7 +3,6 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.LedgerBlock;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
@@ -18,7 +17,7 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
     private Ledger ledger;
     private Money amt;
     private ZonedDateTime booked;
-    private LedgerBlock block;
+    private Block block;
     private com.radynamics.dallipay.cryptoledger.Wallet senderWallet;
     private com.radynamics.dallipay.cryptoledger.Wallet receiverWallet;
     private String destinationTag;
@@ -65,7 +64,7 @@ public class Transaction implements com.radynamics.dallipay.cryptoledger.Transac
         return block;
     }
 
-    public void setBlock(LedgerBlock value) {
+    public void setBlock(Block value) {
         this.block = value;
     }
 

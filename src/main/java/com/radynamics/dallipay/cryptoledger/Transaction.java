@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
-import com.radynamics.dallipay.cryptoledger.xrpl.api.LedgerBlock;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 
@@ -18,7 +17,7 @@ public interface Transaction {
 
     Block getBlock();
 
-    void setBlock(LedgerBlock value);
+    void setBlock(Block value);
 
     String getId();
 
