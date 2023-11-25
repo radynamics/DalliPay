@@ -3,12 +3,12 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
-import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersRequestParams;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.xrpl4j.ImmutableBookOffersResult;
@@ -318,7 +318,11 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     private boolean exists(Address wallet) {
-        return exists(WalletConverter.from(wallet));
+        return exists(from(wallet));
+    }
+
+    private Wallet from(Address address) {
+        return new Wallet(ledger.getId(), address.value());
     }
 
     public boolean exists(Wallet wallet) {
@@ -512,7 +516,7 @@ public class JsonRpcApi implements TransactionSource {
         trx.setId(t.hash().get().value());
         trx.setBooked(t.closeDateHuman().get());
         trx.setBlock(new LedgerBlock(t.ledgerIndex().orElseThrow()));
-        trx.setSender(WalletConverter.from(t.account()));
+        trx.setSender(from(t.account()));
         var messages = new ArrayList<String>();
         for (MemoWrapper mw : t.memos()) {
             if (!mw.memo().memoData().isPresent()) {
@@ -533,7 +537,7 @@ public class JsonRpcApi implements TransactionSource {
 
         if (t.transactionType() == TransactionType.PAYMENT) {
             var p = (Payment) t;
-            trx.setReceiver(WalletConverter.from(p.destination()));
+            trx.setReceiver(from(p.destination()));
             if (p.destinationTag().isPresent()) {
                 trx.setDestinationTag(p.destinationTag().get().toString());
             }
