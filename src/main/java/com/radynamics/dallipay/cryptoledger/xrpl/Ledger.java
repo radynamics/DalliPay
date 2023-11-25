@@ -66,8 +66,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public Transaction createTransaction() {
-        return new Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
+    public com.radynamics.dallipay.cryptoledger.generic.Transaction createTransaction() {
+        return new com.radynamics.dallipay.cryptoledger.generic.Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
 
     @Override
