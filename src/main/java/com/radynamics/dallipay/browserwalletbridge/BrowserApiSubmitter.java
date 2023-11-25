@@ -92,13 +92,13 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
         }
 
         for (var trx : transactions) {
-            var t = (com.radynamics.dallipay.cryptoledger.xrpl.Transaction) trx;
+            var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
             t.refreshTransmissionState(TransmissionState.Waiting);
             raiseProgressChanged(t);
         }
 
         for (var trx : transactions) {
-            var t = (com.radynamics.dallipay.cryptoledger.xrpl.Transaction) trx;
+            var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
             try {
                 var future = server.sendPayment(new TransactionDto(t), payloadConverter.toJson(t));
                 future.join();
@@ -130,28 +130,28 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
         stateListener.add(l);
     }
 
-    private void raiseProgressChanged(com.radynamics.dallipay.cryptoledger.xrpl.Transaction t) {
+    private void raiseProgressChanged(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
         for (var l : stateListener) {
             l.onProgressChanged(t);
         }
     }
 
-    private void raiseSuccess(com.radynamics.dallipay.cryptoledger.xrpl.Transaction t) {
+    private void raiseSuccess(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
         for (var l : stateListener) {
             l.onSuccess(t);
         }
     }
 
-    private void raiseFailure(com.radynamics.dallipay.cryptoledger.xrpl.Transaction t) {
+    private void raiseFailure(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
         for (var l : stateListener) {
             l.onFailure(t);
         }
     }
 
     private static class TransactionDto implements com.radynamics.dallipay.browserwalletbridge.httpserver.Transaction {
-        private final com.radynamics.dallipay.cryptoledger.xrpl.Transaction t;
+        private final com.radynamics.dallipay.cryptoledger.generic.Transaction t;
 
-        public TransactionDto(com.radynamics.dallipay.cryptoledger.xrpl.Transaction t) {
+        public TransactionDto(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
             this.t = t;
         }
 
@@ -165,7 +165,7 @@ public abstract class BrowserApiSubmitter implements TransactionSubmitter {
             return t.getAmount().getCcy().getCode();
         }
 
-        public com.radynamics.dallipay.cryptoledger.xrpl.Transaction getTransaction() {
+        public com.radynamics.dallipay.cryptoledger.generic.Transaction getTransaction() {
             return t;
         }
     }

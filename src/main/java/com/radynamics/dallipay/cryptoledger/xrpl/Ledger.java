@@ -6,6 +6,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -66,8 +67,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public Transaction createTransaction() {
-        return new Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
+    public com.radynamics.dallipay.cryptoledger.generic.Transaction createTransaction() {
+        return new com.radynamics.dallipay.cryptoledger.generic.Transaction(this, Money.zero(new Currency(getNativeCcySymbol())));
     }
 
     @Override
