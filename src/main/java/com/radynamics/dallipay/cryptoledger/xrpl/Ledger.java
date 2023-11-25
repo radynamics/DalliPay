@@ -11,10 +11,7 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
-import com.radynamics.dallipay.exchange.Currency;
-import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
-import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +24,7 @@ import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -37,9 +35,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private JsonRpcApi api;
     private WalletAddressResolver walletAddressResolver;
 
-    private static final String nativeCcySymbol = "XRP";
     public static final long AVG_LEDGER_CLOSE_TIME_SEC = 4;
     public static final UnsignedInteger APP_ID_TAG = UnsignedInteger.valueOf(20220613);
+    public static final Integer NETWORKID_LIVENET = 0;
+    public static final Integer NETWORKID_TESTNET = 1;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
@@ -53,7 +52,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public String getNativeCcySymbol() {
-        return nativeCcySymbol;
+        return "XRP";
     }
 
     @Override
@@ -76,15 +75,16 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.getTransaction(transactionId);
     }
 
-    static Money dropsToXrp(long drops) {
-        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(nativeCcySymbol));
+    Money dropsToXrp(long drops) {
+        return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(getNativeCcySymbol()));
     }
 
-    public static UnsignedLong xrpToDrops(Money xrpAmount) {
-        if (!xrpAmount.getCcy().getCode().equals("XRP")) {
-            throw new IllegalArgumentException("Amount expected in XRP and not " + xrpAmount.getCcy().getCode());
+    @Override
+    public UnsignedLong toSmallestUnit(Money amount) {
+        if (!amount.getCcy().getCode().equals(getNativeCcySymbol())) {
+            throw new IllegalArgumentException("Amount expected in %s and not %s".formatted(getNativeCcySymbol(), amount.getCcy().getCode()));
         }
-        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(xrpAmount.getNumber().doubleValue())).value();
+        return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue())).value();
     }
 
     @Override
@@ -256,13 +256,64 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"), "Mainnet");
+        networks[0].setNetworkId(NETWORKID_LIVENET);
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), "Testnet");
+        networks[1].setNetworkId(NETWORKID_TESTNET);
         return networks;
+    }
+
+    @Override
+    public String[] getExchangeRateProviders() {
+        return new String[]{ManualRateProvider.ID, Coinbase.ID, Bitstamp.ID};
+    }
+
+    @Override
+    public ExchangeRateProvider getDefaultExchangeRateProvider() {
+        return ExchangeRateProviderFactory.create(Coinbase.ID, this);
     }
 
     @Override
     public HttpUrl getDefaultFaucetUrl() {
         return HttpUrl.get("https://faucet.altnet.rippletest.net");
+    }
+
+    @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        var list = new ArrayList<PriceOracle>();
+        {
+            var o = new PriceOracle("XRPL Labs Price Aggregator");
+            list.add(o);
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rXUMMaPpZqPutoRszR29jtC8amWq3APkx")));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "r9PfV3sQpKLWxccdg3HL2FXKxGW2orAcLE"), new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rrJPYwVRyWFcwfaNMm83QEaCexEpKnkEg")));
+        }
+        {
+            var o = new PriceOracle("radynamics Price Oracle");
+            list.add(o);
+            var issuer = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
+            var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "KRW"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "TRY"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "GBP"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "THB"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "RUB"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "BRL"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "AUD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "MXN"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "ZAR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "MYR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "IDR"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "SGD"), issuer, receiver));
+            o.add(new IssuedCurrency(new CurrencyPair("XRP", "CHF"), issuer, receiver));
+        }
+        return list.toArray(PriceOracle[]::new);
+    }
+
+    @Override
+    public String getDefaultLookupProviderId() {
+        return Bithomp.Id;
     }
 
     @Override

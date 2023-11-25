@@ -1,11 +1,13 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
+import com.radynamics.dallipay.exchange.ManualRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.EmptyPaymentValidator;
 import okhttp3.HttpUrl;
@@ -52,6 +54,11 @@ public class TestLedger implements Ledger {
     @Override
     public Transaction getTransaction(String transactionId) {
         return null;
+    }
+
+    @Override
+    public UnsignedLong toSmallestUnit(Money amount) {
+        return UnsignedLong.valueOf(amount.getNumber().longValue() * FACTOR);
     }
 
     static Money convertToNativeCcyAmount(long amountSmallestUnit) {
@@ -128,7 +135,7 @@ public class TestLedger implements Ledger {
 
     @Override
     public NetworkInfo getNetwork() {
-        throw new NotImplementedException();
+        return this.network;
     }
 
     @Override
@@ -196,8 +203,28 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public String[] getExchangeRateProviders() {
+        return new String[]{ManualRateProvider.ID};
+    }
+
+    @Override
+    public ExchangeRateProvider getDefaultExchangeRateProvider() {
+        return new ManualRateProvider();
+    }
+
+    @Override
     public HttpUrl getDefaultFaucetUrl() {
         return null;
+    }
+
+    @Override
+    public PriceOracle[] getDefaultPriceOracles() {
+        return new PriceOracle[0];
+    }
+
+    @Override
+    public String getDefaultLookupProviderId() {
+        throw new NotImplementedException();
     }
 
     @Override

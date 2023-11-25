@@ -3,7 +3,6 @@ package com.radynamics.dallipay.browserwalletbridge.gemwallet;
 import com.radynamics.dallipay.cryptoledger.FeeHelper;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Transaction;
-import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -16,7 +15,7 @@ public class PayloadConverter implements com.radynamics.dallipay.browserwalletbr
         var json = new JSONObject();
         var ccy = t.getAmount().getCcy();
         if (ccy.getCode().equals(t.getLedger().getNativeCcySymbol())) {
-            json.put("amount", Ledger.xrpToDrops(t.getAmount()));
+            json.put("amount", t.getLedger().toSmallestUnit(t.getAmount()));
         } else {
             json.put("amount", t.getAmount().getNumber());
             json.put("currency", ccy.getCode());
@@ -30,7 +29,7 @@ public class PayloadConverter implements com.radynamics.dallipay.browserwalletbr
             json.put("destinationTag", t.getDestinationTag());
         }
 
-        json.put("fee", Ledger.xrpToDrops(FeeHelper.get(t.getFees(), FeeType.LedgerTransactionFee).orElseThrow()));
+        json.put("fee", t.getLedger().toSmallestUnit(FeeHelper.get(t.getFees(), FeeType.LedgerTransactionFee).orElseThrow()));
 
         var memoData = com.radynamics.dallipay.cryptoledger.memo.PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
         if (!StringUtils.isEmpty(memoData)) {

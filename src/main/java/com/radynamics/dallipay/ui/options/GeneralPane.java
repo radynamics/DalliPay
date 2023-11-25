@@ -182,6 +182,11 @@ public class GeneralPane extends JPanel {
             return;
         }
 
+        if (faucetUrl == null) {
+            JOptionPane.showMessageDialog(this, String.format(res.getString("faucetNotAvailable"), ledger.getNetwork().getDisplayName(), ledger.getNetwork().getUrl().toString()), ledger.getNetwork().getDisplayName(), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         var wallet = ledger.createRandomWallet(faucetUrl);
 
         var sb = new StringBuilder();
@@ -205,12 +210,12 @@ public class GeneralPane extends JPanel {
     }
 
     public void save(ConfigRepo repo) throws Exception {
-        repo.setLookupProviderId(cboExplorer.getSelectedItem().toString());
+        repo.setLookupProviderId(ledger.getId(), cboExplorer.getSelectedItem().toString());
     }
 
     public void load(ConfigRepo repo) throws Exception {
         faucetUrl = repo.getFaucetUrl(ledger);
-        cboExplorer.setSelectedItem(repo.getLookupProviderId());
+        cboExplorer.setSelectedItem(repo.getLookupProviderId(ledger.getId()).orElse(ledger.getDefaultLookupProviderId()));
     }
 
     public void init(Ledger ledger) {

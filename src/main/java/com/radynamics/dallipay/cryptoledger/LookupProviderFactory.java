@@ -6,13 +6,14 @@ import com.radynamics.dallipay.cryptoledger.xrpl.XrpScan;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplOrg;
 import com.radynamics.dallipay.db.ConfigRepo;
 
+import java.util.Optional;
+
 public class LookupProviderFactory {
     public static WalletLookupProvider createWalletLookupProvider(Ledger ledger) throws LookupProviderException {
-        String lookupProviderId = loadProviderIdOrNull();
+        var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
@@ -30,11 +31,10 @@ public class LookupProviderFactory {
     }
 
     public static TransactionLookupProvider createTransactionLookupProvider(Ledger ledger) throws LookupProviderException {
-        String lookupProviderId = loadProviderIdOrNull();
+        var lookupProviderId = loadProviderIdOrNull(ledger.getId()).orElse(ledger.getDefaultLookupProviderId());
         var network = ledger.getNetwork();
         switch (ledger.getId()) {
             case Xrpl -> {
-                lookupProviderId = lookupProviderId == null ? Bithomp.Id : lookupProviderId;
                 if (lookupProviderId.equals(Bithomp.Id)) {
                     return new Bithomp(network);
                 } else if (lookupProviderId.equals(XrplOrg.Id)) {
@@ -76,9 +76,9 @@ public class LookupProviderFactory {
         throw new IllegalStateException("Unexpected value: " + lookupProviderId);
     }
 
-    private static String loadProviderIdOrNull() throws LookupProviderException {
+    private static Optional<String> loadProviderIdOrNull(LedgerId ledgerId) throws LookupProviderException {
         try (var repo = new ConfigRepo()) {
-            return repo.getLookupProviderId();
+            return repo.getLookupProviderId(ledgerId);
         } catch (Exception e) {
             throw new LookupProviderException("Error loading lookupProvider from config.", e);
         }

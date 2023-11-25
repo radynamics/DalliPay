@@ -2,10 +2,10 @@ package com.radynamics.dallipay.ui.options.XrplPriceOracleEdit;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.IssuedCurrency;
-import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.ui.TableColumnBuilder;
 
@@ -18,6 +18,8 @@ import java.util.ResourceBundle;
 public class XrplPriceOracleEditor extends JPanel {
     private final JTable table;
     private final IssuedCurrencyTableModel model = new IssuedCurrencyTableModel();
+    private JSplitButton defaultPriceOracles;
+    private Ledger ledger;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -44,22 +46,11 @@ public class XrplPriceOracleEditor extends JPanel {
             pnl.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
             pnl.add(Box.createHorizontalGlue());
             {
-                var popupMenu = new JPopupMenu();
-                {
-                    var item = new JMenuItem("XRPL Labs Price Aggregator");
-                    popupMenu.add(item);
-                    item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsXumm()));
-                }
-                {
-                    var item = new JMenuItem("radynamics Price Oracle");
-                    popupMenu.add(item);
-                    item.addActionListener((SplitButtonClickedActionListener) e -> load(XrplPriceOracleConfig.defaultsRadyamics()));
-                }
-                var cmd = new JSplitButton(res.getString("default"));
-                cmd.setAlwaysPopup(true);
-                cmd.setPopupMenu(popupMenu);
-                cmd.setPreferredSize(new Dimension(90, 21));
-                pnl.add(cmd);
+
+                defaultPriceOracles = new JSplitButton(res.getString("default"));
+                defaultPriceOracles.setAlwaysPopup(true);
+                defaultPriceOracles.setPreferredSize(new Dimension(90, 21));
+                pnl.add(defaultPriceOracles);
             }
             pnl.add(Box.createRigidArea(new Dimension(5, 0)));
             {
@@ -79,7 +70,10 @@ public class XrplPriceOracleEditor extends JPanel {
     }
 
     private void onAdd() {
-        var index = model.getRowIndex(model.newRecord());
+        var issuer = new com.radynamics.dallipay.cryptoledger.generic.Wallet(ledger.getId(), "rKaEc...");
+        var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(ledger.getId(), "rKaEc...");
+        var ic = new IssuedCurrency(new CurrencyPair(ledger.getNativeCcySymbol(), "USD"), issuer, receiver);
+        var index = model.getRowIndex(model.newRecord(ic));
         table.setRowSelectionInterval(index, index);
     }
 
@@ -121,5 +115,28 @@ public class XrplPriceOracleEditor extends JPanel {
                     new Wallet(LedgerId.Xrpl, o.receiver)));
         }
         return list;
+    }
+
+    public void init(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        this.ledger = ledger;
+        refreshDefaultPopupMenu();
+    }
+
+    private void refreshDefaultPopupMenu() {
+        var popupMenu = new JPopupMenu();
+        for (var o : ledger.getDefaultPriceOracles()) {
+            var item = new JMenuItem(o.getDisplayText());
+            popupMenu.add(item);
+            item.addActionListener((SplitButtonClickedActionListener) e -> load(o.getIssuedCurrencies()));
+        }
+
+        if (popupMenu.getComponentCount() == 0) {
+            var item = new JMenuItem(res.getString("noneAvailable"));
+            popupMenu.add(item);
+            item.setEnabled(false);
+        }
+
+        defaultPriceOracles.setPopupMenu(popupMenu);
     }
 }

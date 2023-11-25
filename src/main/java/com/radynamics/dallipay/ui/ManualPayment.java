@@ -54,7 +54,10 @@ public class ManualPayment {
         }
 
         var factory = new FreeTextPaymentFactory(ledger);
-        var payment = factory.createOrNull(txt.getText());
+        return create(parentComponent, factory.createOrNull(txt.getText()), transactionTranslator);
+    }
+
+    public static ManualPayment create(Component parentComponent, Payment payment, TransactionTranslator transactionTranslator) {
         if (payment == null) {
             JOptionPane.showMessageDialog(parentComponent, res.getString("manualPayment.failed"), "DalliPay", JOptionPane.INFORMATION_MESSAGE);
             return null;

@@ -4,10 +4,10 @@ import com.radynamics.dallipay.cryptoledger.xrpl.IssuedCurrency;
 import org.apache.commons.lang3.StringUtils;
 
 public class Record {
-    public String first;
-    public String second;
-    public String issuer;
-    public String receiver;
+    public String first = "";
+    public String second = "";
+    public String issuer = "";
+    public String receiver = "";
 
     public Record() {
     }

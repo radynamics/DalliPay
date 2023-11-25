@@ -70,7 +70,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
             var t = (Transaction) trx;
             try {
                 var builder = PaymentBuilder.builder().payment(t).build();
-                submit(t, PayloadConverter.toJson(builder.build()));
+                submit(t, PayloadConverter.toJson(builder.build(), t.getLedger().getNetwork()));
             } catch (LedgerException e) {
                 t.refreshTransmission(e);
                 raiseFailure(t);
@@ -226,6 +226,11 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
     @Override
     public boolean supportsPathFinding() {
         return true;
+    }
+
+    @Override
+    public void deleteSettings() {
+        storage.setAccessToken(null);
     }
 
     private void raiseProgressChanged(Transaction t) {

@@ -15,7 +15,7 @@ public class FileTest {
         Assertions.assertEquals("test.abc", File.create(new java.io.File("test.abc"), "").getName());
         Assertions.assertEquals("test-test.abc", File.create(new java.io.File("test.abc"), "test").getName());
 
-        Assertions.assertEquals("c:\\test-test.abc", File.create(new java.io.File("c:\\test.abc"), "test").getAbsolutePath());
-        Assertions.assertEquals("c:\\te.st\\test-test.abc", File.create(new java.io.File("c:\\te.st\\test.abc"), "test").getAbsolutePath());
+        Assertions.assertEquals("c:\\test-test.abc", File.create(new java.io.File("c:\\test.abc"), "test").getPath());
+        Assertions.assertEquals("c:\\te.st\\test-test.abc", File.create(new java.io.File("c:\\te.st\\test.abc"), "test").getPath());
     }
 }

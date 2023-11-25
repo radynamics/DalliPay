@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui.options;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.iso20022.camt054.DateFormat;
@@ -16,7 +17,7 @@ public class ReceiverPane extends JPanel {
     final static Logger log = LogManager.getLogger(ReceiverPane.class);
 
     private final XrplPriceOracleEditor xrplPriceOracleEditor = new XrplPriceOracleEditor();
-    private final XrplPriceOracleConfig xrplPriceOracleConfig = new XrplPriceOracleConfig();
+    private XrplPriceOracleConfig xrplPriceOracleConfig;
     private final SpringLayout contentLayout;
     private final JComboBox<DateFormat> cboBookingFormat;
     private final JComboBox<DateFormat> cboValutaFormat;
@@ -90,5 +91,11 @@ public class ReceiverPane extends JPanel {
         cboValutaFormat.setSelectedItem(repo.getValutaDateFormat());
         var referenceNo = repo.getCreditorReferenceIfMissing();
         txtCreditorReference.setText(referenceNo == null ? "" : referenceNo.getUnformatted());
+    }
+
+    public void init(Ledger ledger) {
+        if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
+        xrplPriceOracleEditor.init(ledger);
+        xrplPriceOracleConfig = new XrplPriceOracleConfig(ledger.getId());
     }
 }

@@ -16,6 +16,7 @@ import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.pain001.*;
+import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
@@ -293,6 +294,14 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         showNewPayment(mp);
     }
 
+    public void addNewPaymentByRequest(PaymentRequestUri paymentRequestUri) {
+        var mp = ManualPayment.create(this, paymentRequestUri.create(transformInstruction.getLedger()), transactionTranslator);
+        if (mp == null) {
+            return;
+        }
+        showNewPayment(mp);
+    }
+
     private void addNewEmptyPayment() {
         showNewPayment(ManualPayment.createEmpty(transformInstruction.getLedger(), transactionTranslator));
     }
@@ -538,9 +547,6 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void initSubmitter() {
-        if (submitter != null) {
-            return;
-        }
         setSubmitter(getLastUsedSubmitter(transformInstruction.getLedger()));
     }
 
@@ -590,7 +596,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
-        var frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now(), Block.VALIDATED);
+        ExchangeRatesForm frm;
+        try {
+            frm = new ExchangeRatesForm(transformInstruction.getLedger(), transformInstruction.getExchangeRateProvider(), uniques.values().toArray(new ExchangeRate[0]), ZonedDateTime.now(), Block.VALIDATED);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
         frm.setAllowChangeExchange(true);
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(500, 300);

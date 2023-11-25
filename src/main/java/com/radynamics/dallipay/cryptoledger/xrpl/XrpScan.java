@@ -1,12 +1,13 @@
 package com.radynamics.dallipay.cryptoledger.xrpl;
 
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.ui.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Objects;
 
 public class XrpScan implements WalletLookupProvider, TransactionLookupProvider {
     private final static Logger log = LogManager.getLogger(XrpScan.class);
@@ -16,7 +17,7 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
     public static final String displayName = "XRPScan";
 
     public XrpScan(NetworkInfo network) throws LookupProviderException {
-        if (!network.isLivenet()) {
+        if (!Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", XrpScan.displayName, network.getShortText()));
         }
     }
@@ -32,14 +33,10 @@ public class XrpScan implements WalletLookupProvider, TransactionLookupProvider 
     }
 
     private void openInBrowser(String suffix, String value) {
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            try {
-                Desktop.getDesktop().browse(new URI(String.format("%s/%s/%s", baseUrl, suffix, value)));
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        } else {
-            log.warn("No desktop or no browsing supported");
+        try {
+            Utils.openBrowser(null, new URI(String.format("%s/%s/%s", baseUrl, suffix, value)));
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage(), e);
         }
     }
 }

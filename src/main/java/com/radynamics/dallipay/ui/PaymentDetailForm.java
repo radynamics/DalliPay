@@ -409,7 +409,13 @@ public class PaymentDetailForm extends JDialog {
     private void showExchangeRateEdit() {
         var rate = payment.getExchangeRate() == null ? ExchangeRate.Undefined(payment.createCcyPair()) : payment.getExchangeRate();
 
-        var frm = new ExchangeRatesForm(payment.getLedger(), exchangeRateProvider, new ExchangeRate[]{rate}, rate.getPointInTime(), payment.getBlock());
+        ExchangeRatesForm frm;
+        try {
+            frm = new ExchangeRatesForm(payment.getLedger(), exchangeRateProvider, new ExchangeRate[]{rate}, rate.getPointInTime(), payment.getBlock());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(500, 300);
         frm.setModal(true);

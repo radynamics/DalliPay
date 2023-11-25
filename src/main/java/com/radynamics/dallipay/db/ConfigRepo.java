@@ -1,11 +1,7 @@
 package com.radynamics.dallipay.db;
 
-import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.LedgerId;
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
-import com.radynamics.dallipay.exchange.Coinbase;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
 import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
@@ -15,6 +11,7 @@ import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -56,16 +53,17 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("valutaFormat", DateFormatHelper.toKey(value));
     }
 
-    public JSONObject getXrplPriceOracleConfig() throws Exception {
-        return new JSONObject(single("xrplPriceOracleConfig").orElseThrow());
+    public Optional<JSONObject> getXrplPriceOracleConfig(LedgerId ledgerId) throws Exception {
+        var value = single(createLedgerSpecificKey(ledgerId, "priceOracleConfig"));
+        return value.isPresent() ? Optional.of(new JSONObject(value.get())) : Optional.empty();
     }
 
-    public void setXrplPriceOracleConfig(JSONObject value) throws Exception {
-        saveOrUpdate("xrplPriceOracleConfig", value.toString());
+    public void setXrplPriceOracleConfig(LedgerId ledgerId, JSONObject value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledgerId, "priceOracleConfig"), value.toString());
     }
 
-    public String getExchangeRateProvider() throws Exception {
-        return single("exchangeRateProvider").orElse(Coinbase.ID);
+    public Optional<String> getExchangeRateProvider() throws Exception {
+        return single("exchangeRateProvider");
     }
 
     public void setExchangeRateProvider(ExchangeRateProvider value) throws Exception {
@@ -116,6 +114,15 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
     }
 
+    public NetworkInfo[] getCustomSidechains(Ledger ledger) throws Exception {
+        var value = single(createLedgerSpecificKey(ledger, "customSidechains")).orElse("");
+        return value.length() == 0 ? new NetworkInfo[0] : NetworkInfoJsonSerializer.parse(new JSONArray(value));
+    }
+
+    public void setCustomSidechains(Ledger ledger, NetworkInfo[] entries) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledger, "customSidechains"), NetworkInfoJsonSerializer.toJsonArray(entries).toString());
+    }
+
     public LedgerId getLastUsedLedger() throws Exception {
         var value = single("lastUsedLedger").orElse("");
         return value.length() == 0 ? null : LedgerId.of(value);
@@ -138,7 +145,11 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     private static String createLedgerSpecificKey(Ledger ledger, String key) {
-        return String.format("%s_%s", ledger.getId(), key);
+        return createLedgerSpecificKey(ledger.getId(), key);
+    }
+
+    private static String createLedgerSpecificKey(LedgerId ledgerId, String key) {
+        return String.format("%s_%s", ledgerId, key);
     }
 
     public void setLastUsedSubmitter(TransactionSubmitter submitter) throws Exception {
@@ -171,12 +182,12 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("exportFormat", CamtFormatHelper.toKey(value));
     }
 
-    public String getLookupProviderId() throws Exception {
-        return single("lookupProviderId").orElse(Bithomp.Id);
+    public Optional<String> getLookupProviderId(LedgerId ledgerId) throws Exception {
+        return single(createLedgerSpecificKey(ledgerId, "lookupProviderId"));
     }
 
-    public void setLookupProviderId(String value) throws Exception {
-        saveOrUpdate("lookupProviderId", value);
+    public void setLookupProviderId(LedgerId ledgerId, String value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledgerId, "lookupProviderId"), value);
     }
 
     public String getXummAccessToken() throws Exception {
@@ -184,7 +195,12 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public void setXummAccessToken(String value) throws Exception {
-        saveOrUpdate("xummAccessToken", value);
+        var key = "xummAccessToken";
+        if (StringUtils.isEmpty(value)) {
+            delete(key);
+        } else {
+            saveOrUpdate(key, value);
+        }
     }
 
     public Optional<Integer> getXummLocalHttpServerPort() throws Exception {

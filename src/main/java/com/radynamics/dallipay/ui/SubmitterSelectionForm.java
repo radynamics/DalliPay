@@ -136,6 +136,14 @@ public class SubmitterSelectionForm extends JDialog {
         cmd.setMaximumSize(size);
         pnlContent.add(cmd);
 
+        final JPopupMenu contextMenu = new JPopupMenu();
+        {
+            var item = new JMenuItem(res.getString("deleteSavedSettings").formatted(submitter.getInfo().getTitle()));
+            item.addActionListener(e -> submitter.deleteSettings());
+            contextMenu.add(item);
+        }
+        cmd.addMouseListener(new ContextMenuMouseAdapter(contextMenu));
+
         cmd.setSelected(selected != null && info.getTitle().equals(selected.getInfo().getTitle()));
 
         mapping.put(cmd, submitter);

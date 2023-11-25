@@ -10,6 +10,8 @@ import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
+import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
+import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.update.OnlineUpdate;
@@ -17,19 +19,26 @@ import com.radynamics.dallipay.update.OnlineUpdate;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_MINIMUM_TAB_WIDTH;
 
 public class MainForm extends JFrame {
     private TransformInstruction transformInstruction;
+    private JTabbedPane tabbedPane;
     private SendForm sendingPanel;
     private ReceiveForm receivingPanel;
     private OptionsForm optionsPanel;
     private JSplitButton cmdLedger;
     private JSplitButton cmdNetwork;
+    private NetworkPopMenu networkPopupMenu;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
+    private final String ITEM_OBJECT_ID = "itemObjectId";
 
     public MainForm() {
         setupUI();
@@ -72,12 +81,12 @@ public class MainForm extends JFrame {
                 lblTitle.putClientProperty("FlatLaf.styleClass", "h1");
             }
         }
+        tabbedPane = new JTabbedPane();
         {
             var pnl = new JPanel();
             pnlMain.add(pnl);
             pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
             {
-                var tabbedPane = new JTabbedPane();
                 pnl.add(tabbedPane);
                 tabbedPane.putClientProperty(TABBED_PANE_MINIMUM_TAB_WIDTH, TABBEDPANE_WIDTH);
                 tabbedPane.setTabPlacement(JTabbedPane.LEFT);
@@ -112,6 +121,56 @@ public class MainForm extends JFrame {
                 }
             }
         }
+
+        var paymentRequestServer = new EmbeddedServer();
+        paymentRequestServer.addRequestListenerListener(this::onPaymentRequestReceived);
+        try {
+            paymentRequestServer.start();
+        } catch (IOException e) {
+            ExceptionDialog.show(this, e);
+        }
+    }
+
+    private void onPaymentRequestReceived(URI requestUrl) {
+        if (!PaymentRequestUri.matches(requestUrl.toString())) {
+            return;
+        }
+
+        Utils.bringToFront(this);
+        tabbedPane.setSelectedComponent(sendingPanel);
+
+        PaymentRequestUri paymentRequestUri;
+        try {
+            paymentRequestUri = PaymentRequestUri.create(transformInstruction.getLedger(), requestUrl);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
+        var actual = transformInstruction.getNetwork();
+        var expected = paymentRequestUri.networkInfo();
+        if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
+            var expectedLedger = LedgerFactory.create(paymentRequestUri.ledgerId());
+            askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
+        }
+
+        sendingPanel.addNewPaymentByRequest(paymentRequestUri);
+    }
+
+    private void askSwitchingNetwork(Ledger actualLedger, NetworkInfo actual, Ledger expectedLedger, NetworkInfo expected) {
+        var actualText = "%s: %s (NetworkID %s)".formatted(actualLedger.getDisplayText(), actual.getDisplayName(), actual.getNetworkId());
+        var expectedText = "%s: %s (NetworkID %s)".formatted(expectedLedger.getDisplayText(), expected.getDisplayName(), expected.getNetworkId());
+        var text = res.getString("switchNetwork").formatted(actualText, expectedText);
+        int ret = JOptionPane.showConfirmDialog(this, text, res.getString("switchNetworkTitle"), JOptionPane.YES_NO_CANCEL_OPTION);
+        if (ret != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (!transformInstruction.getLedger().getId().sameAs(expectedLedger.getId())) {
+            onLedgerClicked(expectedLedger);
+        }
+        if (actual.getNetworkId() != expected.getNetworkId()) {
+            networkPopupMenu.setSelectedNetwork(expected);
+        }
     }
 
     private void refreshChangedSettings() {
@@ -119,8 +178,8 @@ public class MainForm extends JFrame {
 
         Wallet defaultSenderWallet = null;
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig();
         var ledger = transformInstruction.getLedger();
+        var xrplOracleConfig = new XrplPriceOracleConfig(ledger.getId());
         try (var repo = new ConfigRepo()) {
             defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
@@ -191,17 +250,35 @@ public class MainForm extends JFrame {
         return menuBar;
     }
 
-    private void refreshLedgerButton(JMenuItem item) {
+    private void refreshLedgerButton(Ledger ledger) throws Exception {
+        JMenuItem item = null;
+        var compareValue = ledger.getId().numericId();
+        for (var e : cmdLedger.getPopupMenu().getSubElements()) {
+            var mi = (JMenuItem) e;
+            if (mi.getClientProperty(ITEM_OBJECT_ID).equals(compareValue)) {
+                item = mi;
+                break;
+            }
+        }
+
+        if (item == null) {
+            throw new Exception("MenuItem for %s not found.".formatted(compareValue));
+        }
+
         cmdLedger.setIcon(item.getIcon());
         cmdLedger.setToolTipText(item.getText());
     }
 
-    private void onLedgerClicked(JMenuItem item, Ledger ledger) {
+    private void onLedgerClicked(Ledger ledger) {
         if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
             return;
         }
         setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
-        refreshLedgerButton(item);
+        try {
+            refreshLedgerButton(ledger);
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         saveLastUsedLedger(ledger.getId());
     }
 
@@ -231,6 +308,15 @@ public class MainForm extends JFrame {
         }
     }
 
+    private NetworkInfo[] getCustomSidechains() {
+        try (var repo = new ConfigRepo()) {
+            return repo.getCustomSidechains(transformInstruction.getLedger());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+        return new NetworkInfo[0];
+    }
+
     public void setTransformInstruction(TransformInstruction transformInstruction) {
         if (transformInstruction == null) throw new IllegalArgumentException("Parameter 'transformInstruction' cannot be null");
         this.transformInstruction = transformInstruction;
@@ -244,6 +330,11 @@ public class MainForm extends JFrame {
         optionsPanel.load();
 
         cmdLedger.setPopupMenu(createLedgerPopMenu());
+        try {
+            refreshLedgerButton(transformInstruction.getLedger());
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         cmdNetwork.setPopupMenu(createNetworkPopMenu().get());
         refreshNetworkButton();
 
@@ -251,27 +342,25 @@ public class MainForm extends JFrame {
     }
 
     private JPopupMenu createLedgerPopMenu() {
-        JMenuItem selected = null;
         var popupMenu = new JPopupMenu();
         for (var l : LedgerFactory.all()) {
             var item = new JMenuItem(l.getDisplayText(), l.getIcon());
-            item.addActionListener(e -> onLedgerClicked(item, l));
+            item.putClientProperty(ITEM_OBJECT_ID, l.getId().numericId());
+            item.addActionListener(e -> onLedgerClicked(l));
             popupMenu.add(item);
-            selected = l.getId().sameAs(transformInstruction.getLedger().getId()) ? item : selected;
-        }
-
-        if (selected != null) {
-            refreshLedgerButton(selected);
         }
 
         return popupMenu;
     }
 
     private NetworkPopMenu createNetworkPopMenu() {
-        var popupMenu = new NetworkPopMenu(transformInstruction.getLedger(), transformInstruction.getConfig().getNetworkInfos());
-        popupMenu.setSelectedNetwork(transformInstruction.getNetwork());
-        popupMenu.addChangedListener(() -> {
-            var selected = popupMenu.getSelectedNetwork();
+        var networkInfos = new ArrayList<>(List.of(transformInstruction.getConfig().getNetworkInfos()));
+        networkInfos.addAll(List.of(getCustomSidechains()));
+
+        networkPopupMenu = new NetworkPopMenu(transformInstruction.getLedger(), networkInfos.toArray(NetworkInfo[]::new));
+        networkPopupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        networkPopupMenu.addChangedListener(() -> {
+            var selected = networkPopupMenu.getSelectedNetwork();
             if (selected == null) {
                 return;
             }
@@ -280,7 +369,7 @@ public class MainForm extends JFrame {
             sendingPanel.setNetwork(selected);
             saveLastUsedNetwork(selected);
         });
-        return popupMenu;
+        return networkPopupMenu;
     }
 
     public void setInputFileName(String inputFileName) {

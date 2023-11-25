@@ -22,4 +22,6 @@ public interface TransactionSubmitter {
     boolean supportIssuedTokens();
 
     boolean supportsPathFinding();
+
+    void deleteSettings();
 }
