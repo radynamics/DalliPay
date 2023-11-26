@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -52,6 +53,9 @@ public class RpcSubmitter implements TransactionSubmitter {
     public void submit(com.radynamics.dallipay.cryptoledger.Transaction[] transactions) {
         var client = new BitcoinJSONRPCClient(ledger.getNetwork().getUrl().url());
         for (var t : transactions) {
+            // Necessary if wallet is encrypted.
+            client.walletPassPhrase(privateKeyProvider.get(t.getSenderWallet().getPublicKey()), Duration.ofSeconds(5).toMillis());
+
             var amount = BigDecimal.valueOf(t.getAmount().getNumber().doubleValue());
             // TODO: include comment data. This api call does NOT include comment into the transaction itself.
             var comment = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
