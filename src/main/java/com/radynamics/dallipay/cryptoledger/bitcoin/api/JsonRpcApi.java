@@ -26,17 +26,18 @@ public class JsonRpcApi {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
+    private final BitcoindRpcClient client;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
+        this.client = new BitcoinJSONRPCClient(network.getUrl().url());
     }
 
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) {
         var tr = new TransactionResult();
 
         try {
-            var client = new BitcoinJSONRPCClient(network.getUrl().url());
             // PARAM must be a label instead of a publicKey
             var transactions = client.listTransactions(/*wallet.getPublicKey()*/);
             for (var t : transactions) {
@@ -95,7 +96,6 @@ public class JsonRpcApi {
     }
 
     public boolean validateAddress(String publicKey) {
-        var client = new BitcoinJSONRPCClient(network.getUrl().url());
         var result = client.validateAddress(publicKey);
         return result.isValid();
     }
