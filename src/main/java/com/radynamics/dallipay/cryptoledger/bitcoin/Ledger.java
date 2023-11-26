@@ -225,7 +225,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
-        throw new NotImplementedException();
+        return api.getEndpointInfo(networkInfo);
     }
 
     @Override

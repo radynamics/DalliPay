@@ -2,10 +2,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
-import com.radynamics.dallipay.cryptoledger.TransactionResult;
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
@@ -104,5 +101,14 @@ public class JsonRpcApi {
         // TODO: Verify wallet matches
         var balance = client.getBalance();
         wallet.getBalances().set(Money.of(balance.doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+    }
+
+    public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
+        var c = new BitcoinJSONRPCClient(networkInfo.getUrl().url());
+        var info = c.getNetworkInfo();
+
+        return EndpointInfo.builder()
+                .networkInfo(networkInfo)
+                .serverVersion(info.subversion());
     }
 }
