@@ -99,4 +99,10 @@ public class JsonRpcApi {
         var result = client.validateAddress(publicKey);
         return result.isValid();
     }
+
+    public void refreshBalance(Wallet wallet, boolean useCache) {
+        // TODO: Verify wallet matches
+        var balance = client.getBalance();
+        wallet.getBalances().set(Money.of(balance.doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+    }
 }

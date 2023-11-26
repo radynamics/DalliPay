@@ -7,6 +7,7 @@ import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
+import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -86,7 +87,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public void refreshBalance(Wallet wallet, boolean useCache) {
-        throw new NotImplementedException();
+        api.refreshBalance(WalletConverter.from(wallet), useCache);
     }
 
     @Override
