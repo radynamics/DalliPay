@@ -4,6 +4,7 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import com.radynamics.dallipay.cryptoledger.WalletInfoAggregator;
+import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
 import com.radynamics.dallipay.iso20022.camt054.*;
 import com.radynamics.dallipay.iso20022.camt054.camt05400104.generated.*;
@@ -110,7 +111,7 @@ public class Camt05400104Writer implements Camt054Writer {
         ntry.setNtryRef(trx.getReceiverAccount().getUnformatted());
 
         var amt = new ActiveOrHistoricCurrencyAndAmount();
-        amt.setValue(AmountRounder.round(trx.getAmount(), 2));
+        amt.setValue(AmountRounder.round(ledger, Money.of(trx.getAmount(), trx.getUserCcy()), 2));
         amt.setCcy(trx.getUserCcyCodeOrEmpty());
 
         ntry.setAmt(amt);
@@ -195,7 +196,7 @@ public class Camt05400104Writer implements Camt054Writer {
 
     private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {
         var amtLedgerCcy = new ActiveOrHistoricCurrencyAndAmount();
-        amtLedgerCcy.setValue(AmountRounder.round(trx.getAmountTransaction().getNumber().doubleValue(), 4));
+        amtLedgerCcy.setValue(AmountRounder.round(ledger, trx.getAmountTransaction(), 4));
         amtLedgerCcy.setCcy(trx.getAmountTransaction().getCcy().getCode());
 
         var ccyXchg = new CurrencyExchange5();
