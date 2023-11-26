@@ -5,6 +5,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
+import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
@@ -148,7 +149,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public WalletAddressResolver createWalletAddressResolver() {
-        return value -> null;
+        return value -> isValidPublicKey(value) ? new WalletAddressInfo(createWallet(value, null)) : null;
     }
 
     @Override
@@ -163,8 +164,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean isValidPublicKey(String publicKey) {
-        // TODO: implement
-        return true;
+        return api.validateAddress(publicKey);
     }
 
     @Override

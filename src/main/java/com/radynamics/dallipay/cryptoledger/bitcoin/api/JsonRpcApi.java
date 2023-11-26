@@ -93,4 +93,10 @@ public class JsonRpcApi {
         signer.setVerifier(new OnchainVerifier(ledger));
         return signer;
     }
+
+    public boolean validateAddress(String publicKey) {
+        var client = new BitcoinJSONRPCClient(network.getUrl().url());
+        var result = client.validateAddress(publicKey);
+        return result.isValid();
+    }
 }
