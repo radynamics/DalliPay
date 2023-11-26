@@ -22,7 +22,7 @@ public final class TransformInstructionFactory {
 
     public static TransformInstruction create(Ledger ledger, String configFilePath, String networkId) {
         var config = Config.loadOrFallback(ledger, configFilePath);
-        var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger.getId()));
+        var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger));
         t.setNetwork(getNetworkOrDefault(ledger, config, networkId));
         try (var repo = new ConfigRepo()) {
             var persistedProvider = repo.getExchangeRateProvider();

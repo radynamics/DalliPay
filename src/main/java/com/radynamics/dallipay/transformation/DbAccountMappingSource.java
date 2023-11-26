@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.transformation;
 
-import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.db.AccountMappingRepo;
@@ -13,18 +13,18 @@ import java.sql.SQLException;
 public class DbAccountMappingSource implements AccountMappingSource {
     final static Logger log = LogManager.getLogger(DbAccountMappingSource.class);
 
-    private final LedgerId ledgerId;
+    private final Ledger ledger;
     private AccountMappingRepo repo;
 
-    public DbAccountMappingSource(LedgerId ledgerId) {
-        this.ledgerId = ledgerId;
+    public DbAccountMappingSource(Ledger ledger) {
+        this.ledger = ledger;
     }
 
     @Override
     public Wallet getWalletOrNull(Account account, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.single(ledgerId, account, partyId).orElse(null);
+            var found = repo.single(ledger, account, partyId).orElse(null);
             return found == null ? null : found.getWallet();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -48,7 +48,7 @@ public class DbAccountMappingSource implements AccountMappingSource {
     public Account getAccountOrNull(Wallet wallet, String partyId) throws AccountMappingSourceException {
         assertOpen();
         try {
-            var found = repo.single(ledgerId, wallet, partyId).orElse(null);
+            var found = repo.single(ledger, wallet, partyId).orElse(null);
             return found == null ? null : found.getAccount();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);

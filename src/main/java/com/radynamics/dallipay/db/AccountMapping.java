@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.db;
 
-import com.radynamics.dallipay.cryptoledger.LedgerFactory;
-import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.iso20022.Account;
@@ -11,11 +10,11 @@ public class AccountMapping {
     private long id;
     private Account account;
     private Wallet wallet;
-    private LedgerId ledgerId;
+    private final Ledger ledger;
     private String partyId = "";
 
-    public AccountMapping(LedgerId ledgerId) {
-        this.ledgerId = ledgerId;
+    public AccountMapping(Ledger ledger) {
+        this.ledger = ledger;
     }
 
     public Account getAccount() {
@@ -34,8 +33,8 @@ public class AccountMapping {
         this.wallet = wallet;
     }
 
-    public LedgerId getLedgerId() {
-        return ledgerId;
+    public Ledger getLedger() {
+        return ledger;
     }
 
     public long getId() {
@@ -83,7 +82,7 @@ public class AccountMapping {
             return false;
         }
 
-        return WalletValidator.isValidFormat(LedgerFactory.create(wallet.getLedgerId()), wallet);
+        return WalletValidator.isValidFormat(ledger, wallet);
     }
 
     @Override

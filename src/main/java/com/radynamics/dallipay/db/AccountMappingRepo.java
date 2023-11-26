@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.db;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Wallet;
@@ -27,18 +28,21 @@ public class AccountMappingRepo implements AutoCloseable {
         conn.close();
     }
 
-    private AccountMapping[] readList(PreparedStatement ps) throws SQLException {
+    private AccountMapping[] readList(Ledger ledger, PreparedStatement ps) throws SQLException {
         var rs = ps.executeQuery();
         var list = new ArrayList<AccountMapping>();
         while (rs.next()) {
-            list.add(read(rs));
+            list.add(read(ledger, rs));
         }
         return list.toArray(new AccountMapping[0]);
     }
 
-    private AccountMapping read(ResultSet rs) throws SQLException {
+    private AccountMapping read(Ledger ledger, ResultSet rs) throws SQLException {
         var ledgerId = LedgerId.of(rs.getInt("ledgerId"));
-        var o = new AccountMapping(ledgerId);
+        if (!ledger.getId().sameAs(ledgerId)) {
+            throw new SQLException("Ledger arg %s doesn't match loaded %s".formatted(ledger.getId().numericId(), ledgerId.numericId()));
+        }
+        var o = new AccountMapping(ledger);
         o.setId(rs.getLong("id"));
         o.setAccount(AccountFactory.create(rs.getString("bankAccount")));
         var l = LedgerFactory.create(ledgerId);
@@ -47,7 +51,7 @@ public class AccountMappingRepo implements AutoCloseable {
         return o;
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Account account, String partyId) throws SQLException {
+    public Optional<AccountMapping> single(Ledger ledger, Account account, String partyId) throws SQLException {
         if (account == null) {
             return Optional.empty();
         }
@@ -55,17 +59,17 @@ public class AccountMappingRepo implements AutoCloseable {
         var includePartyId = partyId.length() > 0;
         var filterPartyId = includePartyId ? "AND partyId = ?" : "";
         var ps = conn.prepareStatement(String.format("SELECT * FROM accountmapping WHERE ledgerId = ? AND bankAccount = ? %s LIMIT 1", filterPartyId));
-        ps.setInt(1, ledgerId.numericId());
+        ps.setInt(1, ledger.getId().numericId());
         ps.setString(2, account.getUnformatted());
         if (includePartyId) {
             ps.setString(3, partyId);
         }
 
         var rs = ps.executeQuery();
-        return rs.next() ? Optional.of(read(rs)) : Optional.empty();
+        return rs.next() ? Optional.of(read(ledger, rs)) : Optional.empty();
     }
 
-    public Optional<AccountMapping> single(LedgerId ledgerId, Wallet wallet, String partyId) throws SQLException {
+    public Optional<AccountMapping> single(Ledger ledger, Wallet wallet, String partyId) throws SQLException {
         if (wallet == null) {
             return Optional.empty();
         }
@@ -73,14 +77,14 @@ public class AccountMappingRepo implements AutoCloseable {
         var includePartyId = partyId.length() > 0;
         var filterPartyId = includePartyId ? "AND partyId = ?" : "";
         var ps = conn.prepareStatement(String.format("SELECT * FROM accountmapping WHERE ledgerId = ? AND walletPublicKey = ? %s LIMIT 1", filterPartyId));
-        ps.setInt(1, ledgerId.numericId());
+        ps.setInt(1, ledger.getId().numericId());
         ps.setString(2, wallet.getPublicKey());
         if (includePartyId) {
             ps.setString(3, partyId);
         }
 
         var rs = ps.executeQuery();
-        return rs.next() ? Optional.of(read(rs)) : Optional.empty();
+        return rs.next() ? Optional.of(read(ledger, rs)) : Optional.empty();
     }
 
     public void saveOrUpdate(AccountMapping value) throws SQLException {
@@ -88,7 +92,7 @@ public class AccountMappingRepo implements AutoCloseable {
                 + "	    VALUES ((SELECT id FROM accountmapping WHERE id = ?), ?, ?, ?, ?);";
         var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, value.getId());
-        ps.setInt(2, value.getLedgerId().numericId());
+        ps.setInt(2, value.getLedger().getId().numericId());
         ps.setString(3, value.getAccount().getUnformatted());
         ps.setString(4, value.getWallet().getPublicKey());
         ps.setString(5, value.getPartyId());
