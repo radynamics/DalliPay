@@ -8,9 +8,9 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
+import com.radynamics.dallipay.cryptoledger.signing.EmptyPrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
-import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
@@ -19,7 +19,6 @@ import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -248,7 +247,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return false;
     }
 
-    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
-        return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
+    public TransactionSubmitter createRpcTransactionSubmitter() {
+        return api.createTransactionSubmitter(new EmptyPrivateKeyProvider());
     }
 }

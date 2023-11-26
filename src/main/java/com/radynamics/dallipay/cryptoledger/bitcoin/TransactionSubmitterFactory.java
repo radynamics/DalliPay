@@ -19,7 +19,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
     public TransactionSubmitter create(String id, Component parentComponent) {
         switch (id) {
             case RpcSubmitter.Id: {
-                return ledger.createRpcTransactionSubmitter(parentComponent);
+                return ledger.createRpcTransactionSubmitter();
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);

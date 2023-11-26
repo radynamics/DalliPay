@@ -3,14 +3,16 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -48,8 +50,13 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void submit(com.radynamics.dallipay.cryptoledger.Transaction[] transactions) {
-        throw new NotImplementedException();
-
+        var client = new BitcoinJSONRPCClient(ledger.getNetwork().getUrl().url());
+        for (var t : transactions) {
+            var amount = BigDecimal.valueOf(t.getAmount().getNumber().doubleValue());
+            // TODO: include comment data. This api call does NOT include comment into the transaction itself.
+            var comment = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
+            client.sendToAddress(t.getReceiverWallet().getPublicKey(), amount, comment, comment);
+        }
     }
 
     @Override
