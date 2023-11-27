@@ -18,18 +18,17 @@ import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
 public class JsonRpcApi {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
-    private final BitcoindRpcClient client;
+    private final BitcoinJSONRPCClient client;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
@@ -41,9 +40,22 @@ public class JsonRpcApi {
         var tr = new TransactionResult();
 
         try {
+            var ownWallets = getAddressesByLabel("");
+
             // PARAM must be a label instead of a publicKey
             var transactions = client.listTransactions(/*wallet.getPublicKey()*/);
             for (var t : transactions) {
+                // Skip outgoing tx and tx without an amount.
+                if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+                // Skip change address of sent payments.
+                if (ownWallets.stream().anyMatch(o -> o.getPublicKey().equals(t.address()))) {
+                    continue;
+                }
+                if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
+                    continue;
+                }
                 tr.add(toTransaction(t));
             }
         } catch (Exception e) {
@@ -51,6 +63,15 @@ public class JsonRpcApi {
         }
 
         return tr;
+    }
+
+    private List<Wallet> getAddressesByLabel(String label) {
+        var result = (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
+        var list = new ArrayList<Wallet>();
+        for (var kvp : result.entrySet()) {
+            list.add(ledger.createWallet(kvp.getKey()));
+        }
+        return list;
     }
 
     private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) throws DecoderException, UnsupportedEncodingException {
