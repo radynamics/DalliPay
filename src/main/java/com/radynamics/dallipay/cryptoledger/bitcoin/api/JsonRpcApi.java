@@ -5,18 +5,24 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.iso20022.Utils;
+import org.apache.commons.codec.DecoderException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 public class JsonRpcApi {
@@ -47,7 +53,7 @@ public class JsonRpcApi {
         return tr;
     }
 
-    private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) {
+    private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) throws DecoderException, UnsupportedEncodingException {
         var amt = Money.of(t.amount().doubleValue(), new Currency(ledger.getNativeCcySymbol()));
         var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
         trx.setId(t.txId());
@@ -62,24 +68,26 @@ public class JsonRpcApi {
             trx.setReceiver(ledger.createWallet(t.address()));
         }
 
-        // TODO: read transaction data/messages
-        if (t.comment() != null) {
-            trx.addMessage(t.comment());
-        }
-        /*for (MemoWrapper mw : t.memos()) {
-            if (!mw.memo().memoData().isPresent()) {
-                continue;
-            }
-            var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
-            for (var ft : unwrappedMemo.freeTexts()) {
-                trx.addMessage(ft);
-            }
-        }
+        var rawTx = client.getRawTransaction(t.txId());
+        for (var vout : rawTx.vOut()) {
+            var content = client.decodeScript(vout.scriptPubKey().hex()).asm();
+            final String OP_RETURN = "OP_RETURN ";
+            if (content.startsWith(OP_RETURN)) {
+                var payloadDataHex = content.substring(OP_RETURN.length());
+                var memoText = Utils.hexToString(payloadDataHex);
 
-        var l = new StructuredReferenceLookup(t);
-        for (var r : l.find()) {
-            trx.addStructuredReference(r);
-        }*/
+                var unwrappedMemo = PayloadConverter.fromMemo(memoText);
+                var messages = new ArrayList<>(Arrays.asList(unwrappedMemo.freeTexts()));
+
+                for (var r : com.radynamics.dallipay.cryptoledger.generic.StructuredReferenceLookup.find(memoText)) {
+                    trx.addStructuredReference(r);
+                    messages.removeIf(o -> o.equals(r.getUnformatted()));
+                }
+                for (var m : messages) {
+                    trx.addMessage(m);
+                }
+            }
+        }
 
         return trx;
     }
