@@ -82,14 +82,13 @@ public class JsonRpcApi {
         if (t.blockTime() != null) {
             trx.setBooked(toUserTimeZone(t.blockTime()));
         }
-        if (t.account() != null) {
-            trx.setSender(ledger.createWallet(t.account()));
-        }
+
+        var rawTx = client.getRawTransaction(t.txId());
+        trx.setSender(getSender(t, rawTx).orElse(null));
         if (t.address() != null) {
             trx.setReceiver(ledger.createWallet(t.address()));
         }
 
-        var rawTx = client.getRawTransaction(t.txId());
         for (var vout : rawTx.vOut()) {
             var content = client.decodeScript(vout.scriptPubKey().hex()).asm();
             final String OP_RETURN = "OP_RETURN ";
@@ -111,6 +110,32 @@ public class JsonRpcApi {
         }
 
         return trx;
+    }
+
+    private Optional<Wallet> getSender(BitcoindRpcClient.Transaction t, BitcoindRpcClient.RawTransaction tx) {
+        if (t.account() != null) {
+            return Optional.of(ledger.createWallet(t.account()));
+        }
+
+        if (tx.vIn().size() == 1) {
+            return Optional.of(ledger.createWallet(getAddress(tx.vIn().get(0))));
+        }
+
+        var exactAmount = new ArrayList<Wallet>();
+        for (var in : tx.vIn()) {
+            if (in.amount().compareTo(t.amount()) == 0) {
+                exactAmount.add(ledger.createWallet(getAddress(in)));
+            }
+        }
+        if (exactAmount.size() == 1) {
+            return Optional.of(exactAmount.get(0));
+        }
+
+        return Optional.empty();
+    }
+
+    private String getAddress(BitcoindRpcClient.RawTransaction.In in) {
+        return in.getTransactionOutput().scriptPubKey().mapStr("address");
     }
 
     private ZonedDateTime toUserTimeZone(Date dt) {
