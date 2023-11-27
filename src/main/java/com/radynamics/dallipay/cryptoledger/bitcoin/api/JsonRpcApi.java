@@ -43,7 +43,7 @@ public class JsonRpcApi {
             var ownWallets = getAddressesByLabel("");
 
             // PARAM must be a label instead of a publicKey
-            var transactions = client.listTransactions(/*wallet.getPublicKey()*/);
+            var transactions = client.listTransactions("*", 1000);
             for (var t : transactions) {
                 // Skip outgoing tx and tx without an amount.
                 if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
