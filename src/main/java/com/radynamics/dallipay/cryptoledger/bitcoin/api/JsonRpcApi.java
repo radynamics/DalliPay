@@ -58,7 +58,9 @@ public class JsonRpcApi {
         if (t.account() != null) {
             trx.setSender(ledger.createWallet(t.account()));
         }
-        trx.setReceiver(ledger.createWallet(t.address()));
+        if (t.address() != null) {
+            trx.setReceiver(ledger.createWallet(t.address()));
+        }
 
         // TODO: read transaction data/messages
         if (t.comment() != null) {
