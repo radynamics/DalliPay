@@ -40,7 +40,7 @@ public class JsonRpcApi {
         var tr = new TransactionResult();
 
         try {
-            var ownWallets = getAddressesByLabel("");
+            var ownWallets = listWallets();
 
             // PARAM must be a label instead of a publicKey
             var transactions = client.listTransactions("*", 1000);
@@ -63,6 +63,15 @@ public class JsonRpcApi {
         }
 
         return tr;
+    }
+
+    private List<Wallet> listWallets() {
+        var labels = (List<String>) client.query("listlabels");
+        var list = new ArrayList<Wallet>();
+        for (var l : labels) {
+            list.addAll(getAddressesByLabel(l));
+        }
+        return list;
     }
 
     private List<Wallet> getAddressesByLabel(String label) {
