@@ -50,7 +50,7 @@ public class JsonRpcApi {
                     continue;
                 }
                 // Skip change address of sent payments.
-                if (ownWallets.stream().anyMatch(o -> o.getPublicKey().equals(t.address()))) {
+                if (ownWallets.stream().noneMatch(o -> o.getPublicKey().equals(t.address()))) {
                     continue;
                 }
                 if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
