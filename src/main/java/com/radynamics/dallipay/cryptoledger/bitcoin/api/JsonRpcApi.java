@@ -22,28 +22,30 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
 
 public class JsonRpcApi {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
-    private final BitcoinJSONRPCClient client;
+    private final MultiWalletJsonRpcApi openedWallets;
 
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
-        this.client = new BitcoinJSONRPCClient(network.getUrl().url());
+        this.openedWallets = new MultiWalletJsonRpcApi(ledger, network);
     }
 
     public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) {
         var tr = new TransactionResult();
 
         try {
-            var ownWallets = listWallets();
+            var ownWallets = openedWallets.listWallets();
 
-            // PARAM must be a label instead of a publicKey
-            var transactions = client.listTransactions("*", 1000);
+            var transactions = openedWallets.listTransactions("*", 1000);
             for (var t : transactions) {
                 // Skip outgoing tx and tx without an amount.
                 if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
@@ -65,24 +67,6 @@ public class JsonRpcApi {
         return tr;
     }
 
-    private List<Wallet> listWallets() {
-        var labels = (List<String>) client.query("listlabels");
-        var list = new ArrayList<Wallet>();
-        for (var l : labels) {
-            list.addAll(getAddressesByLabel(l));
-        }
-        return list;
-    }
-
-    private List<Wallet> getAddressesByLabel(String label) {
-        var result = (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
-        var list = new ArrayList<Wallet>();
-        for (var kvp : result.entrySet()) {
-            list.add(ledger.createWallet(kvp.getKey()));
-        }
-        return list;
-    }
-
     private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) throws DecoderException, UnsupportedEncodingException {
         var amt = Money.of(t.amount().doubleValue(), new Currency(ledger.getNativeCcySymbol()));
         var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
@@ -92,14 +76,14 @@ public class JsonRpcApi {
             trx.setBooked(toUserTimeZone(t.blockTime()));
         }
 
-        var rawTx = client.getRawTransaction(t.txId());
+        var rawTx = openedWallets.getRawTransaction(t.txId());
         trx.setSender(getSender(t, rawTx).orElse(null));
         if (t.address() != null) {
             trx.setReceiver(ledger.createWallet(t.address()));
         }
 
         for (var vout : rawTx.vOut()) {
-            var content = client.decodeScript(vout.scriptPubKey().hex()).asm();
+            var content = openedWallets.decodeScript(vout.scriptPubKey().hex()).asm();
             final String OP_RETURN = "OP_RETURN ";
             if (content.startsWith(OP_RETURN)) {
                 var payloadDataHex = content.substring(OP_RETURN.length());
@@ -167,13 +151,13 @@ public class JsonRpcApi {
     }
 
     public boolean validateAddress(String publicKey) {
-        var result = client.validateAddress(publicKey);
+        var result = openedWallets.validateAddress(publicKey);
         return result.isValid();
     }
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
         // TODO: Verify wallet matches
-        var balance = client.getBalance();
+        var balance = openedWallets.getBalance();
         wallet.getBalances().set(Money.of(balance.doubleValue(), new Currency(ledger.getNativeCcySymbol())));
     }
 
