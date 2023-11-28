@@ -118,13 +118,16 @@ public class JsonRpcApi {
         }
 
         if (tx.vIn().size() == 1) {
-            return Optional.of(ledger.createWallet(getAddress(tx.vIn().get(0))));
+            return getAddress(tx.vIn().get(0));
         }
 
         var exactAmount = new ArrayList<Wallet>();
         for (var in : tx.vIn()) {
             if (in.amount().compareTo(t.amount()) == 0) {
-                exactAmount.add(ledger.createWallet(getAddress(in)));
+                var a = getAddress(in);
+                if (a.isPresent()) {
+                    exactAmount.add(a.orElseThrow());
+                }
             }
         }
         if (exactAmount.size() == 1) {
@@ -134,8 +137,14 @@ public class JsonRpcApi {
         return Optional.empty();
     }
 
-    private String getAddress(BitcoindRpcClient.RawTransaction.In in) {
-        return in.getTransactionOutput().scriptPubKey().mapStr("address");
+    private Optional<Wallet> getAddress(BitcoindRpcClient.RawTransaction.In in) {
+        try {
+            // getTransactionOutput may throw RuntimeException for mined blocks.
+            return Optional.of(ledger.createWallet(in.getTransactionOutput().scriptPubKey().mapStr("address")));
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+            return Optional.empty();
+        }
     }
 
     private ZonedDateTime toUserTimeZone(Date dt) {
