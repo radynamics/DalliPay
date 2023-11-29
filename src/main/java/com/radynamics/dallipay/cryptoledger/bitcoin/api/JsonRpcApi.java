@@ -43,22 +43,16 @@ public class JsonRpcApi {
         var tr = new TransactionResult();
 
         try {
-            var ownWallets = openedWallets.listWallets();
-
-            var transactions = openedWallets.listTransactions("*", 1000);
+            var transactions = openedWallets.listReceivedByAddress(wallet);
             for (var t : transactions) {
                 // Skip outgoing tx and tx without an amount.
                 if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
                     continue;
                 }
-                // Skip change address of sent payments.
-                if (ownWallets.stream().noneMatch(o -> o.getPublicKey().equals(t.address()))) {
-                    continue;
-                }
                 if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
                     continue;
                 }
-                tr.add(toTransaction(t));
+                tr.add(toTransaction(t, wallet));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -67,7 +61,7 @@ public class JsonRpcApi {
         return tr;
     }
 
-    private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t) throws DecoderException, UnsupportedEncodingException {
+    private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t, Wallet receivingWallet) throws DecoderException, UnsupportedEncodingException {
         var amt = Money.of(t.amount().doubleValue(), new Currency(ledger.getNativeCcySymbol()));
         var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
         trx.setId(t.txId());
@@ -78,9 +72,7 @@ public class JsonRpcApi {
 
         var rawTx = openedWallets.getRawTransaction(t.txId());
         trx.setSender(getSender(t, rawTx).orElse(null));
-        if (t.address() != null) {
-            trx.setReceiver(ledger.createWallet(t.address()));
-        }
+        trx.setReceiver(t.address() == null ? receivingWallet : ledger.createWallet(t.address()));
 
         for (var vout : rawTx.vOut()) {
             var content = openedWallets.decodeScript(vout.scriptPubKey().hex()).asm();

@@ -49,6 +49,32 @@ public class MultiWalletJsonRpcApi {
         return list;
     }
 
+    public List<BitcoindRpcClient.Transaction> listReceivedByAddress(Wallet wallet) {
+        var list = new ArrayList<BitcoindRpcClient.Transaction>();
+        for (var c : walletClients.values()) {
+            for (var txId : listReceivedByAddress(c, wallet)) {
+                list.add(c.getTransaction(txId));
+            }
+        }
+        return list;
+    }
+
+    private ArrayList<String> listReceivedByAddress(BitcoinJSONRPCClient client, Wallet wallet) {
+        final int minconf = 1;
+        final boolean include_empty = true;
+        final boolean include_watchonly = true;
+        var result = (ArrayList<?>) client.query("listreceivedbyaddress", minconf, include_empty, include_watchonly, wallet.getPublicKey());
+
+        var list = new ArrayList<String>();
+        for (var r : result) {
+            var map = ((LinkedHashMap) r);
+            if (map.get("address").equals(wallet.getPublicKey())) {
+                return (ArrayList<String>) map.get("txids");
+            }
+        }
+        return list;
+    }
+
     public ArrayList<Wallet> listWallets() {
         var list = new ArrayList<Wallet>();
         for (var c : walletClients.values()) {
