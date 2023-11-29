@@ -20,6 +20,7 @@ import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -160,5 +161,9 @@ public class JsonRpcApi {
         return EndpointInfo.builder()
                 .networkInfo(networkInfo)
                 .serverVersion(info.subversion());
+    }
+
+    public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
+        openedWallets.importWallet(wallet, historicTransactionSince);
     }
 }

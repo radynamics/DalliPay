@@ -7,10 +7,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
+import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,17 +30,21 @@ public class MultiWalletJsonRpcApi {
         this.ledger = ledger;
         this.network = network;
 
+        genericClient = new BitcoinJSONRPCClient(network.getUrl().url());
+        for (var w : listNames()) {
+            walletClients.put(w, createClient(network, w));
+        }
+    }
+
+    private static BitcoinJSONRPCClient createClient(NetworkInfo network, String walletName) {
         try {
-            genericClient = new BitcoinJSONRPCClient(network.getUrl().url());
-            for (var w : listwallets()) {
-                walletClients.put(w, new BitcoinJSONRPCClient(new URL(network.getUrl().url() + "wallet/" + w)));
-            }
+            return new BitcoinJSONRPCClient(new URL(network.getUrl().url() + "wallet/" + walletName));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private List<String> listwallets() {
+    private List<String> listNames() {
         return (List<String>) genericClient.query("listwallets");
     }
 
@@ -109,5 +116,31 @@ public class MultiWalletJsonRpcApi {
 
     public BigDecimal getBalance() {
         return genericClient.getBalance();
+    }
+
+    public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
+        var walletName = wallet.getPublicKey();
+        final boolean disable_private_keys = true;
+        var resultCreate = (LinkedHashMap<String, ?>) genericClient.query("createwallet", walletName, disable_private_keys);
+        if (!resultCreate.get("name").equals(wallet.getPublicKey())) {
+            throw new ApiException("createwallet failed for %s".formatted(wallet.getPublicKey()));
+        }
+        var walletAddress = wallet.getPublicKey();
+        var resultGetDescriptor = (LinkedHashMap<String, ?>) genericClient.query("getdescriptorinfo", "addr(%s)".formatted(walletAddress));
+
+        // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
+        var checksum = resultGetDescriptor.get("checksum");
+        var timestamp = historicTransactionSince.isAfter(LocalDateTime.now()) ? "\"now\"" : historicTransactionSince.toEpochSecond(ZoneOffset.UTC);
+        var options = JSON.parse("[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, checksum, timestamp));
+
+        var walletClient = createClient(network, walletName);
+        var resultImportDescriptor = (ArrayList<?>) walletClient.query("importdescriptors", options);
+        var resultMap = (LinkedHashMap<String, ?>) resultImportDescriptor.get(0);
+        if (!(Boolean) resultMap.get("success")) {
+            var error = (LinkedHashMap<String, ?>) resultMap.get("error");
+            throw new ApiException("importdescriptors failed for %s (%s :%s)".formatted(walletName, error.get("code"), error.get("message")));
+        }
+
+        walletClients.put(walletName, walletClient);
     }
 }
