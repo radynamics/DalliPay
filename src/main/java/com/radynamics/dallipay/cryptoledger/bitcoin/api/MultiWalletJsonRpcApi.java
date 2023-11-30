@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,10 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 public class MultiWalletJsonRpcApi {
     final static Logger log = LogManager.getLogger(MultiWalletJsonRpcApi.class);
@@ -93,6 +91,19 @@ public class MultiWalletJsonRpcApi {
         return list;
     }
 
+    private Optional<BitcoindRpcClient> client(Wallet wallet) {
+        for (var c : walletClients.values()) {
+            for (var l : (List<String>) c.query("listlabels")) {
+                for (var w : getAddressesByLabel(c, l)) {
+                    if (WalletCompare.isSame(w, wallet)) {
+                        return Optional.of(c);
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private List<Wallet> getAddressesByLabel(BitcoinJSONRPCClient client, String label) {
         var result = (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
         var list = new ArrayList<Wallet>();
@@ -114,8 +125,9 @@ public class MultiWalletJsonRpcApi {
         return genericClient.validateAddress(address);
     }
 
-    public BigDecimal getBalance() {
-        return genericClient.getBalance();
+    public Optional<BigDecimal> getBalance(Wallet wallet) {
+        var c = client(wallet);
+        return c.isPresent() ? Optional.of(c.orElseThrow().getBalance()) : Optional.empty();
     }
 
     public List<String> walletNames() {

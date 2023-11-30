@@ -155,9 +155,12 @@ public class JsonRpcApi {
     }
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
-        // TODO: Verify wallet matches
-        var balance = openedWallets.getBalance();
-        wallet.getBalances().set(Money.of(balance.doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        var balance = openedWallets.getBalance(wallet);
+        if (!balance.isPresent()) {
+            log.info("refreshBalance failed. Unknown wallet %s".formatted(wallet.getPublicKey()));
+            return;
+        }
+        wallet.getBalances().set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
     }
 
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
