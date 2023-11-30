@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger.generic;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 
 public class WalletInput {
     private final Ledger ledger;
@@ -28,7 +27,7 @@ public class WalletInput {
         if (addressInfo == null) {
             return null;
         }
-        var result = new WalletValidator(ledger).validateFormat(addressInfo.getWallet());
+        var result = ledger.createWalletValidator().validateFormat(addressInfo.getWallet());
         wallet = result == null ? addressInfo.getWallet() : null;
         return wallet;
     }

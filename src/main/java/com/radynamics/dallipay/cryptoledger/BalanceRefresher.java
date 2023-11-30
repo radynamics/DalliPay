@@ -35,7 +35,7 @@ public class BalanceRefresher {
     }
 
     private synchronized void loadOrGet(Ledger ledger, Wallet wallet, boolean useCache) {
-        if (!WalletValidator.isValidFormat(ledger, wallet)) {
+        if (!ledger.createWalletValidator().isValidFormat(wallet)) {
             return;
         }
 

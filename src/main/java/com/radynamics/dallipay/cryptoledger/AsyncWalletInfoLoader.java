@@ -28,7 +28,7 @@ public class AsyncWalletInfoLoader {
     }
 
     private static final WalletInfo[] all(Ledger ledger, Wallet wallet) {
-        if (wallet == null || !WalletValidator.isValidFormat(ledger, wallet)) {
+        if (wallet == null || !ledger.createWalletValidator().isValidFormat(wallet)) {
             return new WalletInfo[0];
         }
         var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());

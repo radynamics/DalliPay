@@ -1,21 +1,23 @@
-package com.radynamics.dallipay.cryptoledger;
+package com.radynamics.dallipay.cryptoledger.generic;
 
+import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
 
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class WalletValidator {
+public class GenericWalletValidator implements WalletValidator {
     private Ledger ledger;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Validations");
 
-    public WalletValidator(Ledger ledger) {
+    public GenericWalletValidator(Ledger ledger) {
         this.ledger = ledger;
     }
 
-    public ValidationResult[] validate(Wallet wallet, String senderOrReceiver) {
+    public ValidationResult[] validate(com.radynamics.dallipay.cryptoledger.Wallet wallet, String senderOrReceiver) {
         var list = new ArrayList<ValidationResult>();
 
         var formatResult = validateFormat(wallet, senderOrReceiver);
@@ -24,23 +26,18 @@ public class WalletValidator {
             return list.toArray(new ValidationResult[0]);
         }
 
-        if (!ledger.exists(wallet)) {
-            list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("walletDoestExist"), senderOrReceiver)));
-        }
-
         return list.toArray(new ValidationResult[0]);
     }
 
-    public static boolean isValidFormat(Ledger ledger, Wallet wallet) {
-        var v = new WalletValidator(ledger);
-        return v.validateFormat(wallet) == null;
+    public boolean isValidFormat(com.radynamics.dallipay.cryptoledger.Wallet wallet) {
+        return validateFormat(wallet) == null;
     }
 
-    public ValidationResult validateFormat(Wallet wallet) {
+    public ValidationResult validateFormat(com.radynamics.dallipay.cryptoledger.Wallet wallet) {
         return validateFormat(wallet, null);
     }
 
-    private ValidationResult validateFormat(Wallet wallet, String senderOrReceiver) {
+    private ValidationResult validateFormat(com.radynamics.dallipay.cryptoledger.Wallet wallet, String senderOrReceiver) {
         var prefix = senderOrReceiver == null ? "" : String.format("%s ", senderOrReceiver);
         return wallet != null && ledger.isValidPublicKey(wallet.getPublicKey())
                 ? null

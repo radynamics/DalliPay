@@ -3,8 +3,10 @@ package com.radynamics.dallipay.iso20022.pain001;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.GenericWalletValidator;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
+import com.radynamics.dallipay.cryptoledger.generic.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -135,11 +137,6 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public boolean exists(Wallet wallet) {
-        return true;
-    }
-
-    @Override
     public NetworkInfo getNetwork() {
         return this.network;
     }
@@ -157,6 +154,11 @@ public class TestLedger implements Ledger {
     @Override
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         return null;
+    }
+
+    @Override
+    public WalletValidator createWalletValidator() {
+        return new GenericWalletValidator(this);
     }
 
     @Override
