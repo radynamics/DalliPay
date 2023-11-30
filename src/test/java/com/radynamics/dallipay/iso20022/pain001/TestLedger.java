@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -71,6 +72,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public WalletInput createWalletInput(String text) {
+        return new WalletInput(this, text);
+    }
+
+    @Override
     public Wallet createWallet(String publicKey, String secret) {
         return new Wallet() {
             private final MoneyBag balances = new MoneyBag();
@@ -124,7 +130,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
+    public TransactionResult listPaymentsReceived(WalletInput wallet, DateTimeRange period) throws Exception {
         return new TransactionResult();
     }
 

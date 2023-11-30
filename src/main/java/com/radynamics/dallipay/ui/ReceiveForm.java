@@ -116,6 +116,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1.add(lbl);
 
                 txtInput = new WalletField(this);
+                txtInput.allowGeneralTerm(true);
                 panel1Layout.putConstraint(SpringLayout.WEST, txtInput, paddingWest, SpringLayout.WEST, anchorComponentTopLeft);
                 panel1Layout.putConstraint(SpringLayout.NORTH, txtInput, getNorthPad(0), SpringLayout.NORTH, panel1);
                 panel1.add(txtInput);
@@ -409,8 +410,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     public void load() {
-        var walletPublicKey = txtInput.getText();
-        if (!transformInstruction.getLedger().isValidPublicKey(walletPublicKey)) {
+        var walletInput = txtInput.getWalletInput();
+        if (!walletInput.valid()) {
             loadTable(new Payment[0]);
             return;
         }
@@ -436,7 +437,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         lblLoading.showLoading();
         var period = DateTimeRange.of(dtPickerStart.getDateTimePermissive(), dtPickerEnd.getDateTimePermissive());
         transactionTranslator.setTargetCcy(targetCcy);
-        var wallet = transformInstruction.getLedger().createWallet(walletPublicKey, null);
 
         var cf = new CompletableFuture<TransactionResult>();
         cf.thenAccept(result -> {
@@ -465,7 +465,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 });
         Executors.newCachedThreadPool().submit(() -> {
             try {
-                cf.complete(transformInstruction.getLedger().listPaymentsReceived(wallet, period));
+                cf.complete(transformInstruction.getLedger().listPaymentsReceived(walletInput, period));
             } catch (Exception e) {
                 cf.completeExceptionally(e);
             }
