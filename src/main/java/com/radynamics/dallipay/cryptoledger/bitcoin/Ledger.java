@@ -8,6 +8,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -71,6 +72,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         throw new NotImplementedException();
     }
 
+    @Override
+    public WalletInput createWalletInput(String text) {
+        return new WalletNameInput(this, text, api.walletNames());
+    }
+
     public Wallet createWallet(String publicKey) {
         return createWallet(publicKey, null);
     }
@@ -96,8 +102,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        return api.listPaymentsReceived(wallet, period);
+    public TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) throws Exception {
+        return api.listPaymentsReceived(walletInput, period);
     }
 
     @Override

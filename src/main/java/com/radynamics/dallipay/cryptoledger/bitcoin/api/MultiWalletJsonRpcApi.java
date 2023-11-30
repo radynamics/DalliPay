@@ -49,11 +49,11 @@ public class MultiWalletJsonRpcApi {
     }
 
     public List<BitcoindRpcClient.Transaction> listTransactions(String account, int count) {
-        var list = new ArrayList<BitcoindRpcClient.Transaction>();
-        for (var c : walletClients.values()) {
-            list.addAll(c.listTransactions(account, count));
+        if (walletClients.containsKey(account)) {
+            return walletClients.get(account).listTransactions("*", count);
+        } else {
+            return new ArrayList<>();
         }
-        return list;
     }
 
     public List<BitcoindRpcClient.Transaction> listReceivedByAddress(Wallet wallet) {
@@ -116,6 +116,10 @@ public class MultiWalletJsonRpcApi {
 
     public BigDecimal getBalance() {
         return genericClient.getBalance();
+    }
+
+    public List<String> walletNames() {
+        return new ArrayList<>(walletClients.keySet());
     }
 
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {

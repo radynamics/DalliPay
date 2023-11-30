@@ -5,6 +5,7 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
@@ -23,10 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 public class JsonRpcApi {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
@@ -40,11 +38,11 @@ public class JsonRpcApi {
         this.openedWallets = new MultiWalletJsonRpcApi(ledger, network);
     }
 
-    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) {
+    public TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) {
         var tr = new TransactionResult();
 
         try {
-            var transactions = openedWallets.listReceivedByAddress(wallet);
+            var transactions = listPaymentsReceived(walletInput);
             for (var t : transactions) {
                 // Skip outgoing tx and tx without an amount.
                 if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
@@ -53,13 +51,21 @@ public class JsonRpcApi {
                 if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
                     continue;
                 }
-                tr.add(toTransaction(t, wallet));
+                tr.add(toTransaction(t, walletInput.wallet()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
         return tr;
+    }
+
+    private List<BitcoindRpcClient.Transaction> listPaymentsReceived(WalletInput walletInput) {
+        if (ledger.isValidPublicKey(walletInput.raw())) {
+            return openedWallets.listReceivedByAddress(walletInput.wallet());
+        } else {
+            return openedWallets.listTransactions(walletInput.raw(), 9999);
+        }
     }
 
     private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t, Wallet receivingWallet) throws DecoderException, UnsupportedEncodingException {
@@ -161,6 +167,10 @@ public class JsonRpcApi {
         return EndpointInfo.builder()
                 .networkInfo(networkInfo)
                 .serverVersion(info.subversion());
+    }
+
+    public List<String> walletNames() {
+        return openedWallets.walletNames();
     }
 
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
