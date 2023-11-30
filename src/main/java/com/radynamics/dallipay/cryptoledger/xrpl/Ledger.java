@@ -7,6 +7,7 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -95,6 +96,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public WalletInput createWalletInput(String text) {
+        return new WalletInput(this, text);
+    }
+
+    @Override
     public Wallet createWallet(String publicKey, String secret) {
         return new com.radynamics.dallipay.cryptoledger.generic.Wallet(getId(), publicKey, secret);
     }
@@ -115,8 +121,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public TransactionResult listPaymentsReceived(Wallet wallet, DateTimeRange period) throws Exception {
-        return api.listPaymentsReceived(WalletConverter.from(wallet), period);
+    public TransactionResult listPaymentsReceived(WalletInput wallet, DateTimeRange period) throws Exception {
+        return api.listPaymentsReceived(WalletConverter.from(wallet.wallet()), period);
     }
 
     public com.radynamics.dallipay.cryptoledger.Transaction[] listTrustlineTransactions(com.radynamics.dallipay.cryptoledger.generic.Wallet wallet, DateTimeRange period, Wallet ccyIssuer, String ccy) throws Exception {

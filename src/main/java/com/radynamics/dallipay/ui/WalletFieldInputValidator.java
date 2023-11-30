@@ -2,7 +2,6 @@ package com.radynamics.dallipay.ui;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,16 +9,23 @@ import org.apache.logging.log4j.Logger;
 public class WalletFieldInputValidator implements InputControlValidator {
     private final static Logger log = LogManager.getLogger(WalletFieldInputValidator.class);
     private final Ledger ledger;
+    private final boolean allowGeneralTerm;
 
-    public WalletFieldInputValidator(Ledger ledger) {
+    public WalletFieldInputValidator(Ledger ledger, boolean allowGeneralTerm) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
+        this.allowGeneralTerm = allowGeneralTerm;
     }
 
     @Override
     public boolean isValid(Object value) {
         var text = (String) value;
-        return StringUtils.isEmpty(text) || getValidOrNull(text) != null;
+        if (StringUtils.isEmpty(text)) {
+            return true;
+        }
+        return allowGeneralTerm
+                ? ledger.createWalletInput(text).valid()
+                : getValidOrNull(text) != null;
     }
 
     public Wallet getValidOrNull(String text) {
@@ -27,12 +33,7 @@ public class WalletFieldInputValidator implements InputControlValidator {
             return null;
         }
 
-        var addressInfo = ledger.createWalletAddressResolver().resolve(text);
-        if (addressInfo == null) {
-            return null;
-        }
-        var result = new WalletValidator(ledger).validateFormat(addressInfo.getWallet());
-        return result == null ? addressInfo.getWallet() : null;
+        return ledger.createWalletInput(text).wallet();
     }
 
     @Override
