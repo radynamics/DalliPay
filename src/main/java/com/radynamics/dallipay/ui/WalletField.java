@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.WalletInfoLookupException;
 import com.radynamics.dallipay.exchange.Money;
@@ -35,6 +36,7 @@ public class WalletField extends JPanel {
     private InputControlValidator destinationTagValidator;
     private ValidationControlDecorator destinationTagDecorator;
     private boolean isVerifing;
+    private boolean allowGeneralTerm;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -158,14 +160,13 @@ public class WalletField extends JPanel {
     }
 
     private void updateInfoText(String text) {
-        var wallet = walletValidator.getValidOrNull(text);
-        if (wallet == null && text.length() > 0) {
+        if (!walletValidator.isValid(text) && text.length() > 0) {
             lblInfoText.setText(res.getString("invalidWallet"));
             return;
         }
 
         var aggregator = new WalletInfoAggregator(ledger.getInfoProvider());
-        var wi = aggregator.getNameOrDomain(wallet);
+        var wi = aggregator.getNameOrDomain(getWalletInput().wallet());
         if (text.length() > 0) {
             lblInfoText.setText(WalletInfoFormatter.toText(wi).orElse(res.getString("noInfo")));
         } else {
@@ -296,9 +297,13 @@ public class WalletField extends JPanel {
         return txt.getText().trim();
     }
 
+    public WalletInput getWalletInput() {
+        return ledger.createWalletInput(getText());
+    }
+
     public void setLedger(Ledger ledger) {
         this.ledger = ledger;
-        walletValidator = new WalletFieldInputValidator(ledger);
+        walletValidator = new WalletFieldInputValidator(ledger, allowGeneralTerm);
         walletDecorator = new ValidationControlDecorator(txt, walletValidator);
         destinationTagValidator = ledger.supportsDestinationTag()
                 ? new DestinationTagInputValidator(ledger.createDestinationTagBuilder())
@@ -362,5 +367,9 @@ public class WalletField extends JPanel {
     public void setDestinationTag(String destinationTag) {
         this.destinationTag.setText(destinationTag);
         destinationTagDecorator.update(destinationTag);
+    }
+
+    public void allowGeneralTerm(boolean value) {
+        this.allowGeneralTerm = value;
     }
 }

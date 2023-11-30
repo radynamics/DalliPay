@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger.xrpl;
 
 import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import com.radynamics.dallipay.cryptoledger.WalletInfoProvider;
+import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
 import com.radynamics.dallipay.cryptoledger.generic.walletinfo.InfoType;
 import org.apache.commons.lang3.StringUtils;
 

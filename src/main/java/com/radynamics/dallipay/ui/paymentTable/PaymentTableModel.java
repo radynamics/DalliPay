@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.ui.paymentTable;
 
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationState;
@@ -139,7 +138,7 @@ public class PaymentTableModel extends AbstractTableModel {
             var userInput = (String) value;
             var ledger = p.getLedger();
             var wallet = ledger.createWallet(userInput, "");
-            if (WalletValidator.isValidFormat(ledger, wallet)) {
+            if (ledger.createWalletValidator().isValidFormat(wallet)) {
                 return new WalletCellValue(wallet, COL_RECEIVER_LEDGER.equals(columnName) ? p.getDestinationTag() : null);
             }
         }

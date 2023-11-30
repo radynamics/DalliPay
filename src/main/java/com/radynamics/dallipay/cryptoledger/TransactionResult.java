@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class TransactionResult {
     private ArrayList<Transaction> transactions = new ArrayList<>();
@@ -14,7 +16,9 @@ public class TransactionResult {
     }
 
     public Transaction[] transactions() {
-        return transactions.toArray(new Transaction[0]);
+        var array = transactions.toArray(new Transaction[0]);
+        Arrays.sort(array, Comparator.comparing(Transaction::getBooked).reversed());
+        return array;
     }
 
     public boolean hasMarker() {

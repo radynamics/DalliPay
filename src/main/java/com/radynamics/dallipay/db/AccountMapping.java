@@ -3,7 +3,6 @@ package com.radynamics.dallipay.db;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Wallet;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.iso20022.Account;
 import org.apache.commons.lang3.StringUtils;
 
@@ -83,7 +82,7 @@ public class AccountMapping {
             return false;
         }
 
-        return WalletValidator.isValidFormat(LedgerFactory.create(wallet.getLedgerId()), wallet);
+        return LedgerFactory.create(wallet.getLedgerId()).createWalletValidator().isValidFormat(wallet);
     }
 
     @Override

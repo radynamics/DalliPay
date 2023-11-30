@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.signing;
 
 import com.radynamics.dallipay.cryptoledger.PaymentUtils;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.ui.ValidationResultDialog;
@@ -50,7 +49,7 @@ public class UserDialogPrivateKeyProvider implements PrivateKeyProvider {
             }
 
             var ledger = PaymentUtils.getLedger(w, payments).orElseThrow();
-            var vs = new WalletValidator(ledger).validateSecret(ledger.createWallet(w.getPublicKey(), userInput));
+            var vs = ledger.createWalletValidator().validateSecret(ledger.createWallet(w.getPublicKey(), userInput));
             if (vs != null) {
                 ValidationResultDialog.show(parentComponent, new ValidationResult[]{vs});
                 return false;

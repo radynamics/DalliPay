@@ -8,7 +8,7 @@ import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
-import com.radynamics.dallipay.cryptoledger.xrpl.Transaction;
+import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
