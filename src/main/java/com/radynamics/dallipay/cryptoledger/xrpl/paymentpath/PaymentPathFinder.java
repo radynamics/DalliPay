@@ -2,7 +2,6 @@ package com.radynamics.dallipay.cryptoledger.xrpl.paymentpath;
 
 import com.radynamics.dallipay.cryptoledger.LedgerNativeCcyPath;
 import com.radynamics.dallipay.cryptoledger.PaymentPath;
-import com.radynamics.dallipay.cryptoledger.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.generic.paymentpath.BothHolding;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -27,8 +26,9 @@ public class PaymentPathFinder implements com.radynamics.dallipay.cryptoledger.P
             return list.toArray(new PaymentPath[0]);
         }
 
-        var senderValid = WalletValidator.isValidFormat(p.getLedger(), p.getSenderWallet());
-        var receiverValid = WalletValidator.isValidFormat(p.getLedger(), p.getReceiverWallet());
+        var walletValidator = p.getLedger().createWalletValidator();
+        var senderValid = walletValidator.isValidFormat(p.getSenderWallet());
+        var receiverValid = walletValidator.isValidFormat(p.getReceiverWallet());
         if (!senderValid || !receiverValid) {
             return list.toArray(new PaymentPath[0]);
         }

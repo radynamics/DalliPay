@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
+import com.radynamics.dallipay.cryptoledger.generic.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
@@ -40,8 +41,6 @@ public interface Ledger {
 
     TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) throws Exception;
 
-    boolean exists(Wallet wallet);
-
     NetworkInfo getNetwork();
 
     void setNetwork(NetworkInfo network);
@@ -49,6 +48,8 @@ public interface Ledger {
     PaymentHistoryProvider getPaymentHistoryProvider();
 
     ExchangeRateProvider createHistoricExchangeRateSource();
+
+    WalletValidator createWalletValidator();
 
     com.radynamics.dallipay.iso20022.PaymentValidator createPaymentValidator();
 

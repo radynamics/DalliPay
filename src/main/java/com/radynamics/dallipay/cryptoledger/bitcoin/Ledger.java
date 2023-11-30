@@ -3,12 +3,11 @@ package com.radynamics.dallipay.cryptoledger.bitcoin;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
-import com.radynamics.dallipay.cryptoledger.generic.WalletAddressInfo;
-import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
-import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
-import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
+import com.radynamics.dallipay.cryptoledger.generic.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
@@ -107,11 +106,6 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public boolean exists(Wallet wallet) {
-        throw new NotImplementedException();
-    }
-
-    @Override
     public NetworkInfo getNetwork() {
         return network;
     }
@@ -142,6 +136,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     public ExchangeRateProvider createHistoricExchangeRateSource() {
         // TODO: implement
         return new DemoExchange();
+    }
+
+    @Override
+    public WalletValidator createWalletValidator() {
+        return new GenericWalletValidator(this);
     }
 
     @Override
