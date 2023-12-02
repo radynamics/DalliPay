@@ -2,6 +2,7 @@ package com.radynamics.dallipay.exchange;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.cryptoledger.generic.CryptoPriceOracle;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracle;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -25,6 +26,8 @@ public final class ExchangeRateProviderFactory {
                 return new ManualRateProvider();
             case XrplPriceOracle.ID:
                 return new XrplPriceOracle(network);
+            case CryptoPriceOracle.ID:
+                return new CryptoPriceOracle(new Currency(ledger.getNativeCcySymbol()));
             default:
                 throw new NotImplementedException(String.format("Exchange %s unknown.", id));
         }
