@@ -7,7 +7,6 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
@@ -174,22 +173,21 @@ public class MainForm extends JFrame {
     }
 
     private void refreshChangedSettings() {
-        transformInstruction.getHistoricExchangeRateSource().init();
 
         Wallet defaultSenderWallet = null;
         String selectedCcy = null;
         var ledger = transformInstruction.getLedger();
-        var xrplOracleConfig = new XrplPriceOracleConfig(ledger.getId());
+        var historicExchangeRateSource = transformInstruction.getHistoricExchangeRateSource();
         try (var repo = new ConfigRepo()) {
             defaultSenderWallet = repo.getDefaultSenderWallet(ledger);
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
-            xrplOracleConfig.load(repo);
+            historicExchangeRateSource.init(repo);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
 
         sendingPanel.refreshDefaultSenderWallet(ledger.getId(), defaultSenderWallet);
-        receivingPanel.refreshTargetCcys(selectedCcy, xrplOracleConfig);
+        receivingPanel.refreshTargetCcys(selectedCcy, historicExchangeRateSource);
     }
 
     private JMenuBar createMenuBar() {

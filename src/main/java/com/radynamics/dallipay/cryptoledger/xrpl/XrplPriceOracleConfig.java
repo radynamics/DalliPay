@@ -26,14 +26,6 @@ public class XrplPriceOracleConfig {
         this.ledgerId = ledgerId;
     }
 
-    public void load() {
-        try (var repo = new ConfigRepo()) {
-            load(repo);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
     public void load(ConfigRepo repo) throws Exception {
         issuedCurrencies.clear();
         var json = repo.getXrplPriceOracleConfig(ledgerId);

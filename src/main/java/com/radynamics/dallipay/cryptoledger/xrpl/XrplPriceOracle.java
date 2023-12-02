@@ -9,6 +9,7 @@ import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.LedgerBlock;
+import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.exchange.ExchangeRate;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -59,11 +60,15 @@ public class XrplPriceOracle implements ExchangeRateProvider {
     }
 
     @Override
-    public void init() {
+    public void init(ConfigRepo repo) {
         issuedCurrencies.clear();
 
         var config = new XrplPriceOracleConfig(ledger.getId());
-        config.load();
+        try {
+            config.load(repo);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
         for (var o : config.issuedCurrencies()) {
             var nonLedgerCcy = o.getPair().getFirstCode().equals(ledger.getNativeCcySymbol()) ? o.getPair().getSecondCode() : o.getPair().getFirstCode();
             issuedCurrencies.put(nonLedgerCcy, o);

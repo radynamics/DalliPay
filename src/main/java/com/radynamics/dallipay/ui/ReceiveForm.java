@@ -13,6 +13,7 @@ import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.CurrencyPair;
+import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.camt054.CamtExport;
@@ -263,23 +264,21 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void refreshTargetCcys() {
         String selectedCcy = null;
-        var xrplOracleConfig = new XrplPriceOracleConfig(transformInstruction.getLedger().getId());
+        var historicExchangeRateSource = transformInstruction.getHistoricExchangeRateSource();
         try (var repo = new ConfigRepo()) {
             selectedCcy = repo.getTargetCcy(transformInstruction.getTargetCcy());
-            xrplOracleConfig.load(repo);
+            historicExchangeRateSource.init(repo);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
 
-        refreshTargetCcys(selectedCcy, xrplOracleConfig);
+        refreshTargetCcys(selectedCcy, historicExchangeRateSource);
     }
 
-    public void refreshTargetCcys(String selectedCcy, XrplPriceOracleConfig xrplOracleConfig) {
-        var issuedCurrencies = xrplOracleConfig.issuedCurrencies();
-
+    public void refreshTargetCcys(String selectedCcy, ExchangeRateProvider historicExchangeRateSource) {
         var ccys = new ArrayList<StringPairEntry>();
-        for (var ic : issuedCurrencies) {
-            var ccy = ic.getPair().getSecondCode();
+        for (var pair : historicExchangeRateSource.getSupportedPairs()) {
+            var ccy = pair.getSecondCode();
             ccys.add(new StringPairEntry(ccy, ccy));
         }
 
