@@ -2,6 +2,7 @@ package com.radynamics.dallipay.exchange;
 
 import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.db.ConfigRepo;
 
 import java.time.ZonedDateTime;
 
@@ -14,7 +15,7 @@ public interface ExchangeRateProvider {
 
     boolean supportsRateAt();
 
-    void init();
+    void init(ConfigRepo repo);
 
     void load();
 
