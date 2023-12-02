@@ -220,6 +220,11 @@ public class ConfigRepo implements AutoCloseable {
         saveOrDeleteIfEmpty("apiKeyXumm", value);
     }
 
+    public Optional<HttpUrl> getCryptoPriceOracleUrl() throws Exception {
+        var value = single("cryptoPriceOracleUrl").orElse("");
+        return value.length() == 0 ? Optional.empty() : Optional.of(HttpUrl.get(value));
+    }
+
     private void saveOrDeleteIfEmpty(String key, String value) throws Exception {
         if (StringUtils.isEmpty(value)) {
             delete(key);
