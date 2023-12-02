@@ -26,8 +26,11 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
     private final Currency base;
     private HttpUrl url;
     private final CurrencyPair[] currencyPairs = new CurrencyPair[]{
-            new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"),
-            new CurrencyPair("BTC", "USD"),
+            new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"), new CurrencyPair("XRP", "JPY"), new CurrencyPair("XRP", "KRW"),
+            new CurrencyPair("XRP", "TRY"), new CurrencyPair("XRP", "GBP"), new CurrencyPair("XRP", "THB"), new CurrencyPair("XRP", "RUB"),
+            new CurrencyPair("XRP", "BRL"), new CurrencyPair("XRP", "AUD"), new CurrencyPair("XRP", "MXN"), new CurrencyPair("XRP", "ZAR"),
+            new CurrencyPair("XRP", "MYR"), new CurrencyPair("XRP", "IDR"), new CurrencyPair("XRP", "SGD"), new CurrencyPair("XRP", "CHF"),
+            new CurrencyPair("BTC", "USD"), new CurrencyPair("BTC", "EUR"),
     };
 
     public static final String ID = "cryptopriceoracle";
