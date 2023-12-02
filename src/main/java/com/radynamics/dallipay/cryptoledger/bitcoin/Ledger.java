@@ -134,8 +134,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public ExchangeRateProvider createHistoricExchangeRateSource() {
-        // TODO: implement
-        return new DemoExchange();
+        return ExchangeRateProviderFactory.create(CryptoPriceOracle.ID, this);
     }
 
     @Override
