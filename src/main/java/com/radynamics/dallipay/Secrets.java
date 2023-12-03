@@ -19,4 +19,17 @@ public final class Secrets {
             return fallback;
         }
     }
+
+    /**
+     * Return API-Key for used Crypto Price Oracle endpoint (https://github.com/radynamics/CryptoPriceOracle) or null if none is available.
+     */
+    public static String getCryptoPriceOracleApiKey(ConfigRepo repo) {
+        var fallback = SecretsProd.getCryptoPriceOracleApiKey();
+        try {
+            return repo.getApiKeyCryptoPriceOracle().orElse(fallback);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return fallback;
+        }
+    }
 }

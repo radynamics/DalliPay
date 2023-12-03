@@ -225,6 +225,14 @@ public class ConfigRepo implements AutoCloseable {
         return value.length() == 0 ? Optional.empty() : Optional.of(HttpUrl.get(value));
     }
 
+    public Optional<String> getApiKeyCryptoPriceOracle() throws Exception {
+        return single("apiKeyCryptoPriceOracle");
+    }
+
+    public void setApiKeyCryptoPriceOracle(String value) throws Exception {
+        saveOrDeleteIfEmpty("apiKeyCryptoPriceOracle", value);
+    }
+
     private void saveOrDeleteIfEmpty(String key, String value) throws Exception {
         if (StringUtils.isEmpty(value)) {
             delete(key);
