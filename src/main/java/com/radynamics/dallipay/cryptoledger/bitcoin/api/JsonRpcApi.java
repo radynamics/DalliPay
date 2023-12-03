@@ -48,6 +48,10 @@ public class JsonRpcApi {
                 if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
                     continue;
                 }
+                // Skip unconfirmed
+                if (t.blockTime() == null) {
+                    continue;
+                }
                 if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
                     continue;
                 }
