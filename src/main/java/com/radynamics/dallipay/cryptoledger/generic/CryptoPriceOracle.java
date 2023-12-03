@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.generic;
 
+import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
@@ -25,6 +26,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
     private final static Logger log = LogManager.getLogger(CryptoPriceOracle.class);
     private final Currency base;
     private HttpUrl url;
+    private String apiKey;
     private final CurrencyPair[] currencyPairs = new CurrencyPair[]{
             new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"), new CurrencyPair("XRP", "JPY"), new CurrencyPair("XRP", "KRW"),
             new CurrencyPair("XRP", "TRY"), new CurrencyPair("XRP", "GBP"), new CurrencyPair("XRP", "THB"), new CurrencyPair("XRP", "RUB"),
@@ -64,6 +66,11 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
         var fallback = HttpUrl.get("http://localhost:3000");
         try {
             url = repo.getCryptoPriceOracleUrl().orElse(fallback);
+            apiKey = Secrets.getCryptoPriceOracleApiKey(repo);
+            if (apiKey == null) {
+                throw new RuntimeException("No apiKey for CryptoPriceOracle available.");
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             url = fallback;
@@ -114,8 +121,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
         var conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(5000);
         conn.setRequestMethod("GET");
-        // TODO: implement configurable apiKey
-        //conn.setRequestProperty("x-api-key", "xxx");
+        conn.setRequestProperty("x-api-key", apiKey);
         conn.connect();
 
         var responseCode = conn.getResponseCode();
