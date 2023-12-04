@@ -31,6 +31,9 @@ public class Bitstamp implements ExchangeRateProvider {
             case Xrpl -> currencyPairs = new CurrencyPair[]{
                     new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"), new CurrencyPair("XRP", "GBP")
             };
+            case Bitcoin -> currencyPairs = new CurrencyPair[]{
+                    new CurrencyPair("BTC", "USD"), new CurrencyPair("BTC", "EUR"), new CurrencyPair("BTC", "GBP")
+            };
             default -> throw new IllegalStateException("Unexpected value: " + ledger.getId());
         }
     }
