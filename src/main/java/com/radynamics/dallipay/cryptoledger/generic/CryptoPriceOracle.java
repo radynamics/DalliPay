@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.generic;
 
+import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
@@ -95,7 +96,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
                 return null;
             }
 
-            var at = ZonedDateTime.parse(data.getString("at")).withZoneSameInstant(ZoneId.of("UTC"));
+            var at = DateTimeConvert.toUserTimeZone(ZonedDateTime.parse(data.getString("at")));
             return new ExchangeRate(pair, data.getDouble("rate"), at);
         } catch (IOException | ExchangeException e) {
             log.info(e.getMessage(), e);
