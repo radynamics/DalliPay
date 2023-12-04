@@ -20,6 +20,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.math.BigDecimal;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -222,7 +223,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         }
 
         // Round to most accurate value supported by ledger.
-        final int digits = 9;
+        final int digits = BigDecimal.valueOf(1d / SATOSHI_PER_BTC).scale() - 1;
         var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
         return Money.of(rounded.doubleValue(), amt.getCcy());
     }
