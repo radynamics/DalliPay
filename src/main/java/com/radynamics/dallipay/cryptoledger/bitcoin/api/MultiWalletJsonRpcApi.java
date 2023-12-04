@@ -91,7 +91,7 @@ public class MultiWalletJsonRpcApi {
         return list;
     }
 
-    private Optional<BitcoindRpcClient> client(Wallet wallet) {
+    public Optional<BitcoinJSONRPCClient> client(Wallet wallet) {
         for (var c : walletClients.values()) {
             for (var l : (List<String>) c.query("listlabels")) {
                 for (var w : getAddressesByLabel(c, l)) {

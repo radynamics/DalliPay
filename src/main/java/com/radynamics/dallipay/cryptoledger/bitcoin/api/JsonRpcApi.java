@@ -148,7 +148,7 @@ public class JsonRpcApi {
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
-        var signer = new RpcSubmitter(ledger, privateKeyProvider);
+        var signer = new RpcSubmitter(ledger, privateKeyProvider, openedWallets);
         signer.setVerifier(new OnchainVerifier(ledger));
         return signer;
     }

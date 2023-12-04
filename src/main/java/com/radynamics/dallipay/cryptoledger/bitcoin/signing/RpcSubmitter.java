@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.MultiWalletJsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ public class RpcSubmitter implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(RpcSubmitter.class);
     private final Ledger ledger;
     private final PrivateKeyProvider privateKeyProvider;
+    private final MultiWalletJsonRpcApi openedWallets;
     private OnchainVerifier verifier;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
@@ -33,9 +35,10 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     public final static String Id = "rpcSubmitter";
 
-    public RpcSubmitter(Ledger ledger, PrivateKeyProvider privateKeyProvider) {
+    public RpcSubmitter(Ledger ledger, PrivateKeyProvider privateKeyProvider, MultiWalletJsonRpcApi openedWallets) {
         this.ledger = ledger;
         this.privateKeyProvider = privateKeyProvider;
+        this.openedWallets = openedWallets;
 
         info = new TransactionSubmitterInfo();
         info.setTitle(res.getString("rpc.title"));
@@ -55,10 +58,10 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void submit(com.radynamics.dallipay.cryptoledger.Transaction[] transactions) {
-        var client = new BitcoinJSONRPCClient(ledger.getNetwork().getUrl().url());
         for (var trx : transactions) {
             var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
 
+            var client = openedWallets.client(t.getSenderWallet()).orElseThrow();
             // Necessary if wallet is encrypted.
             client.walletPassPhrase(privateKeyProvider.get(t.getSenderWallet().getPublicKey()), Duration.ofSeconds(5).toMillis());
 
