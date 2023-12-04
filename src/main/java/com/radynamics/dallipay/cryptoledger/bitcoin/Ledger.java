@@ -26,7 +26,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private NetworkInfo network;
     private JsonRpcApi api;
 
-    private final Long SATOSHI_PER_BTC = 100_000_000_000l;
+    private final Long SATOSHI_PER_BTC = 100_000_000l;
 
     @Override
     public LedgerId getId() {
