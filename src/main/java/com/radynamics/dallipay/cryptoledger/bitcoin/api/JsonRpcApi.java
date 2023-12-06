@@ -119,7 +119,7 @@ public class JsonRpcApi {
 
         var exactAmount = new ArrayList<Wallet>();
         for (var in : tx.vIn()) {
-            if (in.amount().compareTo(t.amount()) == 0) {
+            if (in.amount() != null && in.amount().compareTo(t.amount()) == 0) {
                 var a = getAddress(in);
                 if (a.isPresent()) {
                     exactAmount.add(a.orElseThrow());
