@@ -27,7 +27,9 @@ public interface Ledger {
 
     UnsignedLong toSmallestUnit(Money amount);
 
-    FeeSuggestion getFeeSuggestion();
+    FeeSuggestion getFeeSuggestion(Transaction t);
+
+    boolean equalTransactionFees();
 
     WalletInput createWalletInput(String text);
 

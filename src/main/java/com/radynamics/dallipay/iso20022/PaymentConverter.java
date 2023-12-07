@@ -23,9 +23,13 @@ public final class PaymentConverter {
     public static Transaction[] toTransactions(Payment[] payments) {
         var items = new Transaction[payments.length];
         for (var i = 0; i < payments.length; i++) {
-            items[i] = payments[i].getTransaction();
+            items[i] = toTransaction(payments[i]);
         }
         return items;
+    }
+
+    public static Transaction toTransaction(Payment payment) {
+        return payment.getTransaction();
     }
 
     private static Currency getTargetCurrency(Transaction t, Currency targetCcySuggested) {

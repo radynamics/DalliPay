@@ -303,6 +303,14 @@ public class Payment {
         cryptoTrx.setLedgerTransactionFee(value);
     }
 
+    public FeeSuggestion getFeeSuggestion() {
+        return cryptoTrx.getFeeSuggestion();
+    }
+
+    public void setFeeSuggestion(FeeSuggestion feeSuggestion) {
+        cryptoTrx.setFeeSuggestion(feeSuggestion);
+    }
+
     public String getDisplayText() {
         var amount = getAmount();
         if (amount != null) {

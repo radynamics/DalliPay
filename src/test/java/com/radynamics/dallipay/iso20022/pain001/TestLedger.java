@@ -69,8 +69,13 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public FeeSuggestion getFeeSuggestion() {
+    public FeeSuggestion getFeeSuggestion(Transaction t) {
         return new FeeSuggestion(convertToNativeCcyAmount(5), convertToNativeCcyAmount(10), convertToNativeCcyAmount(15));
+    }
+
+    @Override
+    public boolean equalTransactionFees() {
+        return true;
     }
 
     @Override

@@ -11,6 +11,8 @@ public final class LedgerFactory {
         switch (ledgerId) {
             case Xrpl:
                 return new com.radynamics.dallipay.cryptoledger.xrpl.Ledger();
+            case Xahau:
+                return new com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger();
             case Bitcoin:
                 return new com.radynamics.dallipay.cryptoledger.bitcoin.Ledger();
             default:

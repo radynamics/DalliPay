@@ -3,6 +3,7 @@ package com.radynamics.dallipay.browserwalletbridge.crossmark;
 import com.radynamics.dallipay.cryptoledger.FeeHelper;
 import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.xrpl.XrplUtils;
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -39,6 +40,8 @@ public class PayloadConverter implements com.radynamics.dallipay.browserwalletbr
         if (!StringUtils.isEmpty(memoData)) {
             json.put("Memos", toJsonMemo(memoData));
         }
+
+        XrplUtils.networkId(t.getLedger().getNetwork()).ifPresent(networkID -> json.put("NetworkID", networkID));
 
         return json;
     }

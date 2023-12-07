@@ -4,6 +4,9 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.MempoolSpace;
 import com.radynamics.dallipay.cryptoledger.xrpl.Bithomp;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrpScan;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplOrg;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.BithompXahau;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.XahScan;
+import com.radynamics.dallipay.cryptoledger.xrpl.xahau.XahauExplorer;
 import com.radynamics.dallipay.db.ConfigRepo;
 
 import java.util.Optional;
@@ -20,6 +23,16 @@ public class LookupProviderFactory {
                     return new XrplOrg(network);
                 } else if (lookupProviderId.equals(XrpScan.Id)) {
                     return new XrpScan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
+            }
+            case Xahau -> {
+                if (lookupProviderId.equals(BithompXahau.Id)) {
+                    return new BithompXahau(network);
+                } else if (lookupProviderId.equals(XahauExplorer.Id)) {
+                    return new XahauExplorer(network);
+                } else if (lookupProviderId.equals(XahScan.Id)) {
+                    return new XahScan(network);
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
@@ -44,6 +57,16 @@ public class LookupProviderFactory {
                 }
                 throw new IllegalStateException("Unexpected value: " + lookupProviderId);
             }
+            case Xahau -> {
+                if (lookupProviderId.equals(BithompXahau.Id)) {
+                    return new BithompXahau(network);
+                } else if (lookupProviderId.equals(XahauExplorer.Id)) {
+                    return new XahauExplorer(network);
+                } else if (lookupProviderId.equals(XahScan.Id)) {
+                    return new XahScan(network);
+                }
+                throw new IllegalStateException("Unexpected value: " + lookupProviderId);
+            }
             case Bitcoin -> {
                 return new MempoolSpace(network);
             }
@@ -55,6 +78,9 @@ public class LookupProviderFactory {
         switch (id) {
             case Xrpl -> {
                 return new String[]{Bithomp.Id, XrplOrg.Id, XrpScan.Id};
+            }
+            case Xahau -> {
+                return new String[]{BithompXahau.Id, XahauExplorer.Id, XahScan.Id};
             }
             case Bitcoin -> {
                 return new String[]{MempoolSpace.Id};
@@ -70,6 +96,12 @@ public class LookupProviderFactory {
             return XrplOrg.displayName;
         } else if (lookupProviderId.equals(XrpScan.Id)) {
             return XrpScan.displayName;
+        } else if (lookupProviderId.equals(BithompXahau.Id)) {
+            return BithompXahau.displayName;
+        } else if (lookupProviderId.equals(XahauExplorer.Id)) {
+            return XahauExplorer.displayName;
+        } else if (lookupProviderId.equals(XahScan.Id)) {
+            return XahScan.displayName;
         } else if (lookupProviderId.equals(MempoolSpace.Id)) {
             return MempoolSpace.displayName;
         }

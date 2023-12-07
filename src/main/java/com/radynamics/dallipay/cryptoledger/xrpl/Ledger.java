@@ -78,7 +78,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.getTransaction(transactionId);
     }
 
-    Money dropsToXrp(long drops) {
+    public Money dropsToXrp(long drops) {
         return Money.of(XrpCurrencyAmount.ofDrops(drops).toXrp().doubleValue(), new Currency(getNativeCcySymbol()));
     }
 
@@ -91,9 +91,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public FeeSuggestion getFeeSuggestion() {
+    public FeeSuggestion getFeeSuggestion(com.radynamics.dallipay.cryptoledger.Transaction t) {
         var fees = api.latestFee();
         return fees == null ? FeeSuggestion.None(getNativeCcySymbol()) : fees.createSuggestion();
+    }
+
+    @Override
+    public boolean equalTransactionFees() {
+        return true;
     }
 
     @Override
