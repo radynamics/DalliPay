@@ -4,7 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 public enum LedgerId {
     Xrpl(0, "xrpl"),
-    Xahau(1, "xahau");
+    Xahau(1, "xahau"),
     Bitcoin(2, "bitcoin");
 
     private final int numericId;
