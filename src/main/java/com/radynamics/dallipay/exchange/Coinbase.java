@@ -3,6 +3,7 @@ package com.radynamics.dallipay.exchange;
 import com.radynamics.dallipay.cryptoledger.Block;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.db.ConfigRepo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -51,7 +52,7 @@ public class Coinbase implements ExchangeRateProvider {
     }
 
     @Override
-    public void init() {
+    public void init(ConfigRepo repo) {
         // do nothing
     }
 
