@@ -167,6 +167,10 @@ public class JsonRpcApi {
         wallet.getBalances().set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
     }
 
+    public BigDecimal estimateSmartFee(int targetInBlocks) {
+        return openedWallets.estimateSmartFee(targetInBlocks).feeRate();
+    }
+
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
         var c = new BitcoinJSONRPCClient(networkInfo.getUrl().url());
         var info = c.getNetworkInfo();

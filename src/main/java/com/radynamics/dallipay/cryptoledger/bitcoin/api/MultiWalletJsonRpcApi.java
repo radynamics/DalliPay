@@ -159,4 +159,8 @@ public class MultiWalletJsonRpcApi {
 
         walletClients.put(walletName, walletClient);
     }
+
+    public BitcoindRpcClient.SmartFeeResult estimateSmartFee(int targetInBlocks) {
+        return genericClient.estimateSmartFee(targetInBlocks);
+    }
 }
