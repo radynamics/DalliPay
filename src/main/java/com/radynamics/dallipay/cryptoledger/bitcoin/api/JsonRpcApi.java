@@ -187,4 +187,8 @@ public class JsonRpcApi {
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
         openedWallets.importWallet(wallet, historicTransactionSince);
     }
+
+    public boolean isValidWalletPassPhrase(Wallet wallet) {
+        return openedWallets.isValidWalletPassPhrase(wallet);
+    }
 }

@@ -184,7 +184,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean isSecretValid(Wallet wallet) {
-        throw new NotImplementedException();
+        return api.isValidWalletPassPhrase(wallet);
     }
 
     @Override

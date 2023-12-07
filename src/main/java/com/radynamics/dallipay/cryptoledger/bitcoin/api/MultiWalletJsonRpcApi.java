@@ -7,12 +7,14 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -162,5 +164,15 @@ public class MultiWalletJsonRpcApi {
 
     public BitcoindRpcClient.SmartFeeResult estimateSmartFee(int targetInBlocks) {
         return genericClient.estimateSmartFee(targetInBlocks);
+    }
+
+    public boolean isValidWalletPassPhrase(Wallet wallet) {
+        try {
+            client(wallet).orElseThrow().walletPassPhrase(wallet.getSecret(), Duration.ofSeconds(1).toMillis());
+            return true;
+        } catch (BitcoinRPCException e) {
+            log.info(e.getMessage(), e);
+            return false;
+        }
     }
 }
