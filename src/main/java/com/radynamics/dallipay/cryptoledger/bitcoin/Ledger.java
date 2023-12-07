@@ -68,8 +68,13 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public FeeSuggestion getFeeSuggestion() {
+    public FeeSuggestion getFeeSuggestion(Transaction t) {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public boolean equalTransactionFees() {
+        return false;
     }
 
     @Override
