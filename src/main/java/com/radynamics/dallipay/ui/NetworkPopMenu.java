@@ -142,7 +142,7 @@ public class NetworkPopMenu {
         popupMenu.remove(item);
 
         if (item.isSelected()) {
-            setSelectedNetwork(selectableEntries.get(0).getRight());
+            setSelectedNetwork(selectableEntries.isEmpty() ? null : selectableEntries.get(0).getRight());
         }
 
         // Force correct repaint
@@ -194,6 +194,10 @@ public class NetworkPopMenu {
     }
 
     public void setSelectedNetwork(NetworkInfo network) {
+        if (network == null) {
+            onNetworkChanged(null);
+            return;
+        }
         for (var item : selectableEntries) {
             if (item.getValue().getUrl().equals(network.getUrl())) {
                 item.getKey().setSelected(true);
