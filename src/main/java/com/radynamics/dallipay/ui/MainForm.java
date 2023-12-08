@@ -299,7 +299,7 @@ public class MainForm extends JFrame {
 
     private void saveLastUsedNetwork(NetworkInfo selected) {
         try (var repo = new ConfigRepo()) {
-            repo.setLastUsedRpcUrl(transformInstruction.getLedger(), selected.getUrl());
+            repo.setLastUsedRpcUrl(transformInstruction.getLedger(), selected == null ? null : selected.getUrl());
             repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
@@ -360,6 +360,7 @@ public class MainForm extends JFrame {
         networkPopupMenu.addChangedListener(() -> {
             var selected = networkPopupMenu.getSelectedNetwork();
             if (selected == null) {
+                saveLastUsedNetwork(null);
                 return;
             }
             transformInstruction.setNetwork(selected);

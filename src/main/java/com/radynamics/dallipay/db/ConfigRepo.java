@@ -111,7 +111,12 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public void setLastUsedRpcUrl(Ledger ledger, HttpUrl value) throws Exception {
-        saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
+        var key = createLedgerSpecificKey(ledger, "lastUsedRpcUrl");
+        if(value == null){
+            delete(key);
+        } else {
+            saveOrUpdate(key, value.toString());
+        }
     }
 
     public NetworkInfo[] getCustomSidechains(Ledger ledger) throws Exception {
