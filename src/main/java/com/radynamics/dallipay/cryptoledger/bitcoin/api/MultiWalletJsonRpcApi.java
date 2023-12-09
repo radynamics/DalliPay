@@ -135,9 +135,14 @@ public class MultiWalletJsonRpcApi {
         return genericClient.decodeScript(hex);
     }
 
-    public BitcoindRpcClient.AddressValidationResult validateAddress(String address) {
+    public boolean validateAddress(String address) {
         init();
-        return genericClient.validateAddress(address);
+        try {
+            return genericClient.validateAddress(address).isValid();
+        } catch (BitcoinRPCException e) {
+            // Could fail due "Parse error".
+            return false;
+        }
     }
 
     public Optional<BigDecimal> getBalance(Wallet wallet) {

@@ -154,8 +154,7 @@ public class JsonRpcApi {
     }
 
     public boolean validateAddress(String publicKey) {
-        var result = openedWallets.validateAddress(publicKey);
-        return result.isValid();
+        return openedWallets.validateAddress(publicKey);
     }
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
