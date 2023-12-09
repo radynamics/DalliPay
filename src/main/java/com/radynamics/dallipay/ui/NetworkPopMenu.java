@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.EndpointInfo;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
+import com.radynamics.dallipay.util.RequestFocusListener;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +14,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -44,6 +47,20 @@ public class NetworkPopMenu {
             pnl.setBackground(popupMenu.getBackground());
             var txt = new JSidechainTextField();
             pnl.add(txt);
+            popupMenu.addPopupMenuListener(new PopupMenuListener() {
+                @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                    txt.addAncestorListener(new RequestFocusListener());
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                }
+            });
             txt.setPreferredSize(new Dimension(180, 21));
             txt.addChangedListener(new SidechainChangedListener() {
                 @Override
