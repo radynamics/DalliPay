@@ -27,6 +27,7 @@ public class NetworkPopMenu {
     private final Ledger ledger;
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final ArrayList<Pair<JCheckBoxMenuItem, NetworkInfo>> selectableEntries = new ArrayList<>();
+    private final JCheckBoxMenuItem noConnectionsEntry;
 
     private final ArrayList<ChangedListener> changedListener = new ArrayList<>();
 
@@ -35,10 +36,16 @@ public class NetworkPopMenu {
     public NetworkPopMenu(Ledger ledger, NetworkInfo[] networks) {
         this.ledger = ledger;
 
-        var index = 0;
+        noConnectionsEntry = new JCheckBoxMenuItem(res.getString("noConnections"));
+        noConnectionsEntry.setEnabled(false);
+        popupMenu.add(noConnectionsEntry, 0);
+
+        var index = 1;
         for (var network : networks) {
             addEntry(network, network.getShortText(), loadAsync(network), index++);
         }
+
+        refreshNoConnectionsEntryVisibility();
 
         {
             var pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -87,6 +94,10 @@ public class NetworkPopMenu {
                 }
             });
         }
+    }
+
+    private void refreshNoConnectionsEntryVisibility() {
+        noConnectionsEntry.setVisible(selectableEntries.isEmpty());
     }
 
     private void saveCustoms(ArrayList<NetworkInfo> entries) {
@@ -146,6 +157,7 @@ public class NetworkPopMenu {
         popupMenu.add(item, index);
         selectableEntries.add(new ImmutablePair<>(item, networkInfo));
         item.addActionListener((SplitButtonClickedActionListener) e -> onNetworkChanged(item));
+        refreshNoConnectionsEntryVisibility();
 
         return item;
     }
@@ -161,6 +173,8 @@ public class NetworkPopMenu {
         if (item.isSelected()) {
             setSelectedNetwork(selectableEntries.get(0).getRight());
         }
+
+        refreshNoConnectionsEntryVisibility();
 
         // Force correct repaint
         popupMenu.setVisible(false);
