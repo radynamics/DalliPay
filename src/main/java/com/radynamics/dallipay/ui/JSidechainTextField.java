@@ -1,12 +1,15 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -18,8 +21,26 @@ public class JSidechainTextField extends JTextField {
     public JSidechainTextField() {
         putClientProperty("JTextField.placeholderText", res.getString("addCustomSidechain"));
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
 
         registerKeyboardAction(e -> onAccept(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
+
+    private JToolBar createToolbar() {
+        var toolbar = new JToolBar();
+        {
+            var cmd = new JToggleButton(new FlatSVGIcon("svg/arrowRightCircle.svg", 16, 16));
+            toolbar.add(cmd);
+            Utils.setRolloverIcon(cmd);
+            cmd.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    onAccept();
+                }
+            });
+        }
+
+        return toolbar;
     }
 
     private void onAccept() {
