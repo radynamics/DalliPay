@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import okhttp3.HttpUrl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,7 +12,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
@@ -199,6 +203,16 @@ public final class Utils {
         if (!frame.isActive()) {
             frame.setState(JFrame.ICONIFIED);
             frame.setState(JFrame.NORMAL);
+        }
+    }
+
+    public static HttpUrl hideCredentials(HttpUrl httpUrl) {
+        try {
+            var url = httpUrl.url();
+            var userInfo = StringUtils.isEmpty(url.getUserInfo()) ? url.getUserInfo() : "%s**:***".formatted(url.getUserInfo().charAt(0));
+            return HttpUrl.get(new URI(url.getProtocol(), userInfo, url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef()).toURL());
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }
