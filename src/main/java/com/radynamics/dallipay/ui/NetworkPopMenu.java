@@ -143,6 +143,7 @@ public class NetworkPopMenu {
         futureInfo.thenAccept(endpointInfo -> item.setToolTipText(createToolTipText(networkInfo, endpointInfo, null)))
                 .exceptionally((e) -> {
                     log.error(e.getMessage(), e);
+                    item.setEnabled(false);
                     item.setToolTipText(createToolTipText(networkInfo, null, e));
                     return null;
                 });
