@@ -6,6 +6,7 @@ import com.radynamics.dallipay.cryptoledger.EndpointInfo;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
+import com.radynamics.dallipay.util.RequestFocusListener;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +14,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -24,6 +27,7 @@ public class NetworkPopMenu {
     private final Ledger ledger;
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final ArrayList<Pair<JCheckBoxMenuItem, NetworkInfo>> selectableEntries = new ArrayList<>();
+    private final JCheckBoxMenuItem noConnectionsEntry;
 
     private final ArrayList<ChangedListener> changedListener = new ArrayList<>();
 
@@ -32,10 +36,16 @@ public class NetworkPopMenu {
     public NetworkPopMenu(Ledger ledger, NetworkInfo[] networks) {
         this.ledger = ledger;
 
-        var index = 0;
+        noConnectionsEntry = new JCheckBoxMenuItem(res.getString("noConnections"));
+        noConnectionsEntry.setEnabled(false);
+        popupMenu.add(noConnectionsEntry, 0);
+
+        var index = 1;
         for (var network : networks) {
             addEntry(network, network.getShortText(), loadAsync(network), index++);
         }
+
+        refreshNoConnectionsEntryVisibility();
 
         {
             var pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -44,6 +54,20 @@ public class NetworkPopMenu {
             pnl.setBackground(popupMenu.getBackground());
             var txt = new JSidechainTextField();
             pnl.add(txt);
+            popupMenu.addPopupMenuListener(new PopupMenuListener() {
+                @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                    txt.addAncestorListener(new RequestFocusListener());
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                }
+            });
             txt.setPreferredSize(new Dimension(180, 21));
             txt.addChangedListener(new SidechainChangedListener() {
                 @Override
@@ -70,6 +94,10 @@ public class NetworkPopMenu {
                 }
             });
         }
+    }
+
+    private void refreshNoConnectionsEntryVisibility() {
+        noConnectionsEntry.setVisible(selectableEntries.isEmpty());
     }
 
     private void saveCustoms(ArrayList<NetworkInfo> entries) {
@@ -129,6 +157,7 @@ public class NetworkPopMenu {
         popupMenu.add(item, index);
         selectableEntries.add(new ImmutablePair<>(item, networkInfo));
         item.addActionListener((SplitButtonClickedActionListener) e -> onNetworkChanged(item));
+        refreshNoConnectionsEntryVisibility();
 
         return item;
     }
@@ -144,6 +173,8 @@ public class NetworkPopMenu {
         if (item.isSelected()) {
             setSelectedNetwork(selectableEntries.isEmpty() ? null : selectableEntries.get(0).getRight());
         }
+
+        refreshNoConnectionsEntryVisibility();
 
         // Force correct repaint
         popupMenu.setVisible(false);

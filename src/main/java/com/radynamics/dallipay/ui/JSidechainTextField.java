@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -19,7 +18,7 @@ public class JSidechainTextField extends JTextField {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public JSidechainTextField() {
-        putClientProperty("JTextField.placeholderText", res.getString("addCustomSidechain"));
+        putClientProperty("JTextField.placeholderText", res.getString("addConnection"));
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
 
@@ -46,10 +45,6 @@ public class JSidechainTextField extends JTextField {
     private void onAccept() {
         var value = getText();
         setText("");
-
-        if (StringUtils.isEmpty(value)) {
-            return;
-        }
 
         var networkInfo = createNetworkInfo(value);
         if (networkInfo == null) {
