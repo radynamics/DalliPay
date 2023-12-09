@@ -19,7 +19,7 @@ public class JSidechainTextField extends JTextField {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public JSidechainTextField() {
-        putClientProperty("JTextField.placeholderText", res.getString("addCustomSidechain"));
+        putClientProperty("JTextField.placeholderText", res.getString("addConnection"));
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
 
