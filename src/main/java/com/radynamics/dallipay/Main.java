@@ -2,6 +2,7 @@ package com.radynamics.dallipay;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.db.ConfigRepo;
@@ -77,6 +78,11 @@ public class Main {
                 var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
 
                 var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
+                if (ledger.getNetwork() != null && !networkAvailable(ledger)) {
+                    log.warn("No connection could be established to %s.".formatted(ledger.getNetwork().getUrl()));
+                    transformInstruction.setNetwork(null);
+                }
+
                 var frm = new MainForm();
                 frm.setTransformInstruction(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -105,6 +111,18 @@ public class Main {
             });
         } catch (Exception e) {
             log.error(String.format("Error during %s", action), e);
+        }
+    }
+
+    private static boolean networkAvailable(Ledger ledger) {
+        if (ledger.getNetwork() == null) {
+            return false;
+        }
+        try {
+            ledger.getEndpointInfo(ledger.getNetwork());
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
