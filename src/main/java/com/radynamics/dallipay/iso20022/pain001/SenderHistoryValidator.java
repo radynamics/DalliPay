@@ -27,7 +27,7 @@ public class SenderHistoryValidator implements WalletHistoryValidator {
     }
 
     private void initCache(NetworkInfo network) {
-        cache = new Cache<>(network.getUrl().toString(), ChronoUnit.FOREVER.getDuration());
+        cache = new Cache<>(network == null ? "unknown" : network.getUrl().toString(), ChronoUnit.FOREVER.getDuration());
     }
 
     public ValidationResult[] validate(Payment[] payments) {

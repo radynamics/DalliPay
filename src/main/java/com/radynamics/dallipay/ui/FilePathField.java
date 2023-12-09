@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 
 public class FilePathField extends JPanel {
     private JTextField txt;
+    private JToggleButton cmdOpen;
 
     private ArrayList<ChangedListener> listener = new ArrayList<>();
     private boolean validateExists;
@@ -85,14 +86,16 @@ public class FilePathField extends JPanel {
     private Object createToolbar() {
         var toolbar = new JToolBar();
         {
-            var cmd = new JToggleButton(new FlatSVGIcon("svg/open.svg", 16, 16));
-            toolbar.add(cmd);
-            Utils.setRolloverIcon(cmd);
-            cmd.setToolTipText(res.getString("browse"));
-            cmd.addMouseListener(new MouseAdapter() {
+            cmdOpen = new JToggleButton(new FlatSVGIcon("svg/open.svg", 16, 16));
+            toolbar.add(cmdOpen);
+            Utils.setRolloverIcon(cmdOpen);
+            cmdOpen.setToolTipText(res.getString("browse"));
+            cmdOpen.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    showFileChooser();
+                    if (cmdOpen.isEnabled()) {
+                        showFileChooser();
+                    }
                 }
             });
         }
@@ -147,5 +150,11 @@ public class FilePathField extends JPanel {
 
     public void setCurrentDirectory(File currentDirectory) {
         this.currentDirectory = currentDirectory;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        txt.setEditable(enabled);
+        cmdOpen.setEnabled(enabled);
     }
 }

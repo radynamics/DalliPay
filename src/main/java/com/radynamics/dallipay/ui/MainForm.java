@@ -283,9 +283,18 @@ public class MainForm extends JFrame {
     private void refreshNetworkButton() {
         var icon = new FlatSVGIcon("svg/network.svg", 16, 16);
         var networkInfo = transformInstruction.getNetwork();
-        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
+        if (networkInfo == null) {
+            icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Consts.ColorWarning));
+            cmdNetwork.setToolTipText(res.getString("currentlyDisconnected"));
+        } else {
+            icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
+            cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(networkInfo.getUrl().uri())));
+        }
         cmdNetwork.setIcon(icon);
-        cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(networkInfo.getUrl().uri())));
+
+        var enabled = networkInfo != null;
+        sendingPanel.setEnabled(enabled);
+        receivingPanel.setEnabled(enabled);
     }
 
     private void saveLastUsedLedger(LedgerId ledgerId) {
@@ -356,13 +365,11 @@ public class MainForm extends JFrame {
         networkInfos.addAll(List.of(getCustomSidechains()));
 
         networkPopupMenu = new NetworkPopMenu(transformInstruction.getLedger(), networkInfos.toArray(NetworkInfo[]::new));
-        networkPopupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        if (transformInstruction.getNetwork() != null) {
+            networkPopupMenu.setSelectedNetwork(transformInstruction.getNetwork());
+        }
         networkPopupMenu.addChangedListener(() -> {
             var selected = networkPopupMenu.getSelectedNetwork();
-            if (selected == null) {
-                saveLastUsedNetwork(null);
-                return;
-            }
             transformInstruction.setNetwork(selected);
             refreshNetworkButton();
             sendingPanel.setNetwork(selected);

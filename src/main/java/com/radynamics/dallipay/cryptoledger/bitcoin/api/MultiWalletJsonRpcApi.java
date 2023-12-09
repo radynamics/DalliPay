@@ -23,12 +23,18 @@ public class MultiWalletJsonRpcApi {
     final static Logger log = LogManager.getLogger(MultiWalletJsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
-    private final BitcoinJSONRPCClient genericClient;
+    private BitcoinJSONRPCClient genericClient;
     private final HashMap<String, BitcoinJSONRPCClient> walletClients = new HashMap<>();
 
     public MultiWalletJsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
+    }
+
+    private void init() {
+        if (genericClient != null) {
+            return;
+        }
 
         genericClient = new BitcoinJSONRPCClient(network.getUrl().url());
         for (var w : listNames()) {
@@ -49,6 +55,7 @@ public class MultiWalletJsonRpcApi {
     }
 
     public List<BitcoindRpcClient.Transaction> listTransactions(String account, int count) {
+        init();
         if (walletClients.containsKey(account)) {
             return walletClients.get(account).listTransactions("*", count);
         } else {
@@ -57,6 +64,7 @@ public class MultiWalletJsonRpcApi {
     }
 
     public List<BitcoindRpcClient.Transaction> listReceivedByAddress(Wallet wallet) {
+        init();
         var list = new ArrayList<BitcoindRpcClient.Transaction>();
         for (var c : walletClients.values()) {
             for (var txId : listReceivedByAddress(c, wallet)) {
@@ -83,6 +91,7 @@ public class MultiWalletJsonRpcApi {
     }
 
     public ArrayList<Wallet> listWallets() {
+        init();
         var list = new ArrayList<Wallet>();
         for (var c : walletClients.values()) {
             var labels = (List<String>) c.query("listlabels");
@@ -94,6 +103,7 @@ public class MultiWalletJsonRpcApi {
     }
 
     public Optional<BitcoinJSONRPCClient> client(Wallet wallet) {
+        init();
         for (var c : walletClients.values()) {
             for (var l : (List<String>) c.query("listlabels")) {
                 for (var w : getAddressesByLabel(c, l)) {
@@ -116,27 +126,33 @@ public class MultiWalletJsonRpcApi {
     }
 
     public BitcoindRpcClient.RawTransaction getRawTransaction(String txId) {
+        init();
         return genericClient.getRawTransaction(txId);
     }
 
     public BitcoindRpcClient.DecodedScript decodeScript(String hex) {
+        init();
         return genericClient.decodeScript(hex);
     }
 
     public BitcoindRpcClient.AddressValidationResult validateAddress(String address) {
+        init();
         return genericClient.validateAddress(address);
     }
 
     public Optional<BigDecimal> getBalance(Wallet wallet) {
+        init();
         var c = client(wallet);
         return c.isPresent() ? Optional.of(c.orElseThrow().getBalance()) : Optional.empty();
     }
 
     public List<String> walletNames() {
+        init();
         return new ArrayList<>(walletClients.keySet());
     }
 
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
+        init();
         var walletName = wallet.getPublicKey();
         final boolean disable_private_keys = true;
         var resultCreate = (LinkedHashMap<String, ?>) genericClient.query("createwallet", walletName, disable_private_keys);
@@ -163,11 +179,13 @@ public class MultiWalletJsonRpcApi {
     }
 
     public BitcoindRpcClient.SmartFeeResult estimateSmartFee(int targetInBlocks) {
+        init();
         return genericClient.estimateSmartFee(targetInBlocks);
     }
 
     public boolean isValidWalletPassPhrase(Wallet wallet) {
         try {
+            init();
             client(wallet).orElseThrow().walletPassPhrase(wallet.getSecret(), Duration.ofSeconds(1).toMillis());
             return true;
         } catch (BitcoinRPCException e) {

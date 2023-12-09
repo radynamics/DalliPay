@@ -139,7 +139,9 @@ public class WalletField extends JPanel {
             cmd.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    lookup();
+                    if (!txt.isEnabled()) {
+                        lookup();
+                    }
                 }
             });
         }
@@ -151,7 +153,9 @@ public class WalletField extends JPanel {
             detailButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    showMore();
+                    if (!txt.isEnabled()) {
+                        showMore();
+                    }
                 }
             });
         }

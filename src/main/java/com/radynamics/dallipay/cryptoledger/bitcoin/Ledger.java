@@ -83,6 +83,9 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public WalletInput createWalletInput(String text) {
+        if (!networkAvailable()) {
+            return new WalletInput(this, text);
+        }
         return new WalletNameInput(this, text, api.walletNames());
     }
 
@@ -179,7 +182,15 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public boolean isValidPublicKey(String publicKey) {
+        if (!networkAvailable()) {
+            return true;
+        }
         return api.validateAddress(publicKey);
+    }
+
+    private boolean networkAvailable() {
+        // Null for fresh Bitcoin usage if no node connection has been configured yet.
+        return getNetwork() != null;
     }
 
     @Override
@@ -189,10 +200,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
-        // TODO: implement
-        var networks = new NetworkInfo[1];
-        networks[0] = NetworkInfo.createTestnet(HttpUrl.get("http://user:pass@localhost:8332"), "Testnet");
-        return networks;
+        return new NetworkInfo[0];
     }
 
     @Override

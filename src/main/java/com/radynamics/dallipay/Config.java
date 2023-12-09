@@ -109,7 +109,7 @@ public class Config {
                 return n;
             }
         }
-        return networkInfos.get(0);
+        return networkInfos.stream().findFirst().orElse(null);
     }
 
     public String getLoadedFilePath() {

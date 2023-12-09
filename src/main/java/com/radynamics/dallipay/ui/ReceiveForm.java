@@ -103,7 +103,11 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(500, 45));
 
-        pnlMain.registerKeyboardAction(e -> load(), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        pnlMain.registerKeyboardAction(e -> {
+            if (isEnabled()) {
+                load();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         {
             final int paddingWest = 120;
@@ -193,7 +197,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             table = new PaymentTable(Actor.Receiver);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
-                enableInputControls(progress.isFinished());
+                enableInputControls(isEnabled() && progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
             table.setEmptyBackgroundText(res.getString("noPayments"));
@@ -458,7 +462,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                     }
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     if (e != null) {
-                        enableInputControls(true);
+                        enableInputControls(isEnabled());
                         ExceptionDialog.show(this, e);
                     }
                 });
@@ -475,6 +479,13 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         cmdRefresh.setEnabled(enabled);
         table.setEditable(enabled);
         cmdExport.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        enableInputControls(enabled);
+        txtInput.setEditable(enabled);
     }
 
     private void loadTable(Payment[] payments) {

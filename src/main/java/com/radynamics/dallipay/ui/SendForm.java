@@ -78,7 +78,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         pnlMain.setDropTarget(new DropTarget() {
             public synchronized void drop(DropTargetDropEvent evt) {
                 try {
-                    if (lblLoading.isLoading()) {
+                    if (!isEnabled() || lblLoading.isLoading()) {
                         return;
                     }
                     evt.acceptDrop(DnDConstants.ACTION_COPY);
@@ -226,7 +226,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             table = new PaymentTable(Actor.Sender);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
-                enableInputControls(progress.isFinished());
+                enableInputControls(isEnabled() && progress.isFinished());
             });
             table.addPaymentListener(p -> remove(p));
             table.addMappingChangedListener(this);
@@ -703,6 +703,12 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         cmdAdd.setEnabled(enabled);
         cmdExport.setEnabled(enabled);
         cmdSendPayments.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        enableInputControls(enabled);
     }
 
     private void loadTable(ArrayList<Payment> payments) {
