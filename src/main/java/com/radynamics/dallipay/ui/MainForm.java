@@ -138,6 +138,11 @@ public class MainForm extends JFrame {
         Utils.bringToFront(this);
         tabbedPane.setSelectedComponent(sendingPanel);
 
+        if (transformInstruction.getNetwork() == null) {
+            JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         PaymentRequestUri paymentRequestUri;
         try {
             paymentRequestUri = PaymentRequestUri.create(transformInstruction.getLedger(), requestUrl);
@@ -271,7 +276,8 @@ public class MainForm extends JFrame {
         if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
             return;
         }
-        setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), transformInstruction.getNetwork().getId()));
+        var networkId = transformInstruction.getNetwork() == null ? null : transformInstruction.getNetwork().getId();
+        setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), networkId));
         try {
             refreshLedgerButton(ledger);
         } catch (Exception e) {
