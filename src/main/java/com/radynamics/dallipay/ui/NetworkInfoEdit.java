@@ -26,13 +26,11 @@ public class NetworkInfoEdit {
 
         var pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
-        pnl.setPreferredSize(new Dimension(350, 70));
-        pnl.add(new JLabel(res.getString("displayName")), createGridConstraints(0.3, 1, 0, 0));
-        pnl.add(txtName, createGridConstraints(0.7, 1, 1, 0));
-        pnl.add(new JLabel(res.getString("rpcUrl")), createGridConstraints(0.3, 1, 0, 1));
-        pnl.add(txtRpcUrl, createGridConstraints(0.7, 1, 1, 1));
-        pnl.add(new JLabel(res.getString("networkId")), createGridConstraints(0.3, 1, 0, 2));
-        pnl.add(txtNetworkId, createGridConstraints(0.7, 1, 1, 2));
+        var row = 0;
+        appendRow(pnl, res.getString("displayName"), txtName, row++);
+        appendRow(pnl, res.getString("rpcUrl"), txtRpcUrl, row++);
+        appendRow(pnl, res.getString("networkId"), txtNetworkId, row++);
+        pnl.setPreferredSize(new Dimension(350, 23 * row));
 
         int result = JOptionPane.showConfirmDialog(null, pnl, res.getString("descText"), JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
@@ -57,6 +55,11 @@ public class NetworkInfoEdit {
         var info = NetworkInfo.create(httpUrl, displayText);
         info.setNetworkId(toIntegerOrNull(networkIdText));
         return info;
+    }
+
+    private static void appendRow(JPanel pnl, String labelText, JComponent input, int row) {
+        pnl.add(new JLabel(labelText), createGridConstraints(0.3, 1, 0, row));
+        pnl.add(input, createGridConstraints(0.7, 1, 1, row));
     }
 
     private static Integer toIntegerOrNull(String value) {
