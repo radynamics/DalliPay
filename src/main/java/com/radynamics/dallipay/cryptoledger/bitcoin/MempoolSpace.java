@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.net.URI;
+import java.util.Objects;
 
 public class MempoolSpace implements WalletLookupProvider, TransactionLookupProvider {
     final static Logger log = LogManager.getLogger(MempoolSpace.class);
@@ -15,9 +16,9 @@ public class MempoolSpace implements WalletLookupProvider, TransactionLookupProv
     public static final String displayName = "mempool.space";
 
     public MempoolSpace(NetworkInfo network) throws LookupProviderException {
-        if (network.isLivenet()) {
+        if (network.getNetworkId() == null || Objects.equals(network.getNetworkId(), Ledger.NETWORKID_MAINNET)) {
             this.baseUrl = "https://mempool.space";
-        } else if (network.isTestnet()) {
+        } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://mempool.space/testnet";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
