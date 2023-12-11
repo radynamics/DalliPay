@@ -28,6 +28,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private JsonRpcApi api;
 
     private final Long SATOSHI_PER_BTC = 100_000_000l;
+    public static final Integer NETWORKID_MAINNET = 0;
+    public static final Integer NETWORKID_TESTNET = 1;
 
     @Override
     public LedgerId getId() {
@@ -268,6 +270,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public boolean existsSellOffer(Money minimum) {
         return false;
+    }
+
+    @Override
+    public NetworkId[] networkIds() {
+        return new NetworkId[]{
+                new NetworkId(NETWORKID_MAINNET.toString(), "Mainnet"),
+                new NetworkId(NETWORKID_TESTNET.toString(), "Testnet"),
+        };
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
