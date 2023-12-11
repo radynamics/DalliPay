@@ -21,7 +21,7 @@ public class MempoolSpace implements WalletLookupProvider, TransactionLookupProv
         } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://mempool.space/testnet";
         } else {
-            throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
+            throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getNetworkId()));
         }
     }
 
