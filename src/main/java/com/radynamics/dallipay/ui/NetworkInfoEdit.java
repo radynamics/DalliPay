@@ -1,21 +1,26 @@
 package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.NetworkId;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.util.RequestFocusListener;
 import okhttp3.HttpUrl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.util.ResourceBundle;
 
 public class NetworkInfoEdit {
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
+    private static final NetworkId custom = new NetworkId("custom", res.getString("custom"));
 
-    public static NetworkInfo show(Component parent, HttpUrl url, String displayName) {
+    public static NetworkInfo show(Component parent, Ledger ledger, HttpUrl url, String displayName) {
         var txtName = new JTextField();
         var txtRpcUrl = new JTextField();
         var txtNetworkId = new JTextField();
+        var cboNetwork = createNetworkCombo(ledger, txtNetworkId);
 
         txtName.setText(displayName);
         txtName.addAncestorListener(new RequestFocusListener());
@@ -29,6 +34,7 @@ public class NetworkInfoEdit {
         var row = 0;
         appendRow(pnl, res.getString("displayName"), txtName, row++);
         appendRow(pnl, res.getString("rpcUrl"), txtRpcUrl, row++);
+        appendRow(pnl, res.getString("network"), cboNetwork, row++);
         appendRow(pnl, res.getString("networkId"), txtNetworkId, row++);
         pnl.setPreferredSize(new Dimension(350, 23 * row));
 
@@ -39,7 +45,8 @@ public class NetworkInfoEdit {
 
         var displayText = txtName.getText().trim();
         var rpcUrlText = txtRpcUrl.getText().trim();
-        var networkIdText = txtNetworkId.getText().trim();
+        var selectedNetwork = (NetworkId) cboNetwork.getSelectedItem();
+        var networkIdText = custom.getKey().equals(selectedNetwork.getKey()) ? txtNetworkId.getText().trim() : selectedNetwork.getKey();
         if (displayText.length() == 0 || rpcUrlText.length() == 0) {
             return null;
         }
@@ -55,6 +62,28 @@ public class NetworkInfoEdit {
         var info = NetworkInfo.create(httpUrl, displayText);
         info.setNetworkId(toIntegerOrNull(networkIdText));
         return info;
+    }
+
+    private static JComboBox<NetworkId> createNetworkCombo(Ledger ledger, JTextField txtNetworkId) {
+        var cbo = new JComboBox<NetworkId>();
+        cbo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                return super.getListCellRendererComponent(list, ((NetworkId) value).getDisplayText(), index, isSelected, cellHasFocus);
+            }
+        });
+        cbo.addItemListener(e -> {
+            var selected = (NetworkId) e.getItem();
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                txtNetworkId.setEnabled(custom.getKey().equals(selected.getKey()));
+            }
+        });
+        for (var item : ledger.networkIds()) {
+            cbo.addItem(item);
+        }
+        cbo.addItem(custom);
+        cbo.setSelectedIndex(0);
+        return cbo;
     }
 
     private static void appendRow(JPanel pnl, String labelText, JComponent input, int row) {

@@ -92,4 +92,6 @@ public interface Ledger {
     boolean existsPath(Wallet sender, Wallet receiver, Money amount);
 
     boolean existsSellOffer(Money minimum);
+
+    NetworkId[] networkIds();
 }

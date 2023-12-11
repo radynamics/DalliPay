@@ -92,6 +92,14 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     }
 
     @Override
+    public NetworkId[] networkIds() {
+        return new NetworkId[]{
+                new NetworkId(NETWORKID_LIVENET.toString(), "Mainnet"),
+                new NetworkId(NETWORKID_TESTNET.toString(), "Testnet"),
+        };
+    }
+
+    @Override
     public TransactionSubmitterFactory createTransactionSubmitterFactory() {
         return new com.radynamics.dallipay.cryptoledger.xrpl.xahau.TransactionSubmitterFactory(this);
     }

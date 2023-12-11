@@ -274,4 +274,9 @@ public class TestLedger implements Ledger {
     public boolean existsSellOffer(Money minimum) {
         return true;
     }
+
+    @Override
+    public NetworkId[] networkIds() {
+        return new NetworkId[0];
+    }
 }

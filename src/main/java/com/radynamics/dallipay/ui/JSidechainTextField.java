@@ -2,6 +2,7 @@ package com.radynamics.dallipay.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import okhttp3.HttpUrl;
 
@@ -13,11 +14,13 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class JSidechainTextField extends JTextField {
+    private Ledger ledger;
     private final ArrayList<SidechainChangedListener> sidechainChangedListener = new ArrayList<>();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public JSidechainTextField() {
+    public JSidechainTextField(Ledger ledger) {
+        this.ledger = ledger;
         putClientProperty("JTextField.placeholderText", res.getString("addConnection"));
         putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, createToolbar());
@@ -63,7 +66,7 @@ public class JSidechainTextField extends JTextField {
         } catch (Exception ex) {
         }
 
-        return NetworkInfoEdit.show(this, url, displayName);
+        return NetworkInfoEdit.show(this, ledger, url, displayName);
     }
 
     public void addChangedListener(SidechainChangedListener l) {

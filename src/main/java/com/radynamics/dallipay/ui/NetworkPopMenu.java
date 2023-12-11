@@ -52,7 +52,7 @@ public class NetworkPopMenu {
             popupMenu.add(pnl);
             pnl.setBorder(new EmptyBorder(10, 20, 0, 0));
             pnl.setBackground(popupMenu.getBackground());
-            var txt = new JSidechainTextField();
+            var txt = new JSidechainTextField(ledger);
             pnl.add(txt);
             popupMenu.addPopupMenuListener(new PopupMenuListener() {
                 @Override
