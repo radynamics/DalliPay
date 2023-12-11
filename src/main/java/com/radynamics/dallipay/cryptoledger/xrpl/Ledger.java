@@ -378,6 +378,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.existsSellOffer(minimum);
     }
 
+    @Override
+    public NetworkId[] networkIds() {
+        return new NetworkId[]{
+                new NetworkId(NETWORKID_LIVENET.toString(), "Mainnet"),
+                new NetworkId(NETWORKID_TESTNET.toString(), "Testnet"),
+        };
+    }
+
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }
