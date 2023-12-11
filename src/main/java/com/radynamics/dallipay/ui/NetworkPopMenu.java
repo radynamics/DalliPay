@@ -18,6 +18,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -184,6 +185,7 @@ public class NetworkPopMenu {
     private String createToolTipText(NetworkInfo networkInfo, EndpointInfo endpointInfo, Throwable e) {
         var sb = new StringBuilder();
         sb.append(String.format("%s: %s", res.getString("url"), Utils.hideCredentials(networkInfo.getUrl())) + System.lineSeparator());
+        sb.append(String.format("%s: %s", res.getString("network"), getNetworkIdText(networkInfo.getNetworkId())) + System.lineSeparator());
         if (endpointInfo == null) {
             sb.append(res.getString("noInfo"));
         } else {
@@ -198,6 +200,11 @@ public class NetworkPopMenu {
             sb.append(String.format("Error: %s", e.getCause().getMessage()));
         }
         return sb.toString();
+    }
+
+    private String getNetworkIdText(Integer networkId) {
+        var entry = Arrays.stream(ledger.networkIds()).filter(o -> o.getKey().equals(networkId.toString())).findFirst();
+        return entry.isPresent() ? entry.get().getDisplayText() : networkId.toString();
     }
 
     private void onNetworkChanged(JCheckBoxMenuItem item) {
