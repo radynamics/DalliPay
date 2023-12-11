@@ -27,13 +27,15 @@ public class Camt05300108Writer implements Camt054Writer {
     private ZonedDateTime creationDate;
 
     public static final CamtFormat ExportFormat = CamtFormat.Camt05300108;
+    private final LedgerCurrencyConverter ledgerCurrencyConverter;
 
-    public Camt05300108Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion) {
+    public Camt05300108Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion, LedgerCurrencyFormat ledgerCurrencyFormat) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
         this.productVersion = productVersion;
         this.idGenerator = new UUIDIdGenerator();
         this.creationDate = ZonedDateTime.now();
+        this.ledgerCurrencyConverter = ledger.createLedgerCurrencyConverter(ledgerCurrencyFormat);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class Camt05300108Writer implements Camt054Writer {
         for (var t : transactions) {
             var receiver = t.getReceiverWallet();
             var address = t.getReceiverAddress();
-            var ccy = t.getUserCcyCodeOrEmpty();
+            var ccy = ledgerCurrencyConverter.getTargetCurrency(t.getUserCcy()).getCode();
             var stmt = getNtfctnOrNull(d, receiver, address, ccy);
             if (stmt == null) {
                 stmt = new AccountStatement9();
@@ -110,9 +112,10 @@ public class Camt05300108Writer implements Camt054Writer {
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getReceiverAccount().getUnformatted());
 
+        var m = ledgerCurrencyConverter.convert(Money.of(trx.getAmount(), trx.getUserCcy()));
         var amt = new ActiveOrHistoricCurrencyAndAmount();
-        amt.setValue(AmountRounder.round(ledger, Money.of(trx.getAmount(), trx.getUserCcy()), 2));
-        amt.setCcy(trx.getUserCcyCodeOrEmpty());
+        amt.setValue(AmountRounder.round(ledger, m, 2));
+        amt.setCcy(m.getCcy().getCode());
 
         ntry.setAmt(amt);
         var amtDtls = trx.createCcyPair().isOneToOne() ? null : createAmtDtls(trx);
@@ -198,13 +201,14 @@ public class Camt05300108Writer implements Camt054Writer {
 
     private AmountAndCurrencyExchange3 createAmtDtls(Payment trx) {
         var amtLedgerCcy = new ActiveOrHistoricCurrencyAndAmount();
-        amtLedgerCcy.setValue(AmountRounder.round(ledger, trx.getAmountTransaction(), 4));
-        amtLedgerCcy.setCcy(trx.getAmountTransaction().getCcy().getCode());
+        var m = ledgerCurrencyConverter.convert(trx.getAmountTransaction());
+        amtLedgerCcy.setValue(AmountRounder.round(ledger, m, 4));
+        amtLedgerCcy.setCcy(m.getCcy().getCode());
 
         var ccyXchg = new CurrencyExchange5();
-        ccyXchg.setSrcCcy(trx.getAmountTransaction().getCcy().getCode());
+        ccyXchg.setSrcCcy(m.getCcy().getCode());
         ccyXchg.setTrgtCcy(trx.getUserCcyCodeOrEmpty());
-        ccyXchg.setXchgRate(BigDecimal.valueOf(trx.getExchangeRate().getRate()));
+        ccyXchg.setXchgRate(ledgerCurrencyConverter.convert(trx.getExchangeRate()));
 
         var o = new AmountAndCurrencyExchange3();
         o.setTxAmt(new AmountAndCurrencyExchangeDetails3());
@@ -283,5 +287,10 @@ public class Camt05300108Writer implements Camt054Writer {
     @Override
     public CamtFormat getExportFormat() {
         return ExportFormat;
+    }
+
+    @Override
+    public LedgerCurrencyFormat getExportLedgerCurrencyFormat() {
+        return ledgerCurrencyConverter.getTargetFormat();
     }
 }

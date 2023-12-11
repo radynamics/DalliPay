@@ -16,10 +16,7 @@ import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
-import com.radynamics.dallipay.iso20022.camt054.CamtExport;
-import com.radynamics.dallipay.iso20022.camt054.CamtExportFactory;
-import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
-import com.radynamics.dallipay.iso20022.camt054.PaymentValidator;
+import com.radynamics.dallipay.iso20022.camt054.*;
 import com.radynamics.dallipay.transformation.AccountMappingSource;
 import com.radynamics.dallipay.transformation.AccountMappingSourceException;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
@@ -360,23 +357,27 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             targetFileName = createTargetFile().getAbsolutePath();
         }
         var exportFormat = CamtFormatHelper.getDefault();
+        var exportLedgerCurrencyFormat = transformInstruction.getLedger().createLedgerCurrencyConverter(LedgerCurrencyFormat.Native).getDefaultTargetFormat();
         if (camtExport == null) {
             try (var repo = new ConfigRepo()) {
                 exportFormat = repo.getDefaultExportFormat();
+                exportLedgerCurrencyFormat = repo.getExportLedgerCurrencyFormat(transformInstruction.getLedger());
             } catch (Exception e) {
                 ExceptionDialog.show(this, e);
             }
         } else {
             exportFormat = camtExport.getWriter().getExportFormat();
+            exportLedgerCurrencyFormat = camtExport.getWriter().getExportLedgerCurrencyFormat();
         }
 
-        var frm = new ReceiveExportForm();
+        var frm = new ReceiveExportForm(transformInstruction.getLedger());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frm.setSize(600, 300);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setOutputFile(targetFileName);
         frm.setExportFormat(exportFormat);
+        frm.setLedgerCurrencyFormat(exportLedgerCurrencyFormat);
         frm.setVisible(true);
         if (!frm.isDialogAccepted()) {
             return false;
@@ -390,11 +391,12 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         try (var repo = new ConfigRepo()) {
             repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
             repo.setDefaultExportFormat(frm.getExportFormat());
+            repo.setExportLedgerCurrencyFormat(transformInstruction.getLedger().getId(), frm.getExportLedgerCurrencyFormat());
             repo.commit();
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
-        camtExport = CamtExportFactory.create(frm.getExportFormat(), transformInstruction, versionController);
+        camtExport = CamtExportFactory.create(frm.getExportFormat(), frm.getExportLedgerCurrencyFormat(), transformInstruction, versionController);
         return true;
     }
 

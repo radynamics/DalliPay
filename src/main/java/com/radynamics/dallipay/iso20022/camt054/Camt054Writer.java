@@ -9,4 +9,6 @@ public interface Camt054Writer {
     TransformInstruction getTransformInstruction();
 
     CamtFormat getExportFormat();
+
+    LedgerCurrencyFormat getExportLedgerCurrencyFormat();
 }

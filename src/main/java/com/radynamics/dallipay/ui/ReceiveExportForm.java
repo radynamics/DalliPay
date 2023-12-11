@@ -1,8 +1,7 @@
 package com.radynamics.dallipay.ui;
 
-import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
-import com.radynamics.dallipay.iso20022.camt054.CamtFormatEntry;
-import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
+import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.iso20022.camt054.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,15 +14,16 @@ public class ReceiveExportForm extends JDialog {
     private boolean accepted;
     private FilePathField txtOutputFile;
     private JComboBox<CamtFormatEntry> cboExportFormat;
+    private JComboBox<LedgerCurrencyFormat> cboLedgerCurrencyFormat;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public ReceiveExportForm() {
-        setupUI();
+    public ReceiveExportForm(Ledger ledger) {
+        setupUI(ledger);
     }
 
-    private void setupUI() {
+    private void setupUI(Ledger ledger) {
         setTitle(res.getString("title"));
         setIconImage(Utils.getProductIcon());
 
@@ -128,6 +128,34 @@ public class ReceiveExportForm extends JDialog {
                 pnlContent.add(cboExportFormat);
                 line++;
             }
+            {
+                var lbl = new JLabel(res.getString("ledgerCurrencyFormat").formatted(ledger.getNativeCcySymbol()));
+                anchorComponentTopLeft = lbl;
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lbl, getNorthPad(line), SpringLayout.NORTH, pnlContent);
+                lbl.setOpaque(true);
+                pnlContent.add(lbl);
+
+                cboLedgerCurrencyFormat = new JComboBox<>();
+                cboLedgerCurrencyFormat.setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        var c = ledger.createLedgerCurrencyConverter(LedgerCurrencyFormat.Native);
+                        var displayText = value == LedgerCurrencyFormat.Native
+                                ? res.getString("nativeCcy").formatted(c.getLedgerNativeCcy().getCode())
+                                : res.getString("smallestUnit").formatted(c.getSmallestUnitCcy().getCode());
+                        return super.getListCellRendererComponent(list, displayText, index, isSelected, cellHasFocus);
+                    }
+                });
+                for (var item : LedgerCurrencyFormatHelper.all()) {
+                    cboLedgerCurrencyFormat.addItem(item);
+                }
+                setExportFormat(CamtFormatHelper.getDefault());
+                panel1Layout.putConstraint(SpringLayout.WEST, cboLedgerCurrencyFormat, padValueCtrl, SpringLayout.WEST, anchorComponentTopLeft == null ? lbl : anchorComponentTopLeft);
+                panel1Layout.putConstraint(SpringLayout.NORTH, cboLedgerCurrencyFormat, getNorthPad(line), SpringLayout.NORTH, pnlContent);
+                pnlContent.add(cboLedgerCurrencyFormat);
+                line++;
+            }
         }
         {
             var pnl = new JPanel();
@@ -185,5 +213,18 @@ public class ReceiveExportForm extends JDialog {
                 cboExportFormat.setSelectedItem(item);
             }
         }
+    }
+
+    public void setLedgerCurrencyFormat(LedgerCurrencyFormat ledgerCurrencyFormat) {
+        for (var i = 0; i < cboLedgerCurrencyFormat.getItemCount(); i++) {
+            var item = cboLedgerCurrencyFormat.getItemAt(i);
+            if (item == ledgerCurrencyFormat) {
+                cboLedgerCurrencyFormat.setSelectedItem(item);
+            }
+        }
+    }
+
+    public LedgerCurrencyFormat getExportLedgerCurrencyFormat() {
+        return ((LedgerCurrencyFormat) cboLedgerCurrencyFormat.getSelectedItem());
     }
 }
