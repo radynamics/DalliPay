@@ -16,6 +16,8 @@ import com.radynamics.dallipay.cryptoledger.xrpl.api.JsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.xrpl.walletinfo.Xumm;
 import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
@@ -384,6 +386,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
                 new NetworkId(NETWORKID_LIVENET.toString(), "Mainnet"),
                 new NetworkId(NETWORKID_TESTNET.toString(), "Testnet"),
         };
+    }
+
+    @Override
+    public LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat) {
+        return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Drop"), XrpCurrencyAmount.ofXrp(BigDecimal.ONE).value().longValue(), LedgerCurrencyFormat.Native, ledgerCurrencyFormat);
     }
 
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {

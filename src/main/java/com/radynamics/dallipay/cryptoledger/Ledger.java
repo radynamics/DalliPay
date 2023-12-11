@@ -8,6 +8,8 @@ import com.radynamics.dallipay.cryptoledger.generic.WalletValidator;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import okhttp3.HttpUrl;
 
 import javax.swing.*;
@@ -94,4 +96,6 @@ public interface Ledger {
     boolean existsSellOffer(Money minimum);
 
     NetworkId[] networkIds();
+
+    LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat);
 }

@@ -44,7 +44,7 @@ public class Camt05400104WriterTest {
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), targetCcy));
 
-        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
         var actual = camtConverter.toXml(w.createDocument(payments));
@@ -60,7 +60,7 @@ public class Camt05400104WriterTest {
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
-        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
         var actual = (Document) w.createDocument(payments);
@@ -80,7 +80,7 @@ public class Camt05400104WriterTest {
 
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(TestFactory.createTransactions(cryptoInstruction.getLedger(), "XRP"));
-        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
         var actual = (Document) w.createDocument(payments);
@@ -113,7 +113,7 @@ public class Camt05400104WriterTest {
         var t = new TransactionTranslator(cryptoInstruction, new CurrencyConverter(cryptoInstruction.getExchangeRateProvider().latestRates()));
         var payments = t.apply(PaymentConverter.toPayment(new Transaction[]{trx}, new Currency("XRP")));
 
-        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion);
+        var w = new Camt05400104Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
         var actual = camtConverter.toXml(w.createDocument(payments));
@@ -134,7 +134,7 @@ public class Camt05400104WriterTest {
 
         var t = new TransactionTranslator(ti, new CurrencyConverter(new ExchangeRate[0]));
         var payments = t.apply(TestFactory.createTransactions(ti.getLedger(), "TEST"));
-        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion);
+        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 
@@ -153,7 +153,7 @@ public class Camt05400104WriterTest {
     public void multipleCurrencies() throws Exception {
         var ledger = new TestLedger();
         var ti = TestFactory.createTransformInstruction(ledger);
-        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion);
+        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 
@@ -180,7 +180,7 @@ public class Camt05400104WriterTest {
     public void RmtInfUstrdLength() throws Exception {
         var ledger = new TestLedger();
         var ti = TestFactory.createTransformInstruction(ledger);
-        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion);
+        var w = new Camt05400104Writer(ti.getLedger(), ti, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 

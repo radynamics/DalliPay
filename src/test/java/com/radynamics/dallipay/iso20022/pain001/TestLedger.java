@@ -13,6 +13,8 @@ import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ManualRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.EmptyPaymentValidator;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -278,5 +280,10 @@ public class TestLedger implements Ledger {
     @Override
     public NetworkId[] networkIds() {
         return new NetworkId[0];
+    }
+
+    @Override
+    public LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat) {
+        return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Testi"), FACTOR, LedgerCurrencyFormat.Native, ledgerCurrencyFormat);
     }
 }

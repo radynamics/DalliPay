@@ -3,10 +3,7 @@ package com.radynamics.dallipay.db;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
-import com.radynamics.dallipay.iso20022.camt054.CamtFormatHelper;
-import com.radynamics.dallipay.iso20022.camt054.DateFormat;
-import com.radynamics.dallipay.iso20022.camt054.DateFormatHelper;
+import com.radynamics.dallipay.iso20022.camt054.*;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import okhttp3.HttpUrl;
@@ -111,7 +108,12 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public void setLastUsedRpcUrl(Ledger ledger, HttpUrl value) throws Exception {
-        saveOrUpdate(createLedgerSpecificKey(ledger, "lastUsedRpcUrl"), value == null ? "" : value.toString());
+        var key = createLedgerSpecificKey(ledger, "lastUsedRpcUrl");
+        if (value == null) {
+            delete(key);
+        } else {
+            saveOrUpdate(key, value.toString());
+        }
     }
 
     public NetworkInfo[] getCustomSidechains(Ledger ledger) throws Exception {
@@ -180,6 +182,16 @@ public class ConfigRepo implements AutoCloseable {
 
     public void setDefaultExportFormat(CamtFormat value) throws Exception {
         saveOrUpdate("exportFormat", CamtFormatHelper.toKey(value));
+    }
+
+    public LedgerCurrencyFormat getExportLedgerCurrencyFormat(Ledger ledger) throws Exception {
+        var value = single(createLedgerSpecificKey(ledger.getId(), "exportLedgerCurrencyFormat"));
+        var defaultValue = ledger.createLedgerCurrencyConverter(LedgerCurrencyFormat.Native).getDefaultTargetFormat();
+        return value.isPresent() ? LedgerCurrencyFormatHelper.toType(value.get()) : defaultValue;
+    }
+
+    public void setExportLedgerCurrencyFormat(LedgerId ledgerId, LedgerCurrencyFormat value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledgerId, "exportLedgerCurrencyFormat"), LedgerCurrencyFormatHelper.toKey(value));
     }
 
     public Optional<String> getLookupProviderId(LedgerId ledgerId) throws Exception {
