@@ -219,7 +219,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public HttpUrl getDefaultFaucetUrl() {
-        return HttpUrl.get("https://bitcoinfaucet.uo1.net");
+        return null;
     }
 
     @Override
