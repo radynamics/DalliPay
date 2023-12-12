@@ -76,9 +76,10 @@ public class RpcSubmitter implements TransactionSubmitter {
     private void submit(BitcoinJSONRPCClient client, com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
         var amount = BigDecimal.valueOf(t.getAmount().getNumber().doubleValue());
         var comment = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
+        var commentBytes = StringUtils.isEmpty(comment) ? null : comment.getBytes(StandardCharsets.UTF_8);
 
         var outputs = new ArrayList<BitcoindRpcClient.TxOutput>();
-        outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, comment.getBytes(StandardCharsets.UTF_8)));
+        outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, commentBytes));
         var rawTx = client.createRawTransaction(new ArrayList<>(), outputs);
 
         var changeAddress = client.getNewAddress();
