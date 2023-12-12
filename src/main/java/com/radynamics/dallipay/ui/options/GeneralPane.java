@@ -183,7 +183,7 @@ public class GeneralPane extends JPanel {
         }
 
         if (faucetUrl == null) {
-            JOptionPane.showMessageDialog(this, String.format(res.getString("faucetNotAvailable"), ledger.getNetwork().getDisplayName(), ledger.getNetwork().getUrl().toString()), ledger.getNetwork().getDisplayName(), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, String.format(res.getString("faucetNotAvailable"), ledger.getNetwork().getDisplayName()), ledger.getNetwork().getDisplayName(), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
