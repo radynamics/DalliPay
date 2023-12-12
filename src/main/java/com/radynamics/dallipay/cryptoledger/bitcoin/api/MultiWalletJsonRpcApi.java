@@ -63,6 +63,12 @@ public class MultiWalletJsonRpcApi {
         }
     }
 
+    public List<BitcoindRpcClient.Transaction> listByAddress(Wallet wallet, int count) {
+        init();
+        var c = client(wallet).orElseThrow();
+        return c.listTransactions("*", count);
+    }
+
     public List<BitcoindRpcClient.Transaction> listReceivedByAddress(Wallet wallet) {
         init();
         var list = new ArrayList<BitcoindRpcClient.Transaction>();

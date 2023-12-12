@@ -12,7 +12,6 @@ import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.*;
-import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
@@ -114,7 +113,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception {
-        throw new NotImplementedException();
+        return api.listPaymentsSent(WalletConverter.from(wallet), sinceDaysAgo, limit);
     }
 
     @Override
@@ -135,18 +134,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
-        // TODO: implement
-        return new PaymentHistoryProvider() {
-            @Override
-            public void load(com.radynamics.dallipay.cryptoledger.Ledger ledger, Wallet wallet, long sinceDaysAgo) {
-                // do nothing
-            }
-
-            @Override
-            public Transaction oldestSimilarOrDefault(Payment p) {
-                return null;
-            }
-        };
+        return new LedgerPaymentHistoryProvider();
     }
 
     @Override

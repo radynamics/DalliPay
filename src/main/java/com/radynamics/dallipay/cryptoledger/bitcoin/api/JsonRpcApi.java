@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class JsonRpcApi {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
@@ -41,30 +43,58 @@ public class JsonRpcApi {
         this.openedWallets = new MultiWalletJsonRpcApi(ledger, network);
     }
 
+    public TransactionResult listPaymentsSent(com.radynamics.dallipay.cryptoledger.generic.Wallet from, long sinceDaysAgo, int limit) {
+        // Use endOfToday to ensure data until latest ledger is loaded.
+        var period = DateTimeRange.of(Utils.endOfToday().minusDays(sinceDaysAgo), Utils.endOfToday());
+
+        var tr = new TransactionResult();
+        try {
+            var transactions = openedWallets.listByAddress(from, 9999);
+            var filtered = transactions.stream()
+                    .filter(inPeriod(period))
+                    .filter(outgoing())
+                    .collect(Collectors.toList());
+            for (var t : filtered) {
+                tr.add(toTransaction(t, from));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return tr;
+    }
+
     public TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) {
         var tr = new TransactionResult();
-
         try {
             var transactions = listPaymentsReceived(walletInput);
-            for (var t : transactions) {
-                // Skip outgoing tx and tx without an amount.
-                if (t.amount().compareTo(BigDecimal.ZERO) <= 0) {
-                    continue;
-                }
-                // Skip unconfirmed
-                if (t.blockTime() == null) {
-                    continue;
-                }
-                if (!period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")))) {
-                    continue;
-                }
+            var filtered = transactions.stream()
+                    .filter(inPeriod(period))
+                    .filter(incoming())
+                    .collect(Collectors.toList());
+            for (var t : filtered) {
                 tr.add(toTransaction(t, walletInput.wallet()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
         return tr;
+    }
+
+    private Predicate<? super BitcoindRpcClient.Transaction> outgoing() {
+        // Skip incoming tx and tx without an amount.
+        return t -> t.amount().compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    private Predicate<? super BitcoindRpcClient.Transaction> incoming() {
+        // Skip outgoing tx and tx without an amount.
+        return t -> t.amount().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private Predicate<? super BitcoindRpcClient.Transaction> inPeriod(DateTimeRange period) {
+        return t ->
+                // Skip unconfirmed
+                t.blockTime() != null
+                        && period.isBetween(ZonedDateTime.ofInstant(t.blockTime().toInstant(), ZoneId.of("UTC")));
     }
 
     private List<BitcoindRpcClient.Transaction> listPaymentsReceived(WalletInput walletInput) {
@@ -76,7 +106,8 @@ public class JsonRpcApi {
     }
 
     private com.radynamics.dallipay.cryptoledger.Transaction toTransaction(BitcoindRpcClient.Transaction t, Wallet receivingWallet) throws DecoderException, UnsupportedEncodingException {
-        var amt = Money.of(t.amount().doubleValue(), new Currency(ledger.getNativeCcySymbol()));
+        // Outgoing transactions have a negative value. We handle both incoming and outgoing with positive values.
+        var amt = Money.of(Math.abs(t.amount().doubleValue()), new Currency(ledger.getNativeCcySymbol()));
         var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
         trx.setId(t.txId());
         // Null uncomfirmed tx
