@@ -3,8 +3,10 @@ package com.radynamics.dallipay.cryptoledger;
 import com.radynamics.dallipay.iso20022.Payment;
 import org.apache.commons.lang3.StringUtils;
 
-public class PaymentCompare {
-    public static final boolean isSimilar(Payment first, Payment second) {
+public class PaymentComparer {
+    private boolean compareSender = true;
+
+    public boolean similar(Payment first, Payment second) {
         if (first == null && second == null) {
             return true;
         }
@@ -15,7 +17,7 @@ public class PaymentCompare {
             return false;
         }
 
-        if (!WalletCompare.isSame(first.getSenderWallet(), second.getSenderWallet())) {
+        if (compareSender && !WalletCompare.isSame(first.getSenderWallet(), second.getSenderWallet())) {
             return false;
         }
 
@@ -36,5 +38,13 @@ public class PaymentCompare {
             final Double tolerancePercent = 0.02;
             return sameCcy && Math.abs(first.getAmountTransaction().minus(second.getAmountTransaction()).getNumber().doubleValue()) <= first.getAmountTransaction().multiply(tolerancePercent).getNumber().doubleValue();
         }
+    }
+
+    public void compareSender(boolean value) {
+        this.compareSender = value;
+    }
+
+    public boolean compareSender() {
+        return this.compareSender;
     }
 }
