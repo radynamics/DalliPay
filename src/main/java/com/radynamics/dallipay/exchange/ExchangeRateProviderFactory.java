@@ -22,6 +22,8 @@ public final class ExchangeRateProviderFactory {
                 return new Bitstamp(ledger);
             case Coinbase.ID:
                 return new Coinbase(ledger);
+            case Bitrue.ID:
+                return new Bitrue(ledger);
             case ManualRateProvider.ID:
                 return new ManualRateProvider();
             case XrplPriceOracle.ID:
