@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.MultiWalletJsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
@@ -27,7 +26,6 @@ public class RpcSubmitter implements TransactionSubmitter {
     private final Ledger ledger;
     private final PrivateKeyProvider privateKeyProvider;
     private final MultiWalletJsonRpcApi openedWallets;
-    private OnchainVerifier verifier;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
@@ -112,17 +110,9 @@ public class RpcSubmitter implements TransactionSubmitter {
         t.setId(transactionHash);
         t.setBooked(ZonedDateTime.now());
 
+        // Onchain verification using Verifier is skipped as it would take too long.
         t.refreshTransmission();
         raiseSuccess(t);
-        // TODO: Verify transaction on chain
-        /*if (verifier.verify(transactionHash, t)) {
-            t.setBlock(Convert.toLedgerBlock(verifier.getOnchainTransaction().getBlock()));
-            t.refreshTransmission();
-            raiseSuccess(t);
-        } else {
-            t.refreshTransmission(new OnchainVerificationException(res.getString("verifyFailed")));
-            raiseFailure(t);
-        }*/
     }
 
     @Override
@@ -133,10 +123,6 @@ public class RpcSubmitter implements TransactionSubmitter {
     @Override
     public TransactionSubmitterInfo getInfo() {
         return info;
-    }
-
-    public void setVerifier(OnchainVerifier verifier) {
-        this.verifier = verifier;
     }
 
     @Override
