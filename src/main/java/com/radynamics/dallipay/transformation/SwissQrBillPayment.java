@@ -18,6 +18,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class SwissQrBillPayment {
@@ -148,7 +149,7 @@ public class SwissQrBillPayment {
      * Parse AV according to https://www.radynamics.com/qr-bill-cc
      */
     private QrBillCc toQrBillCc(String av) {
-        if (!av.startsWith("CC/XRPL")) {
+        if (!isSupported(av)) {
             return null;
         }
 
@@ -159,6 +160,16 @@ public class SwissQrBillPayment {
         o.destinationTag = getTagValueOrNull(elements, "11");
         o.expectedCcyIssuer = toWalletOrNull(elements, "20");
         return o;
+    }
+
+    private static boolean isSupported(String av) {
+        var supported = new HashSet<>(Arrays.asList("XRPL", "BTC"));
+        for (var cc : supported) {
+            if (av.startsWith("CC/%s".formatted(cc))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Wallet toWalletOrNull(List<String> elements, String tag) {
