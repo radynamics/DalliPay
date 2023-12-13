@@ -22,6 +22,7 @@ import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
 import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
+import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.transactions.Hash256;
@@ -92,12 +93,12 @@ public class RpcSubmitter implements TransactionSubmitter {
         var accountSequenceOffset = sequences.getRight();
 
         // Get the latest validated ledger index
-        var validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerIndex(LedgerIndex.VALIDATED).build())
+        var validatedLedger = xrplClient.ledger(LedgerRequestParams.builder().ledgerSpecifier(LedgerSpecifier.VALIDATED).build())
                 .ledgerIndex()
                 .orElseThrow(() -> new RuntimeException("LedgerIndex not available."));
 
         // Workaround for https://github.com/XRPLF/xrpl4j/issues/84
-        var lastLedgerSequence = UnsignedInteger.valueOf(validatedLedger.plus(UnsignedLong.valueOf(4)).unsignedLongValue().intValue());
+        var lastLedgerSequence = UnsignedInteger.valueOf(validatedLedger.plus(UnsignedInteger.valueOf(4)).unsignedIntegerValue().intValue());
         if (previousLastLedgerSequence == UnsignedInteger.ZERO) {
             accountSequenceOffset = UnsignedInteger.ZERO;
         } else {
@@ -108,7 +109,7 @@ public class RpcSubmitter implements TransactionSubmitter {
         var pb = PaymentBuilder.builder().payment(t);
 
         var requestParams = AccountInfoRequestParams.builder()
-                .ledgerIndex(LedgerIndex.VALIDATED)
+                .ledgerSpecifier(LedgerSpecifier.VALIDATED)
                 .account(pb.getSender())
                 .build();
         var accountInfoResult = xrplClient.accountInfo(requestParams);

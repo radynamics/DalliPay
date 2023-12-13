@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
+import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 import org.xrpl.xrpl4j.model.transactions.ImmutableMemo;
 import org.xrpl.xrpl4j.model.transactions.ImmutableMemoWrapper;
 
@@ -46,7 +47,7 @@ public final class Convert {
     public static LedgerBlock toLedgerBlock(Block block) {
         if (block == null) throw new IllegalArgumentException("Parameter 'block' cannot be null");
         if (block == Block.VALIDATED) {
-            return new LedgerBlock(LedgerIndex.VALIDATED);
+            return new LedgerBlock(LedgerSpecifier.VALIDATED.ledgerIndex().orElseThrow());
         }
         return new LedgerBlock(LedgerIndex.of(UnsignedInteger.valueOf(block.getId())));
     }

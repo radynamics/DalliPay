@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
+import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +14,7 @@ public class LedgerAtTimeCache {
     private final ConcurrentHashMap<UnsignedInteger, LedgerAtTime> items = new ConcurrentHashMap<>();
 
     public LedgerAtTime add(ZonedDateTime pointInTime, LedgerIndex index) {
-        var item = new LedgerAtTime(pointInTime, index);
+        var item = new LedgerAtTime(pointInTime, LedgerSpecifier.of(index));
         items.put(index.unsignedIntegerValue(), item);
         return item;
     }
@@ -21,7 +22,7 @@ public class LedgerAtTimeCache {
     public LedgerAtTime find(LedgerIndex index) {
         if (items.containsKey(index.unsignedIntegerValue())) {
             var item = items.get(index.unsignedIntegerValue());
-            log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
+            log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerSpecifier().ledgerIndex().orElseThrow().unsignedIntegerValue()));
             return item;
         }
         return null;
@@ -31,7 +32,7 @@ public class LedgerAtTimeCache {
         for (var e : items.entrySet()) {
             var item = e.getValue();
             if (item.getPointInTime() == dt) {
-                log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerIndex().unsignedIntegerValue()));
+                log.trace(String.format("CACHE hit %s (%s)", item.getPointInTime(), item.getLedgerSpecifier().ledgerIndex().orElseThrow().unsignedIntegerValue()));
                 return item;
             }
         }
