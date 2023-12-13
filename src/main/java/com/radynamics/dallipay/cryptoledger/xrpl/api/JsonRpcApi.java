@@ -315,7 +315,10 @@ public class JsonRpcApi implements TransactionSource {
             return data;
         }
         try {
-            var requestParams = AccountLinesRequestParams.builder().account(Address.of(wallet.getPublicKey())).build();
+            var requestParams = AccountLinesRequestParams.builder()
+                    .ledgerSpecifier(LedgerSpecifier.CURRENT)
+                    .account(Address.of(wallet.getPublicKey()))
+                    .build();
             data = xrplClient.accountLines(requestParams);
             accountTrustLineCache.add(key, data);
             return data;
@@ -351,6 +354,7 @@ public class JsonRpcApi implements TransactionSource {
         }
         try {
             var requestParams = RipplePathFindRequestParams.builder()
+                    .ledgerSpecifier(LedgerSpecifier.CURRENT)
                     .sourceAccount(Address.of(sender.getPublicKey()))
                     .destinationAccount(Address.of(receiver.getPublicKey()))
                     .destinationAmount(PaymentBuilder.toCurrencyAmount(ledger, amount));
