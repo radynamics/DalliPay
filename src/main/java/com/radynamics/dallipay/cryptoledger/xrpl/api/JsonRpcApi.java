@@ -3,10 +3,8 @@ package com.radynamics.dallipay.cryptoledger.xrpl.api;
 import com.google.common.primitives.UnsignedInteger;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.generic.Wallet;
 import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
-import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.xrpl.FeeInfo;
@@ -41,14 +39,12 @@ import org.xrpl.xrpl4j.model.transactions.*;
 import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -56,6 +52,7 @@ public class JsonRpcApi implements TransactionSource {
     final static Logger log = LogManager.getLogger(JsonRpcApi.class);
     private final Ledger ledger;
     private final NetworkInfo network;
+    private final TransactionConverter transactionConverter;
     private final XrplClient xrplClient;
     private final LedgerAtTimeProvider ledgerAtTimeProvider;
     private final Cache<AccountRootObject> accountDataCache;
@@ -68,6 +65,7 @@ public class JsonRpcApi implements TransactionSource {
     public JsonRpcApi(Ledger ledger, NetworkInfo network) {
         this.ledger = ledger;
         this.network = network;
+        this.transactionConverter = new TransactionConverter(ledger);
         this.xrplClient = new XrplClient(network.getUrl());
         var fallback = new OnchainLookupProvider(xrplClient);
         this.ledgerAtTimeProvider = ledger.isKnownMainnet(network) ? new XrplfDataApi(fallback) : fallback;
@@ -117,7 +115,7 @@ public class JsonRpcApi implements TransactionSource {
                     return false;
                 }
 
-                tr.add(toTransaction(p, deliveredAmount));
+                tr.add(transactionConverter.toTransaction(p, deliveredAmount));
                 return true;
             }
             return false;
@@ -168,55 +166,6 @@ public class JsonRpcApi implements TransactionSource {
         }
 
         tr.setHasMaxPageCounterReached(pageCounter >= maxPages);
-    }
-
-    private Transaction toTransaction(Payment p, CurrencyAmount deliveredAmount) {
-        var future = new CompletableFuture<Transaction>();
-        deliveredAmount.handle(xrpCurrencyAmount -> {
-            try {
-                future.complete(toTransaction(p, xrpCurrencyAmount));
-            } catch (DecoderException | UnsupportedEncodingException e) {
-                future.completeExceptionally(e);
-            }
-        }, issuedCurrencyAmount -> {
-            try {
-                future.complete(toTransaction(p, issuedCurrencyAmount));
-            } catch (ExecutionException | InterruptedException | DecoderException | UnsupportedEncodingException e) {
-                future.completeExceptionally(e);
-            }
-        });
-        return future.join();
-    }
-
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
-        var ccyCode = Convert.toCurrencyCode(amount.currency());
-        var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
-
-        var issuer = ledger.createWallet(amount.issuer().value(), "");
-        var ccy = new Currency(ccyCode, issuer);
-        // When the issuer field of the destination Amount field matches the Destination address, it is treated as a special case meaning "any issuer that the destination accepts." (https://xrpl.org/payment.html)
-        if (!issuer.getPublicKey().equals((p.destination().value())) || p.sendMax().isEmpty()) {
-            return toTransaction(p, amt, ccy);
-        }
-
-        var future = new CompletableFuture<Transaction>();
-        p.sendMax().get().handle(xrpCurrencyAmount -> {
-                    try {
-                        future.complete(toTransaction(p, amt, ccy));
-                    } catch (DecoderException | UnsupportedEncodingException e) {
-                        future.completeExceptionally(e);
-                    }
-                },
-                issuedCurrencyAmountSendMax -> {
-                    try {
-                        var issuerSendMax = ledger.createWallet(issuedCurrencyAmountSendMax.issuer().value(), "");
-                        future.complete(toTransaction(p, amt, new Currency(ccyCode, issuerSendMax)));
-                    } catch (DecoderException | UnsupportedEncodingException e) {
-                        future.completeExceptionally(e);
-                    }
-                });
-
-        return future.join();
     }
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, DateTimeRange period, Marker marker) throws JsonRpcClientErrorException, LedgerException, LedgerAtTimeException {
@@ -273,7 +222,7 @@ public class JsonRpcApi implements TransactionSource {
             }
             var p = (Payment) r.transaction();
             var deliveredAmount = r.metadata().get().deliveredAmount().get();
-            return toTransaction(p, deliveredAmount);
+            return transactionConverter.toTransaction(p, deliveredAmount);
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -311,7 +260,7 @@ public class JsonRpcApi implements TransactionSource {
                 return false;
             }
             try {
-                tr.add(toTransaction(t, XrpCurrencyAmount.ofDrops(0)));
+                tr.add(transactionConverter.toTransaction(t, XrpCurrencyAmount.ofDrops(0)));
             } catch (DecoderException | UnsupportedEncodingException e) {
                 log.error(e.getMessage(), e);
             }
@@ -504,50 +453,6 @@ public class JsonRpcApi implements TransactionSource {
             return false;
         }
         return !accountData.flags().lsfDisallowXrp();
-    }
-
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
-        return toTransaction((org.xrpl.xrpl4j.model.transactions.Transaction) p, deliveredAmount);
-    }
-
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
-        return toTransaction(t, deliveredAmount.toXrp(), new Currency(ledger.getNativeCcySymbol()));
-    }
-
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
-        var trx = new Transaction(ledger, Money.of(amt.doubleValue(), ccy));
-        trx.setId(t.hash().get().value());
-        trx.setBooked(t.closeDateHuman().get());
-        trx.setBlock(new LedgerBlock(t.ledgerIndex().orElseThrow()));
-        trx.setSender(from(t.account()));
-        var messages = new ArrayList<String>();
-        for (MemoWrapper mw : t.memos()) {
-            if (!mw.memo().memoData().isPresent()) {
-                continue;
-            }
-            var unwrappedMemo = PayloadConverter.fromMemo(Utils.hexToString(mw.memo().memoData().get()));
-            messages.addAll(Arrays.asList(unwrappedMemo.freeTexts()));
-        }
-
-        var l = new StructuredReferenceLookup(t);
-        for (var r : l.find()) {
-            trx.addStructuredReference(r);
-            messages.removeIf(o -> o.equals(r.getUnformatted()));
-        }
-        for (var m : messages) {
-            trx.addMessage(m);
-        }
-
-        if (t.transactionType() == TransactionType.PAYMENT) {
-            var p = (Payment) t;
-            trx.setReceiver(from(p.destination()));
-            if (p.destinationTag().isPresent()) {
-                trx.setDestinationTag(p.destinationTag().get().toString());
-            }
-            trx.setInvoiceId(p.invoiceId().isEmpty() ? "" : p.invoiceId().get().value());
-        }
-
-        return trx;
     }
 
     public void refreshBalance(Wallet wallet, boolean useCache) {
