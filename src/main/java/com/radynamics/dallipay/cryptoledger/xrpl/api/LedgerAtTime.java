@@ -1,14 +1,14 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.api;
 
-import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
+import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 
 import java.time.ZonedDateTime;
 
 public class LedgerAtTime {
     private ZonedDateTime pointInTime;
-    private LedgerIndex index;
+    private LedgerSpecifier index;
 
-    public LedgerAtTime(ZonedDateTime pointInTime, LedgerIndex index) {
+    public LedgerAtTime(ZonedDateTime pointInTime, LedgerSpecifier index) {
         this.pointInTime = pointInTime;
         this.index = index;
     }
@@ -17,7 +17,7 @@ public class LedgerAtTime {
         return pointInTime;
     }
 
-    public LedgerIndex getLedgerIndex() {
+    public LedgerSpecifier getLedgerSpecifier() {
         return index;
     }
 

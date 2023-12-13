@@ -27,7 +27,7 @@ public class LedgerBlock implements Block {
 
     @Override
     public String getId() {
-        return ledgerIndex.value();
+        return ledgerIndex.unsignedIntegerValue().toString();
     }
 
     public LedgerIndex getLedgerIndex() {

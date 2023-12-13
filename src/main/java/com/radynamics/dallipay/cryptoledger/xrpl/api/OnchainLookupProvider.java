@@ -37,10 +37,11 @@ public class OnchainLookupProvider implements LedgerAtTimeProvider {
         // Assuming average ledger close time
         var ago = Duration.ofDays(daysAgo);
         var estimatedPassedLedgers = UnsignedInteger.valueOf(ago.getSeconds() / Ledger.AVG_LEDGER_CLOSE_TIME_SEC);
-        if (latestLedgerFirstCall.getLedgerIndex().unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
+        var latestLedgerIndex = latestLedgerFirstCall.getLedgerSpecifier().ledgerIndex().orElseThrow();
+        if (latestLedgerIndex.unsignedIntegerValue().compareTo(estimatedPassedLedgers) < 0) {
             return Optional.empty();
         }
-        return Optional.of(new LedgerAtTime(ZonedDateTime.now().minus(ago), latestLedgerFirstCall.getLedgerIndex().minus(estimatedPassedLedgers)));
+        return Optional.of(new LedgerAtTime(ZonedDateTime.now().minus(ago), LedgerSpecifier.of(latestLedgerIndex.minus(estimatedPassedLedgers))));
     }
 
     public Optional<LedgerAtTime> at(ZonedDateTime dt) throws LedgerAtTimeException {
@@ -78,8 +79,8 @@ public class OnchainLookupProvider implements LedgerAtTimeProvider {
                 break;
             }
             var estimatedFromLedgerIndex = isTooEarly
-                    ? bestMatch.getLedgerIndex().plus(estimatedOffset)
-                    : bestMatch.getLedgerIndex().minus(estimatedOffset);
+                    ? bestMatch.getLedgerSpecifier().ledgerIndex().orElseThrow().plus(estimatedOffset)
+                    : bestMatch.getLedgerSpecifier().ledgerIndex().orElseThrow().minus(estimatedOffset);
 
             var tmp = get(estimatedFromLedgerIndex, !isTooEarly);
             if (tmp == null) {
@@ -141,7 +142,7 @@ public class OnchainLookupProvider implements LedgerAtTimeProvider {
     }
 
     private Duration getAverageLedgerDuration(LedgerAtTime ledger, UnsignedInteger referenceInterval) {
-        var referenceLedgerIndex = ledger.getLedgerIndex().minus(referenceInterval);
+        var referenceLedgerIndex = ledger.getLedgerSpecifier().ledgerIndex().orElseThrow().minus(referenceInterval);
         var referenceEarlier = get(referenceLedgerIndex);
         if (referenceEarlier == null) {
             var changedReferenceInterval = referenceInterval.minus(UnsignedInteger.valueOf(100));
