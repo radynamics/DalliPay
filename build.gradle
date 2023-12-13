@@ -27,11 +27,8 @@ dependencies {
 
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
 
-    implementation group: 'org.xrpl', name: 'xrpl4j-address-codec', version: '2.5.1'
-    implementation group: 'org.xrpl', name: 'xrpl4j-keypairs', version: '2.5.1'
-    implementation group: 'org.xrpl', name: 'xrpl4j-model', version: '2.5.1'
-    implementation group: 'org.xrpl', name: 'xrpl4j-client', version: '2.5.1'
-    implementation group: 'org.xrpl', name: 'xrpl4j-crypto-bouncycastle', version: '2.5.1'
+    implementation group: 'org.xrpl', name: 'xrpl4j-core', version: '3.2.1'
+    implementation group: 'org.xrpl', name: 'xrpl4j-client', version: '3.2.1'
 
     implementation 'com.formdev:flatlaf:3.0'
     implementation 'com.formdev:flatlaf-extras:3.0'
