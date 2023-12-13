@@ -26,11 +26,19 @@ public class AmountFormatter {
         return df.format(p.getAmount());
     }
 
-    public static String formatAmtWithCcy(Money amt) {
+    public static String formatAmtWithCcyFiat(Money amt) {
+        return formatAmtWithCcy(dfFiat, amt);
+    }
+
+    public static String formatAmtWithCcyLedgerCcy(Money amt) {
+        return formatAmtWithCcy(dfCryptocurrency, amt);
+    }
+
+    private static String formatAmtWithCcy(NumberFormat nf, Money amt) {
         if (Payment.isAmountUnknown(amt)) {
             return "n/a";
         }
-        return MoneyFormatter.formatFiat(dfFiat.format(amt.getNumber()), amt.getCcy().getCode());
+        return MoneyFormatter.formatFiat(nf.format(amt.getNumber()), amt.getCcy().getCode());
     }
 
     public static String formatAmtWithCcy(Payment p) {

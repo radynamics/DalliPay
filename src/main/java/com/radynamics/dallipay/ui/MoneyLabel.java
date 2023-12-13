@@ -17,6 +17,9 @@ public class MoneyLabel extends MoneyControl<JLabel> {
 
     @Override
     protected void refreshText(Money value) {
-        ctrl.setText(AmountFormatter.formatAmtWithCcy(value));
+        var formatted = getLedger().getNativeCcySymbol().equals(value.getCcy().getCode())
+                ? AmountFormatter.formatAmtWithCcyLedgerCcy(value)
+                : AmountFormatter.formatAmtWithCcyFiat(value);
+        ctrl.setText(formatted);
     }
 }
