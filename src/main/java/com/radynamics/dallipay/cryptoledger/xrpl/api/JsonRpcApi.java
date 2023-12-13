@@ -108,14 +108,14 @@ public class JsonRpcApi implements TransactionSource {
 
     private TransactionResult listPayments(ImmutableAccountTransactionsRequestParams.Builder params, int limit, Function<Payment, Boolean> include) throws Exception {
         var tr = new TransactionResult();
-        loadTransactions(params, limit, tr, (org.xrpl.xrpl4j.model.transactions.Transaction t, CurrencyAmount deliveredAmount) -> {
-            if (t.transactionType() == TransactionType.PAYMENT) {
-                var p = (Payment) t;
+        loadTransactions(params, limit, tr, (AccountTransactionsTransaction<?> att, CurrencyAmount deliveredAmount) -> {
+            if (att.transaction().transactionType() == TransactionType.PAYMENT) {
+                var p = (Payment) att.transaction();
                 if (!include.apply(p)) {
                     return false;
                 }
 
-                tr.add(transactionConverter.toTransaction(p, deliveredAmount));
+                tr.add(transactionConverter.toTransaction(p, deliveredAmount, att));
                 return true;
             }
             return false;
@@ -123,7 +123,7 @@ public class JsonRpcApi implements TransactionSource {
         return tr;
     }
 
-    private void loadTransactions(ImmutableAccountTransactionsRequestParams.Builder params, int limit, TransactionResult tr, BiFunction<org.xrpl.xrpl4j.model.transactions.Transaction, CurrencyAmount, Boolean> include) throws Exception {
+    private void loadTransactions(ImmutableAccountTransactionsRequestParams.Builder params, int limit, TransactionResult tr, BiFunction<AccountTransactionsTransaction<?>, CurrencyAmount, Boolean> include) throws Exception {
         var pageCounter = 0;
         var maxPages = 10;
         var result = xrplClient.accountTransactions(params.build());
@@ -146,7 +146,7 @@ public class JsonRpcApi implements TransactionSource {
                 }
 
                 var deliveredAmount = r.metadata().get().deliveredAmount().orElse(XrpCurrencyAmount.ofDrops(0));
-                if (!include.apply(r.resultTransaction().transaction(), deliveredAmount)) {
+                if (!include.apply(r.resultTransaction(), deliveredAmount)) {
                     continue;
                 }
             }
@@ -222,7 +222,7 @@ public class JsonRpcApi implements TransactionSource {
             }
             var p = (Payment) r.transaction();
             var deliveredAmount = r.metadata().get().deliveredAmount().get();
-            return transactionConverter.toTransaction(p, deliveredAmount);
+            return transactionConverter.toTransaction(p, deliveredAmount, r);
         } catch (JsonRpcClientErrorException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -251,7 +251,8 @@ public class JsonRpcApi implements TransactionSource {
         var tr = new TransactionResult();
         var params = createAccountTransactionsRequestParams(wallet, period, null);
         final int limit = 200;
-        loadTransactions(params, limit, tr, (org.xrpl.xrpl4j.model.transactions.Transaction t, CurrencyAmount deliveredAmount) -> {
+        loadTransactions(params, limit, tr, (AccountTransactionsTransaction<?> att, CurrencyAmount deliveredAmount) -> {
+            var t = att.transaction();
             if (!(t instanceof ImmutableTrustSet)) {
                 return false;
             }
@@ -260,7 +261,7 @@ public class JsonRpcApi implements TransactionSource {
                 return false;
             }
             try {
-                tr.add(transactionConverter.toTransaction(t, XrpCurrencyAmount.ofDrops(0)));
+                tr.add(transactionConverter.toTransaction(att, XrpCurrencyAmount.ofDrops(0)));
             } catch (DecoderException | UnsupportedEncodingException e) {
                 log.error(e.getMessage(), e);
             }

@@ -8,10 +8,13 @@ import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.xrpl.xrpl4j.model.client.accounts.AccountTransactionsTransaction;
+import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.transactions.*;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -24,17 +27,29 @@ public class TransactionConverter {
         this.ledger = ledger;
     }
 
-    Transaction toTransaction(Payment p, CurrencyAmount deliveredAmount) {
+    Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, CurrencyAmount deliveredAmount, org.xrpl.xrpl4j.model.client.transactions.TransactionResult<?> tr) {
+        return toTransaction(p, tr.hash(), tr.closeDateHuman().orElseThrow(), tr.ledgerIndexSafe(), deliveredAmount);
+    }
+
+    Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, CurrencyAmount deliveredAmount, AccountTransactionsTransaction<?> att) {
+        return toTransaction(p, att.hash(), att.closeDateHuman().orElseThrow(), att.ledgerIndex(), deliveredAmount);
+    }
+
+    Transaction toTransaction(AccountTransactionsTransaction<?> att, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+        return toTransaction(att.transaction(), att.hash(), att.closeDateHuman().orElseThrow(), att.ledgerIndex(), deliveredAmount);
+    }
+
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, Hash256 hash, ZonedDateTime closeDateHuman, LedgerIndex ledgerIndex, CurrencyAmount deliveredAmount) {
         var future = new CompletableFuture<Transaction>();
         deliveredAmount.handle(xrpCurrencyAmount -> {
             try {
-                future.complete(toTransaction(p, xrpCurrencyAmount));
+                future.complete(toTransaction(p, hash, closeDateHuman, ledgerIndex, xrpCurrencyAmount));
             } catch (DecoderException | UnsupportedEncodingException e) {
                 future.completeExceptionally(e);
             }
         }, issuedCurrencyAmount -> {
             try {
-                future.complete(toTransaction(p, issuedCurrencyAmount));
+                future.complete(toTransaction(p, hash, closeDateHuman, ledgerIndex, issuedCurrencyAmount));
             } catch (ExecutionException | InterruptedException | DecoderException | UnsupportedEncodingException e) {
                 future.completeExceptionally(e);
             }
@@ -42,7 +57,7 @@ public class TransactionConverter {
         return future.join();
     }
 
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, Hash256 hash, ZonedDateTime closeDateHuman, LedgerIndex ledgerIndex, IssuedCurrencyAmount amount) throws ExecutionException, InterruptedException, DecoderException, UnsupportedEncodingException {
         var ccyCode = Convert.toCurrencyCode(amount.currency());
         var amt = BigDecimal.valueOf(Double.parseDouble(amount.value()));
 
@@ -50,13 +65,13 @@ public class TransactionConverter {
         var ccy = new Currency(ccyCode, issuer);
         // When the issuer field of the destination Amount field matches the Destination address, it is treated as a special case meaning "any issuer that the destination accepts." (https://xrpl.org/payment.html)
         if (!issuer.getPublicKey().equals((p.destination().value())) || p.sendMax().isEmpty()) {
-            return toTransaction(p, amt, ccy);
+            return toTransaction(p, hash, closeDateHuman, ledgerIndex, amt, ccy);
         }
 
         var future = new CompletableFuture<Transaction>();
         p.sendMax().get().handle(xrpCurrencyAmount -> {
                     try {
-                        future.complete(toTransaction(p, amt, ccy));
+                        future.complete(toTransaction(p, hash, closeDateHuman, ledgerIndex, amt, ccy));
                     } catch (DecoderException | UnsupportedEncodingException e) {
                         future.completeExceptionally(e);
                     }
@@ -64,7 +79,7 @@ public class TransactionConverter {
                 issuedCurrencyAmountSendMax -> {
                     try {
                         var issuerSendMax = ledger.createWallet(issuedCurrencyAmountSendMax.issuer().value(), "");
-                        future.complete(toTransaction(p, amt, new Currency(ccyCode, issuerSendMax)));
+                        future.complete(toTransaction(p, hash, closeDateHuman, ledgerIndex, amt, new Currency(ccyCode, issuerSendMax)));
                     } catch (DecoderException | UnsupportedEncodingException e) {
                         future.completeExceptionally(e);
                     }
@@ -73,19 +88,19 @@ public class TransactionConverter {
         return future.join();
     }
 
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
-        return toTransaction((org.xrpl.xrpl4j.model.transactions.Transaction) p, deliveredAmount);
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Payment p, Hash256 hash, ZonedDateTime closeDateHuman, LedgerIndex ledgerIndex, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+        return toTransaction(p, hash, closeDateHuman, ledgerIndex, deliveredAmount.toXrp(), new Currency(ledger.getNativeCcySymbol()));
     }
 
-    Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
-        return toTransaction(t, deliveredAmount.toXrp(), new Currency(ledger.getNativeCcySymbol()));
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, Hash256 hash, ZonedDateTime closeDateHuman, LedgerIndex ledgerIndex, XrpCurrencyAmount deliveredAmount) throws DecoderException, UnsupportedEncodingException {
+        return toTransaction(t, hash, closeDateHuman, ledgerIndex, deliveredAmount.toXrp(), new Currency(ledger.getNativeCcySymbol()));
     }
 
-    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
+    private Transaction toTransaction(org.xrpl.xrpl4j.model.transactions.Transaction t, Hash256 hash, ZonedDateTime closeDateHuman, LedgerIndex ledgerIndex, BigDecimal amt, Currency ccy) throws DecoderException, UnsupportedEncodingException {
         var trx = new Transaction(ledger, Money.of(amt.doubleValue(), ccy));
-        trx.setId(t.hash().get().value());
-        trx.setBooked(t.closeDateHuman().get());
-        trx.setBlock(new LedgerBlock(t.ledgerIndex().orElseThrow()));
+        trx.setId(hash.value());
+        trx.setBooked(closeDateHuman);
+        trx.setBlock(new LedgerBlock(ledgerIndex));
         trx.setSender(from(t.account()));
         var messages = new ArrayList<String>();
         for (MemoWrapper mw : t.memos()) {
