@@ -28,6 +28,8 @@ import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
 import org.xrpl.xrpl4j.client.faucet.FaucetClient;
 import org.xrpl.xrpl4j.client.faucet.FundAccountRequest;
+import org.xrpl.xrpl4j.codec.addresses.SeedCodec;
+import org.xrpl.xrpl4j.crypto.keys.Seed;
 import org.xrpl.xrpl4j.model.client.accounts.*;
 import org.xrpl.xrpl4j.model.client.common.LedgerIndexBound;
 import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
@@ -36,7 +38,6 @@ import org.xrpl.xrpl4j.model.client.path.RipplePathFindResult;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
-import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
@@ -517,13 +518,14 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public com.radynamics.dallipay.cryptoledger.Wallet createRandomWallet(HttpUrl faucetUrl) {
-        var walletFactory = DefaultWalletFactory.getInstance();
-        var w = walletFactory.randomWallet(network.isTestnet());
+        var randomSeed = Seed.ed25519Seed();
+        var keyPair = randomSeed.deriveKeyPair();
+        var address = keyPair.publicKey().deriveAddress();
 
         var faucetClient = FaucetClient.construct(faucetUrl);
-        faucetClient.fundAccount(FundAccountRequest.of(w.wallet().classicAddress()));
+        faucetClient.fundAccount(FundAccountRequest.of(address));
 
-        var wallet = ledger.createWallet(w.wallet().classicAddress().value(), w.seed());
+        var wallet = ledger.createWallet(address.value(), SeedCodec.getInstance().encodeSeed(randomSeed.decodedSeed().bytes(), randomSeed.decodedSeed().type().orElseThrow()));
         ledger.refreshBalance(wallet, false);
         return wallet;
     }

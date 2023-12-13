@@ -21,10 +21,11 @@ import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.xrpl.xrpl4j.codec.addresses.AddressCodec;
+import org.xrpl.xrpl4j.crypto.keys.Base58EncodedSecret;
+import org.xrpl.xrpl4j.crypto.keys.Seed;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.CurrencyAmount;
 import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
-import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -253,11 +254,13 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
             if (StringUtils.isEmpty(wallet.getSecret())) {
                 return false;
             }
-            var sender = DefaultWalletFactory.getInstance().fromSeed(wallet.getSecret(), network.isTestnet());
             if (StringUtils.isEmpty(wallet.getPublicKey())) {
                 return true;
             }
-            return StringUtils.equals(sender.classicAddress().value(), wallet.getPublicKey());
+
+            var seed = Seed.fromBase58EncodedSecret(Base58EncodedSecret.of(wallet.getSecret()));
+            var publicKeyText = seed.deriveKeyPair().publicKey().deriveAddress().value();
+            return StringUtils.equals(publicKeyText, wallet.getPublicKey());
         } catch (Exception ex) {
             return false;
         }

@@ -2,13 +2,12 @@ package com.radynamics.dallipay.cryptoledger.xrpl.signing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
-import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterInfo;
-import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -16,19 +15,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xrpl.xrpl4j.client.JsonRpcClientErrorException;
 import org.xrpl.xrpl4j.client.XrplClient;
-import org.xrpl.xrpl4j.crypto.KeyMetadata;
-import org.xrpl.xrpl4j.crypto.PrivateKey;
-import org.xrpl.xrpl4j.crypto.signing.SignedTransaction;
-import org.xrpl.xrpl4j.crypto.signing.SingleKeySignatureService;
+import org.xrpl.xrpl4j.crypto.keys.Base58EncodedSecret;
+import org.xrpl.xrpl4j.crypto.keys.Seed;
+import org.xrpl.xrpl4j.crypto.signing.SingleSignedTransaction;
+import org.xrpl.xrpl4j.crypto.signing.bc.BcSignatureService;
 import org.xrpl.xrpl4j.model.client.accounts.AccountInfoRequestParams;
-import org.xrpl.xrpl4j.model.client.common.LedgerIndex;
 import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.client.transactions.ImmutableTransactionRequestParams;
 import org.xrpl.xrpl4j.model.transactions.Hash256;
 import org.xrpl.xrpl4j.model.transactions.ImmutablePayment;
 import org.xrpl.xrpl4j.model.transactions.Payment;
-import org.xrpl.xrpl4j.wallet.DefaultWalletFactory;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -147,8 +144,8 @@ public class RpcSubmitter implements TransactionSubmitter {
         var signed = sign(builder, privateKey);
 
         var prelimResult = xrplClient.submit(signed);
-        if (!prelimResult.result().equalsIgnoreCase("tesSUCCESS")) {
-            throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.result(), prelimResult.engineResultMessage().get()));
+        if (!prelimResult.engineResult().equalsIgnoreCase("tesSUCCESS")) {
+            throw new LedgerException(String.format("Ledger submit failed with result %s %s", prelimResult.engineResult(), prelimResult.engineResultMessage()));
         }
 
         var transactionHash = signed.hash().value();
@@ -190,17 +187,16 @@ public class RpcSubmitter implements TransactionSubmitter {
         }
     }
 
-    private SignedTransaction<Payment> sign(ImmutablePayment.Builder builder, String privateKeyPlain) {
-        var walletFactory = DefaultWalletFactory.getInstance();
-        var sender = walletFactory.fromSeed(privateKeyPlain, ledger.getNetwork().isTestnet());
+    private SingleSignedTransaction<Payment> sign(ImmutablePayment.Builder builder, String privateKeyPlain) {
+        var seed = Seed.fromBase58EncodedSecret(Base58EncodedSecret.of(privateKeyPlain));
+        var keyPair = seed.deriveKeyPair();
 
-        builder.signingPublicKey(sender.publicKey());
+        builder.signingPublicKey(keyPair.publicKey());
 
-        var privateKey = PrivateKey.fromBase16EncodedPrivateKey(sender.privateKey().get());
-        var signatureService = new SingleKeySignatureService(privateKey);
+        var signatureService = new BcSignatureService();
 
         var prepared = builder.build();
-        return signatureService.sign(KeyMetadata.EMPTY, prepared);
+        return signatureService.sign(keyPair.privateKey(), prepared);
     }
 
     @Override

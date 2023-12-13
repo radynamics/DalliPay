@@ -34,7 +34,6 @@ public class JsonRpcApi {
         var builder = pb.build();
         // Fee must be 0, SigningPubKey empty (https://xrpl-hooks.readme.io/docs/hook-fees)
         builder.fee(XrpCurrencyAmount.ofDrops(0));
-        builder.signingPublicKey("");
         var payment = builder.build();
 
         var objectMapper = ObjectMapperFactory.create();
