@@ -294,7 +294,7 @@ public class MainForm extends JFrame {
             cmdNetwork.setToolTipText(res.getString("currentlyDisconnected"));
         } else {
             icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> networkInfo.isLivenet() ? Consts.ColorLivenet : Consts.ColorTestnet));
-            cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(networkInfo.getUrl().uri())));
+            cmdNetwork.setToolTipText(String.format(res.getString("currentlyUsing"), networkInfo.getShortText(), Utils.withoutPath(Utils.hideCredentials(networkInfo.getUrl()).uri())));
         }
         cmdNetwork.setIcon(icon);
 
