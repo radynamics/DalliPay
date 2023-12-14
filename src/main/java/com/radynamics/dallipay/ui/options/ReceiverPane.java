@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.ui.options;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.iso20022.camt054.DateFormat;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 
 public class ReceiverPane extends JPanel {
@@ -30,40 +32,9 @@ public class ReceiverPane extends JPanel {
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
 
-        var builder = new RowContentBuilder(this, contentLayout);
-        {
-            final var topOffset = 5;
-            var top = topOffset;
-            {
-                builder.addRowLabel(top, res.getString("xrplPriceOracle"));
-                builder.addRowContent(top, xrplPriceOracleEditor);
-                top += 140;
-            }
-            {
-                var lbl = builder.addRowLabel(top, res.getString("export"));
-                lbl.putClientProperty("FlatLaf.styleClass", "h3");
-                top += 40;
-            }
-            {
-                builder.addRowLabel(top, res.getString("bookingFormat"));
-                cboBookingFormat = createCboDateFormat();
-                builder.addRowContent(top, cboBookingFormat);
-                top += 30;
-            }
-            {
-                builder.addRowLabel(top, res.getString("valutaFormat"));
-                cboValutaFormat = createCboDateFormat();
-                builder.addRowContent(top, cboValutaFormat);
-                top += 30;
-            }
-            {
-                builder.addRowLabel(top, res.getString("refNoIfEmpty"));
-                txtCreditorReference = new JTextField();
-                txtCreditorReference.setPreferredSize(new Dimension(160, 24));
-                builder.addRowContent(top, txtCreditorReference);
-                top += 30;
-            }
-        }
+        cboBookingFormat = createCboDateFormat();
+        cboValutaFormat = createCboDateFormat();
+        txtCreditorReference = new JTextField();
     }
 
     private JComboBox<DateFormat> createCboDateFormat() {
@@ -71,6 +42,41 @@ public class ReceiverPane extends JPanel {
         cbo.addItem(DateFormat.DateTime);
         cbo.addItem(DateFormat.Date);
         return cbo;
+    }
+
+    private void createUiControls(LedgerId ledgerId) {
+        removeAll();
+        var builder = new RowContentBuilder(this, contentLayout);
+        final var topOffset = 5;
+        var top = topOffset;
+        {
+            if (new HashSet<>(Arrays.asList(LedgerId.Xrpl, LedgerId.Xahau)).contains(ledgerId)) {
+                builder.addRowLabel(top, res.getString("xrplPriceOracle"));
+                builder.addRowContent(top, xrplPriceOracleEditor);
+                top += 140;
+            }
+        }
+        {
+            var lbl = builder.addRowLabel(top, res.getString("export"));
+            lbl.putClientProperty("FlatLaf.styleClass", "h3");
+            top += 40;
+        }
+        {
+            builder.addRowLabel(top, res.getString("bookingFormat"));
+            builder.addRowContent(top, cboBookingFormat);
+            top += 30;
+        }
+        {
+            builder.addRowLabel(top, res.getString("valutaFormat"));
+            builder.addRowContent(top, cboValutaFormat);
+            top += 30;
+        }
+        {
+            builder.addRowLabel(top, res.getString("refNoIfEmpty"));
+            txtCreditorReference.setPreferredSize(new Dimension(160, 24));
+            builder.addRowContent(top, txtCreditorReference);
+            top += 30;
+        }
     }
 
     public void save(ConfigRepo repo) throws Exception {
@@ -97,5 +103,6 @@ public class ReceiverPane extends JPanel {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         xrplPriceOracleEditor.init(ledger);
         xrplPriceOracleConfig = new XrplPriceOracleConfig(ledger.getId());
+        createUiControls(ledger.getId());
     }
 }
