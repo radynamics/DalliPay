@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.MultiWalletJsonRpcApi;
@@ -13,6 +14,7 @@ import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -21,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class RpcSubmitter implements TransactionSubmitter {
-    private final static Logger log = LogManager.getLogger(RpcSubmitter.class);
+public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
+    private final static Logger log = LogManager.getLogger(BitcoinCoreRpcSubmitter.class);
     private final Ledger ledger;
     private final PrivateKeyProvider privateKeyProvider;
     private final MultiWalletJsonRpcApi openedWallets;
@@ -31,16 +33,18 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
 
-    public final static String Id = "rpcSubmitter";
+    public final static String Id = "bitcoinCoreRpcSubmitter";
 
-    public RpcSubmitter(Ledger ledger, PrivateKeyProvider privateKeyProvider, MultiWalletJsonRpcApi openedWallets) {
+    public BitcoinCoreRpcSubmitter(Ledger ledger, PrivateKeyProvider privateKeyProvider, MultiWalletJsonRpcApi openedWallets) {
         this.ledger = ledger;
         this.privateKeyProvider = privateKeyProvider;
         this.openedWallets = openedWallets;
 
         info = new TransactionSubmitterInfo();
-        info.setTitle(res.getString("rpc.title"));
-        info.setDescription(res.getString("rpc.desc"));
+        info.setTitle(res.getString("bitcoinCoreRpcSubmitter.title"));
+        info.setDescription(res.getString("bitcoinCoreRpcSubmitter.desc"));
+        info.setDetailUri(URI.create("https://bitcoin.org/en/wallets/desktop/windows/bitcoincore"));
+        info.setIcon(new FlatSVGIcon("img/bitcoincore.svg", 58, 58));
         info.setNotRecommended(true);
     }
 
@@ -133,7 +137,7 @@ public class RpcSubmitter implements TransactionSubmitter {
 
     @Override
     public boolean supportIssuedTokens() {
-        return true;
+        return false;
     }
 
     @Override

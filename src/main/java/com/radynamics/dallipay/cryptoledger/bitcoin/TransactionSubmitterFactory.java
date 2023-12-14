@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin;
 
-import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 
 import java.awt.*;
@@ -18,7 +18,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
     @Override
     public TransactionSubmitter create(String id, Component parentComponent) {
         switch (id) {
-            case RpcSubmitter.Id: {
+            case BitcoinCoreRpcSubmitter.Id: {
                 return ledger.createRpcTransactionSubmitter(parentComponent);
             }
             default:
@@ -30,7 +30,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
     public TransactionSubmitter[] all(Component parentComponent) {
         var list = new ArrayList<TransactionSubmitter>();
 
-        list.add(create(RpcSubmitter.Id, parentComponent));
+        list.add(create(BitcoinCoreRpcSubmitter.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }

@@ -7,7 +7,7 @@ import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
-import com.radynamics.dallipay.cryptoledger.bitcoin.signing.RpcSubmitter;
+import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
@@ -182,7 +182,7 @@ public class JsonRpcApi {
     }
 
     public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
-        return new RpcSubmitter(ledger, privateKeyProvider, openedWallets);
+        return new BitcoinCoreRpcSubmitter(ledger, privateKeyProvider, openedWallets);
     }
 
     public boolean validateAddress(String publicKey) {
