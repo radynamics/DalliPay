@@ -33,7 +33,10 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
             new CurrencyPair("XRP", "TRY"), new CurrencyPair("XRP", "GBP"), new CurrencyPair("XRP", "THB"), new CurrencyPair("XRP", "RUB"),
             new CurrencyPair("XRP", "BRL"), new CurrencyPair("XRP", "AUD"), new CurrencyPair("XRP", "MXN"), new CurrencyPair("XRP", "ZAR"),
             new CurrencyPair("XRP", "MYR"), new CurrencyPair("XRP", "IDR"), new CurrencyPair("XRP", "SGD"), new CurrencyPair("XRP", "CHF"),
-            new CurrencyPair("BTC", "USD"), new CurrencyPair("BTC", "EUR"),
+            new CurrencyPair("BTC", "USD"), new CurrencyPair("BTC", "EUR"), new CurrencyPair("BTC", "JPY"), new CurrencyPair("BTC", "KRW"),
+            new CurrencyPair("BTC", "TRY"), new CurrencyPair("BTC", "GBP"), new CurrencyPair("BTC", "THB"), new CurrencyPair("BTC", "BRL"),
+            new CurrencyPair("BTC", "AUD"), new CurrencyPair("BTC", "MXN"), new CurrencyPair("BTC", "ZAR"), new CurrencyPair("BTC", "IDR"),
+            new CurrencyPair("BTC", "SGD"), new CurrencyPair("BTC", "CHF"),
     };
 
     public static final String ID = "cryptopriceoracle";
