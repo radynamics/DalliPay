@@ -97,6 +97,7 @@ public class OptionsForm extends JPanel implements MainFormPane {
         generalPane.init(ledger);
         senderPane.init(ledger);
         receiverPane.init(ledger);
+        apiKeysPane.init(ledger);
     }
 
     @Override
