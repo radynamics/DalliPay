@@ -6,7 +6,6 @@ import com.radynamics.dallipay.ui.WalletField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SenderPane extends JPanel {
@@ -54,7 +53,8 @@ public class SenderPane extends JPanel {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
 
-        lblDefaultSenderWallet.setText(String.format(res.getString("defaultSenderWallet"), ledger.getId().textId().toUpperCase(Locale.ROOT)));
+        lblDefaultSenderWallet.setText(res.getString("defaultSenderWallet"));
+        lblDefaultSenderWallet.setToolTipText(ledger.getDisplayText());
         txtDefaultSenderWallet.setLedger(this.ledger);
     }
 }
