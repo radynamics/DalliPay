@@ -67,7 +67,8 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
 
     @Override
     public void init(ConfigRepo repo) {
-        var fallback = HttpUrl.get("http://localhost:3000");
+        var fallback = HttpUrl.get("http://localhost:3000/api");
+        // var fallback = HttpUrl.get("https://priceoracle.dallipay.com/api/");
         try {
             url = repo.getCryptoPriceOracleUrl().orElse(fallback);
             apiKey = Secrets.getCryptoPriceOracleApiKey(repo);
