@@ -9,14 +9,14 @@ import java.math.BigDecimal;
 public class LedgerCurrencyConverter {
     private final Currency ledgerNativeCcy;
     private final Currency smallestUnitCcy;
-    private final long factor;
+    private final Double factor;
     private final LedgerCurrencyFormat defaulTargetFormat;
     private final LedgerCurrencyFormat targetFormat;
 
     public LedgerCurrencyConverter(Currency ledgerNativeCcy, Currency smallestUnitCcy, long factorToSmallestUnit, LedgerCurrencyFormat defaulTargetFormat, LedgerCurrencyFormat targetFormat) {
         this.ledgerNativeCcy = ledgerNativeCcy;
         this.smallestUnitCcy = smallestUnitCcy;
-        this.factor = factorToSmallestUnit;
+        this.factor = Double.valueOf(factorToSmallestUnit);
         this.defaulTargetFormat = defaulTargetFormat;
         this.targetFormat = targetFormat;
     }
