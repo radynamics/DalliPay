@@ -16,6 +16,7 @@ import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Utils;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
@@ -199,7 +200,13 @@ public class JsonRpcApi {
     }
 
     public BigDecimal estimateSmartFee(int targetInBlocks) {
-        return openedWallets.estimateSmartFee(targetInBlocks).feeRate();
+        var est = openedWallets.estimateSmartFee(targetInBlocks);
+        if (StringUtils.isEmpty(est.errors())) {
+            return est.feeRate();
+        } else {
+            log.warn(est.errors());
+            return BigDecimal.ZERO;
+        }
     }
 
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {
