@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Transaction;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.BitcoinCoreRpcClientExt;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.MultiWalletJsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.*;
@@ -11,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
-import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -19,8 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
@@ -77,35 +75,26 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
         }
     }
 
-    private void submit(BitcoinJSONRPCClient client, com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
+    private void submit(BitcoinJSONRPCClient client, com.radynamics.dallipay.cryptoledger.generic.Transaction t) throws SigningException {
         var amount = BigDecimal.valueOf(t.getAmount().getNumber().doubleValue());
         var comment = PayloadConverter.toMemo(t.getStructuredReferences(), t.getMessages());
         var commentBytes = StringUtils.isEmpty(comment) ? null : comment.getBytes(StandardCharsets.UTF_8);
 
         var outputs = new ArrayList<BitcoindRpcClient.TxOutput>();
         outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, commentBytes));
-        var rawTx = client.createRawTransaction(new ArrayList<>(), outputs);
+        var ext = new BitcoinCoreRpcClientExt(client);
+        var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs);
 
-        var changeAddress = client.getNewAddress();
-        var options = JSON.parse("{ changeAddress: \"%s\", changePosition : 0, includeWatching : true }".formatted(changeAddress));
-        var fundedResponse = (Map<String, ?>) client.query("fundrawtransaction", rawTx, options);
-        var fundedResponseHex = fundedResponse.get("hex").toString();
-
-        var result = (Map<String, ?>) client.query("signrawtransactionwithwallet", fundedResponseHex);
-
-        if (result.containsKey("errors")) {
-            List<Map<String, ?>> list = (List<Map<String, ?>>) result.get("errors");
-            var sb = new StringBuilder();
-            for (var e : list) {
-                sb.append(e.get("error").toString() + "\n");
-            }
-            t.refreshTransmission(new SigningException(sb.toString()));
-            raiseFailure(t);
-            return;
+        var signed = ext.walletProcessPsbt(walletCreateFundedPsbtResult.psbt());
+        if (!signed.complete()) {
+            throw new SigningException("walletProcessPsbt failed");
+        }
+        var finalized = ext.finalizePsbt(signed);
+        if (!finalized.complete()) {
+            throw new SigningException("finalizePsbt failed");
         }
 
-        var signed = result.get("hex").toString();
-        var transactionHash = client.sendRawTransaction(signed);
+        var transactionHash = client.sendRawTransaction(finalized.hex());
         if (StringUtils.isEmpty(transactionHash)) {
             t.refreshTransmission(new SigningException("Didn't get a txHash after sending transaction."));
             raiseFailure(t);
