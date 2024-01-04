@@ -17,11 +17,14 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class Hwi {
     private final static Logger log = LogManager.getLogger(Hwi.class);
     private File executable;
     private Device signingDevice;
+
+    private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
 
     public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws SigningException {
         init();
@@ -185,7 +188,7 @@ public class Hwi {
 
     private void assertSigningDevicePresent() throws SigningException {
         if (signingDevice == null) {
-            throw new SigningException("Cannot proceed due not signing device was found.");
+            throw new SigningException(res.getString("hwi.noSigningDevice"));
         }
     }
 }
