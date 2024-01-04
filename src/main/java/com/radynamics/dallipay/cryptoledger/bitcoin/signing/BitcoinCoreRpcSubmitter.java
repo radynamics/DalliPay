@@ -7,6 +7,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.api.BitcoinCoreRpcClientExt;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.MultiWalletJsonRpcApi;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.*;
+import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,6 +61,12 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void submit(com.radynamics.dallipay.cryptoledger.Transaction[] transactions) {
+        for (var trx : transactions) {
+            var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
+            t.refreshTransmissionState(TransmissionState.Waiting);
+            raiseProgressChanged(t);
+        }
+
         for (var trx : transactions) {
             var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
 
@@ -145,6 +152,12 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void deleteSettings() {
+    }
+
+    private void raiseProgressChanged(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
+        for (var l : stateListener) {
+            l.onProgressChanged(t);
+        }
     }
 
     public void signingMethod(SigningMethod value) {
