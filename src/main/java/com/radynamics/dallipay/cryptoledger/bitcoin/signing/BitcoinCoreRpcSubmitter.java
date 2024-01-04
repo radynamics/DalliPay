@@ -28,6 +28,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
     private final MultiWalletJsonRpcApi openedWallets;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
+    private SigningMethod signingMethod;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
 
@@ -37,6 +38,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
         this.ledger = ledger;
         this.privateKeyProvider = privateKeyProvider;
         this.openedWallets = openedWallets;
+        signingMethod(new BitcoinCoreSigning());
 
         info = new TransactionSubmitterInfo();
         info.setTitle(res.getString("bitcoinCoreRpcSubmitter.title"));
@@ -63,7 +65,9 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
             var client = openedWallets.client(t.getSenderWallet()).orElseThrow();
             // Necessary if wallet is encrypted.
-            client.walletPassPhrase(privateKeyProvider.get(t.getSenderWallet().getPublicKey()), Duration.ofSeconds(5).toMillis());
+            if (signingMethod.usesWalletPassPhrase()) {
+                client.walletPassPhrase(privateKeyProvider.get(t.getSenderWallet().getPublicKey()), Duration.ofSeconds(5).toMillis());
+            }
 
             try {
                 submit(client, t);
@@ -85,7 +89,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
         var ext = new BitcoinCoreRpcClientExt(client);
         var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs);
 
-        var signed = ext.walletProcessPsbt(walletCreateFundedPsbtResult.psbt());
+        var signed = signingMethod.signPsbt(client, walletCreateFundedPsbtResult);
         if (!signed.complete()) {
             throw new SigningException("walletProcessPsbt failed");
         }
@@ -136,6 +140,10 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
     @Override
     public void deleteSettings() {
+    }
+
+    public void signingMethod(SigningMethod value) {
+        this.signingMethod = value;
     }
 
     private void raiseSuccess(Transaction t) {
