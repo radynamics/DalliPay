@@ -91,7 +91,7 @@ public class Hwi {
             throw new SigningException("%s (Code %s)".formatted(asObject.getString("error"), asObject.getInt("code")));
         }
 
-        return new JSONArray(asObject);
+        return new JSONArray().put(asObject);
     }
 
     public void init() throws SigningException {
