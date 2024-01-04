@@ -39,6 +39,11 @@ public class GemWallet extends BrowserApiSubmitter {
     }
 
     @Override
+    public boolean supportsPayload() {
+        return true;
+    }
+
+    @Override
     public void deleteSettings() {
     }
 }

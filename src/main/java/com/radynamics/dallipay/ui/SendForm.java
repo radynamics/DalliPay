@@ -2,6 +2,7 @@ package com.radynamics.dallipay.ui;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
@@ -54,6 +55,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private JLabel lblExchange;
     private JLabel lblSigningText;
+    private JLabel picSigningWarning;
     private PaymentTable table;
     private FilePathField txtInput;
     private ArrayList<Payment> payments = new ArrayList<>();
@@ -184,8 +186,14 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblSigningText, 60, SpringLayout.NORTH, panel1);
                 panel1.add(lblSigningText);
 
+                picSigningWarning = new JLabel();
+                picSigningWarning.setIcon(new FlatSVGIcon("svg/warningDialog.svg", 16, 16));
+                panel1Layout.putConstraint(SpringLayout.WEST, picSigningWarning, 10, SpringLayout.EAST, lblSigningText);
+                panel1Layout.putConstraint(SpringLayout.NORTH, picSigningWarning, 60, SpringLayout.NORTH, panel1);
+                panel1.add(picSigningWarning);
+
                 var lbl3 = Utils.createLinkLabel(pnlMain, res.getString("edit"));
-                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, lblSigningText);
+                panel1Layout.putConstraint(SpringLayout.WEST, lbl3, 10, SpringLayout.EAST, picSigningWarning);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lbl3, 60, SpringLayout.NORTH, panel1);
                 lbl3.addMouseListener(new MouseAdapter() {
                     @Override
@@ -679,6 +687,13 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
     private void refreshSigningText() {
         lblSigningText.setText(String.format(res.getString("signUsing"), submitter == null ? res.getString("unknown") : submitter.getInfo().getTitle()));
+
+        if (submitter == null) {
+            picSigningWarning.setVisible(false);
+        } else {
+            picSigningWarning.setVisible(!submitter.supportsPayload());
+            picSigningWarning.setToolTipText(res.getString("payloadNotSupported").formatted(submitter.getInfo().getTitle()));
+        }
     }
 
     private boolean showConfirmationForm(Ledger ledger, Payment[] payments) {

@@ -75,6 +75,11 @@ public class BitBox02 implements TransactionSubmitter {
     }
 
     @Override
+    public boolean supportsPayload() {
+        return false;
+    }
+
+    @Override
     public void deleteSettings() {
     }
 

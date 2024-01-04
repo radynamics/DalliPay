@@ -23,5 +23,7 @@ public interface TransactionSubmitter {
 
     boolean supportsPathFinding();
 
+    boolean supportsPayload();
+
     void deleteSettings();
 }

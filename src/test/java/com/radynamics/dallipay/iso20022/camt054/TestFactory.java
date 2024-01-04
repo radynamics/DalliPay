@@ -199,6 +199,11 @@ public class TestFactory {
             }
 
             @Override
+            public boolean supportsPayload() {
+                return true;
+            }
+
+            @Override
             public void deleteSettings() {
             }
         };

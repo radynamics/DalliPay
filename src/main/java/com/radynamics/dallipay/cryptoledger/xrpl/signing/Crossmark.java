@@ -39,6 +39,11 @@ public class Crossmark extends BrowserApiSubmitter {
     }
 
     @Override
+    public boolean supportsPayload() {
+        return true;
+    }
+
+    @Override
     public void deleteSettings() {
     }
 }

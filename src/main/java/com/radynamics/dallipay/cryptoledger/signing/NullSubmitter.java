@@ -46,6 +46,11 @@ public class NullSubmitter implements TransactionSubmitter {
     }
 
     @Override
+    public boolean supportsPayload() {
+        return false;
+    }
+
+    @Override
     public void deleteSettings() {
     }
 }

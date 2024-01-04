@@ -229,6 +229,11 @@ public class RpcSubmitter implements TransactionSubmitter {
     }
 
     @Override
+    public boolean supportsPayload() {
+        return true;
+    }
+
+    @Override
     public void deleteSettings() {
     }
 
