@@ -16,6 +16,7 @@ public class HwiSigning implements SigningMethod {
 
     @Override
     public WalletProcessPsbtResult signPsbt(BitcoinJSONRPCClient client, WalletCreateFundedPsbtResult funded) throws SigningException {
+        hwi.chain(client.getBlockChainInfo().chain());
         return hwi.signPsbt(funded);
     }
 

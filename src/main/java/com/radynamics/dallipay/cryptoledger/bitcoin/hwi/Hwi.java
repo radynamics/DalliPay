@@ -23,6 +23,7 @@ public class Hwi {
     private final static Logger log = LogManager.getLogger(Hwi.class);
     private File executable;
     private Device signingDevice;
+    private String chain;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
 
@@ -33,8 +34,7 @@ public class Hwi {
 
         var args = new String[]{
                 "-f", signingDevice.fingerprint(),
-                // TODO: handle main/testnet
-                "--chain", "test",
+                "--chain", chain,
                 "signtx", funded.psbt()
         };
         var result = execObject(args);
@@ -190,5 +190,9 @@ public class Hwi {
         if (signingDevice == null) {
             throw new SigningException(res.getString("hwi.noSigningDevice"));
         }
+    }
+
+    public void chain(String chain) {
+        this.chain = chain;
     }
 }
