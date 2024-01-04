@@ -15,4 +15,9 @@ public class BitcoinCoreSigning implements SigningMethod {
     public boolean usesWalletPassPhrase() {
         return true;
     }
+
+    @Override
+    public boolean supportsPayload() {
+        return true;
+    }
 }

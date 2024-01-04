@@ -45,7 +45,7 @@ public class BitBox02 implements TransactionSubmitter {
     @Override
     public void submit(Transaction[] transactions) {
         var s = ledger.createRpcTransactionSubmitter(getPrivateKeyProvider());
-        s.signingMethod(new HwiSigning());
+        s.signingMethod(new HwiSigning(supportsPayload()));
         s.submit(transactions);
     }
 

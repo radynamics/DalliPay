@@ -85,7 +85,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
         var commentBytes = StringUtils.isEmpty(comment) ? null : comment.getBytes(StandardCharsets.UTF_8);
 
         var outputs = new ArrayList<BitcoindRpcClient.TxOutput>();
-        outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, commentBytes));
+        outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, signingMethod.supportsPayload() ? commentBytes : null));
         var ext = new BitcoinCoreRpcClientExt(client);
         var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs);
 
@@ -140,7 +140,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
     @Override
     public boolean supportsPayload() {
-        return true;
+        return signingMethod.supportsPayload();
     }
 
     @Override

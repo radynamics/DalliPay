@@ -9,4 +9,6 @@ public interface SigningMethod {
     WalletProcessPsbtResult signPsbt(BitcoinJSONRPCClient client, WalletCreateFundedPsbtResult funded) throws SigningException;
 
     boolean usesWalletPassPhrase();
+
+    boolean supportsPayload();
 }
