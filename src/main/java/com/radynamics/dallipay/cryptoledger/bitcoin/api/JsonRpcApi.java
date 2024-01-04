@@ -11,7 +11,6 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmit
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
-import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Utils;
@@ -182,7 +181,7 @@ public class JsonRpcApi {
         return DateTimeConvert.toUserTimeZone(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dt.getTime()), ZoneId.of("UTC")));
     }
 
-    public TransactionSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
+    public BitcoinCoreRpcSubmitter createTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
         return new BitcoinCoreRpcSubmitter(ledger, privateKeyProvider, openedWallets);
     }
 

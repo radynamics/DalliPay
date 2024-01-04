@@ -7,8 +7,9 @@ import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
+import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.generic.*;
-import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
 import com.radynamics.dallipay.cryptoledger.signing.UserDialogPrivateKeyProvider;
 import com.radynamics.dallipay.exchange.*;
@@ -275,7 +276,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Sat"), SATOSHI_PER_BTC, LedgerCurrencyFormat.SmallestUnit, ledgerCurrencyFormat);
     }
 
-    public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
+    public BitcoinCoreRpcSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
+    }
+
+    public BitcoinCoreRpcSubmitter createRpcTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
+        return api.createTransactionSubmitter(privateKeyProvider);
     }
 }

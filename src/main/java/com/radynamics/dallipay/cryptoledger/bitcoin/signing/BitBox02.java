@@ -4,7 +4,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.signing.*;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +13,7 @@ import java.util.ResourceBundle;
 
 public class BitBox02 implements TransactionSubmitter {
     private final static Logger log = LogManager.getLogger(BitBox02.class);
-    private final Ledger ledger;
+    private final com.radynamics.dallipay.cryptoledger.bitcoin.Ledger ledger;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
 
@@ -22,7 +21,7 @@ public class BitBox02 implements TransactionSubmitter {
 
     public final static String Id = "bitbox02";
 
-    public BitBox02(Ledger ledger) {
+    public BitBox02(com.radynamics.dallipay.cryptoledger.bitcoin.Ledger ledger) {
         this.ledger = ledger;
 
         info = new TransactionSubmitterInfo();
@@ -45,20 +44,9 @@ public class BitBox02 implements TransactionSubmitter {
 
     @Override
     public void submit(Transaction[] transactions) {
-        for (var trx : transactions) {
-            var t = (com.radynamics.dallipay.cryptoledger.generic.Transaction) trx;
-            try {
-                submit(t);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                t.refreshTransmission(e);
-                raiseFailure(t);
-            }
-        }
-    }
-
-    private void submit(com.radynamics.dallipay.cryptoledger.generic.Transaction t) {
-        throw new NotImplementedException();
+        var s = ledger.createRpcTransactionSubmitter(getPrivateKeyProvider());
+        s.signingMethod(new HwiSigning());
+        s.submit(transactions);
     }
 
     @Override
