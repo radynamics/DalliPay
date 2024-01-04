@@ -90,7 +90,7 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
         var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs);
 
         var signed = signingMethod.signPsbt(client, walletCreateFundedPsbtResult);
-        if (!signed.complete()) {
+        if (!signed.signed()) {
             throw new SigningException("walletProcessPsbt failed");
         }
         var finalized = ext.finalizePsbt(signed);
