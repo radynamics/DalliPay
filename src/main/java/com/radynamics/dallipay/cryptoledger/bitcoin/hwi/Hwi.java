@@ -1,28 +1,32 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.hwi;
 
+import com.google.common.io.ByteStreams;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletCreateFundedPsbtResult;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletProcessPsbtResult;
 import com.radynamics.dallipay.cryptoledger.signing.SigningException;
-import org.apache.commons.lang3.NotImplementedException;
+import com.radynamics.dallipay.util.Platform;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Hwi {
+    private final static Logger log = LogManager.getLogger(Hwi.class);
     private File executable;
     private Device signingDevice;
 
     public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws SigningException {
         init();
-        if (signingDevice == null) {
-            throw new SigningException("Cannot proceed due not signing device was found.");
-        }
+        assertExecutablePresent();
+        assertSigningDevicePresent();
 
         var args = new String[]{
                 "-f", signingDevice.fingerprint(),
@@ -93,6 +97,7 @@ public class Hwi {
     public void init() throws SigningException {
         if (executable == null) {
             executable = getExecutable();
+            assertExecutablePresent();
         }
 
         if (signingDevice == null) {
@@ -112,8 +117,68 @@ public class Hwi {
         return items;
     }
 
-    private File getExecutable() {
-        // TODO: ensure hwi binary is present at temp location or extract if needed
-        throw new NotImplementedException();
+    private synchronized File getExecutable() {
+        // Delete first if present to ensure that not an older/outdated version is being used.
+        var tmpDir = System.getProperty("java.io.tmpdir");
+        var execDir = Paths.get(tmpDir, ".dalliPay").toFile();
+        final String HWI_DIR = "hwi";
+        var hwiHome = new File(execDir, HWI_DIR);
+        if (hwiHome.exists()) {
+            hwiHome.delete();
+        }
+
+        try {
+            var platform = Platform.current();
+            var osArch = System.getProperty("os.arch");
+            var ownerExecutableWritable = PosixFilePermissions.fromString("rwxr--r--");
+            InputStream inputStream;
+            Path tempExecPath;
+            if (platform == Platform.WINDOWS) {
+                Files.createDirectories(hwiHome.toPath());
+                inputStream = Hwi.class.getResourceAsStream("/native/windows/x64/hwi.exe");
+                tempExecPath = Files.createTempFile(hwiHome.toPath(), HWI_DIR, null);
+            } else if (platform == Platform.OSX) {
+                if (osArch.equals("aarch64")) {
+                    inputStream = Hwi.class.getResourceAsStream("/native/osx/aarch64/hwi");
+                } else {
+                    inputStream = Hwi.class.getResourceAsStream("/native/osx/x64/hwi");
+                }
+                tempExecPath = Files.createDirectories(hwiHome.toPath(), PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+            } else if (osArch.equals("aarch64")) {
+                inputStream = Hwi.class.getResourceAsStream("/native/linux/aarch64/hwi");
+                tempExecPath = Files.createTempFile(HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+            } else {
+                inputStream = Hwi.class.getResourceAsStream("/native/linux/x64/hwi");
+                tempExecPath = Files.createTempFile(HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+            }
+
+            if (inputStream == null) {
+                throw new IllegalStateException("Cannot load " + HWI_DIR + " from classpath");
+            }
+
+            var tempExec = tempExecPath.toFile();
+            tempExec.deleteOnExit();
+            try (var tempExecStream = new BufferedOutputStream(new FileOutputStream(tempExec))) {
+                ByteStreams.copy(inputStream, tempExecStream);
+                inputStream.close();
+                tempExecStream.flush();
+            }
+            return tempExec;
+        } catch (Exception e) {
+            log.error("Error initializing HWI", e);
+            return null;
+        }
+    }
+
+    private void assertExecutablePresent() throws SigningException {
+        if (executable == null) {
+            throw new SigningException("Cannot proceed due hwi executable is not initialized.");
+        }
+    }
+
+    private void assertSigningDevicePresent() throws SigningException {
+        if (signingDevice == null) {
+            throw new SigningException("Cannot proceed due not signing device was found.");
+        }
     }
 }
