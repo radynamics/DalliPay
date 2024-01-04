@@ -33,7 +33,7 @@ public class BitcoinCoreRpcClientExt {
 
     public WalletProcessPsbtResult walletProcessPsbt(String psbt) {
         var result = (LinkedHashMap<String, ?>) client.query("walletprocesspsbt", psbt);
-        return new WalletProcessPsbtResult(result.get("psbt").toString(), Boolean.parseBoolean(result.get("complete").toString()));
+        return new WalletProcessPsbtResult(result.get("psbt").toString(), Boolean.parseBoolean(result.get("complete").toString()), false);
     }
 
     public FinalizePsbtResult finalizePsbt(WalletProcessPsbtResult signedPsbt) {

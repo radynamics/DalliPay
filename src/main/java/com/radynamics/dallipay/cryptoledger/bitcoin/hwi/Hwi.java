@@ -35,7 +35,11 @@ public class Hwi {
                 "signtx", funded.psbt()
         };
         var result = execObject(args);
-        return new WalletProcessPsbtResult(result.getString("psbt"), result.getBoolean("signed"));
+        if (result.has("error")) {
+            return new WalletProcessPsbtResult(null, false, true);
+        } else {
+            return new WalletProcessPsbtResult(result.getString("psbt"), result.getBoolean("signed"), false);
+        }
     }
 
     private JSONObject execObject(String[] args) throws SigningException {
@@ -88,7 +92,10 @@ public class Hwi {
         }
 
         if (asObject.has("error")) {
-            throw new SigningException("%s (Code %s)".formatted(asObject.getString("error"), asObject.getInt("code")));
+            final var CODE_CANCELLED = -14;
+            if (asObject.getInt("code") != CODE_CANCELLED) {
+                throw new SigningException("%s (Code %s)".formatted(asObject.getString("error"), asObject.getInt("code")));
+            }
         }
 
         return new JSONArray().put(asObject);
