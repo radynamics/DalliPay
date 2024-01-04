@@ -2,18 +2,18 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 public class WalletProcessPsbtResult {
     private final String psbt;
-    private final boolean complete;
+    private final boolean signed;
 
     public WalletProcessPsbtResult(String psbt, boolean complete) {
         this.psbt = psbt;
-        this.complete = complete;
+        this.signed = complete;
     }
 
     public String psbt() {
         return psbt;
     }
 
-    public boolean complete() {
-        return complete;
+    public boolean signed() {
+        return signed;
     }
 }

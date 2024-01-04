@@ -35,7 +35,7 @@ public class Hwi {
                 "signtx", funded.psbt()
         };
         var result = execObject(args);
-        return new WalletProcessPsbtResult(result.getString("psbt"), result.getBoolean("complete"));
+        return new WalletProcessPsbtResult(result.getString("psbt"), result.getBoolean("signed"));
     }
 
     private JSONObject execObject(String[] args) throws SigningException {
