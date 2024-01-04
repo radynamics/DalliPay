@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin;
 
+import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitBox02;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
 
@@ -21,6 +22,9 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
             case BitcoinCoreRpcSubmitter.Id: {
                 return ledger.createRpcTransactionSubmitter(parentComponent);
             }
+            case BitBox02.Id: {
+                return new BitBox02(ledger);
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + id);
         }
@@ -31,6 +35,7 @@ public class TransactionSubmitterFactory implements com.radynamics.dallipay.cryp
         var list = new ArrayList<TransactionSubmitter>();
 
         list.add(create(BitcoinCoreRpcSubmitter.Id, parentComponent));
+        list.add(create(BitBox02.Id, parentComponent));
 
         return list.toArray(new TransactionSubmitter[0]);
     }
