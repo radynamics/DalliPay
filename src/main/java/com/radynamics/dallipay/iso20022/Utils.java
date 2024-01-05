@@ -7,6 +7,7 @@ import org.apache.commons.codec.binary.Hex;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -44,5 +45,15 @@ public class Utils {
 
     public static ZonedDateTime endOfDay(ZonedDateTime dt) {
         return dt.with(LocalTime.of(23, 59, 59));
+    }
+
+    public static boolean deleteDirectory(File dir) {
+        var files = dir.listFiles();
+        if (files != null) {
+            for (var file : files) {
+                deleteDirectory(file);
+            }
+        }
+        return dir.delete();
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletCreateFundedPsbtResult;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletProcessPsbtResult;
 import com.radynamics.dallipay.cryptoledger.signing.SigningException;
+import com.radynamics.dallipay.iso20022.Utils;
 import com.radynamics.dallipay.util.Platform;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -143,7 +144,7 @@ public class Hwi {
         final String HWI_DIR = "hwi";
         var hwiHome = new File(execDir, HWI_DIR);
         if (hwiHome.exists()) {
-            hwiHome.delete();
+            Utils.deleteDirectory(hwiHome);
         }
 
         try {
