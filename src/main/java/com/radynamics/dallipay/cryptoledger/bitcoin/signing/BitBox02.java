@@ -16,6 +16,7 @@ public class BitBox02 implements TransactionSubmitter {
     private final com.radynamics.dallipay.cryptoledger.bitcoin.Ledger ledger;
     private final TransactionSubmitterInfo info;
     private final ArrayList<TransactionStateListener> stateListener = new ArrayList<>();
+    private final BitcoinCoreRpcSubmitter submitter;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
 
@@ -30,6 +31,25 @@ public class BitBox02 implements TransactionSubmitter {
         info.setDetailUri(URI.create("https://bitbox.swiss"));
         info.setIcon(new FlatSVGIcon("img/bitbox02.svg", 64, 64));
         info.setOrder(100);
+
+        submitter = ledger.createRpcTransactionSubmitter(getPrivateKeyProvider());
+        submitter.signingMethod(new HwiSigning(supportsPayload()));
+        submitter.addStateListener(new TransactionStateListener() {
+            @Override
+            public void onProgressChanged(Transaction t) {
+                raiseProgressChanged(t);
+            }
+
+            @Override
+            public void onSuccess(Transaction t) {
+                raiseSuccess(t);
+            }
+
+            @Override
+            public void onFailure(Transaction t) {
+                raiseFailure(t);
+            }
+        });
     }
 
     @Override
@@ -44,9 +64,7 @@ public class BitBox02 implements TransactionSubmitter {
 
     @Override
     public void submit(Transaction[] transactions) {
-        var s = ledger.createRpcTransactionSubmitter(getPrivateKeyProvider());
-        s.signingMethod(new HwiSigning(supportsPayload()));
-        s.submit(transactions);
+        submitter.submit(transactions);
     }
 
     @Override
@@ -81,6 +99,12 @@ public class BitBox02 implements TransactionSubmitter {
 
     @Override
     public void deleteSettings() {
+    }
+
+    private void raiseProgressChanged(Transaction t) {
+        for (var l : stateListener) {
+            l.onProgressChanged(t);
+        }
     }
 
     private void raiseSuccess(Transaction t) {
