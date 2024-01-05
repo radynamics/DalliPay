@@ -13,6 +13,7 @@ import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import okhttp3.HttpUrl;
 
 import javax.swing.*;
+import java.awt.*;
 
 public interface Ledger {
     LedgerId getId();
@@ -98,4 +99,6 @@ public interface Ledger {
     NetworkId[] networkIds();
 
     LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat);
+
+    WalletSetupProcess createWalletSetupProcess(Component parentComponent);
 }

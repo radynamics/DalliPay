@@ -30,6 +30,11 @@ public class Hwi {
 
     public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws SigningException {
         init();
+
+        if (signingDevice == null) {
+            var devices = enumerate();
+            signingDevice = devices.stream().findFirst().orElse(null);
+        }
         assertExecutablePresent();
         assertSigningDevicePresent();
 
@@ -114,14 +119,10 @@ public class Hwi {
             executable = getExecutable();
             assertExecutablePresent();
         }
-
-        if (signingDevice == null) {
-            var devices = enumerate();
-            signingDevice = devices.stream().findFirst().orElse(null);
-        }
     }
 
-    private ArrayList<Device> enumerate() throws SigningException {
+    public ArrayList<Device> enumerate() throws SigningException {
+        init();
         var result = execArray(new String[]{"enumerate"});
 
         if (result.length() == 1 && result.getJSONObject(0).has("error")) {

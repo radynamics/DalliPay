@@ -396,6 +396,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Drop"), XrpCurrencyAmount.ofXrp(BigDecimal.ONE).value().longValue(), LedgerCurrencyFormat.Native, ledgerCurrencyFormat);
     }
 
+    @Override
+    public WalletSetupProcess createWalletSetupProcess(Component parentComponent) {
+        return null;
+    }
+
     public TransactionSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }

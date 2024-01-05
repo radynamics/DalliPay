@@ -20,6 +20,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Random;
@@ -285,5 +286,10 @@ public class TestLedger implements Ledger {
     @Override
     public LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat) {
         return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Testi"), FACTOR, LedgerCurrencyFormat.Native, ledgerCurrencyFormat);
+    }
+
+    @Override
+    public WalletSetupProcess createWalletSetupProcess(Component parentComponent) {
+        return null;
     }
 }

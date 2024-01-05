@@ -36,6 +36,10 @@ public class GeneralPane extends JPanel {
         contentLayout = new SpringLayout();
         setLayout(contentLayout);
 
+    }
+
+    private void createUiControls() {
+        removeAll();
         var builder = new RowContentBuilder(this, contentLayout);
         {
             final var topOffset = 5;
@@ -98,6 +102,14 @@ public class GeneralPane extends JPanel {
                 var cmd = new JButton(res.getString("create"));
                 cmd.setPreferredSize(new Dimension(150, 35));
                 cmd.addActionListener(e -> onCreateTestWallet());
+                builder.addRowContent(top, cmd);
+                top += 50;
+            }
+            if (ledger.createWalletSetupProcess(this) != null) {
+                builder.addRowLabel(top, res.getString("walletSetup"));
+                var cmd = new JButton(res.getString("start"));
+                cmd.setPreferredSize(new Dimension(150, 35));
+                cmd.addActionListener(e -> onSetupWallet());
                 builder.addRowContent(top, cmd);
                 top += 50;
             }
@@ -209,6 +221,19 @@ public class GeneralPane extends JPanel {
         JOptionPane.showMessageDialog(this, new JScrollPane(txt), res.getString("testWalletCreated"), JOptionPane.INFORMATION_MESSAGE);
     }
 
+    private void onSetupWallet() {
+        var p = ledger.createWalletSetupProcess(this);
+        if (p == null) {
+            return;
+        }
+
+        try {
+            p.start();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+    }
+
     public void save(ConfigRepo repo) throws Exception {
         repo.setLookupProviderId(ledger.getId(), cboExplorer.getSelectedItem().toString());
     }
@@ -221,6 +246,7 @@ public class GeneralPane extends JPanel {
     public void init(Ledger ledger) {
         if (ledger == null) throw new IllegalArgumentException("Parameter 'ledger' cannot be null");
         this.ledger = ledger;
+        createUiControls();
         refreshExplorer();
     }
 }

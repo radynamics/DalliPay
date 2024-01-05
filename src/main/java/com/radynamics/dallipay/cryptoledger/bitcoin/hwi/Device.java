@@ -29,6 +29,10 @@ public class Device {
         return fingerprint;
     }
 
+    public String getDisplayText() {
+        return "%s (%s)".formatted(model, fingerprint);
+    }
+
     @Override
     public String toString() {
         return "%s, %s".formatted(fingerprint, model);

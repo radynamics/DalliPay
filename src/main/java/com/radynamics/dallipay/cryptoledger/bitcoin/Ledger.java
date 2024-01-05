@@ -6,7 +6,10 @@ import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.BitcoinCoreWalletImport;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.JsonRpcApi;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.generic.*;
 import com.radynamics.dallipay.cryptoledger.signing.PrivateKeyProvider;
@@ -23,6 +26,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     private WalletInfoProvider[] walletInfoProvider;
@@ -276,11 +280,24 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Sat"), SATOSHI_PER_BTC, LedgerCurrencyFormat.SmallestUnit, ledgerCurrencyFormat);
     }
 
+    @Override
+    public WalletSetupProcess createWalletSetupProcess(Component parentComponent) {
+        return new BitcoinCoreWalletImport(parentComponent, this);
+    }
+
     public BitcoinCoreRpcSubmitter createRpcTransactionSubmitter(Component parentComponent) {
         return api.createTransactionSubmitter(new UserDialogPrivateKeyProvider(parentComponent));
     }
 
     public BitcoinCoreRpcSubmitter createRpcTransactionSubmitter(PrivateKeyProvider privateKeyProvider) {
         return api.createTransactionSubmitter(privateKeyProvider);
+    }
+
+    public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
+        api.importWallet(wallet, historicTransactionSince);
+    }
+
+    public void importWallet(Device device, LocalDateTime historicTransactionSince) {
+        throw new NotImplementedException();
     }
 }
