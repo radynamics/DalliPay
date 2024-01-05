@@ -38,11 +38,22 @@ public class Hwi {
                 "signtx", funded.psbt()
         };
         var result = execObject(args);
-        if (result.has("error")) {
-            return new WalletProcessPsbtResult(null, false, true);
-        } else {
+        if (!result.has("error")) {
             return new WalletProcessPsbtResult(result.getString("psbt"), result.getBoolean("signed"), false);
         }
+
+        final var CODE_CANCELLED = -14;
+        if (result.getInt("code") == CODE_CANCELLED) {
+            return new WalletProcessPsbtResult(null, false, true);
+        }
+
+        var exceptionMessage = "%s (Code %s)".formatted(result.getString("error"), result.getInt("code"));
+        final var CODE_NO_KEY_FOUND_FOR_INPUT = -7;
+        // Occurs, if user used another wallet and therefore a different wallet rpc was used in bitcoinCore to fund the tx.
+        if (result.getInt("code") == CODE_NO_KEY_FOUND_FOR_INPUT) {
+            throw new SigningException(res.getString("hwi.senderWalletUnknown").formatted(signingDevice.type(), exceptionMessage));
+        }
+        throw new SigningException(exceptionMessage);
     }
 
     private JSONObject execObject(String[] args) throws SigningException {
@@ -94,13 +105,6 @@ public class Hwi {
             throw new SigningException("hwi didn't return a json response. Params: %s, returned: %s".formatted(String.join(" ", args), response));
         }
 
-        if (asObject.has("error")) {
-            final var CODE_CANCELLED = -14;
-            if (asObject.getInt("code") != CODE_CANCELLED) {
-                throw new SigningException("%s (Code %s)".formatted(asObject.getString("error"), asObject.getInt("code")));
-            }
-        }
-
         return new JSONArray().put(asObject);
     }
 
@@ -118,6 +122,11 @@ public class Hwi {
 
     private ArrayList<Device> enumerate() throws SigningException {
         var result = execArray(new String[]{"enumerate"});
+
+        if (result.length() == 1 && result.getJSONObject(0).has("error")) {
+            var error = result.getJSONObject(0);
+            throw new SigningException("%s (Code %s)".formatted(error.getString("error"), error.getInt("code")));
+        }
 
         var items = new ArrayList<Device>();
         for (int i = 0; i < result.length(); i++) {
