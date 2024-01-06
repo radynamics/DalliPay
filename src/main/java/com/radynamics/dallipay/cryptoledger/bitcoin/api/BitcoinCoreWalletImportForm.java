@@ -4,6 +4,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
 import com.radynamics.dallipay.ui.FormAcceptCloseHandler;
+import com.radynamics.dallipay.ui.FormActionListener;
 import com.radynamics.dallipay.ui.Utils;
 import com.radynamics.dallipay.util.RequestFocusListener;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +23,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
     private final JRadioButton rdoAddress = new JRadioButton();
     private final JRadioButton rdoHardwareWallet = new JRadioButton();
     private final JTextField txtWalletAddress = new JTextField();
+    private final ScheduledExecutorService deviceSearchExecutor = Executors.newSingleThreadScheduledExecutor();
     private boolean accepted;
     private final JComboBox<Device> cboDevices = new JComboBox<>();
     private final JLabel lblSearching = new JLabel();
@@ -33,7 +36,18 @@ public class BitcoinCoreWalletImportForm extends JDialog {
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
-        formAcceptCloseHandler.addFormActionListener(this::acceptDialog);
+        formAcceptCloseHandler.addFormActionListener(new FormActionListener() {
+            @Override
+            public void onAccept() {
+                deviceSearchExecutor.shutdown();
+                acceptDialog();
+            }
+
+            @Override
+            public void onCancel() {
+                deviceSearchExecutor.shutdown();
+            }
+        });
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -186,8 +200,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 }
             }
         };
-        var executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(task, 0, 1000, TimeUnit.MILLISECONDS);
+        deviceSearchExecutor.scheduleAtFixedRate(task, 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     private void acceptDialog() {
