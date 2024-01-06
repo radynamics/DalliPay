@@ -90,13 +90,18 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 contentLayout.putConstraint(SpringLayout.WEST, rdoAddress, 0, SpringLayout.WEST, pnlContent);
                 contentLayout.putConstraint(SpringLayout.NORTH, rdoAddress, 0, SpringLayout.NORTH, pnlContent);
                 pnlContent.add(rdoAddress);
+                final int LBL_LEFT = 25;
+                final int INPUT_LEFT = 90;
+                final int OFFNSET_TOP = 5;
                 {
-                    var pnlRdo = new JPanel();
-                    contentLayout.putConstraint(SpringLayout.WEST, pnlRdo, 20, SpringLayout.WEST, rdoAddress);
-                    contentLayout.putConstraint(SpringLayout.NORTH, pnlRdo, 0, SpringLayout.SOUTH, rdoAddress);
-                    pnlContent.add(pnlRdo);
-                    pnlRdo.add(new JLabel(res.getString("address")));
-                    pnlRdo.add(txtWalletAddress);
+                    var lbl = new JLabel(res.getString("address"));
+                    contentLayout.putConstraint(SpringLayout.WEST, lbl, LBL_LEFT, SpringLayout.WEST, rdoAddress);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
+                    pnlContent.add(lbl);
+
+                    contentLayout.putConstraint(SpringLayout.WEST, txtWalletAddress, INPUT_LEFT, SpringLayout.WEST, rdoAddress);
+                    contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
+                    pnlContent.add(txtWalletAddress);
                 }
                 rdoHardwareWallet.setText(res.getString("setupHardwareWallet"));
                 group.add(rdoHardwareWallet);
@@ -105,22 +110,26 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 contentLayout.putConstraint(SpringLayout.NORTH, rdoHardwareWallet, 40, SpringLayout.SOUTH, rdoAddress);
                 pnlContent.add(rdoHardwareWallet);
                 {
-                    var pnlRdo = new JPanel();
-                    contentLayout.putConstraint(SpringLayout.WEST, pnlRdo, 20, SpringLayout.WEST, rdoHardwareWallet);
-                    contentLayout.putConstraint(SpringLayout.NORTH, pnlRdo, 0, SpringLayout.SOUTH, rdoHardwareWallet);
-                    pnlContent.add(pnlRdo);
-                    pnlRdo.add(new JLabel(res.getString("device")));
+                    var lbl = new JLabel(res.getString("device"));
+                    contentLayout.putConstraint(SpringLayout.WEST, lbl, LBL_LEFT, SpringLayout.WEST, rdoHardwareWallet);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    pnlContent.add(lbl);
                     cboDevices.setRenderer(new DefaultListCellRenderer() {
                         @Override
                         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                             return super.getListCellRendererComponent(list, value == null ? "" : ((Device) value).getDisplayText(), index, isSelected, cellHasFocus);
                         }
                     });
-                    pnlRdo.add(cboDevices);
+                    cboDevices.setPrototypeDisplayValue(new Device("testDevice", "testPath", "testModelName", "123456789"));
+                    contentLayout.putConstraint(SpringLayout.WEST, cboDevices, INPUT_LEFT, SpringLayout.WEST, rdoHardwareWallet);
+                    contentLayout.putConstraint(SpringLayout.NORTH, cboDevices, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    pnlContent.add(cboDevices);
 
                     lblSearching.setText(res.getString("searching"));
                     lblSearching.setVisible(false);
-                    pnlRdo.add(lblSearching);
+                    contentLayout.putConstraint(SpringLayout.WEST, lblSearching, 5, SpringLayout.EAST, cboDevices);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lblSearching, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    pnlContent.add(lblSearching);
                 }
             }
         }
