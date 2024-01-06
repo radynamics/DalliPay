@@ -12,6 +12,7 @@ import java.awt.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class BitcoinCoreWalletImport implements WalletSetupProcess {
     private final Component parentComponent;
@@ -38,12 +39,16 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
         }
 
         var dlg = WaitingForm.create(null, res.getString("walletImportInProgress"));
-        var future = Executors.newCachedThreadPool().submit(() -> {
+        Future<Boolean> future = Executors.newCachedThreadPool().submit(() -> {
             try {
                 if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
                     ledger.importWallet(ledger.createWallet(frm.walletAddress()), frm.historicTransactionSince());
+                    return true;
                 } else if (frm.importDevice() && frm.device() != null) {
                     ledger.importWallet(frm.device(), frm.historicTransactionSince());
+                    return true;
+                } else {
+                    return false;
                 }
             } catch (ApiException e) {
                 throw new RuntimeException(e);
@@ -54,7 +59,9 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
 
         try {
             dlg.setVisible(true);
-            future.get();
+            if (!future.get()) {
+                return;
+            }
         } catch (InterruptedException | ExecutionException e) {
             if (e.getCause() instanceof BitcoinRPCException) {
                 final var rpcEx = (BitcoinRPCException) e.getCause();
