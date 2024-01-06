@@ -5,6 +5,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
 import com.radynamics.dallipay.cryptoledger.signing.SigningException;
 import com.radynamics.dallipay.ui.FormAcceptCloseHandler;
 import com.radynamics.dallipay.ui.Utils;
+import com.radynamics.dallipay.util.RequestFocusListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -100,6 +101,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                     pnlContent.add(lbl);
 
                     txtWalletAddress.setColumns(30);
+                    txtWalletAddress.addAncestorListener(new RequestFocusListener());
                     contentLayout.putConstraint(SpringLayout.WEST, txtWalletAddress, INPUT_LEFT, SpringLayout.WEST, rdoAddress);
                     contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(txtWalletAddress);
