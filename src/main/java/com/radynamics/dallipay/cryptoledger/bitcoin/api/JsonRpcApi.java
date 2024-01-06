@@ -7,6 +7,7 @@ import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.memo.PayloadConverter;
@@ -223,6 +224,10 @@ public class JsonRpcApi {
 
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
         openedWallets.importWallet(wallet, historicTransactionSince);
+    }
+
+    public void importWallet(Device device, LocalDateTime historicTransactionSince, String walletName) throws ApiException {
+        openedWallets.importWallet(device, historicTransactionSince, walletName);
     }
 
     public boolean isValidWalletPassPhrase(Wallet wallet) {

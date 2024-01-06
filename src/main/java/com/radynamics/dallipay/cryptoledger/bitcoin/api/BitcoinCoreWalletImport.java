@@ -45,7 +45,7 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
                     ledger.importWallet(ledger.createWallet(frm.walletAddress()), frm.historicTransactionSince());
                     return true;
                 } else if (frm.importDevice() && frm.device() != null) {
-                    ledger.importWallet(frm.device(), frm.historicTransactionSince());
+                    ledger.importWallet(frm.device(), frm.historicTransactionSince(), frm.device().type());
                     return true;
                 } else {
                     return false;

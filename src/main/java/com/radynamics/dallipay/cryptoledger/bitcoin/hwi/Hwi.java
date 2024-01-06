@@ -127,16 +127,30 @@ public class Hwi {
     public ArrayList<Device> enumerate() throws HwiException {
         init();
         var result = execArray(new String[]{"enumerate"});
-
-        if (result.length() == 1 && result.getJSONObject(0).has("error")) {
-            var error = result.getJSONObject(0);
-            throw new HwiException("%s (Code %s)".formatted(error.getString("error"), error.getInt("code")));
-        }
+        assertNoError(result);
 
         var items = new ArrayList<Device>();
         for (int i = 0; i < result.length(); i++) {
             var obj = result.getJSONObject(i);
             items.add(new Device(obj.getString("type"), obj.getString("path"), obj.getString("model"), obj.getString("fingerprint")));
+        }
+        return items;
+    }
+
+    public ArrayList<KeyPool> keypool(Device device, int start, int end) throws HwiException {
+        init();
+        var args = new String[]{
+                "-f", device.fingerprint(),
+                "--chain", chain,
+                "getkeypool", String.valueOf(start), String.valueOf(end)
+        };
+        var result = execArray(args);
+        assertNoError(result);
+
+        var items = new ArrayList<KeyPool>();
+        for (int i = 0; i < result.length(); i++) {
+            var obj = result.getJSONObject(i);
+            items.add(new KeyPool(obj.toString(), obj.getString("desc")));
         }
         return items;
     }
@@ -203,6 +217,13 @@ public class Hwi {
     private void assertSigningDevicePresent() throws HwiException {
         if (signingDevice == null) {
             throw new HwiException(res.getString("hwi.noSigningDevice"));
+        }
+    }
+
+    private void assertNoError(JSONArray result) throws HwiException {
+        if (result.length() == 1 && result.getJSONObject(0).has("error")) {
+            var error = result.getJSONObject(0);
+            throw new HwiException("%s (Code %s)".formatted(error.getString("error"), error.getInt("code")));
         }
     }
 

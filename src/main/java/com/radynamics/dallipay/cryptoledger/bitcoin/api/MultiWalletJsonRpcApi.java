@@ -4,12 +4,15 @@ import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.KeyPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
-import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -165,18 +168,58 @@ public class MultiWalletJsonRpcApi {
     public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
         init();
         var walletName = wallet.getPublicKey();
-        final boolean disable_private_keys = true;
-        var resultCreate = (LinkedHashMap<String, ?>) genericClient.query("createwallet", walletName, disable_private_keys);
-        if (!resultCreate.get("name").equals(wallet.getPublicKey())) {
-            throw new ApiException("createwallet failed for %s".formatted(wallet.getPublicKey()));
-        }
+        createWallet(walletName);
+
         var walletAddress = wallet.getPublicKey();
         var resultGetDescriptor = (LinkedHashMap<String, ?>) genericClient.query("getdescriptorinfo", "addr(%s)".formatted(walletAddress));
 
-        // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
         var checksum = resultGetDescriptor.get("checksum");
+        var descriptors = new ArrayList<String>();
+        descriptors.add("addr(%s)#%s".formatted(walletAddress, checksum));
+
+        importDescriptors(walletName, descriptors, historicTransactionSince);
+    }
+
+    public void importWallet(Device device, LocalDateTime historicTransactionSince, String walletName) throws ApiException {
+        init();
+        createWallet(walletName);
+
+        var hwi = Hwi.get();
+        hwi.chain(genericClient.getBlockChainInfo().chain());
+
+        ArrayList<KeyPool> keyPool;
+        try {
+            keyPool = hwi.keypool(device, 0, 1000);
+        } catch (HwiException e) {
+            throw new ApiException(e.getMessage(), e);
+        }
+
+        var descriptors = new ArrayList<String>();
+        for (var kp : keyPool) {
+            descriptors.add(kp.desc());
+        }
+        importDescriptors(walletName, descriptors, historicTransactionSince);
+    }
+
+    private void createWallet(String name) throws ApiException {
+        final boolean disable_private_keys = true;
+        var result = (LinkedHashMap<String, ?>) genericClient.query("createwallet", name, disable_private_keys);
+        if (!result.get("name").equals(name)) {
+            throw new ApiException("createwallet failed for %s".formatted(name));
+        }
+    }
+
+    private void importDescriptors(String walletName, ArrayList<String> descriptors, LocalDateTime historicTransactionSince) throws ApiException {
         var timestamp = historicTransactionSince.isAfter(LocalDateTime.now()) ? "\"now\"" : historicTransactionSince.toEpochSecond(ZoneOffset.UTC);
-        var options = JSON.parse("[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, checksum, timestamp));
+
+        // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
+        var options = new ArrayList<>();
+        for (var d : descriptors) {
+            var elem = new LinkedHashMap<String, Object>();
+            options.add(elem);
+            elem.put("desc", d);
+            elem.put("timestamp", timestamp);
+        }
 
         var walletClient = createClient(network, walletName);
         try {
