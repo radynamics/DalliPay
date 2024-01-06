@@ -38,6 +38,7 @@ public class FormAcceptCloseHandler {
     }
 
     public void close() {
+        raiseCancel();
         dialog.dispose();
     }
 
@@ -51,4 +52,9 @@ public class FormAcceptCloseHandler {
         }
     }
 
+    private void raiseCancel() {
+        for (var l : listener) {
+            l.onCancel();
+        }
+    }
 }
