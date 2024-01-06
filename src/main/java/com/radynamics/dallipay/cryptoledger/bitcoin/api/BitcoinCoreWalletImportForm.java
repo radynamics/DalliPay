@@ -93,17 +93,17 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 pnlContent.add(rdoAddress);
                 final int LBL_LEFT = 25;
                 final int INPUT_LEFT = 90;
-                final int OFFNSET_TOP = 5;
+                final int OFFSET_TOP = 5;
                 {
                     var lbl = new JLabel(res.getString("address"));
                     contentLayout.putConstraint(SpringLayout.WEST, lbl, LBL_LEFT, SpringLayout.WEST, rdoAddress);
-                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(lbl);
 
                     txtWalletAddress.setColumns(30);
                     txtWalletAddress.addAncestorListener(new RequestFocusListener());
                     contentLayout.putConstraint(SpringLayout.WEST, txtWalletAddress, INPUT_LEFT, SpringLayout.WEST, rdoAddress);
-                    contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
+                    contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(txtWalletAddress);
                 }
                 rdoHardwareWallet.setText(res.getString("setupHardwareWallet"));
@@ -115,7 +115,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 {
                     var lbl = new JLabel(res.getString("device"));
                     contentLayout.putConstraint(SpringLayout.WEST, lbl, LBL_LEFT, SpringLayout.WEST, rdoHardwareWallet);
-                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
                     pnlContent.add(lbl);
                     cboDevices.setRenderer(new DefaultListCellRenderer() {
                         @Override
@@ -125,13 +125,13 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                     });
                     cboDevices.setPrototypeDisplayValue(new Device("testDevice", "testPath", "testModelName", "123456789"));
                     contentLayout.putConstraint(SpringLayout.WEST, cboDevices, INPUT_LEFT, SpringLayout.WEST, rdoHardwareWallet);
-                    contentLayout.putConstraint(SpringLayout.NORTH, cboDevices, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    contentLayout.putConstraint(SpringLayout.NORTH, cboDevices, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
                     pnlContent.add(cboDevices);
 
                     lblSearching.setText(res.getString("searching"));
                     lblSearching.setVisible(false);
                     contentLayout.putConstraint(SpringLayout.WEST, lblSearching, 5, SpringLayout.EAST, cboDevices);
-                    contentLayout.putConstraint(SpringLayout.NORTH, lblSearching, OFFNSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                    contentLayout.putConstraint(SpringLayout.NORTH, lblSearching, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
                     pnlContent.add(lblSearching);
                 }
             }
