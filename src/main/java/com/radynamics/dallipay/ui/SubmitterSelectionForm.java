@@ -27,7 +27,16 @@ public class SubmitterSelectionForm extends JDialog {
         setIconImage(Utils.getProductIcon());
 
         formAcceptCloseHandler.configure();
-        formAcceptCloseHandler.addFormActionListener(this::acceptDialog);
+        formAcceptCloseHandler.addFormActionListener(new FormActionListener() {
+            @Override
+            public void onAccept() {
+                acceptDialog();
+            }
+
+            @Override
+            public void onCancel() {
+            }
+        });
 
         var pnlMain = new JPanel();
         pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
