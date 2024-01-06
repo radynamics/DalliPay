@@ -27,6 +27,10 @@ public class Hwi {
     private String chain;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.TransactionSubmitter");
+    private static Hwi INSTANCE;
+
+    private Hwi() {
+    }
 
     public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws SigningException {
         init();
@@ -201,6 +205,19 @@ public class Hwi {
         if (signingDevice == null) {
             throw new SigningException(res.getString("hwi.noSigningDevice"));
         }
+    }
+
+    public static synchronized Hwi get() {
+        if (INSTANCE == null) {
+            INSTANCE = new Hwi();
+            try {
+                INSTANCE.init();
+            } catch (SigningException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+
+        return INSTANCE;
     }
 
     public void chain(String chain) {

@@ -165,7 +165,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
     }
 
     private void startDeviceSearch() {
-        var hwi = new Hwi();
+        var hwi = Hwi.get();
         var mutex = new Semaphore(1);
         var task = new TimerTask() {
             public synchronized void run() {

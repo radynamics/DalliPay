@@ -7,7 +7,7 @@ import com.radynamics.dallipay.cryptoledger.signing.SigningException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 
 public class HwiSigning implements SigningMethod {
-    private final Hwi hwi = new Hwi();
+    private final Hwi hwi = Hwi.get();
     private final boolean supportsPayload;
 
     public HwiSigning(boolean supportsPayload) {
