@@ -3,7 +3,6 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.hwi;
 import com.google.common.io.ByteStreams;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletCreateFundedPsbtResult;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.WalletProcessPsbtResult;
-import com.radynamics.dallipay.cryptoledger.signing.SigningException;
 import com.radynamics.dallipay.iso20022.Utils;
 import com.radynamics.dallipay.util.Platform;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +31,7 @@ public class Hwi {
     private Hwi() {
     }
 
-    public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws SigningException {
+    public WalletProcessPsbtResult signPsbt(WalletCreateFundedPsbtResult funded) throws HwiException {
         init();
 
         if (signingDevice == null) {
@@ -61,20 +60,20 @@ public class Hwi {
         final var CODE_NO_KEY_FOUND_FOR_INPUT = -7;
         // Occurs, if user used another wallet and therefore a different wallet rpc was used in bitcoinCore to fund the tx.
         if (result.getInt("code") == CODE_NO_KEY_FOUND_FOR_INPUT) {
-            throw new SigningException(res.getString("hwi.senderWalletUnknown").formatted(signingDevice.type(), exceptionMessage));
+            throw new HwiException(res.getString("hwi.senderWalletUnknown").formatted(signingDevice.type(), exceptionMessage));
         }
-        throw new SigningException(exceptionMessage);
+        throw new HwiException(exceptionMessage);
     }
 
-    private JSONObject execObject(String[] args) throws SigningException {
+    private JSONObject execObject(String[] args) throws HwiException {
         return exec(args).getJSONObject(0);
     }
 
-    private JSONArray execArray(String[] args) throws SigningException {
+    private JSONArray execArray(String[] args) throws HwiException {
         return exec(args);
     }
 
-    private JSONArray exec(String[] args) throws SigningException {
+    private JSONArray exec(String[] args) throws HwiException {
         var arguments = new ArrayList<String>();
         arguments.add(executable.getAbsolutePath());
         arguments.addAll(List.of(args));
@@ -92,7 +91,7 @@ public class Hwi {
 
             response = sb.toString();
         } catch (IOException e) {
-            throw new SigningException(e.getMessage(), e);
+            throw new HwiException(e.getMessage(), e);
         }
 
         JSONObject asObject = null;
@@ -112,26 +111,26 @@ public class Hwi {
         }
 
         if (asObject == null) {
-            throw new SigningException("hwi didn't return a json response. Params: %s, returned: %s".formatted(String.join(" ", args), response));
+            throw new HwiException("hwi didn't return a json response. Params: %s, returned: %s".formatted(String.join(" ", args), response));
         }
 
         return new JSONArray().put(asObject);
     }
 
-    public void init() throws SigningException {
+    public void init() throws HwiException {
         if (executable == null) {
             executable = getExecutable();
             assertExecutablePresent();
         }
     }
 
-    public ArrayList<Device> enumerate() throws SigningException {
+    public ArrayList<Device> enumerate() throws HwiException {
         init();
         var result = execArray(new String[]{"enumerate"});
 
         if (result.length() == 1 && result.getJSONObject(0).has("error")) {
             var error = result.getJSONObject(0);
-            throw new SigningException("%s (Code %s)".formatted(error.getString("error"), error.getInt("code")));
+            throw new HwiException("%s (Code %s)".formatted(error.getString("error"), error.getInt("code")));
         }
 
         var items = new ArrayList<Device>();
@@ -195,15 +194,15 @@ public class Hwi {
         }
     }
 
-    private void assertExecutablePresent() throws SigningException {
+    private void assertExecutablePresent() throws HwiException {
         if (executable == null) {
-            throw new SigningException("Cannot proceed due hwi executable is not initialized.");
+            throw new HwiException("Cannot proceed due hwi executable is not initialized.");
         }
     }
 
-    private void assertSigningDevicePresent() throws SigningException {
+    private void assertSigningDevicePresent() throws HwiException {
         if (signingDevice == null) {
-            throw new SigningException(res.getString("hwi.noSigningDevice"));
+            throw new HwiException(res.getString("hwi.noSigningDevice"));
         }
     }
 
@@ -212,7 +211,7 @@ public class Hwi {
             INSTANCE = new Hwi();
             try {
                 INSTANCE.init();
-            } catch (SigningException e) {
+            } catch (HwiException e) {
                 log.error(e.getMessage(), e);
             }
         }

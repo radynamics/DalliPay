@@ -2,7 +2,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
-import com.radynamics.dallipay.cryptoledger.signing.SigningException;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
 import com.radynamics.dallipay.ui.FormAcceptCloseHandler;
 import com.radynamics.dallipay.ui.Utils;
 import com.radynamics.dallipay.util.RequestFocusListener;
@@ -178,7 +178,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                     for (var d : devices) {
                         cboDevices.addItem(d);
                     }
-                } catch (SigningException e) {
+                } catch (HwiException e) {
                     throw new RuntimeException(e);
                 } finally {
                     lblSearching.setVisible(false);
