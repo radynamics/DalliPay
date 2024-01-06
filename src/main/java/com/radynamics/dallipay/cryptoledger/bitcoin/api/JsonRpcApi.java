@@ -222,12 +222,12 @@ public class JsonRpcApi {
         return openedWallets.walletNames();
     }
 
-    public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
-        openedWallets.importWallet(wallet, historicTransactionSince);
+    public void importWallet(String walletName, LocalDateTime historicTransactionSince, Wallet wallet) throws ApiException {
+        openedWallets.importWallet(walletName, historicTransactionSince, wallet);
     }
 
-    public void importWallet(Device device, LocalDateTime historicTransactionSince, String walletName) throws ApiException {
-        openedWallets.importWallet(device, historicTransactionSince, walletName);
+    public void importWallet(String walletName, LocalDateTime historicTransactionSince, Device device) throws ApiException {
+        openedWallets.importWallet(walletName, historicTransactionSince, device);
     }
 
     public boolean isValidWalletPassPhrase(Wallet wallet) {

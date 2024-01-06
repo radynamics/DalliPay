@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
@@ -12,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
     private final JRadioButton rdoHardwareWallet = new JRadioButton();
     private final JTextField txtWalletAddress = new JTextField();
     private final ScheduledExecutorService deviceSearchExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final JTextField txtWalletName = new JTextField();
     private boolean accepted;
     private final JComboBox<Device> cboDevices = new JComboBox<>();
     private final JLabel lblSearching = new JLabel();
@@ -149,6 +152,19 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                     pnlContent.add(lblSearching);
                 }
             }
+            {
+                final int OFFSET_TOP = 50;
+                var lbl = new JLabel(res.getString("name"));
+                contentLayout.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, pnlContent);
+                contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                pnlContent.add(lbl);
+
+                txtWalletName.setColumns(30);
+                txtWalletName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "accounting");
+                contentLayout.putConstraint(SpringLayout.WEST, txtWalletName, 90, SpringLayout.WEST, rdoAddress);
+                contentLayout.putConstraint(SpringLayout.NORTH, txtWalletName, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
+                pnlContent.add(txtWalletName);
+            }
         }
 
         {
@@ -233,5 +249,10 @@ public class BitcoinCoreWalletImportForm extends JDialog {
 
     public LocalDateTime historicTransactionSince() {
         return LocalDateTime.now().minusMonths(3);
+    }
+
+    public Optional<String> walletName() {
+        var value = txtWalletName.getText().trim();
+        return value.isEmpty() ? Optional.empty() : Optional.of(value);
     }
 }

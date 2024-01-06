@@ -165,9 +165,8 @@ public class MultiWalletJsonRpcApi {
         return new ArrayList<>(walletClients.keySet());
     }
 
-    public void importWallet(Wallet wallet, LocalDateTime historicTransactionSince) throws ApiException {
+    public void importWallet(String walletName, LocalDateTime historicTransactionSince, Wallet wallet) throws ApiException {
         init();
-        var walletName = wallet.getPublicKey();
         createWallet(walletName);
 
         var walletAddress = wallet.getPublicKey();
@@ -180,7 +179,7 @@ public class MultiWalletJsonRpcApi {
         importDescriptors(walletName, descriptors, historicTransactionSince);
     }
 
-    public void importWallet(Device device, LocalDateTime historicTransactionSince, String walletName) throws ApiException {
+    public void importWallet(String walletName, LocalDateTime historicTransactionSince, Device device) throws ApiException {
         init();
         createWallet(walletName);
 

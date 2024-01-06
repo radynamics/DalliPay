@@ -42,10 +42,10 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
         Future<Boolean> future = Executors.newCachedThreadPool().submit(() -> {
             try {
                 if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
-                    ledger.importWallet(ledger.createWallet(frm.walletAddress()), frm.historicTransactionSince());
+                    ledger.importWallet(frm.walletName().orElse(frm.walletAddress()), frm.historicTransactionSince(), ledger.createWallet(frm.walletAddress()));
                     return true;
                 } else if (frm.importDevice() && frm.device() != null) {
-                    ledger.importWallet(frm.device(), frm.historicTransactionSince(), frm.device().type());
+                    ledger.importWallet(frm.walletName().orElse(frm.device().type()), frm.historicTransactionSince(), frm.device());
                     return true;
                 } else {
                     return false;
