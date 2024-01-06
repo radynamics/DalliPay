@@ -99,6 +99,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                     contentLayout.putConstraint(SpringLayout.NORTH, lbl, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(lbl);
 
+                    txtWalletAddress.setColumns(30);
                     contentLayout.putConstraint(SpringLayout.WEST, txtWalletAddress, INPUT_LEFT, SpringLayout.WEST, rdoAddress);
                     contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFNSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(txtWalletAddress);
