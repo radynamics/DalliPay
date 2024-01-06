@@ -179,14 +179,17 @@ public class MultiWalletJsonRpcApi {
         var options = JSON.parse("[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, checksum, timestamp));
 
         var walletClient = createClient(network, walletName);
-        var resultImportDescriptor = (ArrayList<?>) walletClient.query("importdescriptors", options);
-        var resultMap = (LinkedHashMap<String, ?>) resultImportDescriptor.get(0);
-        if (!(Boolean) resultMap.get("success")) {
-            var error = (LinkedHashMap<String, ?>) resultMap.get("error");
-            throw new ApiException("importdescriptors failed for %s (%s :%s)".formatted(walletName, error.get("code"), error.get("message")));
+        try {
+            var resultImportDescriptor = (ArrayList<?>) walletClient.query("importdescriptors", options);
+            var resultMap = (LinkedHashMap<String, ?>) resultImportDescriptor.get(0);
+            if (!(Boolean) resultMap.get("success")) {
+                var error = (LinkedHashMap<String, ?>) resultMap.get("error");
+                throw new ApiException("importdescriptors failed for %s (%s :%s)".formatted(walletName, error.get("code"), error.get("message")));
+            }
+        } finally {
+            // If user aborts rescan in bitcoinCore, we're able to fetch already scanned data.
+            walletClients.put(walletName, walletClient);
         }
-
-        walletClients.put(walletName, walletClient);
     }
 
     public BitcoindRpcClient.SmartFeeResult estimateSmartFee(int targetInBlocks) {
