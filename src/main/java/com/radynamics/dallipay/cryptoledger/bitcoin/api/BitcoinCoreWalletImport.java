@@ -2,11 +2,16 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.cryptoledger.WalletSetupProcess;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
+import com.radynamics.dallipay.ui.WaitingForm;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class BitcoinCoreWalletImport implements WalletSetupProcess {
     private final Component parentComponent;
@@ -32,15 +37,33 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
             return;
         }
 
-        try {
-            if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
-                ledger.importWallet(ledger.createWallet(frm.walletAddress()), frm.historicTransactionSince());
-            } else if (frm.importDevice() && frm.device() != null) {
-                ledger.importWallet(frm.device(), frm.historicTransactionSince());
-            } else {
-                return;
+        var dlg = WaitingForm.create(null, res.getString("walletImportInProgress"));
+        var future = Executors.newCachedThreadPool().submit(() -> {
+            try {
+                if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
+                    ledger.importWallet(ledger.createWallet(frm.walletAddress()), frm.historicTransactionSince());
+                } else if (frm.importDevice() && frm.device() != null) {
+                    ledger.importWallet(frm.device(), frm.historicTransactionSince());
+                }
+            } catch (ApiException e) {
+                throw new RuntimeException(e);
+            } finally {
+                dlg.setVisible(false);
             }
-        } catch (ApiException e) {
+        });
+
+        try {
+            dlg.setVisible(true);
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            if (e.getCause() instanceof BitcoinRPCException) {
+                final var rpcEx = (BitcoinRPCException) e.getCause();
+                final var resultJson = new JSONObject(rpcEx.getResponse());
+                final var ERR_RESCAN_ABORTED_BY_USER = -1;
+                if (resultJson.getJSONObject("error").getInt("code") == ERR_RESCAN_ABORTED_BY_USER) {
+                    return;
+                }
+            }
             throw new RuntimeException(e);
         }
 
