@@ -4,15 +4,14 @@ import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
-import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
-import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
-import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
-import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.KeyPool;
+import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
+import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -173,10 +172,13 @@ public class MultiWalletJsonRpcApi {
         var resultGetDescriptor = (LinkedHashMap<String, ?>) genericClient.query("getdescriptorinfo", "addr(%s)".formatted(walletAddress));
 
         var checksum = resultGetDescriptor.get("checksum");
-        var descriptors = new ArrayList<String>();
-        descriptors.add("addr(%s)#%s".formatted(walletAddress, checksum));
+        // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
+        var options = "[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, checksum, toTimestamp(historicTransactionSince));
+        importDescriptors(walletName, options);
+    }
 
-        importDescriptors(walletName, descriptors, historicTransactionSince);
+    private static Object toTimestamp(LocalDateTime historicTransactionSince) {
+        return historicTransactionSince.isAfter(LocalDateTime.now()) ? "\"now\"" : historicTransactionSince.toEpochSecond(ZoneOffset.UTC);
     }
 
     public void importWallet(String walletName, LocalDateTime historicTransactionSince, Device device) throws ApiException {
@@ -193,11 +195,12 @@ public class MultiWalletJsonRpcApi {
             throw new ApiException(e.getMessage(), e);
         }
 
-        var descriptors = new ArrayList<String>();
+        var arr = new JSONArray();
         for (var kp : keyPool) {
-            descriptors.add(kp.desc());
+            kp.timestamp(toTimestamp(historicTransactionSince));
+            arr.put(KeyPoolJsonSerializer.toJson(kp));
         }
-        importDescriptors(walletName, descriptors, historicTransactionSince);
+        importDescriptors(walletName, arr.toString());
     }
 
     private void createWallet(String name) throws ApiException {
@@ -208,17 +211,8 @@ public class MultiWalletJsonRpcApi {
         }
     }
 
-    private void importDescriptors(String walletName, ArrayList<String> descriptors, LocalDateTime historicTransactionSince) throws ApiException {
-        var timestamp = historicTransactionSince.isAfter(LocalDateTime.now()) ? "\"now\"" : historicTransactionSince.toEpochSecond(ZoneOffset.UTC);
-
-        // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
-        var options = new ArrayList<>();
-        for (var d : descriptors) {
-            var elem = new LinkedHashMap<String, Object>();
-            options.add(elem);
-            elem.put("desc", d);
-            elem.put("timestamp", timestamp);
-        }
+    private void importDescriptors(String walletName, String jsonOptions) throws ApiException {
+        var options = JSON.parse(jsonOptions);
 
         var walletClient = createClient(network, walletName);
         try {

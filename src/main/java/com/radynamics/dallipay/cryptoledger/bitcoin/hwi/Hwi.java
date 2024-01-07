@@ -149,8 +149,7 @@ public class Hwi {
 
         var items = new ArrayList<KeyPool>();
         for (int i = 0; i < result.length(); i++) {
-            var obj = result.getJSONObject(i);
-            items.add(new KeyPool(obj.toString(), obj.getString("desc")));
+            items.add(KeyPoolJsonSerializer.parse(result.getJSONObject(i)));
         }
         return items;
     }
