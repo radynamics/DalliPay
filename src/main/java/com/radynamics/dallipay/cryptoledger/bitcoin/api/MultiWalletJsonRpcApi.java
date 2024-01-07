@@ -205,7 +205,13 @@ public class MultiWalletJsonRpcApi {
 
     private void createWallet(String name) throws ApiException {
         final boolean disable_private_keys = true;
-        var result = (LinkedHashMap<String, ?>) genericClient.query("createwallet", name, disable_private_keys);
+        final boolean blank = false;
+        final String passphrase = null;
+        final boolean avoid_reuse = false;
+        final Boolean descriptors = null;
+        // Necessary to remain accessible via rpc after Bitcoin Core restart.
+        final boolean load_on_startup = true;
+        var result = (LinkedHashMap<String, ?>) genericClient.query("createwallet", name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors, load_on_startup);
         if (!result.get("name").equals(name)) {
             throw new ApiException("createwallet failed for %s".formatted(name));
         }
