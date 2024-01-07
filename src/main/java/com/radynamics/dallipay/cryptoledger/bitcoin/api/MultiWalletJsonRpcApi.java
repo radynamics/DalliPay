@@ -11,7 +11,6 @@ import org.json.JSONArray;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
-import wf.bitcoin.krotjson.JSON;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -19,7 +18,10 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 public class MultiWalletJsonRpcApi {
     final static Logger log = LogManager.getLogger(MultiWalletJsonRpcApi.class);
@@ -53,7 +55,8 @@ public class MultiWalletJsonRpcApi {
     }
 
     private List<String> listNames() {
-        return (List<String>) genericClient.query("listwallets");
+        var ext = new BitcoinCoreRpcClientExt(genericClient);
+        return ext.listWallets();
     }
 
     public List<BitcoindRpcClient.Transaction> listTransactions(String account, int count) {
@@ -83,26 +86,16 @@ public class MultiWalletJsonRpcApi {
     }
 
     private ArrayList<String> listReceivedByAddress(BitcoinJSONRPCClient client, Wallet wallet) {
-        final int minconf = 1;
-        final boolean include_empty = true;
-        final boolean include_watchonly = true;
-        var result = (ArrayList<?>) client.query("listreceivedbyaddress", minconf, include_empty, include_watchonly, wallet.getPublicKey());
-
-        var list = new ArrayList<String>();
-        for (var r : result) {
-            var map = ((LinkedHashMap) r);
-            if (map.get("address").equals(wallet.getPublicKey())) {
-                return (ArrayList<String>) map.get("txids");
-            }
-        }
-        return list;
+        var ext = new BitcoinCoreRpcClientExt(client);
+        return ext.listReceivedByAddress(wallet);
     }
 
     public ArrayList<Wallet> listWallets() {
         init();
         var list = new ArrayList<Wallet>();
         for (var c : walletClients.values()) {
-            var labels = (List<String>) c.query("listlabels");
+            var ext = new BitcoinCoreRpcClientExt(c);
+            var labels = ext.listLabels();
             for (var l : labels) {
                 list.addAll(getAddressesByLabel(c, l));
             }
@@ -113,7 +106,8 @@ public class MultiWalletJsonRpcApi {
     public Optional<BitcoinJSONRPCClient> client(Wallet wallet) {
         init();
         for (var c : walletClients.values()) {
-            for (var l : (List<String>) c.query("listlabels")) {
+            var ext = new BitcoinCoreRpcClientExt(c);
+            for (var l : ext.listLabels()) {
                 for (var w : getAddressesByLabel(c, l)) {
                     if (WalletCompare.isSame(w, wallet)) {
                         return Optional.of(c);
@@ -125,7 +119,8 @@ public class MultiWalletJsonRpcApi {
     }
 
     private List<Wallet> getAddressesByLabel(BitcoinJSONRPCClient client, String label) {
-        var result = (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
+        var ext = new BitcoinCoreRpcClientExt(client);
+        var result = ext.getAddressesByLabel(label);
         var list = new ArrayList<Wallet>();
         for (var kvp : result.entrySet()) {
             list.add(ledger.createWallet(kvp.getKey()));
@@ -169,7 +164,8 @@ public class MultiWalletJsonRpcApi {
         createWallet(walletName);
 
         var walletAddress = wallet.getPublicKey();
-        var resultGetDescriptor = (LinkedHashMap<String, ?>) genericClient.query("getdescriptorinfo", "addr(%s)".formatted(walletAddress));
+        var ext = new BitcoinCoreRpcClientExt(genericClient);
+        var resultGetDescriptor = ext.getDescriptorInfo("addr(%s)".formatted(walletAddress));
 
         var checksum = resultGetDescriptor.get("checksum");
         // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
@@ -204,30 +200,15 @@ public class MultiWalletJsonRpcApi {
     }
 
     private void createWallet(String name) throws ApiException {
-        final boolean disable_private_keys = true;
-        final boolean blank = false;
-        final String passphrase = null;
-        final boolean avoid_reuse = false;
-        final Boolean descriptors = null;
-        // Necessary to remain accessible via rpc after Bitcoin Core restart.
-        final boolean load_on_startup = true;
-        var result = (LinkedHashMap<String, ?>) genericClient.query("createwallet", name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors, load_on_startup);
-        if (!result.get("name").equals(name)) {
-            throw new ApiException("createwallet failed for %s".formatted(name));
-        }
+        var ext = new BitcoinCoreRpcClientExt(genericClient);
+        ext.createWallet(name);
     }
 
     private void importDescriptors(String walletName, String jsonOptions) throws ApiException {
-        var options = JSON.parse(jsonOptions);
-
         var walletClient = createClient(network, walletName);
         try {
-            var resultImportDescriptor = (ArrayList<?>) walletClient.query("importdescriptors", options);
-            var resultMap = (LinkedHashMap<String, ?>) resultImportDescriptor.get(0);
-            if (!(Boolean) resultMap.get("success")) {
-                var error = (LinkedHashMap<String, ?>) resultMap.get("error");
-                throw new ApiException("importdescriptors failed for %s (%s :%s)".formatted(walletName, error.get("code"), error.get("message")));
-            }
+            var ext = new BitcoinCoreRpcClientExt(walletClient);
+            ext.importDescriptors(jsonOptions);
         } finally {
             // If user aborts rescan in bitcoinCore, we're able to fetch already scanned data.
             walletClients.put(walletName, walletClient);
