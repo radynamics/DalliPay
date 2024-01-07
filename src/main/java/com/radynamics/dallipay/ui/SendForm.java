@@ -351,6 +351,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     }
 
     private void onTxtInputChanged() {
+        if (!isEnabled()) {
+            return;
+        }
+
         PaymentInstructionReader reader;
         try {
             reader = PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText()));
