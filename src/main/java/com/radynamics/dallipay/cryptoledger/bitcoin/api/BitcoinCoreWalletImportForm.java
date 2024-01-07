@@ -10,6 +10,8 @@ import com.radynamics.dallipay.ui.Utils;
 import com.radynamics.dallipay.util.RequestFocusListener;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
@@ -103,7 +105,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 var group = new ButtonGroup();
                 rdoAddress.setText(res.getString("setupCustomWallet"));
                 group.add(rdoAddress);
-                rdoAddress.addItemListener(this::onSelectedChanged);
+                rdoAddress.addItemListener(this::onSelectedWalletTypeChanged);
                 rdoAddress.setSelected(true);
                 contentLayout.putConstraint(SpringLayout.WEST, rdoAddress, 0, SpringLayout.WEST, pnlContent);
                 contentLayout.putConstraint(SpringLayout.NORTH, rdoAddress, 0, SpringLayout.NORTH, pnlContent);
@@ -119,13 +121,29 @@ public class BitcoinCoreWalletImportForm extends JDialog {
 
                     txtWalletAddress.setColumns(30);
                     txtWalletAddress.addAncestorListener(new RequestFocusListener());
+                    txtWalletAddress.getDocument().addDocumentListener(new DocumentListener() {
+                        @Override
+                        public void insertUpdate(DocumentEvent e) {
+                            onWalletAddressChanged();
+                        }
+
+                        @Override
+                        public void removeUpdate(DocumentEvent e) {
+                            onWalletAddressChanged();
+                        }
+
+                        @Override
+                        public void changedUpdate(DocumentEvent e) {
+                            onWalletAddressChanged();
+                        }
+                    });
                     contentLayout.putConstraint(SpringLayout.WEST, txtWalletAddress, INPUT_LEFT, SpringLayout.WEST, rdoAddress);
                     contentLayout.putConstraint(SpringLayout.NORTH, txtWalletAddress, OFFSET_TOP, SpringLayout.SOUTH, rdoAddress);
                     pnlContent.add(txtWalletAddress);
                 }
                 rdoHardwareWallet.setText(res.getString("setupHardwareWallet"));
                 group.add(rdoHardwareWallet);
-                rdoHardwareWallet.addItemListener(this::onSelectedChanged);
+                rdoHardwareWallet.addItemListener(this::onSelectedWalletTypeChanged);
                 contentLayout.putConstraint(SpringLayout.WEST, rdoHardwareWallet, 0, SpringLayout.WEST, rdoAddress);
                 contentLayout.putConstraint(SpringLayout.NORTH, rdoHardwareWallet, 40, SpringLayout.SOUTH, rdoAddress);
                 pnlContent.add(rdoHardwareWallet);
@@ -140,6 +158,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                             return super.getListCellRendererComponent(list, value == null ? "" : ((Device) value).getDisplayText(), index, isSelected, cellHasFocus);
                         }
                     });
+                    cboDevices.addItemListener(this::onSelectedDeviceChanged);
                     cboDevices.setPrototypeDisplayValue(new Device("testDevice", "testPath", "testModelName", "123456789"));
                     contentLayout.putConstraint(SpringLayout.WEST, cboDevices, INPUT_LEFT, SpringLayout.WEST, rdoHardwareWallet);
                     contentLayout.putConstraint(SpringLayout.NORTH, cboDevices, OFFSET_TOP, SpringLayout.SOUTH, rdoHardwareWallet);
@@ -189,9 +208,29 @@ public class BitcoinCoreWalletImportForm extends JDialog {
         startDeviceSearch();
     }
 
-    private void onSelectedChanged(ItemEvent e) {
+    private void onSelectedWalletTypeChanged(ItemEvent e) {
         txtWalletAddress.setEnabled(rdoAddress.equals(e.getItem()));
-        cboDevices.setEnabled(rdoHardwareWallet.equals(e.getItem()));
+        var hardwareWalletSelected = rdoHardwareWallet.equals(e.getItem());
+        cboDevices.setEnabled(hardwareWalletSelected);
+
+        if (hardwareWalletSelected && walletName().isEmpty()) {
+            onSelectedDeviceChanged(e);
+        }
+    }
+
+    private void onWalletAddressChanged() {
+        if (!rdoAddress.isSelected()) {
+            return;
+        }
+        txtWalletName.setText(walletAddress());
+    }
+
+    private void onSelectedDeviceChanged(ItemEvent itemEvent) {
+        if (!rdoHardwareWallet.isSelected() || cboDevices.getSelectedItem() == null) {
+            return;
+        }
+        var device = (Device) cboDevices.getSelectedItem();
+        txtWalletName.setText(device.type());
     }
 
     private void startDeviceSearch() {
