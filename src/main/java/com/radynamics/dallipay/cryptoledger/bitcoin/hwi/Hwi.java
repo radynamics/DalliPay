@@ -180,7 +180,8 @@ public class Hwi {
                 } else {
                     inputStream = Hwi.class.getResourceAsStream("/native/osx/x64/hwi");
                 }
-                tempExecPath = Files.createDirectories(hwiHome.toPath(), PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+                Files.createDirectories(hwiHome.toPath(), PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+                tempExecPath = Files.createTempFile(hwiHome.toPath(), HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
             } else if (osArch.equals("aarch64")) {
                 inputStream = Hwi.class.getResourceAsStream("/native/linux/aarch64/hwi");
                 tempExecPath = Files.createTempFile(HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
