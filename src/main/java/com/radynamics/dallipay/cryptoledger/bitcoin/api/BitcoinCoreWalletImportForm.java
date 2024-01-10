@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Hwi;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.HwiException;
+import com.radynamics.dallipay.ui.ExceptionDialog;
 import com.radynamics.dallipay.ui.FormAcceptCloseHandler;
 import com.radynamics.dallipay.ui.FormActionListener;
 import com.radynamics.dallipay.ui.Utils;
@@ -236,6 +237,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
     private void startDeviceSearch() {
         var hwi = Hwi.get();
         var mutex = new Semaphore(1);
+        final var self = this;
         var task = new TimerTask() {
             public synchronized void run() {
                 if (!mutex.tryAcquire()) return;
@@ -248,7 +250,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                         cboDevices.addItem(d);
                     }
                 } catch (HwiException e) {
-                    throw new RuntimeException(e);
+                    ExceptionDialog.show(self, e);
                 } finally {
                     lblSearching.setVisible(false);
                     mutex.release();
