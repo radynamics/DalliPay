@@ -185,9 +185,13 @@ public class Hwi {
             } else if (osArch.equals("aarch64")) {
                 inputStream = Hwi.class.getResourceAsStream("/native/linux/aarch64/hwi");
                 tempExecPath = Files.createTempFile(HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+                // "When the access permissions are set at file creation time then the actual value of the permissions may differ from the value of the attribute object." (https://bugs.openjdk.org/browse/JDK-8174893)
+                Files.setPosixFilePermissions(tempExecPath, ownerExecutableWritable);
             } else {
                 inputStream = Hwi.class.getResourceAsStream("/native/linux/x64/hwi");
                 tempExecPath = Files.createTempFile(HWI_DIR, null, PosixFilePermissions.asFileAttribute(ownerExecutableWritable));
+                // "When the access permissions are set at file creation time then the actual value of the permissions may differ from the value of the attribute object." (https://bugs.openjdk.org/browse/JDK-8174893)
+                Files.setPosixFilePermissions(tempExecPath, ownerExecutableWritable);
             }
 
             if (inputStream == null) {
