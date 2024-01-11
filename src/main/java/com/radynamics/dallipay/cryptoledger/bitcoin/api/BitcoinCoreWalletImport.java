@@ -4,8 +4,6 @@ import com.radynamics.dallipay.cryptoledger.WalletSetupProcess;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.ui.WaitingForm;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,11 +61,10 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
                 return;
             }
         } catch (InterruptedException | ExecutionException e) {
-            if (e.getCause() instanceof BitcoinRPCException) {
-                final var rpcEx = (BitcoinRPCException) e.getCause();
-                final var resultJson = new JSONObject(rpcEx.getResponse());
+            var errorJson = BitcoinCoreRpcClientExt.errorJson(e.getCause());
+            if (errorJson.isPresent()) {
                 final var ERR_RESCAN_ABORTED_BY_USER = -1;
-                if (resultJson.getJSONObject("error").getInt("code") == ERR_RESCAN_ABORTED_BY_USER) {
+                if (errorJson.get().getInt("code") == ERR_RESCAN_ABORTED_BY_USER) {
                     return;
                 }
             }

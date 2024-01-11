@@ -1,15 +1,14 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import org.json.JSONObject;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
 import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 import wf.bitcoin.krotjson.HexCoder;
 import wf.bitcoin.krotjson.JSON;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BitcoinCoreRpcClientExt {
     private final BitcoinJSONRPCClient client;
@@ -99,5 +98,13 @@ public class BitcoinCoreRpcClientExt {
 
     public LinkedHashMap<String, ?> getDescriptorInfo(String desc) {
         return (LinkedHashMap<String, ?>) client.query("getdescriptorinfo", desc);
+    }
+
+    public static Optional<JSONObject> errorJson(Throwable t) {
+        if (!(t instanceof BitcoinRPCException)) {
+            return Optional.empty();
+        }
+        final var rpcEx = (BitcoinRPCException) t;
+        return Optional.of(new JSONObject(rpcEx.getResponse()).getJSONObject("error"));
     }
 }

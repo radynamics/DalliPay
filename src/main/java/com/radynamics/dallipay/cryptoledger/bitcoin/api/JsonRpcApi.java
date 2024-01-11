@@ -44,7 +44,7 @@ public class JsonRpcApi {
         this.openedWallets = new MultiWalletJsonRpcApi(ledger, network);
     }
 
-    public TransactionResult listPaymentsSent(com.radynamics.dallipay.cryptoledger.generic.Wallet from, long sinceDaysAgo, int limit) {
+    public TransactionResult listPaymentsSent(com.radynamics.dallipay.cryptoledger.generic.Wallet from, long sinceDaysAgo, int limit) throws ApiException {
         // Use endOfToday to ensure data until latest ledger is loaded.
         var period = DateTimeRange.of(Utils.endOfToday().minusDays(sinceDaysAgo), Utils.endOfToday());
 
@@ -59,12 +59,12 @@ public class JsonRpcApi {
                 tr.add(toTransaction(t, from));
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throwException(e);
         }
         return tr;
     }
 
-    public TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) {
+    public TransactionResult listPaymentsReceived(WalletInput walletInput, DateTimeRange period) throws ApiException {
         var tr = new TransactionResult();
         try {
             var transactions = listPaymentsReceived(walletInput);
@@ -76,9 +76,18 @@ public class JsonRpcApi {
                 tr.add(toTransaction(t, walletInput.wallet()));
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            throwException(e);
         }
         return tr;
+    }
+
+    private void throwException(Exception e) throws ApiException {
+        var errorJson = BitcoinCoreRpcClientExt.errorJson(e);
+        if (errorJson.isPresent()) {
+            throw new ApiException("%s (Code %s)".formatted(errorJson.get().getString("message"), errorJson.get().getInt("code")));
+        } else {
+            throw new RuntimeException(e);
+        }
     }
 
     private Predicate<? super BitcoindRpcClient.Transaction> outgoing() {
