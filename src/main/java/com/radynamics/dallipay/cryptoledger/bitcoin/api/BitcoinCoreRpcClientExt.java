@@ -105,7 +105,7 @@ public class BitcoinCoreRpcClientExt {
         if (!(t instanceof BitcoinRPCException)) {
             return Optional.empty();
         }
-        final var rpcEx = (BitcoinRPCException) t.getCause();
+        final var rpcEx = (BitcoinRPCException) t;
         if (StringUtils.isEmpty(rpcEx.getResponse())) {
             return Optional.empty();
         }
