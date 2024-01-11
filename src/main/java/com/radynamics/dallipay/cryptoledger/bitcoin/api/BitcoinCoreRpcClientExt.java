@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 import wf.bitcoin.javabitcoindrpcclient.BitcoinRPCException;
@@ -104,7 +105,10 @@ public class BitcoinCoreRpcClientExt {
         if (!(t instanceof BitcoinRPCException)) {
             return Optional.empty();
         }
-        final var rpcEx = (BitcoinRPCException) t;
+        final var rpcEx = (BitcoinRPCException) t.getCause();
+        if (StringUtils.isEmpty(rpcEx.getResponse())) {
+            return Optional.empty();
+        }
         return Optional.of(new JSONObject(rpcEx.getResponse()).getJSONObject("error"));
     }
 }
