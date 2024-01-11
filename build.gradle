@@ -83,13 +83,10 @@ task createFatJar(type: Jar) {
         attributes 'Main-Class': 'com.radynamics.dallipay.Main'
     }
     archiveFileName = 'DalliPay.jar'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    //exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     with jar
 }
