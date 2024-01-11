@@ -167,7 +167,7 @@ public class Hwi {
         try {
             var platform = Platform.current();
             var osArch = System.getProperty("os.arch");
-            var ownerExecutableWritable = PosixFilePermissions.fromString("rwxr--r--");
+            var ownerExecutableWritable = PosixFilePermissions.fromString("rwxrw-rw-");
             InputStream inputStream;
             Path tempExecPath;
             if (platform == Platform.WINDOWS) {
