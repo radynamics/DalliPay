@@ -28,6 +28,7 @@ public class GeneralPane extends JPanel {
     private final SpringLayout contentLayout;
     private Ledger ledger;
     private JComboBox<String> cboExplorer;
+    private JButton cmdWalletSetup;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n.Options");
 
@@ -107,10 +108,10 @@ public class GeneralPane extends JPanel {
             }
             if (ledger.createWalletSetupProcess(this) != null) {
                 builder.addRowLabel(top, res.getString("walletSetup"));
-                var cmd = new JButton(res.getString("start"));
-                cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> onSetupWallet());
-                builder.addRowContent(top, cmd);
+                cmdWalletSetup = new JButton(res.getString("start"));
+                cmdWalletSetup.setPreferredSize(new Dimension(150, 35));
+                cmdWalletSetup.addActionListener(e -> onSetupWallet());
+                builder.addRowContent(top, cmdWalletSetup);
                 top += 50;
             }
         }
@@ -248,5 +249,11 @@ public class GeneralPane extends JPanel {
         this.ledger = ledger;
         createUiControls();
         refreshExplorer();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        cmdWalletSetup.setEnabled(enabled);
     }
 }

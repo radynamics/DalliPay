@@ -101,6 +101,12 @@ public class OptionsForm extends JPanel implements MainFormPane {
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        generalPane.setEnabled(enabled);
+    }
+
+    @Override
     public String getTitle() {
         return res.getString("options");
     }

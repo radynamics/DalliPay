@@ -301,6 +301,7 @@ public class MainForm extends JFrame {
         var enabled = networkInfo != null;
         sendingPanel.setEnabled(enabled);
         receivingPanel.setEnabled(enabled);
+        optionsPanel.setEnabled(enabled);
     }
 
     private void saveLastUsedLedger(LedgerId ledgerId) {
