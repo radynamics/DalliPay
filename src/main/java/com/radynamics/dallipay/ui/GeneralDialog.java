@@ -19,6 +19,9 @@ public class GeneralDialog extends JDialog {
         formAcceptCloseHandler.addFormActionListener(new FormActionListener() {
             @Override
             public void onAccept() {
+                if (!content.validateInput()) {
+                    return;
+                }
                 accepted(true);
             }
 

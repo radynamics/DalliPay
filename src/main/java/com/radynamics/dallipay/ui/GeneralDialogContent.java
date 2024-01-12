@@ -4,4 +4,6 @@ import javax.swing.*;
 
 public interface GeneralDialogContent {
     JComponent view();
+
+    boolean validateInput();
 }

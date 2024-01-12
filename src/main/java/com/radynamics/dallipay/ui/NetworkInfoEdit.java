@@ -43,7 +43,7 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         setPreferredSize(new Dimension(350, 23 * row));
     }
 
-    public NetworkInfo networkInfo() {
+    public NetworkInfo createNetworkInfo(boolean showErrors) {
         var displayText = txtName.getText().trim();
         var rpcUrlText = txtRpcUrl.getText().trim();
         var selectedNetwork = (NetworkId) cboNetwork.getSelectedItem();
@@ -56,7 +56,9 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         try {
             httpUrl = HttpUrl.get(rpcUrlText);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, String.format(res.getString("urlParseFailed"), rpcUrlText), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+            if (showErrors) {
+                JOptionPane.showMessageDialog(this, String.format(res.getString("urlParseFailed"), rpcUrlText), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+            }
             return null;
         }
 
@@ -121,11 +123,16 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         if (!frm.accepted()) {
             return null;
         }
-        return networkInfoEdit.networkInfo();
+        return networkInfoEdit.createNetworkInfo(false);
     }
 
     @Override
     public JComponent view() {
         return this;
+    }
+
+    @Override
+    public boolean validateInput() {
+        return createNetworkInfo(true) != null;
     }
 }
