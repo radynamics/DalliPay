@@ -18,7 +18,11 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
     private final JTextField txtNetworkId;
     private final JComboBox<NetworkId> cboNetwork;
 
+    private final int LINE_HEIGHT = 25;
+    private final int INPUT_LEFT = 120;
+
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
+    private static final ResourceBundle resNetworkPopMenu = ResourceBundle.getBundle("i18n." + NetworkPopMenu.class.getSimpleName());
     private static final NetworkId custom = new NetworkId("custom", res.getString("custom"));
 
     public NetworkInfoEdit(Ledger ledger, HttpUrl url, String displayName) {
@@ -34,13 +38,57 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
         txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
-        setLayout(new GridBagLayout());
+        var l = new SpringLayout();
+        setLayout(l);
+
         var row = 0;
-        appendRow(res.getString("displayName"), txtName, row++);
-        appendRow(res.getString("rpcUrl"), txtRpcUrl, row++);
-        appendRow(res.getString("network"), cboNetwork, row++);
-        appendRow(res.getString("networkId"), txtNetworkId, row++);
-        setPreferredSize(new Dimension(350, 23 * row));
+        appendRow(l, res.getString("displayName"), txtName, row++);
+        appendRow(l, res.getString("rpcUrl"), txtRpcUrl, row++);
+        appendRow(l, res.getString("network"), cboNetwork, row++);
+        appendRow(l, res.getString("networkId"), txtNetworkId, row++);
+        {
+            var pnlTestConnection = new JPanel();
+            add(pnlTestConnection);
+            pnlTestConnection.setLayout(new BoxLayout(pnlTestConnection, BoxLayout.Y_AXIS));
+            l.putConstraint(SpringLayout.WEST, pnlTestConnection, INPUT_LEFT, SpringLayout.WEST, this);
+            l.putConstraint(SpringLayout.NORTH, pnlTestConnection, row * LINE_HEIGHT + 5, SpringLayout.NORTH, this);
+            l.putConstraint(SpringLayout.EAST, pnlTestConnection, 0, SpringLayout.EAST, this);
+            l.putConstraint(SpringLayout.SOUTH, pnlTestConnection, 0, SpringLayout.SOUTH, this);
+
+            var txt = new JTextArea();
+
+            var cmd = new JButton(res.getString("testConnection"));
+            pnlTestConnection.add(cmd);
+            cmd.addActionListener(e -> {
+                try {
+                    var ni = createNetworkInfo(true);
+                    if (ni == null) {
+                        return;
+                    }
+
+                    var info = ledger.getEndpointInfo(ni);
+                    if (info == null) {
+                        txt.setText(resNetworkPopMenu.getString("retrieveServerInfoFailed"));
+                    } else {
+                        var sb = new StringBuilder();
+                        sb.append(res.getString("testSuccess").formatted(displayName));
+                        sb.append(System.lineSeparator());
+                        sb.append(info.getServerVersion());
+                        txt.setText(sb.toString());
+                    }
+                } catch (Exception ex) {
+                    txt.setText(ex.getMessage());
+                }
+            });
+
+            pnlTestConnection.add(Box.createRigidArea(new Dimension(0, 5)));
+
+            var sp = new JScrollPane(txt);
+            pnlTestConnection.add(sp);
+            sp.setAlignmentX(Component.LEFT_ALIGNMENT);
+            txt.setEditable(false);
+            txt.setLineWrap(true);
+        }
     }
 
     public NetworkInfo createNetworkInfo(boolean showErrors) {
@@ -89,9 +137,16 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         return cbo;
     }
 
-    private void appendRow(String labelText, JComponent input, int row) {
-        add(new JLabel(labelText), createGridConstraints(0.3, 1, 0, row));
-        add(input, createGridConstraints(0.7, 1, 1, row));
+    private void appendRow(SpringLayout l, String labelText, JComponent input, int row) {
+        var lbl = new JLabel(labelText);
+        add(lbl);
+        l.putConstraint(SpringLayout.WEST, lbl, 0, SpringLayout.WEST, this);
+        l.putConstraint(SpringLayout.NORTH, lbl, row * LINE_HEIGHT, SpringLayout.NORTH, this);
+
+        add(input);
+        l.putConstraint(SpringLayout.WEST, input, INPUT_LEFT, SpringLayout.WEST, this);
+        l.putConstraint(SpringLayout.NORTH, input, row * LINE_HEIGHT, SpringLayout.NORTH, this);
+        l.putConstraint(SpringLayout.EAST, input, 0, SpringLayout.EAST, this);
     }
 
     private static Integer toIntegerOrNull(String value) {
@@ -102,21 +157,11 @@ public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
         }
     }
 
-    private static GridBagConstraints createGridConstraints(double weightx, double weighty, int x, int y) {
-        var c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = weightx;
-        c.weighty = weighty;
-        c.gridx = x;
-        c.gridy = y;
-        return c;
-    }
-
     public static NetworkInfo show(Frame owner, Component parent, Ledger ledger, HttpUrl url, String displayName) {
         var networkInfoEdit = new NetworkInfoEdit(ledger, url, displayName);
         var frm = new GeneralDialog(owner, res.getString("descText"), networkInfoEdit);
         frm.smallOkCancel();
-        frm.setSize(400, 200);
+        frm.setSize(450, 350);
         frm.setLocationRelativeTo(parent);
         frm.setResizable(false);
         frm.setVisible(true);
