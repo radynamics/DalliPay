@@ -245,7 +245,7 @@ public class NetworkPopMenu {
             }
         }
 
-        var text = network.getId() == null ? network.getUrl().toString() : network.getShortText();
+        var text = network.getId() == null ? Utils.hideCredentials(network.getUrl()).toString() : network.getShortText();
         var item = addEntryAtEnd(network, text, loadAsync(network));
         onNetworkChanged(item);
     }
