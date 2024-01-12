@@ -371,7 +371,7 @@ public class MainForm extends JFrame {
         var networkInfos = new ArrayList<>(List.of(transformInstruction.getConfig().getNetworkInfos()));
         networkInfos.addAll(List.of(getCustomSidechains()));
 
-        networkPopupMenu = new NetworkPopMenu(transformInstruction.getLedger(), networkInfos.toArray(NetworkInfo[]::new));
+        networkPopupMenu = new NetworkPopMenu(this, transformInstruction.getLedger(), networkInfos.toArray(NetworkInfo[]::new));
         if (transformInstruction.getNetwork() != null) {
             networkPopupMenu.setSelectedNetwork(transformInstruction.getNetwork());
         }

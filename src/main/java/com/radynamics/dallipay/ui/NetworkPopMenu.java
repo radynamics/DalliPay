@@ -34,7 +34,7 @@ public class NetworkPopMenu {
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public NetworkPopMenu(Ledger ledger, NetworkInfo[] networks) {
+    public NetworkPopMenu(Frame owner, Ledger ledger, NetworkInfo[] networks) {
         this.ledger = ledger;
 
         noConnectionsEntry = new JCheckBoxMenuItem(res.getString("noConnections"));
@@ -53,7 +53,7 @@ public class NetworkPopMenu {
             popupMenu.add(pnl);
             pnl.setBorder(new EmptyBorder(10, 20, 0, 0));
             pnl.setBackground(popupMenu.getBackground());
-            var txt = new JSidechainTextField(ledger);
+            var txt = new JSidechainTextField(owner, ledger);
             pnl.add(txt);
             popupMenu.addPopupMenuListener(new PopupMenuListener() {
                 @Override

@@ -12,15 +12,20 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.util.ResourceBundle;
 
-public class NetworkInfoEdit {
+public class NetworkInfoEdit extends JPanel implements GeneralDialogContent {
+    private final JTextField txtName;
+    private final JTextField txtRpcUrl;
+    private final JTextField txtNetworkId;
+    private final JComboBox<NetworkId> cboNetwork;
+
     private static final ResourceBundle res = ResourceBundle.getBundle("i18n." + NetworkInfoEdit.class.getSimpleName());
     private static final NetworkId custom = new NetworkId("custom", res.getString("custom"));
 
-    public static NetworkInfo show(Component parent, Ledger ledger, HttpUrl url, String displayName) {
-        var txtName = new JTextField();
-        var txtRpcUrl = new JTextField();
-        var txtNetworkId = new JTextField();
-        var cboNetwork = createNetworkCombo(ledger, txtNetworkId);
+    public NetworkInfoEdit(Ledger ledger, HttpUrl url, String displayName) {
+        txtName = new JTextField();
+        txtRpcUrl = new JTextField();
+        txtNetworkId = new JTextField();
+        cboNetwork = createNetworkCombo(ledger, txtNetworkId);
 
         txtName.setText(displayName);
         txtName.addAncestorListener(new RequestFocusListener());
@@ -29,20 +34,16 @@ public class NetworkInfoEdit {
         txtRpcUrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("rpcUrl.placeholderText"));
         txtNetworkId.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("networkId.placeholderText"));
 
-        var pnl = new JPanel();
-        pnl.setLayout(new GridBagLayout());
+        setLayout(new GridBagLayout());
         var row = 0;
-        appendRow(pnl, res.getString("displayName"), txtName, row++);
-        appendRow(pnl, res.getString("rpcUrl"), txtRpcUrl, row++);
-        appendRow(pnl, res.getString("network"), cboNetwork, row++);
-        appendRow(pnl, res.getString("networkId"), txtNetworkId, row++);
-        pnl.setPreferredSize(new Dimension(350, 23 * row));
+        appendRow(res.getString("displayName"), txtName, row++);
+        appendRow(res.getString("rpcUrl"), txtRpcUrl, row++);
+        appendRow(res.getString("network"), cboNetwork, row++);
+        appendRow(res.getString("networkId"), txtNetworkId, row++);
+        setPreferredSize(new Dimension(350, 23 * row));
+    }
 
-        int result = JOptionPane.showConfirmDialog(null, pnl, res.getString("descText"), JOptionPane.OK_CANCEL_OPTION);
-        if (result != JOptionPane.OK_OPTION) {
-            return null;
-        }
-
+    public NetworkInfo createNetworkInfo(boolean showErrors) {
         var displayText = txtName.getText().trim();
         var rpcUrlText = txtRpcUrl.getText().trim();
         var selectedNetwork = (NetworkId) cboNetwork.getSelectedItem();
@@ -55,7 +56,9 @@ public class NetworkInfoEdit {
         try {
             httpUrl = HttpUrl.get(rpcUrlText);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(parent, String.format(res.getString("urlParseFailed"), rpcUrlText), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+            if (showErrors) {
+                JOptionPane.showMessageDialog(this, String.format(res.getString("urlParseFailed"), rpcUrlText), res.getString("connectionFailed"), JOptionPane.INFORMATION_MESSAGE);
+            }
             return null;
         }
 
@@ -86,9 +89,9 @@ public class NetworkInfoEdit {
         return cbo;
     }
 
-    private static void appendRow(JPanel pnl, String labelText, JComponent input, int row) {
-        pnl.add(new JLabel(labelText), createGridConstraints(0.3, 1, 0, row));
-        pnl.add(input, createGridConstraints(0.7, 1, 1, row));
+    private void appendRow(String labelText, JComponent input, int row) {
+        add(new JLabel(labelText), createGridConstraints(0.3, 1, 0, row));
+        add(input, createGridConstraints(0.7, 1, 1, row));
     }
 
     private static Integer toIntegerOrNull(String value) {
@@ -107,5 +110,29 @@ public class NetworkInfoEdit {
         c.gridx = x;
         c.gridy = y;
         return c;
+    }
+
+    public static NetworkInfo show(Frame owner, Component parent, Ledger ledger, HttpUrl url, String displayName) {
+        var networkInfoEdit = new NetworkInfoEdit(ledger, url, displayName);
+        var frm = new GeneralDialog(owner, res.getString("descText"), networkInfoEdit);
+        frm.smallOkCancel();
+        frm.setSize(400, 200);
+        frm.setLocationRelativeTo(parent);
+        frm.setResizable(false);
+        frm.setVisible(true);
+        if (!frm.accepted()) {
+            return null;
+        }
+        return networkInfoEdit.createNetworkInfo(false);
+    }
+
+    @Override
+    public JComponent view() {
+        return this;
+    }
+
+    @Override
+    public boolean validateInput() {
+        return createNetworkInfo(true) != null;
     }
 }
