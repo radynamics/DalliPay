@@ -9,6 +9,7 @@ import com.radynamics.dallipay.ui.FormAcceptCloseHandler;
 import com.radynamics.dallipay.ui.FormActionListener;
 import com.radynamics.dallipay.ui.Utils;
 import com.radynamics.dallipay.util.RequestFocusListener;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -30,6 +31,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
     private final JTextField txtWalletAddress = new JTextField();
     private final ScheduledExecutorService deviceSearchExecutor = Executors.newSingleThreadScheduledExecutor();
     private final JTextField txtWalletName = new JTextField();
+    private final JButton cmdOk = new JButton("OK");
     private boolean accepted;
     private final JComboBox<Device> cboDevices = new JComboBox<>();
     private final JLabel lblSearching = new JLabel();
@@ -193,10 +195,9 @@ public class BitcoinCoreWalletImportForm extends JDialog {
             panel3Layout.putConstraint(SpringLayout.SOUTH, pnl, 0, SpringLayout.SOUTH, panel3);
             panel3.add(pnl);
             {
-                var cmd = new JButton("OK");
-                cmd.setPreferredSize(new Dimension(150, 35));
-                cmd.addActionListener(e -> formAcceptCloseHandler.accept());
-                pnl.add(cmd);
+                cmdOk.setPreferredSize(new Dimension(150, 35));
+                cmdOk.addActionListener(e -> formAcceptCloseHandler.accept());
+                pnl.add(cmdOk);
             }
             {
                 var cmd = new JButton(res.getString("cancel"));
@@ -206,6 +207,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
             }
         }
 
+        refreshOkEnabled();
         startDeviceSearch();
     }
 
@@ -217,6 +219,8 @@ public class BitcoinCoreWalletImportForm extends JDialog {
         if (hardwareWalletSelected && walletName().isEmpty()) {
             onSelectedDeviceChanged(e);
         }
+
+        refreshOkEnabled();
     }
 
     private void onWalletAddressChanged() {
@@ -224,14 +228,18 @@ public class BitcoinCoreWalletImportForm extends JDialog {
             return;
         }
         txtWalletName.setText(walletAddress());
+        refreshOkEnabled();
     }
 
     private void onSelectedDeviceChanged(ItemEvent itemEvent) {
-        if (!rdoHardwareWallet.isSelected() || cboDevices.getSelectedItem() == null) {
+        if (!rdoHardwareWallet.isSelected()) {
             return;
         }
-        var device = (Device) cboDevices.getSelectedItem();
-        txtWalletName.setText(device.type());
+        if (cboDevices.getSelectedItem() != null) {
+            var device = (Device) cboDevices.getSelectedItem();
+            txtWalletName.setText(device.type());
+        }
+        refreshOkEnabled();
     }
 
     private void startDeviceSearch() {
@@ -258,6 +266,16 @@ public class BitcoinCoreWalletImportForm extends JDialog {
             }
         };
         deviceSearchExecutor.scheduleAtFixedRate(task, 0, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    private void refreshOkEnabled() {
+        cmdOk.setEnabled(continueEnabled());
+    }
+
+    private boolean continueEnabled() {
+        if (importWalletAddress() && StringUtils.isEmpty(walletAddress())) return false;
+        if (importDevice() && device() == null) return false;
+        return walletName().isPresent();
     }
 
     private void acceptDialog() {
