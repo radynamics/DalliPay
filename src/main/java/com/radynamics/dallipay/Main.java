@@ -83,7 +83,7 @@ public class Main {
                     transformInstruction.setNetwork(null);
                 }
 
-                var frm = new MainForm();
+                var frm = new MainForm(!existsDb);
                 frm.setTransformInstruction(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);
