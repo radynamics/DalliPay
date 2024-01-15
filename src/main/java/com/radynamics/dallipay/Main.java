@@ -77,7 +77,7 @@ public class Main {
                 var wallet = StringUtils.isAllEmpty(walletPublicKey) ? null : ledger.createWallet(walletPublicKey, null);
 
                 var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
-                var frm = new MainForm();
+                var frm = new MainForm(!existsDb);
                 frm.setTransformInstruction(transformInstruction);
                 frm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frm.setSize(1450, 768);

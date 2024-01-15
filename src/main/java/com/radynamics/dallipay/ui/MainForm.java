@@ -13,11 +13,16 @@ import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
+import com.radynamics.dallipay.ui.wizard.WizardController;
+import com.radynamics.dallipay.ui.wizard.WizardDialog;
+import com.radynamics.dallipay.ui.wizard.welcome.StartPage;
 import com.radynamics.dallipay.update.OnlineUpdate;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -39,11 +44,11 @@ public class MainForm extends JFrame {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
     private final String ITEM_OBJECT_ID = "itemObjectId";
 
-    public MainForm() {
-        setupUI();
+    public MainForm(boolean isFirstStart) {
+        setupUI(isFirstStart);
     }
 
-    private void setupUI() {
+    private void setupUI(boolean isFirstStart) {
         var vc = new VersionController();
         setTitle(String.format("DalliPay [%s]", vc.getVersion()));
         setIconImage(Utils.getProductIcon());
@@ -127,6 +132,19 @@ public class MainForm extends JFrame {
             paymentRequestServer.start();
         } catch (IOException e) {
             ExceptionDialog.show(this, e);
+        }
+
+        if (isFirstStart) {
+            final var self = this;
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    var wizard = new WizardDialog(self, "");
+                    wizard.contentTitle(res.getString("welcomeWizardTitle"));
+                    var wizardCtrl = new WizardController(wizard);
+                    wizardCtrl.startWizard(new StartPage());
+                    wizard.setVisible(true);
+                }
+            });
         }
     }
 
