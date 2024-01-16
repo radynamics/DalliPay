@@ -20,6 +20,7 @@ import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.iso20022.camt054.AmountRounder;
 import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
 import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
+import com.radynamics.dallipay.ui.wizard.AbstractWizardPage;
 import okhttp3.HttpUrl;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -278,6 +279,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat) {
         return new LedgerCurrencyConverter(new Currency(getNativeCcySymbol()), new Currency("Sat"), SATOSHI_PER_BTC, LedgerCurrencyFormat.SmallestUnit, ledgerCurrencyFormat);
+    }
+
+    @Override
+    public AbstractWizardPage createPageWelcomeWizard() {
+        return null;
     }
 
     @Override
