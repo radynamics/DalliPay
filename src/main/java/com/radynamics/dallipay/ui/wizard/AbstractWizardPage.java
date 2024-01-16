@@ -22,6 +22,10 @@ public abstract class AbstractWizardPage extends JPanel {
         super();
     }
 
+    protected WizardController wizardController() {
+        return wizardController;
+    }
+
     void wizardController(WizardController wizardController) {
         this.wizardController = wizardController;
     }

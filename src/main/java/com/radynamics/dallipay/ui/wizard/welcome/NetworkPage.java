@@ -6,19 +6,27 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ResourceBundle;
 
-public class StartPage extends AbstractWizardPage {
-    private final AbstractWizardPage nextPage = new LedgerPage();
+public class NetworkPage extends AbstractWizardPage {
+    private final AbstractWizardPage nextPage = new WalletMappingPage();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public StartPage() {
+    public NetworkPage() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(Utils.createText(res.getString("section0")));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(Utils.createText(res.getString("section1")));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(Utils.createText(res.getString("section2")));
+
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
+        var pnl = new JPanel();
+        add(pnl);
+        pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+        pnl.add(Utils.createImageWithText(res.getString("mainnet"), "mainnet.png"));
+        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
+        pnl.add(Utils.createImageWithText(res.getString("testnet"), "testnet.png"));
+        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
+        pnl.add(Utils.createImageWithText(res.getString("offline"), "offline.png"));
     }
 
     @Override
