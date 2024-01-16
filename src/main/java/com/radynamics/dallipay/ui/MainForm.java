@@ -143,6 +143,10 @@ public class MainForm extends JFrame {
                     var wizardCtrl = new WizardController(wizard);
                     wizardCtrl.startWizard(new LedgerPage());
                     wizard.setVisible(true);
+
+                    if (!transformInstruction.getLedger().getId().sameAs(wizardCtrl.ledgerId())) {
+                        onLedgerClicked(LedgerFactory.create(wizardCtrl.ledgerId()));
+                    }
                 }
             });
         }

@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.ui.wizard;
 
-import com.radynamics.dallipay.util.RequestFocusListener;
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +11,7 @@ import java.util.Stack;
 
 public class WizardController {
     private final Wizard wizard;
+    private LedgerId ledgerId;
     private final Stack<AbstractWizardPage> pageHistory = new Stack<AbstractWizardPage>();
     private AbstractWizardPage currentPage = null;
 
@@ -99,6 +100,14 @@ public class WizardController {
 
     public List<AbstractWizardPage> pageHistoryList() {
         return new ArrayList<>(pageHistory);
+    }
+
+    public LedgerId ledgerId() {
+        return ledgerId;
+    }
+
+    public void ledgerId(LedgerId ledgerId) {
+        this.ledgerId = ledgerId;
     }
 
     private class NextPageListener implements ActionListener {
