@@ -26,11 +26,7 @@ public class LedgerPage extends AbstractWizardPage {
         add(pnl);
         pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
-        pnl.add(Utils.createImageWithText(res.getString("mainnet"), "mainnet.png"));
-        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
-        pnl.add(Utils.createImageWithText(res.getString("testnet"), "testnet.png"));
-        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
-        pnl.add(Utils.createImageWithText(res.getString("offline"), "offline.png"));
+        pnl.add(Utils.createImageWithText(res.getString("switchLedger"), "switchLedger.png"));
     }
 
     @Override

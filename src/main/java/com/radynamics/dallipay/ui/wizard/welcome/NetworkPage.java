@@ -15,8 +15,6 @@ public class NetworkPage extends AbstractWizardPage {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(Utils.createText(res.getString("section0")));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(Utils.createText(res.getString("section1")));
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -24,7 +22,11 @@ public class NetworkPage extends AbstractWizardPage {
         add(pnl);
         pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
-        pnl.add(Utils.createImageWithText(res.getString("switchLedger"), "switchLedger.png"));
+        pnl.add(Utils.createImageWithText(res.getString("mainnet"), "mainnet.png"));
+        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
+        pnl.add(Utils.createImageWithText(res.getString("testnet"), "testnet.png"));
+        pnl.add(Box.createRigidArea(new Dimension(0, 10)));
+        pnl.add(Utils.createImageWithText(res.getString("offline"), "offline.png"));
     }
 
     @Override
