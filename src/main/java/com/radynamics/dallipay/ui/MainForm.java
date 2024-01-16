@@ -144,8 +144,13 @@ public class MainForm extends JFrame {
                     wizardCtrl.startWizard(new StartPage());
                     wizard.setVisible(true);
 
-                    if (!transformInstruction.getLedger().getId().sameAs(wizardCtrl.ledgerId())) {
-                        onLedgerClicked(LedgerFactory.create(wizardCtrl.ledgerId()));
+                    var ledger = LedgerFactory.create(wizardCtrl.ledgerId());
+                    if (!transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
+                        onLedgerClicked(ledger);
+                    }
+                    // Eg Bitcoin doens't has any default endpoints.
+                    if (!networkPopupMenu.hasSelectableNetworks()) {
+                        networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:18332/");
                     }
                 }
             });

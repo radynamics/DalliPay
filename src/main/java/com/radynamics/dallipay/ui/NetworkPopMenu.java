@@ -27,6 +27,7 @@ public class NetworkPopMenu {
     private final static Logger log = LogManager.getLogger(NetworkPopMenu.class);
     private final Ledger ledger;
     private final JPopupMenu popupMenu = new JPopupMenu();
+    private final JSidechainTextField txt;
     private final ArrayList<Pair<JCheckBoxMenuItem, NetworkInfo>> selectableEntries = new ArrayList<>();
     private final JCheckBoxMenuItem noConnectionsEntry;
 
@@ -53,7 +54,7 @@ public class NetworkPopMenu {
             popupMenu.add(pnl);
             pnl.setBorder(new EmptyBorder(10, 20, 0, 0));
             pnl.setBackground(popupMenu.getBackground());
-            var txt = new JSidechainTextField(owner, ledger);
+            txt = new JSidechainTextField(owner, ledger);
             pnl.add(txt);
             popupMenu.addPopupMenuListener(new PopupMenuListener() {
                 @Override
@@ -221,6 +222,14 @@ public class NetworkPopMenu {
 
     public JPopupMenu get() {
         return popupMenu;
+    }
+
+    public void showNetworkInfoEdit(String value) {
+        txt.showNetworkInfoEdit(value);
+    }
+
+    public boolean hasSelectableNetworks() {
+        return !selectableEntries.isEmpty();
     }
 
     public NetworkInfo getSelectedNetwork() {

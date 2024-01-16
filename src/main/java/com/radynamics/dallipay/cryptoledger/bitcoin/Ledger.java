@@ -283,7 +283,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public AbstractWizardPage createPageWelcomeWizard() {
-        return null;
+        return new SetupBitcoinCorePage();
     }
 
     @Override

@@ -52,15 +52,10 @@ public class JSidechainTextField extends JTextField {
         var value = getText();
         setText("");
 
-        var networkInfo = createNetworkInfo(value);
-        if (networkInfo == null) {
-            return;
-        }
-
-        raiseSidechainCreated(networkInfo);
+        createNetworkInfo(value);
     }
 
-    private NetworkInfo createNetworkInfo(String value) {
+    private void createNetworkInfo(String value) {
         HttpUrl url = null;
         var displayName = value;
         try {
@@ -69,7 +64,14 @@ public class JSidechainTextField extends JTextField {
         } catch (Exception ex) {
         }
 
-        return NetworkInfoEdit.show(owner, this, ledger, url, displayName);
+        var networkInfo = NetworkInfoEdit.show(owner, this, ledger, url, displayName);
+        if (networkInfo != null) {
+            raiseSidechainCreated(networkInfo);
+        }
+    }
+
+    public void showNetworkInfoEdit(String value) {
+        createNetworkInfo(value);
     }
 
     public void addChangedListener(SidechainChangedListener l) {
