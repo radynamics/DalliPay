@@ -19,10 +19,6 @@ public class LedgerPage extends AbstractWizardPage {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(Utils.createText(res.getString("section0")));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(Utils.createText(res.getString("section1")));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(Utils.createText(res.getString("section2")));
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 

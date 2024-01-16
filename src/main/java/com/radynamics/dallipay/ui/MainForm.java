@@ -15,7 +15,7 @@ import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
 import com.radynamics.dallipay.ui.wizard.WizardController;
 import com.radynamics.dallipay.ui.wizard.WizardDialog;
-import com.radynamics.dallipay.ui.wizard.welcome.LedgerPage;
+import com.radynamics.dallipay.ui.wizard.welcome.StartPage;
 import com.radynamics.dallipay.update.OnlineUpdate;
 
 import javax.swing.*;
@@ -141,7 +141,7 @@ public class MainForm extends JFrame {
                     var wizard = new WizardDialog(self, "");
                     wizard.contentTitle(res.getString("welcomeWizardTitle"));
                     var wizardCtrl = new WizardController(wizard);
-                    wizardCtrl.startWizard(new LedgerPage());
+                    wizardCtrl.startWizard(new StartPage());
                     wizard.setVisible(true);
 
                     if (!transformInstruction.getLedger().getId().sameAs(wizardCtrl.ledgerId())) {
