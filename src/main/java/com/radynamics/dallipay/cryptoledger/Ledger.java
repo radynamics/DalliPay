@@ -10,6 +10,7 @@ import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyConverter;
 import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
+import com.radynamics.dallipay.ui.wizard.AbstractWizardPage;
 import okhttp3.HttpUrl;
 
 import javax.swing.*;
@@ -98,4 +99,6 @@ public interface Ledger {
     NetworkId[] networkIds();
 
     LedgerCurrencyConverter createLedgerCurrencyConverter(LedgerCurrencyFormat ledgerCurrencyFormat);
+
+    AbstractWizardPage createPageWelcomeWizard();
 }

@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.ui.wizard.welcome;
 
+import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.ui.wizard.AbstractWizardPage;
 
 import javax.swing.*;
@@ -29,7 +30,7 @@ public class WalletMappingPage extends AbstractWizardPage {
 
     @Override
     protected AbstractWizardPage nextPage() {
-        return null;
+        return LedgerFactory.create(wizardController().ledgerId()).createPageWelcomeWizard();
     }
 
     @Override
@@ -44,11 +45,11 @@ public class WalletMappingPage extends AbstractWizardPage {
 
     @Override
     protected boolean nextAllowed() {
-        return false;
+        return nextPage() != null;
     }
 
     @Override
     protected boolean finishAllowed() {
-        return true;
+        return !nextAllowed();
     }
 }
