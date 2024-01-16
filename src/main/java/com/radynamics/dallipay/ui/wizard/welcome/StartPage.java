@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.ResourceBundle;
 
 public class StartPage extends AbstractWizardPage {
-    private final AbstractWizardPage nextPage = new LedgerPage();
+    private final AbstractWizardPage nextPage = new NetworkPage();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 

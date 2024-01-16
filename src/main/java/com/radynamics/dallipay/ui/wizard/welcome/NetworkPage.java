@@ -6,12 +6,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ResourceBundle;
 
-public class LedgerPage extends AbstractWizardPage {
+public class NetworkPage extends AbstractWizardPage {
     private final AbstractWizardPage nextPage = new WalletMappingPage();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public LedgerPage() {
+    public NetworkPage() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(Utils.createText(res.getString("section0")));
