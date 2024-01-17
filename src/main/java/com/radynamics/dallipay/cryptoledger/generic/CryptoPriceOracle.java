@@ -3,6 +3,7 @@ package com.radynamics.dallipay.cryptoledger.generic;
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.Secrets;
 import com.radynamics.dallipay.cryptoledger.Block;
+import com.radynamics.dallipay.cryptoledger.Cache;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.*;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +30,8 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
     private final Currency base;
     private HttpUrl url;
     private String apiKey;
+    private final Cache<JSONObject> cache;
+
     private final CurrencyPair[] currencyPairs = new CurrencyPair[]{
             new CurrencyPair("XRP", "USD"), new CurrencyPair("XRP", "EUR"), new CurrencyPair("XRP", "JPY"), new CurrencyPair("XRP", "KRW"),
             new CurrencyPair("XRP", "TRY"), new CurrencyPair("XRP", "GBP"), new CurrencyPair("XRP", "THB"), new CurrencyPair("XRP", "RUB"),
@@ -41,6 +45,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
 
     public CryptoPriceOracle(Currency base) {
         this.base = base;
+        cache = new Cache<>("", Duration.ofHours(1));
     }
 
     @Override
@@ -92,7 +97,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
     @Override
     public ExchangeRate rateAt(CurrencyPair pair, ZonedDateTime pointInTime, NetworkInfo blockNetwork, Block block) {
         try {
-            var data = load(pair, pointInTime);
+            var data = getOrLoad(pair, pointInTime);
             if (data == null) {
                 return null;
             }
@@ -117,7 +122,12 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
         return new URL(sb.toString());
     }
 
-    private JSONObject load(CurrencyPair pair, ZonedDateTime pointInTime) throws IOException, ExchangeException {
+    private JSONObject getOrLoad(CurrencyPair pair, ZonedDateTime pointInTime) throws IOException, ExchangeException {
+        var key = new RateAtTimeKey(pair, pointInTime);
+        var cached = cache.get(key);
+        if (cached != null) {
+            return cached;
+        }
         var url = createUrl(pair, pointInTime);
 
         var conn = (HttpURLConnection) url.openConnection();
@@ -146,7 +156,10 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
             if (!result.getBoolean("success")) {
                 throw new ExchangeException(result.getJSONObject("error").getString("message"));
             }
-            return result.optJSONObject("data");
+
+            var json = result.optJSONObject("data");
+            cache.add(key, json);
+            return json;
         } catch (JSONException e) {
             log.trace(e.getMessage(), e);
             return null;
