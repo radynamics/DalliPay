@@ -5,6 +5,7 @@ import com.radynamics.dallipay.cryptoledger.transaction.Origin;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
+import com.radynamics.dallipay.iso20022.camt054.LedgerCurrencyFormat;
 import com.radynamics.dallipay.iso20022.creditorreference.ReferenceType;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReferenceFactory;
 import com.radynamics.dallipay.iso20022.pain001.pain00100103.generated.CashAccount16;
@@ -64,7 +65,14 @@ public class Pain001Reader implements PaymentInstructionReader {
                 if (sourceAmt == null || sourceCcy == null) {
                     t.setAmountUnknown();
                 } else {
-                    t.setAmount(Money.of(sourceAmt.doubleValue(), new Currency(sourceCcy)));
+                    var lcc = ledger.createLedgerCurrencyConverter(LedgerCurrencyFormat.Native);
+                    // Accept smaller unit and convert into native one (eg. Sat to Bitcoin).
+                    // Ignore casing, due various products export currency codes in various casings.
+                    if (lcc.getSmallestUnitCcy().getCode().equalsIgnoreCase(sourceCcy)) {
+                        t.setAmount(lcc.convert(Money.of(sourceAmt.doubleValue(), new Currency(sourceCcy))));
+                    } else {
+                        t.setAmount(Money.of(sourceAmt.doubleValue(), new Currency(sourceCcy)));
+                    }
                 }
 
                 var rmtInf = cdtTrfTxInf.getRmtInf();

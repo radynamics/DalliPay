@@ -282,4 +282,32 @@ public class Pain00100103Test {
         assertNotNull(t.getStructuredReferences());
         assertEquals(0, t.getStructuredReferences().length);
     }
+
+    @Test
+    public void readSmallerUnitToNative() throws Exception {
+        // Eg. ccy Sat -> BTC (Satoshi -> Bitcoin)
+        var ledger = new TestLedger();
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
+        ti.setTargetCcy(ledger.getNativeCcySymbol());
+        // DbtrAcct
+        TestFactory.addAccountMapping(ti, new IbanAccount("CH5481230000001998736"), "sender_CH5481230000001998736");
+        // CdtrAcct
+        TestFactory.addAccountMapping(ti, new OtherAccount("25-9034-2"), "receiver_25-9034-2");
+        ExchangeRate[] rates = {
+                new ExchangeRate("CHF", ledger.getNativeCcySymbol(), 1, ZonedDateTime.now()),
+        };
+        var ccyConverter = new CurrencyConverter(rates);
+        var r = new Pain001Reader(ledger);
+
+        var tt = new TransactionTranslator(ti, ccyConverter);
+        var transactions = tt.apply(r.read(getClass().getClassLoader().getResourceAsStream("pain001/pain00100103ch02/pain001SmallerUnitToNative.xml")));
+
+        assertNotNull(transactions);
+        assertEquals(1, transactions.length);
+
+        var t = transactions[0];
+        // Convert 100000 Testi -> 100 TEST
+        assertEquals("TEST", t.getUserCcy().getCode());
+        assertEquals(100, t.getAmount().doubleValue(), 0);
+    }
 }
