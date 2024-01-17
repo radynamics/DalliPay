@@ -10,10 +10,7 @@ import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
-import com.radynamics.dallipay.exchange.Currency;
-import com.radynamics.dallipay.exchange.CurrencyConverter;
-import com.radynamics.dallipay.exchange.CurrencyPair;
-import com.radynamics.dallipay.exchange.ExchangeRateProvider;
+import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.camt054.*;
@@ -29,6 +26,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -36,6 +35,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -59,6 +59,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private JLabel lblInfoText;
     private final JLabel lblUsingExchangeRatesFrom = new JLabel();
     private final JLabel lblUsingExchangeRatesFromSource = new JLabel();
+    private JLabel lblHistoricPriceOracleEdit;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -154,6 +155,19 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFromSource, 0, SpringLayout.EAST, lblUsingExchangeRatesFrom);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFromSource, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(lblUsingExchangeRatesFromSource);
+
+                lblHistoricPriceOracleEdit = Utils.createLinkLabel(this, res.getString("edit"));
+                panel1Layout.putConstraint(SpringLayout.WEST, lblHistoricPriceOracleEdit, 5, SpringLayout.EAST, lblUsingExchangeRatesFromSource);
+                panel1Layout.putConstraint(SpringLayout.NORTH, lblHistoricPriceOracleEdit, getNorthPad(1), SpringLayout.NORTH, panel1);
+                panel1.add(lblHistoricPriceOracleEdit);
+                lblHistoricPriceOracleEdit.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 1) {
+                            editHistoricPriceOracle();
+                        }
+                    }
+                });
             }
             {
                 var lbl = new JLabel(res.getString("paymentsBetween"));
@@ -238,6 +252,43 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
     }
 
+    private void editHistoricPriceOracle() {
+        var allProvider = ExchangeRateProviderFactory.allPriceOracles(transformInstruction.getLedger());
+        try (var repo = new ConfigRepo()) {
+            for (var p : allProvider) {
+                p.init(repo);
+            }
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+            return;
+        }
+
+        var pnl = new JPanel();
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+
+        pnl.add(new JLabel(res.getString("whichHistoricPriceOracle")));
+        pnl.add(Box.createRigidArea(new Dimension(0, 5)));
+        var group = new ButtonGroup();
+        var map = new HashMap<JRadioButton, ExchangeRateProvider>();
+        for (var p : allProvider) {
+            var rdo = new JRadioButton(p.getDisplayText());
+            map.put(rdo, p);
+            rdo.setSelected(p.getId().equals(transformInstruction.getHistoricExchangeRateSource().getId()));
+            group.add(rdo);
+            pnl.add(rdo);
+        }
+
+        var result = JOptionPane.showOptionDialog(this, pnl, res.getString("historicPriceOracleTitle"),
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"OK", res.getString("cancel")}, "OK");
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        var selected = map.entrySet().stream().filter(o -> o.getKey().isSelected()).findFirst().orElseThrow().getValue();
+        transformInstruction.setHistoricExchangeRateSource(selected);
+        refreshUsedPriceOracleText();
+    }
+
     private void hideInfo() {
         pnlInfo.setVisible(false);
     }
@@ -258,6 +309,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         var isAsReceived = ccy.equals(XrplPriceOracleConfig.AsReceived);
         lblUsingExchangeRatesFrom.setVisible(!isAsReceived);
         lblUsingExchangeRatesFromSource.setVisible(!isAsReceived);
+        lblHistoricPriceOracleEdit.setVisible(lblUsingExchangeRatesFromSource.isVisible());
 
         transformInstruction.setTargetCcy(ccy);
     }
@@ -520,10 +572,14 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
         txtInput.setLedger(transformInstruction.getLedger());
         refreshTargetCcys();
-        lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
+        refreshUsedPriceOracleText();
         table.init(transformInstruction, currencyConverter, new PaymentValidator(), transactionTranslator);
         // Clear loaded payments
         loadTable(new Payment[0]);
+    }
+
+    private void refreshUsedPriceOracleText() {
+        lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
     }
 
     private class StringPairEntry {
