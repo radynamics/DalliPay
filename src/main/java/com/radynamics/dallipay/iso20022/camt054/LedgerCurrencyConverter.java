@@ -22,11 +22,23 @@ public class LedgerCurrencyConverter {
     }
 
     public Money convert(Money amount) {
-        if (!amount.getCcy().sameCode(ledgerNativeCcy)) {
+        var amountIsNative = amount.getCcy().sameCode(ledgerNativeCcy);
+        var amountIsSmallest = amount.getCcy().sameCode(smallestUnitCcy);
+        if (!amountIsNative && !amountIsSmallest) {
             return amount;
         }
 
-        return targetFormat == LedgerCurrencyFormat.Native ? amount : toSmallestUnit(amount);
+        if (amountIsNative && targetFormat == LedgerCurrencyFormat.SmallestUnit) {
+            return toSmallestUnit(amount);
+        }
+        if (amountIsSmallest && targetFormat == LedgerCurrencyFormat.Native) {
+            return toNativeUnit(amount);
+        }
+        return amount;
+    }
+
+    private Money toNativeUnit(Money amount) {
+        return Money.of(amount.getNumber().doubleValue() / factor, ledgerNativeCcy);
     }
 
     private Money toSmallestUnit(Money amount) {
