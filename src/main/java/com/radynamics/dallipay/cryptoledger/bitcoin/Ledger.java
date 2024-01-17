@@ -144,11 +144,6 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public ExchangeRateProvider createHistoricExchangeRateSource() {
-        return ExchangeRateProviderFactory.create(CryptoPriceOracle.ID, this);
-    }
-
-    @Override
     public WalletValidator createWalletValidator() {
         return new GenericWalletValidator(this);
     }
@@ -204,6 +199,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public String[] getExchangeRateProviders() {
         return new String[]{ManualRateProvider.ID, Coinbase.ID, Bitstamp.ID};
+    }
+
+    @Override
+    public String[] getHistoricExchangeRateProviders() {
+        return new String[]{CryptoPriceOracle.ID};
     }
 
     @Override
