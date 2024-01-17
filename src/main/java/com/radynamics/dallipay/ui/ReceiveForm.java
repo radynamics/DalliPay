@@ -142,7 +142,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 panel1Layout.putConstraint(SpringLayout.NORTH, cboTargetCcy, getNorthPad(1), SpringLayout.NORTH, panel1);
                 panel1.add(cboTargetCcy);
 
-
                 lblUsingExchangeRatesFrom.setText(" " + res.getString("usingFxRatesFrom") + " ");
                 panel1Layout.putConstraint(SpringLayout.WEST, lblUsingExchangeRatesFrom, 0, SpringLayout.EAST, cboTargetCcy);
                 panel1Layout.putConstraint(SpringLayout.NORTH, lblUsingExchangeRatesFrom, getNorthPad(1), SpringLayout.NORTH, panel1);
