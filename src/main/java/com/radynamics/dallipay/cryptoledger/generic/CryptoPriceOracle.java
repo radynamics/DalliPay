@@ -33,6 +33,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
             new CurrencyPair("XRP", "TRY"), new CurrencyPair("XRP", "GBP"), new CurrencyPair("XRP", "THB"), new CurrencyPair("XRP", "RUB"),
             new CurrencyPair("XRP", "BRL"), new CurrencyPair("XRP", "AUD"), new CurrencyPair("XRP", "MXN"), new CurrencyPair("XRP", "ZAR"),
             new CurrencyPair("XRP", "MYR"), new CurrencyPair("XRP", "IDR"), new CurrencyPair("XRP", "SGD"), new CurrencyPair("XRP", "CHF"),
+            new CurrencyPair("XAH", "USD"),
             new CurrencyPair("BTC", "USD"), new CurrencyPair("BTC", "EUR"),
     };
 
@@ -64,8 +65,7 @@ public class CryptoPriceOracle implements ExchangeRateProvider {
 
     @Override
     public void init(ConfigRepo repo) {
-        var fallback = HttpUrl.get("http://localhost:3000/api");
-        // var fallback = HttpUrl.get("https://priceoracle.dallipay.com/api/");
+        var fallback = HttpUrl.get("https://priceoracle.radynamics.com/api/");
         try {
             url = repo.getCryptoPriceOracleUrl().orElse(fallback);
             apiKey = Secrets.getCryptoPriceOracleApiKey(repo);
