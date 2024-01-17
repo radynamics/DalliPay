@@ -2,7 +2,9 @@ package com.radynamics.dallipay.cryptoledger.xrpl.xahau;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.CryptoPriceOracle;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
+import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.JsonRpcApi;
 import com.radynamics.dallipay.exchange.Bitrue;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -70,6 +72,11 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     @Override
     public String[] getExchangeRateProviders() {
         return new String[]{ManualRateProvider.ID, Bitrue.ID};
+    }
+
+    @Override
+    public String[] getHistoricExchangeRateProviders() {
+        return new String[]{CryptoPriceOracle.ID, XrplPriceOracle.ID};
     }
 
     @Override

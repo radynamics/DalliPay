@@ -6,6 +6,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.cryptoledger.DestinationTagBuilder;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.generic.CryptoPriceOracle;
 import com.radynamics.dallipay.cryptoledger.generic.WalletConverter;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.generic.WalletValidator;
@@ -32,7 +33,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
@@ -183,12 +183,6 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public ExchangeRateProvider createHistoricExchangeRateSource() {
-        var livenet = Arrays.stream(getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
-        return ExchangeRateProviderFactory.create(XrplPriceOracle.ID, this, livenet);
-    }
-
-    @Override
     public WalletValidator createWalletValidator() {
         return new XrplWalletValidator(this);
     }
@@ -288,6 +282,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public String[] getExchangeRateProviders() {
         return new String[]{ManualRateProvider.ID, Coinbase.ID, Bitstamp.ID};
+    }
+
+    @Override
+    public String[] getHistoricExchangeRateProviders() {
+        return new String[]{XrplPriceOracle.ID, CryptoPriceOracle.ID};
     }
 
     @Override

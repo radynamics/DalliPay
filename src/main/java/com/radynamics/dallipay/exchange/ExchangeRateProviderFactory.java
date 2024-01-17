@@ -27,7 +27,8 @@ public final class ExchangeRateProviderFactory {
             case ManualRateProvider.ID:
                 return new ManualRateProvider();
             case XrplPriceOracle.ID:
-                return new XrplPriceOracle(network);
+                var livenet = Arrays.stream(ledger.getDefaultNetworkInfo()).filter(NetworkInfo::isLivenet).findFirst().orElseThrow();
+                return new XrplPriceOracle(livenet);
             case CryptoPriceOracle.ID:
                 return new CryptoPriceOracle(new Currency(ledger.getNativeCcySymbol()));
             default:
@@ -41,6 +42,18 @@ public final class ExchangeRateProviderFactory {
             list.add(create(id, ledger));
         }
         return list.toArray(new ExchangeRateProvider[0]);
+    }
+
+    public static ExchangeRateProvider[] allPriceOracles(Ledger ledger) {
+        var list = new ArrayList<ExchangeRateProvider>();
+        for (var id : ledger.getHistoricExchangeRateProviders()) {
+            list.add(create(id, ledger, ledger.getNetwork()));
+        }
+        return list.toArray(new ExchangeRateProvider[0]);
+    }
+
+    public static ExchangeRateProvider defaultPriceOracle(Ledger ledger) {
+        return Arrays.stream(allPriceOracles(ledger)).findFirst().orElse(null);
     }
 
     public static boolean supports(Ledger ledger, String id) {
