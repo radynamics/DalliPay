@@ -4,6 +4,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.generic.CryptoPriceOracle;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitterFactory;
+import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracle;
 import com.radynamics.dallipay.cryptoledger.xrpl.xahau.api.JsonRpcApi;
 import com.radynamics.dallipay.exchange.Bitrue;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
@@ -59,11 +60,6 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     }
 
     @Override
-    public ExchangeRateProvider createHistoricExchangeRateSource() {
-        return ExchangeRateProviderFactory.create(CryptoPriceOracle.ID, this);
-    }
-
-    @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
         networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xahau.network/"), "Mainnet");
@@ -76,6 +72,11 @@ public class Ledger extends com.radynamics.dallipay.cryptoledger.xrpl.Ledger {
     @Override
     public String[] getExchangeRateProviders() {
         return new String[]{ManualRateProvider.ID, Bitrue.ID};
+    }
+
+    @Override
+    public String[] getHistoricExchangeRateProviders() {
+        return new String[]{CryptoPriceOracle.ID, XrplPriceOracle.ID};
     }
 
     @Override

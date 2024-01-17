@@ -52,8 +52,6 @@ public interface Ledger {
 
     PaymentHistoryProvider getPaymentHistoryProvider();
 
-    ExchangeRateProvider createHistoricExchangeRateSource();
-
     WalletValidator createWalletValidator();
 
     com.radynamics.dallipay.iso20022.PaymentValidator createPaymentValidator();
@@ -73,6 +71,8 @@ public interface Ledger {
     NetworkInfo[] getDefaultNetworkInfo();
 
     String[] getExchangeRateProviders();
+
+    String[] getHistoricExchangeRateProviders();
 
     ExchangeRateProvider getDefaultExchangeRateProvider();
 

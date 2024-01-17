@@ -160,11 +160,6 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public ExchangeRateProvider createHistoricExchangeRateSource() {
-        return null;
-    }
-
-    @Override
     public WalletValidator createWalletValidator() {
         return new GenericWalletValidator(this);
     }
@@ -221,6 +216,11 @@ public class TestLedger implements Ledger {
     @Override
     public String[] getExchangeRateProviders() {
         return new String[]{ManualRateProvider.ID};
+    }
+
+    @Override
+    public String[] getHistoricExchangeRateProviders() {
+        return new String[0];
     }
 
     @Override
