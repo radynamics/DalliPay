@@ -77,7 +77,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public FeeSuggestion getFeeSuggestion(Transaction t) {
+    public FeeSuggestion getFeeSuggestion(Transaction t) throws ApiException {
         var ccy = new Currency(getNativeCcySymbol());
         var low = Money.of(api.estimateSmartFee(6).doubleValue(), ccy);
         var medium = Money.of(api.estimateSmartFee(3).doubleValue(), ccy);

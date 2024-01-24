@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton;
 import com.alexandriasoftware.swing.action.SplitButtonClickedActionListener;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
@@ -493,6 +494,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             Executors.newCachedThreadPool().submit(() -> {
                 table.refresh(payments).thenRun(() -> sendPayments(payments));
             });
+        } catch (ApiException e) {
+            ExceptionDialog.show(this, e);
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }

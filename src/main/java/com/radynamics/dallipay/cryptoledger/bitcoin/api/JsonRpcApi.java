@@ -208,13 +208,13 @@ public class JsonRpcApi {
         wallet.getBalances().set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
     }
 
-    public BigDecimal estimateSmartFee(int targetInBlocks) {
+    public BigDecimal estimateSmartFee(int targetInBlocks) throws ApiException {
         var est = openedWallets.estimateSmartFee(targetInBlocks);
         if (StringUtils.isEmpty(est.errors())) {
             return est.feeRate();
         } else {
             log.warn(est.errors());
-            return BigDecimal.ZERO;
+            throw new ApiException("Estimating transaction fee failed. %s".formatted(est.errors()));
         }
     }
 

@@ -2,6 +2,7 @@ package com.radynamics.dallipay.cryptoledger;
 
 import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.DateTimeRange;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.cryptoledger.generic.WalletAddressResolver;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.generic.WalletValidator;
@@ -31,7 +32,7 @@ public interface Ledger {
 
     UnsignedLong toSmallestUnit(Money amount);
 
-    FeeSuggestion getFeeSuggestion(Transaction t);
+    FeeSuggestion getFeeSuggestion(Transaction t) throws ApiException;
 
     boolean equalTransactionFees();
 

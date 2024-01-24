@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger;
 
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.Payment;
 
@@ -15,7 +16,7 @@ public class FeeRefresher {
         this.payments = payments;
     }
 
-    public void refresh() {
+    public void refresh() throws ApiException {
         feeCache.clear();
         for (var p : payments) {
             if (p.getFeeSuggestion() == null) {
@@ -65,7 +66,7 @@ public class FeeRefresher {
         return true;
     }
 
-    private FeeSuggestion getOrLoadFeeSuggestion(Payment p) {
+    private FeeSuggestion getOrLoadFeeSuggestion(Payment p) throws ApiException {
         var ledger = p.getLedger();
         if (!ledger.equalTransactionFees()) {
             return ledger.getFeeSuggestion(p.getTransaction());
