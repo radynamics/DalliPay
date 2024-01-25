@@ -7,33 +7,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ResourceBundle;
 
-public class SetupBitcoinCorePage extends AbstractWizardPage {
-    private final AbstractWizardPage nextPage = new SetupBitcoinCoreWalletPage();
-
+public class SetupBitcoinCoreWalletPage extends AbstractWizardPage {
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
-    public SetupBitcoinCorePage() {
+    public SetupBitcoinCoreWalletPage() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         add(Utils.createText(res.getString("section0")));
-        add(Box.createRigidArea(new Dimension(0, 5)));
-
-        add(Utils.createText(res.getString("bitcoinConf")));
-        var lbl = new JTextArea(res.getString("bitcoinConfExample"));
-        add(lbl);
-        lbl.setBorder(BorderFactory.createEmptyBorder());
-        lbl.setEditable(false);
-        lbl.setLineWrap(true);
-        lbl.setWrapStyleWord(true);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         add(Box.createRigidArea(new Dimension(0, 5)));
         add(Utils.createText(res.getString("section1")));
     }
 
     @Override
     protected AbstractWizardPage nextPage() {
-        return nextPage;
+        return null;
     }
 
     @Override
@@ -48,11 +35,11 @@ public class SetupBitcoinCorePage extends AbstractWizardPage {
 
     @Override
     protected boolean nextAllowed() {
-        return true;
+        return false;
     }
 
     @Override
     protected boolean finishAllowed() {
-        return false;
+        return true;
     }
 }
