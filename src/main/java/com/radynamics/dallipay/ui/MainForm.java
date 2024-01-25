@@ -134,10 +134,10 @@ public class MainForm extends JFrame {
             ExceptionDialog.show(this, e);
         }
 
-        if (isFirstStart) {
-            final var self = this;
-            addComponentListener(new ComponentAdapter() {
-                public void componentShown(ComponentEvent e) {
+        final var self = this;
+        addComponentListener(new ComponentAdapter() {
+            public void componentShown(ComponentEvent e) {
+                if (isFirstStart) {
                     var wizard = new WizardDialog(self, "");
                     wizard.contentTitle(res.getString("welcomeWizardTitle"));
                     var wizardCtrl = new WizardController(wizard);
@@ -148,13 +148,14 @@ public class MainForm extends JFrame {
                     if (!transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
                         onLedgerClicked(ledger);
                     }
-                    // Eg Bitcoin doens't has any default endpoints.
-                    if (!networkPopupMenu.hasSelectableNetworks()) {
-                        networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:18332/");
-                    }
                 }
-            });
-        }
+
+                // Eg Bitcoin doesn't has any default endpoints.
+                if (!networkPopupMenu.hasSelectableNetworks()) {
+                    networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:18332/");
+                }
+            }
+        });
     }
 
     private void onPaymentRequestReceived(URI requestUrl) {
