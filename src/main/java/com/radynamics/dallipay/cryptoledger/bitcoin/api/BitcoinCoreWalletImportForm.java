@@ -17,6 +17,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.TimerTask;
@@ -251,8 +252,17 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                 if (!mutex.tryAcquire()) return;
 
                 try {
+                    var existing = new ArrayList<Device>();
+                    for (var i = 0; i < cboDevices.getItemCount(); i++) {
+                        existing.add(cboDevices.getItemAt(i));
+                    }
+
                     lblSearching.setVisible(true);
                     var devices = hwi.enumerate();
+                    var newlyFound = devices.stream().filter(o -> !existing.stream().anyMatch(x -> x.fingerprint().equals(o.fingerprint())));
+                    if (newlyFound.findAny().isEmpty()) {
+                        return;
+                    }
                     cboDevices.removeAllItems();
                     for (var d : devices) {
                         cboDevices.addItem(d);
