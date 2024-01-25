@@ -30,6 +30,7 @@ public class LedgerPage extends AbstractWizardPage {
 
         add(Box.createRigidArea(new Dimension(0, 20)));
         add(Utils.createText(res.getString("defaultLedger")));
+        add(Box.createRigidArea(new Dimension(0, 5)));
 
         add(cboLedger);
         cboLedger.setMaximumSize(new Dimension(200, cboLedger.getPreferredSize().height));
