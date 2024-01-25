@@ -179,7 +179,6 @@ public class MultiWalletJsonRpcApi {
 
     public void importWallet(String walletName, LocalDateTime historicTransactionSince, Device device) throws ApiException {
         init();
-        createWallet(walletName);
 
         var hwi = Hwi.get();
         hwi.chain(genericClient.getBlockChainInfo().chain());
@@ -196,6 +195,8 @@ public class MultiWalletJsonRpcApi {
             kp.timestamp(toTimestamp(historicTransactionSince));
             arr.put(KeyPoolJsonSerializer.toJson(kp));
         }
+
+        createWallet(walletName);
         importDescriptors(walletName, arr.toString());
     }
 
