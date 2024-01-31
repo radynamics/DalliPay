@@ -152,7 +152,7 @@ public class MainForm extends JFrame {
 
                 // Eg Bitcoin doesn't has any default endpoints.
                 if (!networkPopupMenu.hasSelectableNetworks()) {
-                    networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:18332/");
+                    networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:8332/");
                 }
             }
         });
