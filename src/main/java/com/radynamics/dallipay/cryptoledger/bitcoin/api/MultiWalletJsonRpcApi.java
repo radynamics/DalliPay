@@ -79,7 +79,11 @@ public class MultiWalletJsonRpcApi {
         var list = new ArrayList<BitcoindRpcClient.Transaction>();
         for (var c : walletClients.values()) {
             for (var txId : listReceivedByAddress(c, wallet)) {
-                list.add(c.getTransaction(txId));
+                var t = c.getTransaction(txId);
+                // Tx is returned multiple times, if eg a hardware wallet is used in multiple bitcoinCore wallets.
+                if (list.stream().noneMatch(o -> o.txId().equals(t.txId()))) {
+                    list.add(t);
+                }
             }
         }
         return list;
