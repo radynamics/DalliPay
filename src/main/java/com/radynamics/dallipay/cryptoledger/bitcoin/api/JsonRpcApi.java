@@ -120,9 +120,9 @@ public class JsonRpcApi {
         var amt = Money.of(Math.abs(t.amount().doubleValue()), new Currency(ledger.getNativeCcySymbol()));
         var trx = new com.radynamics.dallipay.cryptoledger.generic.Transaction(ledger, amt);
         trx.setId(t.txId());
-        // Null uncomfirmed tx
-        if (t.blockTime() != null) {
-            trx.setBooked(toUserTimeZone(t.blockTime()));
+        // Null unconfirmed tx
+        if (t.time() != null) {
+            trx.setBooked(toUserTimeZone(t.time()));
         }
 
         var rawTx = openedWallets.getRawTransaction(t.txId());
