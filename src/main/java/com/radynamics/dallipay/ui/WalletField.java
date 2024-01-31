@@ -294,6 +294,7 @@ public class WalletField extends JPanel {
 
     public void setText(String value) {
         txt.setText(value);
+        txt.setCaretPosition(0);
         txt.getInputVerifier().verify(txt);
     }
 
