@@ -124,10 +124,9 @@ public class MultiWalletJsonRpcApi {
 
     private List<Wallet> getAddressesByLabel(BitcoinJSONRPCClient client, String label) {
         var ext = new BitcoinCoreRpcClientExt(client);
-        var result = ext.getAddressesByLabel(label);
         var list = new ArrayList<Wallet>();
-        for (var kvp : result.entrySet()) {
-            list.add(ledger.createWallet(kvp.getKey()));
+        for (var address : ext.getAddressesByLabel(label)) {
+            list.add(ledger.createWallet(address));
         }
         return list;
     }
@@ -171,9 +170,8 @@ public class MultiWalletJsonRpcApi {
         var ext = new BitcoinCoreRpcClientExt(genericClient);
         var resultGetDescriptor = ext.getDescriptorInfo("addr(%s)".formatted(walletAddress));
 
-        var checksum = resultGetDescriptor.get("checksum");
         // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
-        var options = "[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, checksum, toTimestamp(historicTransactionSince));
+        var options = "[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, resultGetDescriptor.checksum(), toTimestamp(historicTransactionSince));
         importDescriptors(walletName, options);
     }
 

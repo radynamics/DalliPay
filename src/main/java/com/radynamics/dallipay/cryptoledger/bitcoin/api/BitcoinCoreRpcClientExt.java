@@ -93,12 +93,18 @@ public class BitcoinCoreRpcClientExt {
         return (List<String>) client.query("listlabels");
     }
 
-    public LinkedHashMap<String, String> getAddressesByLabel(String label) {
-        return (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
+    public List<String> getAddressesByLabel(String label) {
+        var result = (LinkedHashMap<String, String>) client.query("getaddressesbylabel", label);
+        var list = new ArrayList<String>();
+        for (var kvp : result.entrySet()) {
+            list.add(kvp.getKey());
+        }
+        return list;
     }
 
-    public LinkedHashMap<String, ?> getDescriptorInfo(String desc) {
-        return (LinkedHashMap<String, ?>) client.query("getdescriptorinfo", desc);
+    public DescriptorInfoResult getDescriptorInfo(String desc) {
+        var result = (LinkedHashMap<String, ?>) client.query("getdescriptorinfo", desc);
+        return new DescriptorInfoResult(String.valueOf(result.get("checksum")));
     }
 
     public static Optional<JSONObject> errorJson(Throwable t) {
