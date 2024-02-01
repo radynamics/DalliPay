@@ -104,7 +104,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         pnlMain.registerKeyboardAction(e -> load(), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         {
-            final int paddingWest = 120;
+            final int paddingWest = 130;
             Component anchorComponentTopLeft;
             {
                 var lbl = new JLabel(res.getString("receiverWallet"));

@@ -96,7 +96,7 @@ public class ReceiveExportForm extends JDialog {
 
         {
             int line = 0;
-            int padValueCtrl = 110;
+            int padValueCtrl = 130;
             {
                 var lbl = new JLabel(res.getString("file"));
                 anchorComponentTopLeft = lbl;
