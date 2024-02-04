@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.xrpl.xahau;
 
 import com.radynamics.dallipay.cryptoledger.*;
-import com.radynamics.dallipay.cryptoledger.xrpl.Ledger;
 import com.radynamics.dallipay.ui.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,9 +17,9 @@ public class BithompXahau implements WalletLookupProvider, TransactionLookupProv
     public static final String displayName = "Bithomp";
 
     public BithompXahau(NetworkInfo network) throws LookupProviderException {
-        if (Objects.equals(network.getNetworkId(), com.radynamics.dallipay.cryptoledger.xrpl.Ledger.NETWORKID_LIVENET)) {
+        if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
             this.baseUrl = "https://www.xahauexplorer.com/explorer/";
-        } else if (Objects.equals(network.getNetworkId(), com.radynamics.dallipay.cryptoledger.xrpl.xahau.Ledger.NETWORKID_TESTNET)) {
+        } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
             this.baseUrl = "https://test.xahauexplorer.com/explorer/";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
