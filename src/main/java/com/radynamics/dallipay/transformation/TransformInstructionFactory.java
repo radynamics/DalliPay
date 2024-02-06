@@ -77,6 +77,9 @@ public final class TransformInstructionFactory {
             }
         }
 
-        return NetworkInfo.create(lastUsed, lastUsed.toString());
+        var ni = NetworkInfo.create(lastUsed, lastUsed.toString());
+        var knownNetworkIds = ledger.networkIds();
+        ni.setNetworkId(knownNetworkIds.length == 0 ? null : Integer.parseInt(knownNetworkIds[0].getKey()));
+        return ni;
     }
 }
