@@ -134,7 +134,7 @@ public class Xumm implements WalletInfoProvider {
 
     @Override
     public String getDisplayText() {
-        return "Xumm";
+        return "Xaman";
     }
 
     @Override
