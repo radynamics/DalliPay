@@ -40,6 +40,7 @@ public class MainForm extends JFrame {
     private JSplitButton cmdLedger;
     private JSplitButton cmdNetwork;
     private NetworkPopMenu networkPopupMenu;
+    private boolean formLoaded;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
     private final String ITEM_OBJECT_ID = "itemObjectId";
@@ -137,6 +138,7 @@ public class MainForm extends JFrame {
         final var self = this;
         addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent e) {
+                formLoaded = true;
                 if (isFirstStart) {
                     var wizard = new WizardDialog(self, "");
                     wizard.contentTitle(res.getString("welcomeWizardTitle"));
@@ -150,12 +152,16 @@ public class MainForm extends JFrame {
                     }
                 }
 
-                // Eg Bitcoin doesn't has any default endpoints.
-                if (!networkPopupMenu.hasSelectableNetworks()) {
-                    networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:8332/");
-                }
+                showNetworkInfoEditIfNoneAvailable();
             }
         });
+    }
+
+    private void showNetworkInfoEditIfNoneAvailable() {
+        // Eg Bitcoin doesn't has any default endpoints.
+        if (!networkPopupMenu.hasSelectableNetworks()) {
+            networkPopupMenu.showNetworkInfoEdit("http://user:password@localhost:8332/");
+        }
     }
 
     private void onPaymentRequestReceived(URI requestUrl) {
@@ -330,6 +336,11 @@ public class MainForm extends JFrame {
         sendingPanel.setEnabled(enabled);
         receivingPanel.setEnabled(enabled);
         optionsPanel.setEnabled(enabled);
+
+        // Ensure form is not opened on start before main ui is visible.
+        if (formLoaded) {
+            showNetworkInfoEditIfNoneAvailable();
+        }
     }
 
     private void saveLastUsedLedger(LedgerId ledgerId) {
