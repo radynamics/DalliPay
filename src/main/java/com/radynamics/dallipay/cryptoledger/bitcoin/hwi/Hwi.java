@@ -73,7 +73,7 @@ public class Hwi {
         return exec(args);
     }
 
-    private JSONArray exec(String[] args) throws HwiException {
+    private synchronized JSONArray exec(String[] args) throws HwiException {
         var arguments = new ArrayList<String>();
         arguments.add(executable.getAbsolutePath());
         arguments.addAll(List.of(args));
