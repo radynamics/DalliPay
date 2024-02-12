@@ -51,7 +51,7 @@ public class Main {
             var period = DateTimeRange.of(LocalDateTime.parse(from, DateFormatter), untilDt.toLocalDateTime());
 
             try {
-                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
                     Taskbar.getTaskbar().setIconImage(Utils.getProductIcon());
                 }
             } catch (Exception e) {
