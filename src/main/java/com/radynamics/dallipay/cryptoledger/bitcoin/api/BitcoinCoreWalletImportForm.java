@@ -48,7 +48,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
         formAcceptCloseHandler.addFormActionListener(new FormActionListener() {
             @Override
             public void onAccept() {
-                deviceSearchExecutor.shutdown();
+                stopDeviceSearch();
                 acceptDialog();
             }
 
@@ -268,6 +268,7 @@ public class BitcoinCoreWalletImportForm extends JDialog {
                         cboDevices.addItem(d);
                     }
                 } catch (HwiException e) {
+                    stopDeviceSearch();
                     ExceptionDialog.show(self, e);
                 } finally {
                     lblSearching.setVisible(false);
@@ -276,6 +277,10 @@ public class BitcoinCoreWalletImportForm extends JDialog {
             }
         };
         deviceSearchExecutor.scheduleAtFixedRate(task, 0, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    private void stopDeviceSearch() {
+        deviceSearchExecutor.shutdown();
     }
 
     private void refreshOkEnabled() {
