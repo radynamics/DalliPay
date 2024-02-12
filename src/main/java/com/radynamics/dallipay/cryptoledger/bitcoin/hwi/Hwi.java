@@ -93,11 +93,11 @@ public class Hwi {
             }
 
             response = sb.toString();
-
-            if (proc.exitValue() != 0) {
-                throw new HwiException("hwi exited with code %s. Params: %s, returned: %s".formatted(proc.exitValue(), String.join(" ", args), response));
+            var exitValue = proc.waitFor();
+            if (exitValue != 0) {
+                throw new HwiException("hwi exited with code %s. Params: %s, returned: %s".formatted(exitValue, String.join(" ", args), response));
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new HwiException(e.getMessage(), e);
         }
 
