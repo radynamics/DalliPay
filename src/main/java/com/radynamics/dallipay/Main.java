@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -80,7 +81,8 @@ public class Main {
                 var transformInstruction = TransformInstructionFactory.create(ledger, configFilePath, networkId);
                 if (ledger.getNetwork() != null && !networkAvailable(ledger)) {
                     log.warn("No connection could be established to %s.".formatted(ledger.getNetwork().getUrl()));
-                    transformInstruction.setNetwork(null);
+                    // Fallback to first default network (eg. XRPL) or null if there aren't any (eg. Bitcoin).
+                    transformInstruction.setNetwork(Arrays.stream(ledger.getDefaultNetworkInfo()).findFirst().orElse(null));
                 }
 
                 var frm = new MainForm(!existsDb);
