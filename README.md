@@ -13,11 +13,14 @@ Latest releases for various platforms are available in [releases](https://github
 
 #### Supported crypto ledgers (cryptocurrencies)
 - [XRPL](https://xrpl.org/) (XRP)
+- [Xahau](https://xahau.network) (XAH)
+- [Bitcoin](https://bitcoin.org) (BTC)
 
 #### Supported formats
 Following formats for *sending payments* are tested. Other ISO 20022 versions may also work.
 - ISO 20022 pain.001.001.03
 - ISO 20022 pain.001.001.09
+- ABA (Australian Bankers Association)
 - CSV text file (see pain.001.001.03_USD_EUR.csv in testfiles)
 
 Following ISO 20022 formats for *received payments* are available for export.
