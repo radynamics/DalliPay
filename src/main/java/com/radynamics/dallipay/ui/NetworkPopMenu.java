@@ -205,8 +205,9 @@ public class NetworkPopMenu {
     }
 
     private String getNetworkIdText(Integer networkId) {
-        var entry = Arrays.stream(ledger.networkIds()).filter(o -> o.getKey().equals(networkId.toString())).findFirst();
-        return entry.isPresent() ? entry.get().getDisplayText() : networkId.toString();
+        var networkIdText = String.valueOf(networkId);
+        var entry = Arrays.stream(ledger.networkIds()).filter(o -> o.getKey().equals(networkIdText)).findFirst();
+        return entry.isPresent() ? entry.get().getDisplayText() : res.getString("unknown").formatted(networkIdText);
     }
 
     private void onNetworkChanged(JCheckBoxMenuItem item) {
