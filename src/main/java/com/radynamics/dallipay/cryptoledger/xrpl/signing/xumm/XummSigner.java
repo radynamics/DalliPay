@@ -4,9 +4,9 @@ import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerException;
 import com.radynamics.dallipay.cryptoledger.OnchainVerificationException;
 import com.radynamics.dallipay.cryptoledger.OnchainVerifier;
+import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.signing.*;
 import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
-import com.radynamics.dallipay.cryptoledger.generic.Transaction;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.Convert;
 import com.radynamics.dallipay.cryptoledger.xrpl.api.PaymentBuilder;
 import com.radynamics.dallipay.ui.Utils;
@@ -69,8 +69,15 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         for (var trx : transactions) {
             var t = (Transaction) trx;
             try {
+                var ccy = t.getAmount().getCcy();
+                var sendNativeCcy = t.getLedger().getNativeCcySymbol().equals(ccy.getCode());
+                var senderAndReceiverHoldCurrency = t.getSenderWallet().getBalances().get(ccy).isPresent()
+                        && t.getReceiverWallet().getBalances().get(ccy).isPresent();
+                // Direct IOU payments don't work in Xaman if pathfinding is set to true ("No payment options found").
+                var pathfinding = !sendNativeCcy && !senderAndReceiverHoldCurrency;
+
                 var builder = PaymentBuilder.builder().payment(t).build();
-                submit(t, PayloadConverter.toJson(builder.build(), t.getLedger().getNetwork()));
+                submit(t, PayloadConverter.toJson(builder.build(), t.getLedger().getNetwork()), pathfinding);
             } catch (LedgerException e) {
                 t.refreshTransmission(e);
                 raiseFailure(t);
@@ -121,7 +128,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         return info;
     }
 
-    private void submit(Transaction t, JSONObject json) {
+    private void submit(Transaction t, JSONObject json, boolean pathfinding) {
         if (json == null) throw new IllegalArgumentException("Parameter 'json' cannot be null");
 
         var auth = new CompletableFuture<Void>();
@@ -137,7 +144,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         }
 
         auth
-                .thenRunAsync(() -> submitAndObserve(t, json))
+                .thenRunAsync(() -> submitAndObserve(t, json, pathfinding))
                 .thenRun(() -> {
                     try {
                         // Wait before stop observing
@@ -174,17 +181,17 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         return authentication;
     }
 
-    private void submitAndObserve(Transaction t, JSONObject json) {
+    private void submitAndObserve(Transaction t, JSONObject json, boolean pathfinding) {
         try {
             api.setAccessToken(storage.getAccessToken());
             api.addListener(() -> {
                 log.info("Xumm accessToken expired.");
                 // Re-authenticate if used accessToken expired.
                 authenticate(t)
-                        .thenRunAsync(() -> submitAndObserve(t, json));
+                        .thenRunAsync(() -> submitAndObserve(t, json, pathfinding));
             });
 
-            var sendResponse = api.submit(json);
+            var sendResponse = api.submit(json, pathfinding);
             if (sendResponse == null) {
                 return;
             }

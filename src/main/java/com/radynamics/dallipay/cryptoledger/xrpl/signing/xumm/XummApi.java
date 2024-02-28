@@ -31,13 +31,13 @@ public class XummApi {
         this.accessToken = accessToken;
     }
 
-    public JSONObject submit(JSONObject payload) throws IOException, InterruptedException, XummException {
+    public JSONObject submit(JSONObject payload, boolean pathfinding) throws IOException, InterruptedException, XummException {
         var json = new JSONObject();
         json.put("txjson", payload);
 
         var options = new JSONObject();
         json.put("options", options);
-        options.put("pathfinding", true);
+        options.put("pathfinding", pathfinding);
 
         return post("/payload", HttpRequest.BodyPublishers.ofString(json.toString()));
     }
