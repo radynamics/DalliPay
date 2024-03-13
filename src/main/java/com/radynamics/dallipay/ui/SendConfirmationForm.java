@@ -297,59 +297,23 @@ public class SendConfirmationForm extends JDialog {
     }
 
     private void showFeeEdit() {
-        var pnl = new JPanel();
-        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
-        pnl.setMinimumSize(new Dimension(Integer.MAX_VALUE, 80));
-        pnl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        pnl.setPreferredSize(new Dimension(Integer.MAX_VALUE, 80));
-
-        var group = new ButtonGroup();
-        var rdoLow = new JRadioButton(res.getString("fees.low"));
-        group.add(rdoLow);
-        var rdoMedium = new JRadioButton(res.getString("fees.medium"));
-        group.add(rdoMedium);
-        var rdoHigh = new JRadioButton(res.getString("fees.high"));
-        group.add(rdoHigh);
-
         var fr = new FeeRefresher(payments);
-        rdoLow.setSelected(fr.allLow());
-        rdoMedium.setSelected(fr.allMedium());
-        rdoHigh.setSelected(fr.allHigh());
-
-        pnl.add(createFeeRow(rdoLow));
-        pnl.add(createFeeRow(rdoMedium));
-        pnl.add(createFeeRow(rdoHigh));
-
-        var optionPane = new JOptionPane();
-        optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
-        var ret = JOptionPane.showOptionDialog(this, pnl, res.getString("feePerTrx"),
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"OK", res.getString("cancel")}, "OK");
-        if (ret != JOptionPane.OK_OPTION) {
+        var feeEdit = new FeeEdit(fr);
+        if (feeEdit.showDialog(this) != JOptionPane.OK_OPTION) {
             return;
         }
 
-        if (rdoLow.isSelected()) {
+        if (feeEdit.isLowSelected()) {
             fr.setAllLow();
         }
-        if (rdoMedium.isSelected()) {
+        if (feeEdit.isMediumSelected()) {
             fr.setAllMedium();
         }
-        if (rdoHigh.isSelected()) {
+        if (feeEdit.isHighSelected()) {
             fr.setAllHigh();
         }
 
         refreshTotalFee();
-    }
-
-    private Component createFeeRow(JRadioButton rdo) {
-        var pnl = new JPanel();
-        var layout = new SpringLayout();
-        pnl.setLayout(layout);
-
-        pnl.add(rdo);
-        layout.putConstraint(SpringLayout.WEST, rdo, 0, SpringLayout.WEST, pnl);
-
-        return pnl;
     }
 
     private void showFeeDetails() {
