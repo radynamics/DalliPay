@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.signing;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.radynamics.dallipay.cryptoledger.FeeHelper;
+import com.radynamics.dallipay.cryptoledger.FeeType;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Transaction;
 import com.radynamics.dallipay.cryptoledger.bitcoin.api.BitcoinCoreRpcClientExt;
@@ -93,8 +95,9 @@ public class BitcoinCoreRpcSubmitter implements TransactionSubmitter {
 
         var outputs = new ArrayList<BitcoindRpcClient.TxOutput>();
         outputs.add(new BitcoindRpcClient.BasicTxOutput(t.getReceiverWallet().getPublicKey(), amount, signingMethod.supportsPayload() ? commentBytes : null));
+        var feeSatsPerByte = t.getLedger().toSmallestUnit(FeeHelper.get(t.getFees(), FeeType.LedgerTransactionFee).orElseThrow());
         var ext = new BitcoinCoreRpcClientExt(client);
-        var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs);
+        var walletCreateFundedPsbtResult = ext.walletCreateFundedPsbt(outputs, feeSatsPerByte);
 
         var signed = signingMethod.signPsbt(client, walletCreateFundedPsbtResult);
         if (!signed.signed()) {

@@ -27,7 +27,7 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
     public MoneyTextField(Ledger ledger) {
         super(ledger, new JTextField());
         setEditable(false);
-        ctrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, res.getString("moneyTextField.placeholderText"));
+        placeholderText(res.getString("moneyTextField.placeholderText"));
         ctrl.setColumns(9);
         ctrl.getDocument().addDocumentListener(this);
     }
@@ -79,6 +79,14 @@ public class MoneyTextField extends MoneyControl<JTextField> implements Document
 
     public void setEditable(boolean editable) {
         ctrl.setEditable(editable);
+    }
+
+    public void setEnabled(boolean enabled) {
+        ctrl.setEnabled(enabled);
+    }
+
+    public void placeholderText(String text) {
+        ctrl.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, text);
     }
 
     @Override

@@ -1,17 +1,12 @@
 package com.radynamics.dallipay.cryptoledger;
 
 import com.radynamics.dallipay.MoneyFormatter;
-import com.radynamics.dallipay.exchange.CurrencyPair;
-import com.radynamics.dallipay.exchange.ExchangeRate;
-import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.exchange.Money;
+import com.radynamics.dallipay.exchange.Currency;
+import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 public class PaymentUtils {
     public static ArrayList<Wallet> distinctSendingWallets(Payment[] payments) {
@@ -134,5 +129,24 @@ public class PaymentUtils {
             }
         }
         return sum;
+    }
+
+    public static Currency mostUsedUserCcy(Payment[] payments) {
+        if (payments.length == 0) {
+            return null;
+        }
+
+        var usage = new HashMap<Currency, Integer>();
+        for (var p : payments) {
+            var ccy = p.getUserCcy();
+            var count = usage.getOrDefault(ccy, 0);
+            usage.put(ccy, count + 1);
+        }
+
+        var candidate = usage.entrySet().stream().findFirst().orElseThrow();
+        for (var pair : usage.entrySet()) {
+            candidate = candidate.getValue() > pair.getValue() ? candidate : pair;
+        }
+        return candidate.getKey();
     }
 }

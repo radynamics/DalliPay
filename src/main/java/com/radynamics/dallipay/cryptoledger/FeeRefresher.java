@@ -38,6 +38,10 @@ public class FeeRefresher {
         setAll(FeeSuggestion::getHigh);
     }
 
+    public void setAllCustom(Money amount) {
+        setAll(feeSuggestion -> amount);
+    }
+
     private void setAll(Function<FeeSuggestion, Money> getFee) {
         for (var p : payments) {
             p.setLedgerTransactionFee(getFee.apply(p.getFeeSuggestion()));
@@ -54,6 +58,10 @@ public class FeeRefresher {
 
     public boolean allHigh() {
         return all(FeeSuggestion::getHigh);
+    }
+
+    public boolean custom() {
+        return !allLow() && !allMedium() && !allHigh();
     }
 
     private boolean all(Function<FeeSuggestion, Money> getFee) {
@@ -82,5 +90,9 @@ public class FeeRefresher {
 
     private static final String createKey(Payment p) {
         return p.getLedger().getId().textId();
+    }
+
+    public FeeSuggestion firstFeeSuggestion() throws ApiException {
+        return payments.length == 0 ? null : getOrLoadFeeSuggestion(payments[0]);
     }
 }

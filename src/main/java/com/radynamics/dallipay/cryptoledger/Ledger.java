@@ -36,6 +36,8 @@ public interface Ledger {
 
     boolean equalTransactionFees();
 
+    String transactionFeeUnitText();
+
     WalletInput createWalletInput(String text);
 
     Wallet createWallet(String publicKey, String secret);

@@ -83,6 +83,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public String transactionFeeUnitText() {
+        return null;
+    }
+
+    @Override
     public WalletInput createWalletInput(String text) {
         return new WalletInput(this, text);
     }

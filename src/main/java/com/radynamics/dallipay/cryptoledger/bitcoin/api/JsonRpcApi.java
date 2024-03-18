@@ -24,6 +24,7 @@ import wf.bitcoin.javabitcoindrpcclient.BitcoindRpcClient;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -211,11 +212,16 @@ public class JsonRpcApi {
     public BigDecimal estimateSmartFee(int targetInBlocks) throws ApiException {
         var est = openedWallets.estimateSmartFee(targetInBlocks);
         if (StringUtils.isEmpty(est.errors())) {
-            return est.feeRate();
+            return convertvKilobyteTovByte(est.feeRate());
         } else {
             log.warn(est.errors());
             throw new ApiException("Estimating transaction fee failed. %s".formatted(est.errors()));
         }
+    }
+
+    private BigDecimal convertvKilobyteTovByte(BigDecimal value) {
+        // Bitcoin Core uses is "BTC per 1000 vbyte"
+        return value.divide(BigDecimal.valueOf(1000), RoundingMode.HALF_UP);
     }
 
     public EndpointInfo getEndpointInfo(NetworkInfo networkInfo) {

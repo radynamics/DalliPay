@@ -3,6 +3,7 @@ package com.radynamics.dallipay.ui;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.radynamics.dallipay.MoneyFormatter;
 import com.radynamics.dallipay.cryptoledger.*;
+import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
@@ -298,8 +299,14 @@ public class SendConfirmationForm extends JDialog {
 
     private void showFeeEdit() {
         var fr = new FeeRefresher(payments);
-        var feeEdit = new FeeEdit(fr);
-        if (feeEdit.showDialog(this) != JOptionPane.OK_OPTION) {
+        var feeEdit = new FeeEdit(this, ledger, provider, fr);
+        feeEdit.displayCcy(PaymentUtils.mostUsedUserCcy(payments));
+        try {
+            feeEdit.customFeeSuggestion(fr.firstFeeSuggestion().getMedium());
+        } catch (ApiException e) {
+            ExceptionDialog.show(this, e);
+        }
+        if (feeEdit.showDialog() != JOptionPane.OK_OPTION) {
             return;
         }
 
@@ -311,6 +318,9 @@ public class SendConfirmationForm extends JDialog {
         }
         if (feeEdit.isHighSelected()) {
             fr.setAllHigh();
+        }
+        if (feeEdit.isCustomSelected() && feeEdit.customAmount() != null) {
+            fr.setAllCustom(feeEdit.customAmount());
         }
 
         refreshTotalFee();

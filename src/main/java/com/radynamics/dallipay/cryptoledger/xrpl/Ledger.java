@@ -106,6 +106,11 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public String transactionFeeUnitText() {
+        return null;
+    }
+
+    @Override
     public WalletInput createWalletInput(String text) {
         return new WalletInput(this, text);
     }

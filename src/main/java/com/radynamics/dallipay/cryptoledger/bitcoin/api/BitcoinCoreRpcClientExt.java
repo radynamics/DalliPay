@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
+import com.google.common.primitives.UnsignedLong;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -18,7 +19,7 @@ public class BitcoinCoreRpcClientExt {
         this.client = client;
     }
 
-    public WalletCreateFundedPsbtResult walletCreateFundedPsbt(List<BitcoindRpcClient.TxOutput> txOutputs) {
+    public WalletCreateFundedPsbtResult walletCreateFundedPsbt(List<BitcoindRpcClient.TxOutput> txOutputs, UnsignedLong feeSatsPerByte) {
         var inputs = new ArrayList<Map<String, ?>>();
         var outputs = new LinkedHashMap<String, Object>();
         for (var txOutput : txOutputs) {
@@ -29,7 +30,11 @@ public class BitcoinCoreRpcClientExt {
             }
         }
 
-        var result = (LinkedHashMap<String, ?>) client.query("walletcreatefundedpsbt", inputs, outputs);
+        final var locktime = 0;
+        var options = new LinkedHashMap<String, Object>();
+        options.put("fee_rate", feeSatsPerByte);
+
+        var result = (LinkedHashMap<String, ?>) client.query("walletcreatefundedpsbt", inputs, outputs, locktime, options);
         return new WalletCreateFundedPsbtResult(result.get("psbt").toString(), Double.parseDouble(result.get("fee").toString()), Integer.parseInt(result.get("changepos").toString()));
     }
 
