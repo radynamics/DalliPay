@@ -101,7 +101,7 @@ public abstract class MoneyControl<T extends JComponent> extends JPanel {
         ccyFormatter.format(ctrl, value.getCcy());
 
         var toolTip = new StringBuilder();
-        toolTip.append(MoneyFormatter.formatLedger(value));
+        toolTip.append(MoneyFormatter.formatLedger(ledger.getNativeCcyNumberFormat(), value));
         if (ctrl.getToolTipText().length() > 0) {
             toolTip.append(System.lineSeparator());
             toolTip.append(ctrl.getToolTipText());

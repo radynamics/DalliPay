@@ -6,10 +6,11 @@ import com.radynamics.dallipay.ui.Utils;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 
 public class MoneyFormatter {
-    public static String formatLedger(Money amount) {
-        return String.format("%s %s", Utils.createFormatLedger().format(amount.getNumber()), amount.getCcy().getCode());
+    public static String formatLedger(NumberFormat nf, Money amount) {
+        return String.format("%s %s", nf.format(amount.getNumber()), amount.getCcy().getCode());
     }
 
     public static String formatExact(Money amount) {

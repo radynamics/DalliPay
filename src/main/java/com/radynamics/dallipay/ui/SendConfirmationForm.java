@@ -339,7 +339,7 @@ public class SendConfirmationForm extends JDialog {
                     : AddressFormatter.formatSingleLine(p.getReceiverAddress());
             sb.append(String.format("%s. %s, %s%s", i + 1, paymentHeader, AmountFormatter.formatAmtWithCcy(p), System.lineSeparator()));
             for (var fee : p.getFees()) {
-                sb.append(String.format("%s: %s%s", MoneyFormatter.formatLedger(fee.getAmount()), FeeHelper.getText(fee.getType()), System.lineSeparator()));
+                sb.append(String.format("%s: %s%s", MoneyFormatter.formatLedger(p.getLedger().getNativeCcyNumberFormat(), fee.getAmount()), FeeHelper.getText(fee.getType()), System.lineSeparator()));
             }
         }
 

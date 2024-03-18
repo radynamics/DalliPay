@@ -109,7 +109,7 @@ public class PaymentUtils {
             var r = ExchangeRate.getOrNull(provider.latestRates(), new CurrencyPair(ccy, fiatCcy));
             fiatSum = r == null || fiatSum == null ? null : fiatSum + amt.getNumber().doubleValue() * r.getRate();
 
-            sb.append(MoneyFormatter.formatLedger(amt));
+            sb.append(MoneyFormatter.formatLedger(payments[0].getLedger().getNativeCcyNumberFormat(), amt));
             if (i + 1 < fees.currencies().length) {
                 sb.append(", ");
             }

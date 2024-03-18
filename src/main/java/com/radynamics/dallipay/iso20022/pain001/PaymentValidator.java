@@ -118,8 +118,9 @@ public class PaymentValidator implements com.radynamics.dallipay.iso20022.Paymen
                 var balance = w.getBalances().get(ccy).orElseGet(() -> Money.zero(ccy));
                 var paymentsSum = sums.sum(ccy);
                 if (balance.lessThan(paymentsSum)) {
-                    var paymentsSumText = MoneyFormatter.formatLedger(paymentsSum);
-                    var balanceText = MoneyFormatter.formatLedger(balance);
+                    var numberFormat = affectedPayments.get(0).getLedger().getNativeCcyNumberFormat();
+                    var paymentsSumText = MoneyFormatter.formatLedger(numberFormat, paymentsSum);
+                    var balanceText = MoneyFormatter.formatLedger(numberFormat, balance);
                     list.add(new ValidationResult(ValidationState.Error, String.format(res.getString("paymentSumExeeds"), w.getPublicKey(), paymentsSumText, balanceText)));
                 }
             }

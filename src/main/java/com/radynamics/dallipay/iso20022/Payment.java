@@ -317,7 +317,7 @@ public class Payment {
             return MoneyFormatter.formatFiat(BigDecimal.valueOf(amount), getUserCcyCodeOrEmpty());
         }
 
-        return MoneyFormatter.formatLedger(cryptoTrx.getAmount());
+        return MoneyFormatter.formatLedger(getLedger().getNativeCcyNumberFormat(), cryptoTrx.getAmount());
     }
 
     public Throwable getTransmissionError() {

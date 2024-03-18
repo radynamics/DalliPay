@@ -32,6 +32,8 @@ import org.xrpl.xrpl4j.model.transactions.XrpCurrencyAmount;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -92,6 +94,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
             throw new IllegalArgumentException("Amount expected in %s and not %s".formatted(getNativeCcySymbol(), amount.getCcy().getCode()));
         }
         return XrpCurrencyAmount.ofXrp(BigDecimal.valueOf(amount.getNumber().doubleValue())).value();
+    }
+
+    @Override
+    public NumberFormat getNativeCcyNumberFormat() {
+        var df = DecimalFormat.getInstance();
+        df.setMinimumFractionDigits(maxDigits());
+        df.setMaximumFractionDigits(maxDigits());
+        return df;
     }
 
     @Override
@@ -355,9 +365,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         }
 
         // Round to most accurate value supported by ledger.
-        var digits = String.valueOf(CurrencyAmount.ONE_XRP_IN_DROPS).toCharArray().length - 1;
-        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
+        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), maxDigits());
         return Money.of(rounded.doubleValue(), amt.getCcy());
+    }
+
+    private int maxDigits() {
+        return String.valueOf(CurrencyAmount.ONE_XRP_IN_DROPS).toCharArray().length - 1;
     }
 
     @Override
