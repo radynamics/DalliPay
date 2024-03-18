@@ -27,6 +27,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 
 public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
@@ -74,6 +76,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
             throw new IllegalArgumentException("Amount expected in %s and not %s".formatted(getNativeCcySymbol(), amount.getCcy().getCode()));
         }
         return UnsignedLong.valueOf(Double.valueOf(amount.getNumber().doubleValue() * SATOSHI_PER_BTC).longValue());
+    }
+
+    @Override
+    public NumberFormat getNativeCcyNumberFormat() {
+        var df = DecimalFormat.getInstance();
+        df.setMinimumFractionDigits(maxDigits());
+        df.setMaximumFractionDigits(maxDigits());
+        return df;
     }
 
     @Override
@@ -238,9 +248,12 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         }
 
         // Round to most accurate value supported by ledger.
-        final int digits = BigDecimal.valueOf(1d / SATOSHI_PER_BTC).scale() - 1;
-        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), digits);
+        var rounded = AmountRounder.round(amt.getNumber().doubleValue(), maxDigits());
         return Money.of(rounded.doubleValue(), amt.getCcy());
+    }
+
+    private int maxDigits() {
+        return BigDecimal.valueOf(1d / SATOSHI_PER_BTC).scale() - 1;
     }
 
     @Override

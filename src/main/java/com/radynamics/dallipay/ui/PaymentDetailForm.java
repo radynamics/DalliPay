@@ -391,7 +391,7 @@ public class PaymentDetailForm extends JDialog {
         lblLedgerAmount.setVisible(!payment.isUserCcyEqualTransactionCcy());
         lblEditExchangeRate.setVisible(!payment.isUserCcyEqualTransactionCcy());
 
-        var amtLedgerText = MoneyFormatter.formatLedger(payment.getAmountTransaction());
+        var amtLedgerText = MoneyFormatter.formatLedger(payment.getLedger().getNativeCcyNumberFormat(), payment.getAmountTransaction());
         if (payment.getExchangeRate() == null) {
             lblLedgerAmount.setText(String.format("%s, " + res.getString("missingFxRate"), amtLedgerText));
             return;
@@ -400,7 +400,7 @@ public class PaymentDetailForm extends JDialog {
         var fxRateText = res.getString("unknown");
         var fxRateAtText = res.getString("unknown");
         if (!payment.isAmountUnknown()) {
-            fxRateText = Utils.createFormatLedger().format(payment.getExchangeRate().getRate());
+            fxRateText = payment.getLedger().getNativeCcyNumberFormat().format(payment.getExchangeRate().getRate());
             fxRateAtText = Utils.createFormatDate().format(DateTimeConvert.toUserTimeZone(payment.getExchangeRate().getPointInTime()));
         }
         lblLedgerAmount.setText(String.format(res.getString("withFxRateOf"), amtLedgerText, fxRateText, fxRateAtText));

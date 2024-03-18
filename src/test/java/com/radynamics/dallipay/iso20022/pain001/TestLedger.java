@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -66,6 +68,14 @@ public class TestLedger implements Ledger {
     @Override
     public UnsignedLong toSmallestUnit(Money amount) {
         return UnsignedLong.valueOf(amount.getNumber().longValue() * FACTOR);
+    }
+
+    @Override
+    public NumberFormat getNativeCcyNumberFormat() {
+        var df = DecimalFormat.getInstance();
+        df.setMinimumFractionDigits(6);
+        df.setMaximumFractionDigits(6);
+        return df;
     }
 
     static Money convertToNativeCcyAmount(long amountSmallestUnit) {

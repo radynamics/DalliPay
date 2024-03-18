@@ -16,6 +16,7 @@ import okhttp3.HttpUrl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.NumberFormat;
 
 public interface Ledger {
     LedgerId getId();
@@ -31,6 +32,8 @@ public interface Ledger {
     Transaction getTransaction(String transactionId);
 
     UnsignedLong toSmallestUnit(Money amount);
+
+    NumberFormat getNativeCcyNumberFormat();
 
     FeeSuggestion getFeeSuggestion(Transaction t) throws ApiException;
 

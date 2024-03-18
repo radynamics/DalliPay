@@ -10,7 +10,6 @@ import java.text.NumberFormat;
 
 public class AmountFormatter {
     private static final NumberFormat dfFiat = Utils.createFormatFiat();
-    private static final NumberFormat dfCryptocurrency = Utils.createFormatLedger();
 
     public static String formatAmt(Payment p) {
         if (p.isAmountUnknown()) {
@@ -21,7 +20,7 @@ public class AmountFormatter {
         }
 
         var df = StringUtils.equalsIgnoreCase(p.getLedger().getNativeCcySymbol(), p.getUserCcyCodeOrEmpty())
-                ? dfCryptocurrency
+                ? p.getLedger().getNativeCcyNumberFormat()
                 : dfFiat;
         return df.format(p.getAmount());
     }
@@ -30,8 +29,8 @@ public class AmountFormatter {
         return formatAmtWithCcy(dfFiat, amt);
     }
 
-    public static String formatAmtWithCcyLedgerCcy(Money amt) {
-        return formatAmtWithCcy(dfCryptocurrency, amt);
+    public static String formatAmtWithCcyLedgerCcy(NumberFormat nf, Money amt) {
+        return formatAmtWithCcy(nf, amt);
     }
 
     private static String formatAmtWithCcy(NumberFormat nf, Money amt) {
