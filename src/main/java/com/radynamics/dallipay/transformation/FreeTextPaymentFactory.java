@@ -2,6 +2,7 @@ package com.radynamics.dallipay.transformation;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.iso20022.Payment;
+import com.radynamics.dallipay.transformation.bip21.BitcoinBip21;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +34,11 @@ public class FreeTextPaymentFactory {
 
         if (EpcPayment.matches(text)) {
             var o = new EpcPayment(ledger);
+            return o.createOrNull(text);
+        }
+
+        if (BitcoinBip21.matches(text)) {
+            var o = new BitcoinBip21(ledger);
             return o.createOrNull(text);
         }
 
