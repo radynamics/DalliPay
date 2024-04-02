@@ -31,8 +31,18 @@ public final class Convert {
 
     public static String toCurrencyCode(String currency) {
         try {
+            if (currency.length() <= ccyCodeStandardFormatLength) {
+                return currency;
+            }
+
+            // "LP Token Currency Codes" (https://xrpl.org/docs/concepts/tokens/decentralized-exchange/automated-market-makers/#lp-token-currency-codes)
+            if (currency.startsWith("03")) {
+                // Eg. "0348E1573E830D01581CD80DFE1E02A9FF55A34B" -> "LP 48E1573E830D01581CD80DFE1E02A9FF55A34B"
+                return "LP %s".formatted(currency.substring(2));
+            }
+
             // trim() needed, due value is always 20 bytes, filled with 0.
-            return currency.length() <= ccyCodeStandardFormatLength ? currency : Utils.hexToString(currency).trim();
+            return Utils.hexToString(currency).trim();
         } catch (DecoderException | UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);
             return currency;
