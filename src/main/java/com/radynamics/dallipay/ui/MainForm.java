@@ -132,7 +132,7 @@ public class MainForm extends JFrame {
         try {
             paymentRequestServer.start();
         } catch (IOException e) {
-            ExceptionDialog.show(this, e);
+            ExceptionDialog.show(this, e, res.getString("startingPaymentRequestServerError"));
         }
 
         final var self = this;
