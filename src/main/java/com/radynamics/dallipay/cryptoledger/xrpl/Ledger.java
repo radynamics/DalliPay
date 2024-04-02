@@ -322,7 +322,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
             var o = new PriceOracle("radynamics Price Oracle");
             list.add(o);
             var issuer = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rDLx56UDgChRy3HqwkFSDBpX4hL6sEgmtx");
-            var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m");
+            var receiver = new com.radynamics.dallipay.cryptoledger.generic.Wallet(LedgerId.Xrpl, "r3PDXzXky6gboMrwurmSCiUyhzdrFyAbfu");
             o.add(new IssuedCurrency(new CurrencyPair("XRP", "USD"), issuer, receiver));
             o.add(new IssuedCurrency(new CurrencyPair("XRP", "EUR"), issuer, receiver));
             o.add(new IssuedCurrency(new CurrencyPair("XRP", "JPY"), issuer, receiver));
