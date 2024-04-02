@@ -19,6 +19,7 @@ public class DbMigration {
         ensureVersion(1, this::migrateTo1);
         ensureVersion(2, this::migrateTo2);
         ensureVersion(3, this::migrateTo3);
+        ensureVersion(4, this::migrateTo4);
 
         conn.commit();
     }
@@ -61,6 +62,14 @@ public class DbMigration {
         var ps = conn.prepareStatement("UPDATE config SET key = 'Xrpl_priceOracleConfig' WHERE key = 'xrplPriceOracleConfig'");
         ps.execute();
         ps = conn.prepareStatement("UPDATE config SET key = 'Xrpl_lookupProviderId' WHERE key = 'lookupProviderId'");
+        ps.execute();
+        return null;
+    }
+
+    private Void migrateTo4() throws SQLException {
+        var ps = conn.prepareStatement("UPDATE config " +
+                "SET value = REPLACE(value,'rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m','r3PDXzXky6gboMrwurmSCiUyhzdrFyAbfu') " +
+                "WHERE key = 'Xrpl_priceOracleConfig'");
         ps.execute();
         return null;
     }
