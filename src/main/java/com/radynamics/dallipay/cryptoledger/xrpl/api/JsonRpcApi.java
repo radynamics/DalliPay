@@ -199,8 +199,10 @@ public class JsonRpcApi implements TransactionSource {
 
     private ImmutableAccountTransactionsRequestParams.Builder createAccountTransactionsRequestParams(Wallet wallet, LedgerSpecifier start, LedgerSpecifier end, Marker marker) throws LedgerAtTimeException, LedgerException {
         var b = AccountTransactionsRequestParams.unboundedBuilder()
-                .account(Address.of(wallet.getPublicKey()))
-                .ledgerIndexMinimum(LedgerIndexBound.of(start.ledgerIndex().orElseThrow().unsignedIntegerValue().intValue()));
+                .account(Address.of(wallet.getPublicKey()));
+        if (start != LedgerSpecifier.VALIDATED) {
+            b.ledgerIndexMinimum(LedgerIndexBound.of(start.ledgerIndex().orElseThrow().unsignedIntegerValue().intValue()));
+        }
         if (end != LedgerSpecifier.VALIDATED) {
             b.ledgerIndexMaximum(LedgerIndexBound.of(end.ledgerIndex().orElseThrow().unsignedIntegerValue().intValue()));
         }
