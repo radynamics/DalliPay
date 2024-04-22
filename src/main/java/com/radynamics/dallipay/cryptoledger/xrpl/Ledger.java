@@ -301,7 +301,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
 
     @Override
     public String[] getHistoricExchangeRateProviders() {
-        return new String[]{XrplPriceOracle.ID, CryptoPriceOracle.ID};
+        return new String[]{CryptoPriceOracle.ID, XrplPriceOracle.ID};
     }
 
     @Override
