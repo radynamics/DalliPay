@@ -29,7 +29,10 @@ public final class TransformInstructionFactory {
             t.setExchangeRateProvider(createExchangeRateProvider(ledger, persistedProvider.orElse(null)));
             t.getExchangeRateProvider().init(repo);
             // Different ledgers/sidechains may provide different sources for historic exchange rates.
-            t.setHistoricExchangeRateSource(ExchangeRateProviderFactory.defaultPriceOracle(ledger));
+            var historicRateSource = repo.getHistoricExchangeRateSource(ledger)
+                    .map(s -> ExchangeRateProviderFactory.create(s, ledger))
+                    .orElseGet(() -> ExchangeRateProviderFactory.defaultPriceOracle(ledger));
+            t.setHistoricExchangeRateSource(historicRateSource);
             t.getHistoricExchangeRateSource().init(repo);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

@@ -286,6 +286,12 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
         var selected = map.entrySet().stream().filter(o -> o.getKey().isSelected()).findFirst().orElseThrow().getValue();
         transformInstruction.setHistoricExchangeRateSource(selected);
+        try (var repo = new ConfigRepo()) {
+            repo.setHistoricExchangeRateSource(transformInstruction.getLedger(), transformInstruction.getHistoricExchangeRateSource());
+            repo.commit();
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
         refreshUsedPriceOracleText();
     }
 

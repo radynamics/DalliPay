@@ -67,6 +67,14 @@ public class ConfigRepo implements AutoCloseable {
         saveOrUpdate("exchangeRateProvider", value.getId());
     }
 
+    public Optional<String> getHistoricExchangeRateSource(Ledger ledger) throws Exception {
+        return single(createLedgerSpecificKey(ledger, "historicExchangeRateSource"));
+    }
+
+    public void setHistoricExchangeRateSource(Ledger ledger, ExchangeRateProvider value) throws Exception {
+        saveOrUpdate(createLedgerSpecificKey(ledger, "historicExchangeRateSource"), value.getId());
+    }
+
     public String getTargetCcy(String defaultValue) throws Exception {
         return single("targetCcy").orElse(defaultValue);
     }
