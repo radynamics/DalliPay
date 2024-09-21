@@ -317,6 +317,10 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
         return api.createTransactionSubmitter(privateKeyProvider);
     }
 
+    public boolean walletImported(String walletName) {
+        return api.walletImported(walletName);
+    }
+
     public void importWallet(String walletName, LocalDateTime historicTransactionSince, Wallet wallet) throws ApiException {
         api.importWallet(walletName, historicTransactionSince, wallet);
     }

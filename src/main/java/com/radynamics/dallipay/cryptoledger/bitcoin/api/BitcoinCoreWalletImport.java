@@ -37,16 +37,26 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
         }
 
         var dlg = WaitingForm.create(null, res.getString("walletImportInProgress"));
-        Future<Boolean> future = Executors.newCachedThreadPool().submit(() -> {
+        Future<WalletImportTaskResult> future = Executors.newCachedThreadPool().submit(() -> {
             try {
                 if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
-                    ledger.importWallet(frm.walletName().orElse(frm.walletAddress()), frm.historicTransactionSince(), ledger.createWallet(frm.walletAddress()));
-                    return true;
+                    var walletName = frm.walletName().orElse(frm.walletAddress());
+                    // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
+                    if (ledger.walletImported(walletName)) {
+                        return WalletImportTaskResult.ALREADY_IMPORTED;
+                    }
+                    ledger.importWallet(walletName, frm.historicTransactionSince(), ledger.createWallet(frm.walletAddress()));
+                    return WalletImportTaskResult.IMPORTED;
                 } else if (frm.importDevice() && frm.device() != null) {
-                    ledger.importWallet(frm.walletName().orElse(frm.device().type()), frm.historicTransactionSince(), frm.device());
-                    return true;
+                    var walletName = frm.walletName().orElse(frm.device().type());
+                    // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
+                    if (ledger.walletImported(walletName)) {
+                        return WalletImportTaskResult.ALREADY_IMPORTED;
+                    }
+                    ledger.importWallet(walletName, frm.historicTransactionSince(), frm.device());
+                    return WalletImportTaskResult.IMPORTED;
                 } else {
-                    return false;
+                    return WalletImportTaskResult.NOT_IMPORTED;
                 }
             } catch (ApiException e) {
                 throw new RuntimeException(e);
@@ -57,8 +67,15 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
 
         try {
             dlg.setVisible(true);
-            if (!future.get()) {
-                return;
+            var result = future.get();
+            switch (result) {
+                case IMPORTED ->
+                        JOptionPane.showMessageDialog(parentComponent, res.getString("successfullyAdded"), res.getString("successfullyAddedTitle"), JOptionPane.INFORMATION_MESSAGE);
+                case NOT_IMPORTED -> {
+                }
+                case ALREADY_IMPORTED ->
+                        JOptionPane.showMessageDialog(parentComponent, res.getString("alreadyImported"), res.getString("alreadyImportedTitle"), JOptionPane.INFORMATION_MESSAGE);
+                default -> throw new IllegalStateException("Unexpected value: " + result);
             }
         } catch (InterruptedException | ExecutionException e) {
             var errorJson = BitcoinCoreRpcClientExt.errorJson(e.getCause());
@@ -70,7 +87,11 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
             }
             throw new RuntimeException(e);
         }
+    }
 
-        JOptionPane.showMessageDialog(parentComponent, res.getString("successfullyAdded"), res.getString("successfullyAddedTitle"), JOptionPane.INFORMATION_MESSAGE);
+    private enum WalletImportTaskResult {
+        IMPORTED,
+        NOT_IMPORTED,
+        ALREADY_IMPORTED,
     }
 }
