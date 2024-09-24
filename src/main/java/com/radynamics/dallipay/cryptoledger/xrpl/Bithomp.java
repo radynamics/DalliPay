@@ -18,9 +18,9 @@ public class Bithomp implements WalletLookupProvider, TransactionLookupProvider 
 
     public Bithomp(NetworkInfo network) throws LookupProviderException {
         if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_LIVENET)) {
-            this.baseUrl = "https://www.bithomp.com/explorer/";
+            this.baseUrl = "https://www.xrplexplorer.com/explorer/";
         } else if (Objects.equals(network.getNetworkId(), Ledger.NETWORKID_TESTNET)) {
-            this.baseUrl = "https://test.bithomp.com/explorer/";
+            this.baseUrl = "https://test.xrplexplorer.com/explorer/";
         } else {
             throw new LookupProviderException(String.format("%s doesn't support network %s.", displayName, network.getShortText()));
         }
