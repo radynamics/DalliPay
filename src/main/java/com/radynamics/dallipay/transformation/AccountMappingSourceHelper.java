@@ -26,4 +26,12 @@ public class AccountMappingSourceHelper {
         }
         return accountMappingSource.getWalletOrNull(account, Address.createPartyIdOrEmpty(address));
     }
+
+    public void open() throws AccountMappingSourceException {
+        accountMappingSource.open();
+    }
+
+    public void close() throws AccountMappingSourceException {
+        accountMappingSource.close();
+    }
 }
