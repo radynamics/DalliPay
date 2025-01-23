@@ -1,6 +1,5 @@
 package com.radynamics.dallipay.transformation;
 
-import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.db.AccountMapping;
@@ -10,12 +9,10 @@ import java.util.ArrayList;
 
 public class MemoryAccountMappingSource implements AccountMappingSource {
     private final ArrayList<AccountMapping> accountMappings = new ArrayList<>();
-    private final Ledger ledger;
 
     public static final String DummyPartyId = "undefined";
 
-    public MemoryAccountMappingSource(Ledger ledger) {
-        this.ledger = ledger;
+    public MemoryAccountMappingSource() {
     }
 
     public void add(AccountMapping accountMapping) {

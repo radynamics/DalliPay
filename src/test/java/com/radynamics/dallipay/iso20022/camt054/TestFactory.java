@@ -38,7 +38,7 @@ public class TestFactory {
     public static TransformInstruction createTransformInstruction(Ledger ledger) {
         ledger.setInfoProvider(new WalletInfoProvider[]{new TestWalletInfoProvider()});
         ledger.setNetwork(NetworkInfo.createTestnet(HttpUrl.get("https://test.url"), "TestUrl"));
-        var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(ledger));
+        var i = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
         var exchange = new DemoExchange();
         exchange.load();
         i.setExchangeRateProvider(exchange);
