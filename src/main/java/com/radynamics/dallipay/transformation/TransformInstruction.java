@@ -22,8 +22,6 @@ public class TransformInstruction {
     private final AccountMappingSource accountMappingSource;
     private ExchangeRateProvider exchangeRateProvider;
 
-    private String senderPublicKey;
-    private String senderSecret;
     private String targetCcy = XrplPriceOracleConfig.AsReceived;
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
@@ -40,21 +38,11 @@ public class TransformInstruction {
         if (account == null) {
             return null;
         }
-        var wallet = accountMappingSource.getWalletOrNull(account, Address.createPartyIdOrEmpty(address));
-        if (wallet == null) {
-            return null;
-        }
-        wallet.setSecret(wallet.getPublicKey().equals(senderPublicKey) ? senderSecret : null);
-        return wallet;
+        return accountMappingSource.getWalletOrNull(account, Address.createPartyIdOrEmpty(address));
     }
 
     public Account getAccountOrNull(Wallet wallet, Address address) throws AccountMappingSourceException {
         return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet, Address.createPartyIdOrEmpty(address));
-    }
-
-    public void setStaticSender(String publicKey, String secret) {
-        this.senderPublicKey = publicKey;
-        this.senderSecret = secret;
     }
 
     public Ledger getLedger() {
