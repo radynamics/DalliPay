@@ -10,6 +10,8 @@ import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
+import com.radynamics.dallipay.paymentrequest.Pain001Request;
+import com.radynamics.dallipay.paymentrequest.RequestListener;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
@@ -128,7 +130,17 @@ public class MainForm extends JFrame {
         }
 
         var paymentRequestServer = new EmbeddedServer();
-        paymentRequestServer.addRequestListenerListener(this::onPaymentRequestReceived);
+        paymentRequestServer.addRequestListenerListener(new RequestListener() {
+            @Override
+            public void onPaymentRequest(URI requestUri) {
+                onPaymentRequestReceived(requestUri);
+            }
+
+            @Override
+            public void onPain001Received(Pain001Request args) {
+                onPaymentPain001Received(args);
+            }
+        });
         try {
             paymentRequestServer.start();
         } catch (IOException e) {
@@ -186,12 +198,32 @@ public class MainForm extends JFrame {
         }
         var actual = transformInstruction.getNetwork();
         var expected = paymentRequestUri.networkInfo();
-        if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
-            var expectedLedger = LedgerFactory.create(paymentRequestUri.ledgerId());
-            askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
-        }
+        askSwitchingNetwork(LedgerFactory.create(paymentRequestUri.ledgerId()), expected);
 
         sendingPanel.addNewPaymentByRequest(paymentRequestUri);
+    }
+
+    private void onPaymentPain001Received(Pain001Request args) {
+        Utils.bringToFront(this);
+        tabbedPane.setSelectedComponent(sendingPanel);
+
+        if (transformInstruction.getNetwork() == null) {
+            JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (args.ledgerId() != null) {
+            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), args.networkInfo());
+        }
+
+        sendingPanel.loadPain001(args);
+    }
+
+    private void askSwitchingNetwork(Ledger expectedLedger, NetworkInfo expected) {
+        var actual = transformInstruction.getNetwork();
+        if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
+            askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
+        }
     }
 
     private void askSwitchingNetwork(Ledger actualLedger, NetworkInfo actual, Ledger expectedLedger, NetworkInfo expected) {

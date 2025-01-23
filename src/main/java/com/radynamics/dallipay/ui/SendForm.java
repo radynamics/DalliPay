@@ -18,6 +18,7 @@ import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.pain001.*;
+import com.radynamics.dallipay.paymentrequest.Pain001Request;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
@@ -39,6 +40,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.*;
@@ -356,15 +358,30 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
-        PaymentInstructionReader reader;
         try {
-            reader = PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText()));
+            loadPayments(PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText())), new FileInputStream(txtInput.getText()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
+        }
+    }
+
+    public void loadPain001(Pain001Request args) {
+        if (!isEnabled()) {
+            JOptionPane.showMessageDialog(this, res.getString("readPain001Disabled"), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        // TODO: apply mapping from args.accountWalletPairs()
+        try {
+            loadPayments(new Pain001Reader(transformInstruction.getLedger()), args.xml());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
+        }
+    }
+
+    private void loadPayments(PaymentInstructionReader reader, InputStream in) {
         var paramPanel = reader.createParameterPanel();
         if (paramPanel != null) {
             var frm = new ImportParameterForm(paramPanel);
@@ -409,7 +426,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
             try {
                 payments.clear();
-                payments.addAll(List.of(transactionTranslator.apply(reader.read(new FileInputStream(txtInput.getText())))));
+                payments.addAll(List.of(transactionTranslator.apply(reader.read(in))));
                 transactionTranslator.applyDefaultSender(payments);
                 setSubmitter(payments);
                 cf.complete(payments);
