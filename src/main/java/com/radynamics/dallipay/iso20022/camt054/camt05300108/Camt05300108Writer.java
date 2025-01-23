@@ -10,6 +10,7 @@ import com.radynamics.dallipay.iso20022.camt054.*;
 import com.radynamics.dallipay.iso20022.camt054.camt05300108.generated.*;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.transformation.AccountMappingSourceException;
+import com.radynamics.dallipay.transformation.AccountMappingSourceHelper;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,8 @@ import java.time.ZonedDateTime;
 
 public class Camt05300108Writer implements Camt054Writer {
     private final Ledger ledger;
-    private TransformInstruction transformInstruction;
+    private final TransformInstruction transformInstruction;
+    private final AccountMappingSourceHelper accountMappingSourceHelper;
     private final String productVersion;
     private IdGenerator idGenerator;
     private ZonedDateTime creationDate;
@@ -32,6 +34,7 @@ public class Camt05300108Writer implements Camt054Writer {
     public Camt05300108Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion, LedgerCurrencyFormat ledgerCurrencyFormat) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
+        this.accountMappingSourceHelper = new AccountMappingSourceHelper(this.transformInstruction.getAccountMappingSource());
         this.productVersion = productVersion;
         this.idGenerator = new UUIDIdGenerator();
         this.creationDate = ZonedDateTime.now();
@@ -88,7 +91,7 @@ public class Camt05300108Writer implements Camt054Writer {
     private CashAccount39 createAcct(Wallet receiver, Address address, String ccy) throws AccountMappingSourceException {
         var acct = new CashAccount39();
         acct.setId(new AccountIdentification4Choice());
-        var account = transformInstruction.getAccountOrNull(receiver, address);
+        var account = accountMappingSourceHelper.getAccountOrNull(receiver, address);
         if (account == null) {
             acct.getId().setOthr(new GenericAccountIdentification1());
             acct.getId().getOthr().setId(receiver.getPublicKey());

@@ -3,11 +3,8 @@ package com.radynamics.dallipay.transformation;
 import com.radynamics.dallipay.Config;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
-import com.radynamics.dallipay.iso20022.Account;
-import com.radynamics.dallipay.iso20022.Address;
 import com.radynamics.dallipay.iso20022.camt054.DateFormat;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +19,6 @@ public class TransformInstruction {
     private final AccountMappingSource accountMappingSource;
     private ExchangeRateProvider exchangeRateProvider;
 
-    private String senderPublicKey;
-    private String senderSecret;
     private String targetCcy = XrplPriceOracleConfig.AsReceived;
     private DateFormat bookingDateFormat = DateFormat.DateTime;
     private DateFormat valutaDateFormat = DateFormat.DateTime;
@@ -34,27 +29,6 @@ public class TransformInstruction {
         this.ledger = ledger;
         this.config = config;
         this.accountMappingSource = accountMappingSource;
-    }
-
-    public Wallet getWalletOrNull(Account account, Address address) throws AccountMappingSourceException {
-        if (account == null) {
-            return null;
-        }
-        var wallet = accountMappingSource.getWalletOrNull(account, Address.createPartyIdOrEmpty(address));
-        if (wallet == null) {
-            return null;
-        }
-        wallet.setSecret(wallet.getPublicKey().equals(senderPublicKey) ? senderSecret : null);
-        return wallet;
-    }
-
-    public Account getAccountOrNull(Wallet wallet, Address address) throws AccountMappingSourceException {
-        return wallet == null ? null : accountMappingSource.getAccountOrNull(wallet, Address.createPartyIdOrEmpty(address));
-    }
-
-    public void setStaticSender(String publicKey, String secret) {
-        this.senderPublicKey = publicKey;
-        this.senderSecret = secret;
     }
 
     public Ledger getLedger() {
