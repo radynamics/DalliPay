@@ -19,6 +19,7 @@ import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.PaymentEdit;
 import com.radynamics.dallipay.iso20022.pain001.*;
 import com.radynamics.dallipay.paymentrequest.Pain001Request;
+import com.radynamics.dallipay.transformation.AccountMappingSourceHelper;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
 import com.radynamics.dallipay.transformation.TransformInstruction;
@@ -359,7 +360,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         }
 
         try {
-            loadPayments(PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText())), new FileInputStream(txtInput.getText()));
+            var mappingSourceHelper = new AccountMappingSourceHelper(transformInstruction.getAccountMappingSource());
+            loadPayments(PaymentInstructionReaderFactory.create(transformInstruction.getLedger(), new File(txtInput.getText())), mappingSourceHelper, new FileInputStream(txtInput.getText()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
@@ -372,16 +374,16 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
-        // TODO: apply mapping from args.accountWalletPairs()
         try {
-            loadPayments(new Pain001Reader(transformInstruction.getLedger()), args.xml());
+            var mappingSourceHelper = new AccountMappingSourceHelper(args.createAccountMappingSource(transformInstruction.getLedger()));
+            loadPayments(new Pain001Reader(transformInstruction.getLedger()), mappingSourceHelper, args.xml());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             ExceptionDialog.show(this, e, res.getString("readPain001Failed"));
         }
     }
 
-    private void loadPayments(PaymentInstructionReader reader, InputStream in) {
+    private void loadPayments(PaymentInstructionReader reader, AccountMappingSourceHelper mappingSourceHelper, InputStream in) {
         var paramPanel = reader.createParameterPanel();
         if (paramPanel != null) {
             var frm = new ImportParameterForm(paramPanel);
@@ -426,7 +428,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
             try {
                 payments.clear();
-                payments.addAll(List.of(transactionTranslator.apply(reader.read(in))));
+                payments.addAll(List.of(transactionTranslator.apply(reader.read(in), mappingSourceHelper)));
                 transactionTranslator.applyDefaultSender(payments);
                 setSubmitter(payments);
                 cf.complete(payments);

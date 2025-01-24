@@ -20,7 +20,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001ExamplePTC() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -55,7 +55,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001ExamplePTDQrrScor() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -117,7 +117,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001ExamplePTS() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -153,7 +153,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001ExamplePTXV1PTS() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -233,7 +233,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001ExamplePTXV2() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -272,7 +272,7 @@ public class Pain00100109ch03Test {
     @Test
     public void pain001AcctWalletAddress() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {

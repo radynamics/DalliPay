@@ -20,7 +20,7 @@ public class Pain00100109Test {
     @Test
     public void readExample01() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -111,7 +111,7 @@ public class Pain00100109Test {
     @Test
     public void readExample02() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {
@@ -199,7 +199,7 @@ public class Pain00100109Test {
     @Test
     public void readExamplePTXv1PTS() throws Exception {
         var ledger = new TestLedger();
-        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource());
+        var ti = new TransformInstruction(ledger, Config.fallback(ledger), new MemoryAccountMappingSource(false));
         ti.setTargetCcy(ledger.getNativeCcySymbol());
 
         ExchangeRate[] rates = {

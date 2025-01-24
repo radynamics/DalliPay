@@ -9,10 +9,12 @@ import java.util.ArrayList;
 
 public class MemoryAccountMappingSource implements AccountMappingSource {
     private final ArrayList<AccountMapping> accountMappings = new ArrayList<>();
+    private final boolean comparePartyId;
 
     public static final String DummyPartyId = "undefined";
 
-    public MemoryAccountMappingSource() {
+    public MemoryAccountMappingSource(boolean comparePartyId) {
+        this.comparePartyId = comparePartyId;
     }
 
     public void add(AccountMapping accountMapping) {
@@ -22,8 +24,14 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
     @Override
     public Wallet getWalletOrNull(Account account, String partyId) {
         for (var mapping : accountMappings) {
-            if (mapping.getAccount().getUnformatted().equals(account.getUnformatted()) && mapping.getPartyId().equals(DummyPartyId)) {
-                return mapping.getWallet();
+            if (mapping.getAccount().getUnformatted().equals(account.getUnformatted())) {
+                if (comparePartyId) {
+                    if (mapping.getPartyId().equals(partyId)) {
+                        return mapping.getWallet();
+                    }
+                } else {
+                    return mapping.getWallet();
+                }
             }
         }
         return null;
@@ -32,8 +40,14 @@ public class MemoryAccountMappingSource implements AccountMappingSource {
     @Override
     public Account getAccountOrNull(Wallet wallet, String partyId) {
         for (var mapping : accountMappings) {
-            if (WalletCompare.isSame(mapping.getWallet(), wallet) && mapping.getPartyId().equals(DummyPartyId)) {
-                return mapping.getAccount();
+            if (WalletCompare.isSame(mapping.getWallet(), wallet)) {
+                if (comparePartyId) {
+                    if (mapping.getPartyId().equals(partyId)) {
+                        return mapping.getAccount();
+                    }
+                } else {
+                    return mapping.getAccount();
+                }
             }
         }
         return null;
