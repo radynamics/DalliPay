@@ -129,7 +129,7 @@ public class MainForm extends JFrame {
             }
         }
 
-        var paymentRequestServer = new EmbeddedServer();
+        var paymentRequestServer = new EmbeddedServer(vc.getVersion());
         paymentRequestServer.addRequestListenerListener(new RequestListener() {
             @Override
             public void onPaymentRequest(URI requestUri) {

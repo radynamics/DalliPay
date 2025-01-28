@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.paymentrequest;
 
+import com.radynamics.dallipay.db.Database;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,11 +19,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class EmbeddedServer {
     private final static Logger log = LogManager.getLogger(EmbeddedServer.class);
+    private final String version;
     private static HttpServer httpServer;
     private EmbeddedHttpHandler httpHandler;
 
@@ -31,12 +34,16 @@ public class EmbeddedServer {
     private int port = 58909;
     private ThreadPoolExecutor threadPoolExecutor;
 
+    public EmbeddedServer(String version) {
+        this.version = version;
+    }
+
     public synchronized void start() throws IOException {
         if (isHttpServerRunning()) {
             return;
         }
 
-        httpHandler = new EmbeddedHttpHandler();
+        httpHandler = new EmbeddedHttpHandler(version);
         httpHandler.addRequestListenerListener(new RequestListener() {
             @Override
             public void onPaymentRequest(URI requestUri) {
@@ -51,6 +58,7 @@ public class EmbeddedServer {
 
         httpServer = HttpServer.create(new InetSocketAddress(address, port), 0);
         httpServer.createContext("/" + EmbeddedHttpHandler.RequestPath, httpHandler);
+        httpServer.createContext("/" + EmbeddedHttpHandler.AuthPath, httpHandler);
         httpServer.createContext("/" + EmbeddedHttpHandler.PaymentPath, httpHandler);
         httpServer.createContext("/" + EmbeddedHttpHandler.HealthPath, httpHandler);
         threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
@@ -79,50 +87,42 @@ public class EmbeddedServer {
     }
 
     private class EmbeddedHttpHandler implements HttpHandler {
+        private final String version;
+        private final ArrayList<String> sessionIds = new ArrayList<>();
         private final ArrayList<RequestListener> listener = new ArrayList<>();
 
         public static final String RequestPath = "request";
+        public static final String AuthPath = "auth";
         public static final String PaymentPath = "payment";
         public static final String HealthPath = "health";
+
+        public EmbeddedHttpHandler(String version) {
+            this.version = version;
+        }
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             var uri = httpExchange.getRequestURI();
 
             if ("GET".equals(httpExchange.getRequestMethod())) {
-                if (uri.getPath().equals("/" + RequestPath + "/")) {
-                    httpExchange.sendResponseHeaders(200, 0);
-                    httpExchange.close();
+                if (isPath(uri, RequestPath)) {
+                    Ok(httpExchange);
                     raisePaymentRequest(uri);
                     return;
                 }
-                if (uri.getPath().equals("/" + HealthPath + "/")) {
-                    httpExchange.sendResponseHeaders(200, 0);
-                    httpExchange.close();
+                if (isPath(uri, HealthPath)) {
+                    Ok(httpExchange);
                     raisePaymentRequest(uri);
                     return;
                 }
             }
             if ("POST".equals(httpExchange.getRequestMethod())) {
-                if (uri.getPath().equals("/" + PaymentPath + "/")) {
-                    try {
-                        var json = readJson(httpExchange.getRequestBody());
-                        var pain001Base64 = json.optString("iso20022pain001", null);
-                        if (pain001Base64 == null) {
-                            BadRequest(httpExchange);
-                            return;
-                        }
-                        var args = new Pain001Request(new String(Base64.getDecoder().decode(pain001Base64)));
-                        args.networkId(json.optString("network", null));
-                        args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
-                        raisePain001Received(args);
-                    } catch (Exception e) {
-                        BadRequest(httpExchange);
-                        return;
-                    }
-                    httpExchange.sendResponseHeaders(200, 0);
-                    httpExchange.close();
-                    raisePaymentRequest(uri);
+                if (isPath(uri, AuthPath)) {
+                    handleAuth(httpExchange);
+                    return;
+                }
+                if (isPath(uri, PaymentPath)) {
+                    handlePayment(httpExchange);
                     return;
                 }
             }
@@ -131,19 +131,108 @@ public class EmbeddedServer {
             httpExchange.close();
         }
 
+        private void handleAuth(HttpExchange httpExchange) throws IOException {
+            var json = readJson(httpExchange.getRequestBody());
+            if (!Database.isReadable(json.optString("password", null))) {
+                Forbidden(httpExchange);
+                return;
+            }
+            var payload = new JSONObject();
+            payload.put("sessionid", createSessionId());
+            payload.put("version", version);
+            Ok(httpExchange, createSuccessJson(payload));
+        }
+
+        private void handlePayment(HttpExchange httpExchange) throws IOException {
+            try {
+                var sessionId = getSessionIdOrNull(httpExchange);
+                if (sessionId == null) {
+                    BadRequest(httpExchange);
+                    return;
+                }
+                if (!sessionIds.contains(sessionId)) {
+                    Forbidden(httpExchange);
+                    return;
+                }
+                var json = readJson(httpExchange.getRequestBody());
+                var pain001Base64 = json.optString("iso20022pain001", null);
+                if (pain001Base64 == null) {
+                    BadRequest(httpExchange);
+                    return;
+                }
+                var args = new Pain001Request(new String(Base64.getDecoder().decode(pain001Base64)));
+                args.networkId(json.optString("network", null));
+                args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
+                raisePain001Received(args);
+            } catch (Exception e) {
+                BadRequest(httpExchange);
+                return;
+            }
+            Ok(httpExchange);
+            raisePaymentRequest(httpExchange.getRequestURI());
+        }
+
+        private String getSessionIdOrNull(HttpExchange httpExchange) {
+            var list = httpExchange.getRequestHeaders().getOrDefault("sessionid", null);
+            if (list == null) {
+                return null;
+            }
+            return list.stream().findFirst().orElse(null);
+        }
+
+        private String createSessionId() {
+            var sessionId = UUID.randomUUID().toString().replace("-", "");
+            sessionIds.add(sessionId);
+            return sessionId;
+        }
+
+        private JSONObject createSuccessJson(JSONObject payload) {
+            var result = new JSONObject();
+            result.put("success", true);
+            result.put("data", payload);
+            return result;
+        }
+
+        private boolean isPath(URI uri, String path) {
+            return uri.getPath().equals("/" + path) || uri.getPath().equals("/" + path + "/");
+        }
+
         private List<AccountWalletPair> readAccountMapping(JSONArray jsonMapping) {
             if (jsonMapping == null) return new ArrayList<>();
 
             var mapping = new ArrayList<AccountWalletPair>();
             for (var i = 0; i < jsonMapping.length(); i++) {
                 var m = jsonMapping.getJSONObject(i);
-                mapping.add(new AccountWalletPair(m.getString("accountNo"), m.getString("wallet")));
+                mapping.add(new AccountWalletPair(m.getString("accountno"), m.getString("wallet")));
             }
             return mapping;
         }
 
+        private void Ok(HttpExchange httpExchange) throws IOException {
+            Return(httpExchange, 200);
+        }
+
+        private void Ok(HttpExchange httpExchange, JSONObject response) throws IOException {
+            byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
+            httpExchange.getResponseHeaders().set("Content-Type", "application/json; charset=" + StandardCharsets.UTF_8);
+            httpExchange.sendResponseHeaders(200, bytes.length);
+
+            var outputStream = httpExchange.getResponseBody();
+            outputStream.write(bytes);
+            outputStream.flush();
+            outputStream.close();
+        }
+
         private void BadRequest(HttpExchange httpExchange) throws IOException {
-            httpExchange.sendResponseHeaders(400, 0);
+            Return(httpExchange, 400);
+        }
+
+        private void Forbidden(HttpExchange httpExchange) throws IOException {
+            Return(httpExchange, 403);
+        }
+
+        private void Return(HttpExchange httpExchange, int httpCode) throws IOException {
+            httpExchange.sendResponseHeaders(httpCode, 0);
             httpExchange.close();
         }
 
