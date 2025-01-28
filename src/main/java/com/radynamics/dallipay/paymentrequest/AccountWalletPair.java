@@ -19,6 +19,6 @@ public class AccountWalletPair {
 
     @Override
     public String toString() {
-        return "&s -> %s".formatted(accountNo, walletPublicKey);
+        return "%s -> %s".formatted(accountNo, walletPublicKey);
     }
 }
