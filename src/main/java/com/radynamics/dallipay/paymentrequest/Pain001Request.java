@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Pain001Request {
     private final String xml;
-    private String networkId;
+    private LedgerId ledgerId;
     private List<AccountWalletPair> accountWalletPairs;
 
     public Pain001Request(String xml) {
@@ -29,12 +29,12 @@ public class Pain001Request {
         return new ByteArrayInputStream(xml.getBytes());
     }
 
-    public String networkId() {
-        return this.networkId;
+    public LedgerId ledgerId() {
+        return this.ledgerId;
     }
 
-    public void networkId(String networkId) {
-        this.networkId = networkId;
+    public void ledgerId(LedgerId ledgerId) {
+        this.ledgerId = ledgerId;
     }
 
     public List<AccountWalletPair> accountWalletPairs() {
@@ -46,7 +46,6 @@ public class Pain001Request {
     }
 
     public NetworkInfo networkInfo() {
-        var ledgerId = ledgerId();
         if (ledgerId == null) {
             return null;
         }
@@ -63,17 +62,6 @@ public class Pain001Request {
         }
 
         return livenet != null ? livenet : other;
-    }
-
-    public LedgerId ledgerId() {
-        if ("xrpl".equalsIgnoreCase(networkId)) {
-            return LedgerId.Xrpl;
-        } else if ("xahau".equalsIgnoreCase(networkId)) {
-            return LedgerId.Xahau;
-        } else if ("bitcoin".equalsIgnoreCase(networkId)) {
-            return LedgerId.Bitcoin;
-        }
-        return null;
     }
 
     public AccountMappingSource createAccountMappingSource(Ledger ledger) throws Exception {

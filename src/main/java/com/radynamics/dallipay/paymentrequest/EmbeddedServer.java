@@ -1,5 +1,6 @@
 package com.radynamics.dallipay.paymentrequest;
 
+import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.db.Database;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -161,7 +162,7 @@ public class EmbeddedServer {
                     return;
                 }
                 var args = new Pain001Request(new String(Base64.getDecoder().decode(pain001Base64)));
-                args.networkId(json.optString("network", null));
+                args.ledgerId(LedgerId.ofExternalId(json.optString("network", null)).orElse(null));
                 args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
                 raisePain001Received(args);
             } catch (Exception e) {
