@@ -1,9 +1,7 @@
 package com.radynamics.dallipay.paymentrequest;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.LedgerFactory;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.iso20022.AccountFactory;
 import com.radynamics.dallipay.iso20022.Address;
@@ -43,25 +41,6 @@ public class Pain001Request {
 
     public void accountWalletPairs(List<AccountWalletPair> accountWalletPairs) {
         this.accountWalletPairs = accountWalletPairs;
-    }
-
-    public NetworkInfo networkInfo() {
-        if (ledgerId == null) {
-            return null;
-        }
-
-        Ledger ledger = LedgerFactory.create(ledgerId);
-        NetworkInfo livenet = null;
-        NetworkInfo other = null;
-        for (var n : ledger.getDefaultNetworkInfo()) {
-            if (n.isLivenet()) {
-                livenet = n;
-            } else {
-                other = n;
-            }
-        }
-
-        return livenet != null ? livenet : other;
     }
 
     public AccountMappingSource createAccountMappingSource(Ledger ledger) throws Exception {

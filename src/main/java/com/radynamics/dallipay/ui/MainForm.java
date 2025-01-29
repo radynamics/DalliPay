@@ -213,7 +213,7 @@ public class MainForm extends JFrame {
         }
 
         if (args.ledgerId() != null) {
-            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), args.networkInfo());
+            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
         }
 
         sendingPanel.loadPain001(args);
