@@ -6,4 +6,6 @@ public interface RequestListener {
     void onPaymentRequest(URI requestUri);
 
     void onPain001Received(Pain001Request args);
+
+    void onRequestReceived(ReceiveRequest args);
 }

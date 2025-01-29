@@ -11,6 +11,7 @@ import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
 import com.radynamics.dallipay.paymentrequest.Pain001Request;
+import com.radynamics.dallipay.paymentrequest.ReceiveRequest;
 import com.radynamics.dallipay.paymentrequest.RequestListener;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransformInstruction;
@@ -140,6 +141,11 @@ public class MainForm extends JFrame {
             public void onPain001Received(Pain001Request args) {
                 onPaymentPain001Received(args);
             }
+
+            @Override
+            public void onRequestReceived(ReceiveRequest args) {
+                onRequestReceivedPayments(args);
+            }
         });
         try {
             paymentRequestServer.start();
@@ -217,6 +223,37 @@ public class MainForm extends JFrame {
         }
 
         sendingPanel.loadPain001(args);
+    }
+
+    private void onRequestReceivedPayments(ReceiveRequest args) {
+        Utils.bringToFront(this);
+        tabbedPane.setSelectedComponent(receivingPanel);
+
+        if (transformInstruction.getNetwork() == null) {
+            JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (args.ledgerId() != null) {
+            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
+        }
+
+        receivingPanel.changeFilter(args);
+        receivingPanel.addReceiveListener(new ReceiveListener() {
+            @Override
+            public void onReceiveCompleted() {
+                receivingPanel.removeReceiveListener(this);
+
+                var xml = receivingPanel.createCamtOfChecked();
+                if (xml == null) {
+                    args.aborted(true);
+                    return;
+                }
+
+                args.camtXml(xml.toString());
+            }
+        });
+        receivingPanel.load();
     }
 
     private void askSwitchingNetwork(Ledger expectedLedger, NetworkInfo expected) {

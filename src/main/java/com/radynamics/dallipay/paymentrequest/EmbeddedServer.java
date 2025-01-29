@@ -17,6 +17,9 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -55,12 +58,18 @@ public class EmbeddedServer {
             public void onPain001Received(Pain001Request args) {
                 raisePain001Received(args);
             }
+
+            @Override
+            public void onRequestReceived(ReceiveRequest args) {
+                raiseRequestReceived(args);
+            }
         });
 
         httpServer = HttpServer.create(new InetSocketAddress(address, port), 0);
         httpServer.createContext("/" + EmbeddedHttpHandler.RequestPath, httpHandler);
         httpServer.createContext("/" + EmbeddedHttpHandler.AuthPath, httpHandler);
         httpServer.createContext("/" + EmbeddedHttpHandler.PaymentPath, httpHandler);
+        httpServer.createContext("/" + EmbeddedHttpHandler.ReceivePath, httpHandler);
         httpServer.createContext("/" + EmbeddedHttpHandler.HealthPath, httpHandler);
         threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
         httpServer.setExecutor(threadPoolExecutor);
@@ -87,6 +96,12 @@ public class EmbeddedServer {
         }
     }
 
+    private void raiseRequestReceived(ReceiveRequest args) {
+        for (var l : listener) {
+            l.onRequestReceived(args);
+        }
+    }
+
     private class EmbeddedHttpHandler implements HttpHandler {
         private final String version;
         private final ArrayList<String> sessionIds = new ArrayList<>();
@@ -95,6 +110,7 @@ public class EmbeddedServer {
         public static final String RequestPath = "request";
         public static final String AuthPath = "auth";
         public static final String PaymentPath = "payment";
+        public static final String ReceivePath = "receive";
         public static final String HealthPath = "health";
 
         public EmbeddedHttpHandler(String version) {
@@ -126,6 +142,10 @@ public class EmbeddedServer {
                     handlePayment(httpExchange);
                     return;
                 }
+                if (isPath(uri, ReceivePath)) {
+                    handleReceive(httpExchange);
+                    return;
+                }
             }
 
             httpExchange.sendResponseHeaders(404, 0);
@@ -146,13 +166,7 @@ public class EmbeddedServer {
 
         private void handlePayment(HttpExchange httpExchange) throws IOException {
             try {
-                var sessionId = getSessionIdOrNull(httpExchange);
-                if (sessionId == null) {
-                    BadRequest(httpExchange);
-                    return;
-                }
-                if (!sessionIds.contains(sessionId)) {
-                    Forbidden(httpExchange);
+                if (!assertValidSessionId(httpExchange)) {
                     return;
                 }
                 var json = readJson(httpExchange.getRequestBody());
@@ -173,6 +187,79 @@ public class EmbeddedServer {
             raisePaymentRequest(httpExchange.getRequestURI());
         }
 
+        private void handleReceive(HttpExchange httpExchange) throws IOException {
+            try {
+                if (!assertValidSessionId(httpExchange)) {
+                    return;
+                }
+                var json = readJson(httpExchange.getRequestBody());
+                var df = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
+                var now = LocalDateTime.now();
+                var from = json.optString("from", df.format(now.minusMonths(1)));
+                var to = json.optString("to", df.format(now));
+
+                var args = new ReceiveRequest();
+                args.wallet(json.optString("wallet", null));
+                args.format(json.optString("format", "camt053"));
+                args.from(LocalDateTime.parse(from, df));
+                args.to(LocalDateTime.parse(to, df));
+                args.ledgerId(LedgerId.ofExternalId(json.optString("network", null)).orElse(null));
+                args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
+                raiseRequestReceived(args);
+
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    var remainingTime = Duration.ofMinutes(5);
+                    while (remainingTime.toMillis() > 0) {
+                        try {
+                            if (args.aborted()) {
+                                var payload = new JSONObject();
+                                payload.put("xml", (String) null);
+                                Ok(httpExchange, createSuccessJson(payload));
+                                return;
+                            }
+                            if (args.camtXml() != null) {
+                                var payload = new JSONObject();
+                                payload.put("xml", Base64.getEncoder().encodeToString(args.camtXml().getBytes()));
+                                Ok(httpExchange, createSuccessJson(payload));
+                                return;
+                            }
+                        } catch (IOException e) {
+                            InternalError(httpExchange);
+                            return;
+                        }
+
+                        var wait = Duration.ofMillis(500);
+                        try {
+                            Thread.sleep(wait.toMillis());
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        remainingTime = remainingTime.minus(wait);
+                    }
+                    try {
+                        Ok(httpExchange, createErrorJson("timeout"));
+                    } catch (IOException e) {
+                        InternalError(httpExchange);
+                    }
+                });
+            } catch (Exception e) {
+                BadRequest(httpExchange);
+            }
+        }
+
+        private boolean assertValidSessionId(HttpExchange httpExchange) throws IOException {
+            var sessionId = getSessionIdOrNull(httpExchange);
+            if (sessionId == null) {
+                BadRequest(httpExchange);
+                return false;
+            }
+            if (!sessionIds.contains(sessionId)) {
+                Forbidden(httpExchange);
+                return false;
+            }
+            return true;
+        }
+
         private String getSessionIdOrNull(HttpExchange httpExchange) {
             var list = httpExchange.getRequestHeaders().getOrDefault("sessionid", null);
             if (list == null) {
@@ -191,6 +278,15 @@ public class EmbeddedServer {
             var result = new JSONObject();
             result.put("success", true);
             result.put("data", payload);
+            return result;
+        }
+
+        private JSONObject createErrorJson(String errorKey) {
+            var result = new JSONObject();
+            result.put("success", false);
+            var error = new JSONObject();
+            error.put("key", errorKey);
+            result.put("error", error);
             return result;
         }
 
@@ -232,6 +328,14 @@ public class EmbeddedServer {
             Return(httpExchange, 403);
         }
 
+        private void InternalError(HttpExchange httpExchange) {
+            try {
+                Return(httpExchange, 500);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         private void Return(HttpExchange httpExchange, int httpCode) throws IOException {
             httpExchange.sendResponseHeaders(httpCode, 0);
             httpExchange.close();
@@ -261,6 +365,12 @@ public class EmbeddedServer {
         private void raisePain001Received(Pain001Request args) {
             for (var l : listener) {
                 l.onPain001Received(args);
+            }
+        }
+
+        private void raiseRequestReceived(ReceiveRequest args) {
+            for (var l : listener) {
+                l.onRequestReceived(args);
             }
         }
     }

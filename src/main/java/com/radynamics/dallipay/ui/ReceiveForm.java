@@ -14,6 +14,7 @@ import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentConverter;
 import com.radynamics.dallipay.iso20022.camt054.*;
+import com.radynamics.dallipay.paymentrequest.ReceiveRequest;
 import com.radynamics.dallipay.transformation.AccountMappingSource;
 import com.radynamics.dallipay.transformation.AccountMappingSourceException;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
@@ -28,6 +29,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -50,6 +52,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private DateTimePicker dtPickerStart;
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
+    private CamtFormat defaultExportFormat;
     private CamtExport camtExport;
     private JButton cmdRefresh;
     private JButton cmdExport;
@@ -60,7 +63,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private final JLabel lblUsingExchangeRatesFrom = new JLabel();
     private final JLabel lblUsingExchangeRatesFromSource = new JLabel();
     private JLabel lblHistoricPriceOracleEdit;
-
+    private final ArrayList<ReceiveListener> listener = new ArrayList<>();
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
     public ReceiveForm() {
@@ -207,6 +210,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             table = new PaymentTable(Actor.Receiver);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
+                if (progress.isFinished()) {
+                    raiseOnReceiveCompleted();
+                }
                 enableInputControls(isEnabled() && progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
@@ -371,12 +377,28 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void exportChecked() {
+        try {
+            var xml = createCamtOfChecked();
+            if (xml == null) {
+                return;
+            }
+            var outputStream = new FileOutputStream(targetFileName);
+            xml.writeTo(outputStream);
+            outputStream.close();
+
+            JOptionPane.showMessageDialog(table, String.format(res.getString("exportSuccess"), targetFileName));
+        } catch (Exception e) {
+            ExceptionDialog.show(this, e);
+        }
+    }
+
+    public ByteArrayOutputStream createCamtOfChecked() {
         if (lblLoading.isLoading() || table.checkedPayments().length == 0) {
-            return;
+            return null;
         }
 
         if (!showExportForm()) {
-            return;
+            return null;
         }
 
         AccountMappingSource accountMappingSource = null;
@@ -391,14 +413,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             }
             var camtConverter = camtExport.getConverter();
             accountMappingSource.open();
-            var s = camtConverter.toXml(w.createDocument(table.checkedPayments()));
-            var outputStream = new FileOutputStream(targetFileName);
-            s.writeTo(outputStream);
-            outputStream.close();
-
-            JOptionPane.showMessageDialog(table, String.format(res.getString("exportSuccess"), targetFileName));
+            return camtConverter.toXml(w.createDocument(table.checkedPayments()));
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
+            return null;
         } finally {
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             try {
@@ -413,7 +431,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (StringUtils.isAllEmpty(targetFileName)) {
             targetFileName = createTargetFile().getAbsolutePath();
         }
-        var exportFormat = CamtFormatHelper.getDefault();
+        var exportFormat = defaultExportFormat == null ? CamtFormatHelper.getDefault() : defaultExportFormat;
         var exportLedgerCurrencyFormat = transformInstruction.getLedger().createLedgerCurrencyConverter(LedgerCurrencyFormat.Native).getDefaultTargetFormat();
         if (camtExport == null) {
             try (var repo = new ConfigRepo()) {
@@ -586,6 +604,35 @@ public class ReceiveForm extends JPanel implements MainFormPane {
 
     private void refreshUsedPriceOracleText() {
         lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
+    }
+
+    public void changeFilter(ReceiveRequest args) {
+        if (!StringUtils.isEmpty(args.wallet())) {
+            setWallet(transformInstruction.getLedger().createWallet(args.wallet(), null));
+        }
+        setPeriod(DateTimeRange.of(args.from(), args.to()));
+        // TODO: AccountMapping
+        if (!StringUtils.isEmpty(args.format())) {
+            if ("camt053".equals(args.format())) {
+                defaultExportFormat = CamtFormat.Camt05300108;
+            } else if ("camt054".equals(args.format())) {
+                defaultExportFormat = CamtFormat.Camt05400109;
+            }
+        }
+    }
+
+    public void addReceiveListener(ReceiveListener l) {
+        listener.add(l);
+    }
+
+    public void removeReceiveListener(ReceiveListener l) {
+        listener.remove(l);
+    }
+
+    private void raiseOnReceiveCompleted() {
+        for (var l : listener) {
+            l.onReceiveCompleted();
+        }
     }
 
     private class StringPairEntry {
