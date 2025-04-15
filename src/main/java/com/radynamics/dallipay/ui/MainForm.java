@@ -242,8 +242,6 @@ public class MainForm extends JFrame {
         receivingPanel.addReceiveListener(new ReceiveListener() {
             @Override
             public void onReceiveCompleted() {
-                receivingPanel.removeReceiveListener(this);
-
                 var xml = receivingPanel.createCamtOfChecked();
                 if (xml == null) {
                     args.aborted(true);

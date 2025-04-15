@@ -630,8 +630,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     private void raiseOnReceiveCompleted() {
-        for (var l : listener) {
-            l.onReceiveCompleted();
+        // Do not use for as the listener calls removeReceiveListener withing onReceiveCompleted.
+        for (var i = listener.size() - 1; i >= 0; i--) {
+            listener.get(i).onReceiveCompleted();
         }
     }
 
