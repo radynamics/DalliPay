@@ -1,6 +1,7 @@
 package com.radynamics.dallipay.paymentrequest;
 
 import com.radynamics.dallipay.cryptoledger.LedgerId;
+import com.radynamics.dallipay.iso20022.camt054.CamtFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,5 +74,13 @@ public class ReceiveRequest {
 
     public void aborted(boolean aborted) {
         this.aborted = aborted;
+    }
+
+    public CamtFormat camtFormat() {
+        return switch (format) {
+            case "camt053" -> CamtFormat.Camt05300108;
+            case "camt054" -> CamtFormat.Camt05400109;
+            default -> throw new IllegalStateException("Unexpected value: " + format);
+        };
     }
 }

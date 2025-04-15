@@ -22,6 +22,8 @@ import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.ui.paymentTable.Actor;
 import com.radynamics.dallipay.ui.paymentTable.PaymentTable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -393,12 +395,21 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     public ByteArrayOutputStream createCamtOfChecked() {
+        return createCamtOfChecked(null);
+    }
+
+    public ByteArrayOutputStream createCamtOfChecked(CamtFormat format) {
         if (lblLoading.isLoading() || table.checkedPayments().length == 0) {
             return null;
         }
 
-        if (!showExportForm()) {
-            return null;
+        if (format == null) {
+            if (!showExportForm()) {
+                return null;
+            }
+        } else {
+            var exportParams = createExportParameter();
+            camtExport = CamtExportFactory.create(format, exportParams.getRight(), transformInstruction, versionController);
         }
 
         AccountMappingSource accountMappingSource = null;
@@ -431,19 +442,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (StringUtils.isAllEmpty(targetFileName)) {
             targetFileName = createTargetFile().getAbsolutePath();
         }
-        var exportFormat = defaultExportFormat == null ? CamtFormatHelper.getDefault() : defaultExportFormat;
-        var exportLedgerCurrencyFormat = transformInstruction.getLedger().createLedgerCurrencyConverter(LedgerCurrencyFormat.Native).getDefaultTargetFormat();
-        if (camtExport == null) {
-            try (var repo = new ConfigRepo()) {
-                exportFormat = repo.getDefaultExportFormat();
-                exportLedgerCurrencyFormat = repo.getExportLedgerCurrencyFormat(transformInstruction.getLedger());
-            } catch (Exception e) {
-                ExceptionDialog.show(this, e);
-            }
-        } else {
-            exportFormat = camtExport.getWriter().getExportFormat();
-            exportLedgerCurrencyFormat = camtExport.getWriter().getExportLedgerCurrencyFormat();
-        }
+
+        var exportParams = createExportParameter();
 
         var frm = new ReceiveExportForm(transformInstruction.getLedger());
         frm.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -451,8 +451,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
         frm.setOutputFile(targetFileName);
-        frm.setExportFormat(exportFormat);
-        frm.setLedgerCurrencyFormat(exportLedgerCurrencyFormat);
+        frm.setExportFormat(exportParams.getLeft());
+        frm.setLedgerCurrencyFormat(exportParams.getRight());
         frm.setVisible(true);
         if (!frm.isDialogAccepted()) {
             return false;
@@ -473,6 +473,24 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
         camtExport = CamtExportFactory.create(frm.getExportFormat(), frm.getExportLedgerCurrencyFormat(), transformInstruction, versionController);
         return true;
+    }
+
+    private Pair<CamtFormat, LedgerCurrencyFormat> createExportParameter() {
+        var exportFormat = defaultExportFormat == null ? CamtFormatHelper.getDefault() : defaultExportFormat;
+        var exportLedgerCurrencyFormat = transformInstruction.getLedger().createLedgerCurrencyConverter(LedgerCurrencyFormat.Native).getDefaultTargetFormat();
+        if (camtExport == null) {
+            try (var repo = new ConfigRepo()) {
+                exportFormat = repo.getDefaultExportFormat();
+                exportLedgerCurrencyFormat = repo.getExportLedgerCurrencyFormat(transformInstruction.getLedger());
+            } catch (Exception e) {
+                ExceptionDialog.show(this, e);
+            }
+        } else {
+            exportFormat = camtExport.getWriter().getExportFormat();
+            exportLedgerCurrencyFormat = camtExport.getWriter().getExportLedgerCurrencyFormat();
+        }
+
+        return new ImmutablePair<>(exportFormat, exportLedgerCurrencyFormat);
     }
 
     private File createTargetFile() {
