@@ -125,7 +125,11 @@ public class ConfigRepo implements AutoCloseable {
     }
 
     public NetworkInfo[] getCustomSidechains(Ledger ledger) throws Exception {
-        var value = single(createLedgerSpecificKey(ledger, "customSidechains")).orElse("");
+        return getCustomSidechains(ledger.getId());
+    }
+
+    public NetworkInfo[] getCustomSidechains(LedgerId ledgerId) throws Exception {
+        var value = single(createLedgerSpecificKey(ledgerId, "customSidechains")).orElse("");
         return value.length() == 0 ? new NetworkInfo[0] : NetworkInfoJsonSerializer.parse(new JSONArray(value));
     }
 
