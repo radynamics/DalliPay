@@ -17,6 +17,7 @@ import com.radynamics.dallipay.ui.wizard.WizardController;
 import com.radynamics.dallipay.ui.wizard.WizardDialog;
 import com.radynamics.dallipay.ui.wizard.welcome.StartPage;
 import com.radynamics.dallipay.update.OnlineUpdate;
+import com.radynamics.dallipay.update.UpdateInfo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -40,6 +41,7 @@ public class MainForm extends JFrame {
     private JSplitButton cmdLedger;
     private JSplitButton cmdNetwork;
     private NetworkPopMenu networkPopupMenu;
+    private final NotificationBar notificationBar = new NotificationBar();
     private boolean formLoaded;
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
@@ -59,6 +61,19 @@ public class MainForm extends JFrame {
         var pnlMain = new JPanel();
         add(pnlMain);
         pnlMain.setLayout(new BoxLayout(pnlMain, BoxLayout.Y_AXIS));
+
+        {
+            var pnl = new JPanel();
+            pnlMain.add(pnl);
+            pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
+            pnl.setBackground(notificationBar.getBackground());
+
+            var margin = 10;
+            pnl.add(Box.createRigidArea(new Dimension(margin, 0)));
+            pnl.add(notificationBar);
+            notificationBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+            pnl.add(Box.createRigidArea(new Dimension(margin, 0)));
+        }
 
         JLabel lblTitle = new JLabel();
         var mainContentBorder = new EmptyBorder(0, 10, 10, 10);
@@ -257,14 +272,19 @@ public class MainForm extends JFrame {
                 cmdUpdate.setButtonType(FlatButton.ButtonType.toolBarButton);
                 cmdUpdate.setFocusable(false);
                 cmdUpdate.addActionListener(e -> {
-                    Utils.openBrowser(this, updateInfo.getUri());
+                    startOnlineUpdate(updateInfo);
                 });
                 menuBar.add(cmdUpdate);
                 menuBar.updateUI();
 
+                notificationBar.addInfo(text, res.getString("update"), () -> {
+                    startOnlineUpdate(updateInfo);
+                    return null;
+                });
+
                 int ret = JOptionPane.showConfirmDialog(this, text, "Update", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
-                    Utils.openBrowser(this, updateInfo.getUri());
+                    startOnlineUpdate(updateInfo);
                 }
             });
         }
@@ -285,6 +305,10 @@ public class MainForm extends JFrame {
         menuBar.add(cmdNetwork);
 
         return menuBar;
+    }
+
+    private void startOnlineUpdate(UpdateInfo updateInfo) {
+        Utils.openBrowser(this, updateInfo.getUri());
     }
 
     private void refreshLedgerButton(Ledger ledger) throws Exception {
