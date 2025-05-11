@@ -245,6 +245,7 @@ public class MainForm extends JFrame {
         tabbedPane.setSelectedComponent(receivingPanel);
 
         if (transformInstruction.getNetwork() == null) {
+            args.aborted(true);
             JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
