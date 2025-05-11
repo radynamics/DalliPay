@@ -10,4 +10,5 @@ public final class Consts {
     public static final Color ColorLivenet = Color.GRAY;
     public static final Color ColorTestnet = new Color(181, 191, 38);
     public static final Color ColorHoover = ColorAccent;
+    public static final Color ColorNotificationBar = new Color(255, 255, 192, 255);
 }
