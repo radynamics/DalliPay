@@ -19,18 +19,22 @@ public class NotificationBar extends JPanel {
     }
 
     public void addError(String text, String actionText, Callable<Void> action) {
-        addEntry(text, actionText, action, ValidationState.Error);
+        addEntry(text, actionText, action, false, ValidationState.Error);
     }
 
     public void addWarning(String text, String actionText, Callable<Void> action) {
-        addEntry(text, actionText, action, ValidationState.Warning);
+        addEntry(text, actionText, action, false, ValidationState.Warning);
     }
 
     public void addInfo(String text, String actionText, Callable<Void> action) {
-        addEntry(text, actionText, action, ValidationState.Info);
+        addInfo(text, actionText, action, false);
     }
 
-    public void addEntry(String text, String actionText, Callable<Void> action, ValidationState severity) {
+    public void addInfo(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick) {
+        addEntry(text, actionText, action, removeActionLinkAfterClick, ValidationState.Info);
+    }
+
+    public void addEntry(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick, ValidationState severity) {
         var pnl = new JPanel();
         {
             var area0 = Box.createRigidArea(new Dimension(0, 3));
@@ -65,6 +69,9 @@ public class NotificationBar extends JPanel {
                 public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 1) {
                         try {
+                            if (removeActionLinkAfterClick) {
+                                removeEntry(pnl);
+                            }
                             action.call();
                         } catch (Exception ex) {
                             ExceptionDialog.show(pnl, ex);

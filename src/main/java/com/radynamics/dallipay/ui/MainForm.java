@@ -254,13 +254,18 @@ public class MainForm extends JFrame {
             askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
         }
 
+        var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingReceive"));
+        notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
+            args.aborted(true);
+            return null;
+        }, true);
+
         receivingPanel.changeFilter(args);
         receivingPanel.addReceiveListener(new ReceiveListener() {
             @Override
             public void onReceiveCompleted() {
                 var xml = receivingPanel.createCamtOfChecked(args.camtFormat());
                 if (xml == null) {
-                    args.aborted(true);
                     return;
                 }
 

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ReceiveRequest {
+    private String applicationName;
     private String wallet;
     private String format;
     private LocalDateTime from;
@@ -15,6 +16,15 @@ public class ReceiveRequest {
     private List<AccountWalletPair> accountWalletPairs;
     private String camtXml;
     private boolean aborted;
+
+
+    public String applicationName() {
+        return this.applicationName;
+    }
+
+    public void applicationName(String wallet) {
+        this.applicationName = wallet;
+    }
 
     public String wallet() {
         return wallet;

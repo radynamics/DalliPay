@@ -20,10 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -104,7 +101,7 @@ public class EmbeddedServer {
 
     private class EmbeddedHttpHandler implements HttpHandler {
         private final String version;
-        private final ArrayList<String> sessionIds = new ArrayList<>();
+        private final Map<String, String> sessionIds = new HashMap<>();
         private final ArrayList<RequestListener> listener = new ArrayList<>();
 
         public static final String RequestPath = "request";
@@ -158,8 +155,10 @@ public class EmbeddedServer {
                 Forbidden(httpExchange);
                 return;
             }
+
+            var sessionId = createSessionId(json.optString("applicationName", "unknown"));
             var payload = new JSONObject();
-            payload.put("sessionid", createSessionId());
+            payload.put("sessionid", sessionId);
             payload.put("version", version);
             Ok(httpExchange, createSuccessJson(payload));
         }
@@ -199,6 +198,7 @@ public class EmbeddedServer {
                 var to = json.optString("to", df.format(now));
 
                 var args = new ReceiveRequest();
+                args.applicationName(getApplicationName(httpExchange).orElse("unknown"));
                 args.wallet(json.optString("wallet", null));
                 args.format(json.optString("format", "camt053"));
                 args.from(LocalDateTime.parse(from, df));
@@ -253,7 +253,7 @@ public class EmbeddedServer {
                 BadRequest(httpExchange);
                 return false;
             }
-            if (!sessionIds.contains(sessionId)) {
+            if (!sessionIds.keySet().contains(sessionId)) {
                 Forbidden(httpExchange);
                 return false;
             }
@@ -268,9 +268,17 @@ public class EmbeddedServer {
             return list.stream().findFirst().orElse(null);
         }
 
-        private String createSessionId() {
+        private Optional<String> getApplicationName(HttpExchange httpExchange) {
+            var sessionId = getSessionIdOrNull(httpExchange);
+            if (sessionId == null) {
+                return Optional.empty();
+            }
+            return Optional.of(sessionIds.get(sessionId));
+        }
+
+        private String createSessionId(String applicationName) {
             var sessionId = UUID.randomUUID().toString().replace("-", "");
-            sessionIds.add(sessionId);
+            sessionIds.put(sessionId, applicationName);
             return sessionId;
         }
 
