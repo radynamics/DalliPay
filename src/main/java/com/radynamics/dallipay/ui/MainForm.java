@@ -229,6 +229,7 @@ public class MainForm extends JFrame {
         tabbedPane.setSelectedComponent(sendingPanel);
 
         if (transformInstruction.getNetwork() == null) {
+            args.aborted(true);
             JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
@@ -237,6 +238,20 @@ public class MainForm extends JFrame {
             askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
         }
 
+        var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingSend"));
+        var notification = notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
+            args.aborted(true);
+            return null;
+        }, true);
+
+        sendingPanel.addPaymentSentListener(new PaymentSentListener() {
+            @Override
+            public void onSent() {
+                // TODO: return new pain excluding sent payments (notify user in bankingAdapter, about x payments sent, proceeding with y/z over banking system?)
+                args.sent(true);
+                notificationBar.removeEntry(notification);
+            }
+        });
         sendingPanel.loadPain001(args);
     }
 

@@ -15,9 +15,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Pain001Request {
+    private String applicationName;
     private final String xml;
     private LedgerId ledgerId;
     private List<AccountWalletPair> accountWalletPairs;
+    private boolean sent;
+    private boolean aborted;
+
+    public String applicationName() {
+        return this.applicationName;
+    }
+
+    public void applicationName(String wallet) {
+        this.applicationName = wallet;
+    }
 
     public Pain001Request(String xml) {
         this.xml = xml;
@@ -33,6 +44,22 @@ public class Pain001Request {
 
     public void ledgerId(LedgerId ledgerId) {
         this.ledgerId = ledgerId;
+    }
+
+    public boolean sent() {
+        return this.sent;
+    }
+
+    public void sent(boolean sent) {
+        this.sent = sent;
+    }
+
+    public boolean aborted() {
+        return this.aborted;
+    }
+
+    public void aborted(boolean aborted) {
+        this.aborted = aborted;
     }
 
     public List<AccountWalletPair> accountWalletPairs() {

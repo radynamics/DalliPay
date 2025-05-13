@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -175,15 +176,26 @@ public class EmbeddedServer {
                     return;
                 }
                 var args = new Pain001Request(new String(Base64.getDecoder().decode(pain001Base64)));
+                args.applicationName(getApplicationName(httpExchange).orElse("unknown"));
                 args.ledgerId(LedgerId.ofExternalId(json.optString("network", null)).orElse(null));
                 args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
                 raisePain001Received(args);
+
+                waitUntilTimeout(httpExchange, () -> {
+                    if (args.aborted()) {
+                        Ok(httpExchange, createErrorJson("user_aborted"));
+                        return true;
+                    }
+                    if (args.sent()) {
+                        Ok(httpExchange);
+                        raisePaymentRequest(httpExchange.getRequestURI());
+                        return true;
+                    }
+                    return false;
+                });
             } catch (Exception e) {
                 BadRequest(httpExchange);
-                return;
             }
-            Ok(httpExchange);
-            raisePaymentRequest(httpExchange.getRequestURI());
         }
 
         private void handleReceive(HttpExchange httpExchange) throws IOException {
@@ -207,44 +219,53 @@ public class EmbeddedServer {
                 args.accountWalletPairs(readAccountMapping(json.optJSONArray("accountmapping")));
                 raiseRequestReceived(args);
 
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    var remainingTime = Duration.ofMinutes(5);
-                    while (remainingTime.toMillis() > 0) {
-                        try {
-                            if (args.aborted()) {
-                                var payload = new JSONObject();
-                                payload.put("xml", (String) null);
-                                Ok(httpExchange, createSuccessJson(payload));
-                                return;
-                            }
-                            if (args.camtXml() != null) {
-                                var payload = new JSONObject();
-                                payload.put("xml", Base64.getEncoder().encodeToString(args.camtXml().getBytes()));
-                                Ok(httpExchange, createSuccessJson(payload));
-                                return;
-                            }
-                        } catch (IOException e) {
-                            InternalError(httpExchange);
-                            return;
-                        }
-
-                        var wait = Duration.ofMillis(500);
-                        try {
-                            Thread.sleep(wait.toMillis());
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        remainingTime = remainingTime.minus(wait);
+                waitUntilTimeout(httpExchange, () -> {
+                    if (args.aborted()) {
+                        var payload = new JSONObject();
+                        payload.put("xml", (String) null);
+                        Ok(httpExchange, createSuccessJson(payload));
+                        return true;
                     }
-                    try {
-                        Ok(httpExchange, createErrorJson("timeout"));
-                    } catch (IOException e) {
-                        InternalError(httpExchange);
+                    if (args.camtXml() != null) {
+                        var payload = new JSONObject();
+                        payload.put("xml", Base64.getEncoder().encodeToString(args.camtXml().getBytes()));
+                        Ok(httpExchange, createSuccessJson(payload));
+                        return true;
                     }
+                    return false;
                 });
             } catch (Exception e) {
                 BadRequest(httpExchange);
             }
+        }
+
+        private void waitUntilTimeout(HttpExchange httpExchange, Callable<Boolean> action) {
+            Executors.newSingleThreadExecutor().execute(() -> {
+                var remainingTime = Duration.ofMinutes(5);
+                while (remainingTime.toMillis() > 0) {
+                    try {
+                        if (action.call()) {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        InternalError(httpExchange);
+                        return;
+                    }
+
+                    var wait = Duration.ofMillis(500);
+                    try {
+                        Thread.sleep(wait.toMillis());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    remainingTime = remainingTime.minus(wait);
+                }
+                try {
+                    Ok(httpExchange, createErrorJson("timeout"));
+                } catch (IOException e) {
+                    InternalError(httpExchange);
+                }
+            });
         }
 
         private boolean assertValidSessionId(HttpExchange httpExchange) throws IOException {

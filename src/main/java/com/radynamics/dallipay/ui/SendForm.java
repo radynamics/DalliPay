@@ -67,6 +67,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private JButton cmdSendPayments;
     private JButton cmdExport;
     private ProgressLabel lblLoading;
+    private final ArrayList<PaymentSentListener> listener = new ArrayList<>();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -533,6 +534,8 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         for (var l : ledgers) {
             sendPayments(l, payments);
         }
+
+        raiseOnPaymentSent();
     }
 
     private void sendPayments(Ledger ledger, Payment[] payments) {
@@ -788,5 +791,16 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
         // Clear loaded payments
         load(new ArrayList<>());
+    }
+
+    public void addPaymentSentListener(PaymentSentListener l) {
+        listener.add(l);
+    }
+
+    private void raiseOnPaymentSent() {
+        // Do not use for as the listener calls removeListener withing onCompleted.
+        for (var i = listener.size() - 1; i >= 0; i--) {
+            listener.get(i).onSent();
+        }
     }
 }
