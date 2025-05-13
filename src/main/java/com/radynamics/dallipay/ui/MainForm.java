@@ -255,7 +255,7 @@ public class MainForm extends JFrame {
         }
 
         var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingReceive"));
-        notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
+        var notification = notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
             args.aborted(true);
             return null;
         }, true);
@@ -270,6 +270,7 @@ public class MainForm extends JFrame {
                 }
 
                 args.camtXml(xml.toString());
+                notificationBar.removeEntry(notification);
             }
         });
         receivingPanel.load();
