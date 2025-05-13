@@ -11,31 +11,33 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class NotificationBar extends JPanel {
-    private final Map<JPanel, Set<Component>> _entryRigidAreas = new HashMap<>();
+    private final HashSet<NotificationBarEntry> _notifications = new HashSet<>();
+    private final Map<NotificationBarEntry, Set<Component>> _entryRigidAreas = new HashMap<>();
 
     public NotificationBar() {
         setBackground(Consts.ColorNotificationBar);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
-    public void addError(String text, String actionText, Callable<Void> action) {
-        addEntry(text, actionText, action, false, ValidationState.Error);
+    public NotificationBarEntry addError(String text, String actionText, Callable<Void> action) {
+        return addEntry(text, actionText, action, false, ValidationState.Error);
     }
 
-    public void addWarning(String text, String actionText, Callable<Void> action) {
-        addEntry(text, actionText, action, false, ValidationState.Warning);
+    public NotificationBarEntry addWarning(String text, String actionText, Callable<Void> action) {
+        return addEntry(text, actionText, action, false, ValidationState.Warning);
     }
 
-    public void addInfo(String text, String actionText, Callable<Void> action) {
-        addInfo(text, actionText, action, false);
+    public NotificationBarEntry addInfo(String text, String actionText, Callable<Void> action) {
+        return addInfo(text, actionText, action, false);
     }
 
-    public void addInfo(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick) {
-        addEntry(text, actionText, action, removeActionLinkAfterClick, ValidationState.Info);
+    public NotificationBarEntry addInfo(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick) {
+        return addEntry(text, actionText, action, removeActionLinkAfterClick, ValidationState.Info);
     }
 
-    public void addEntry(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick, ValidationState severity) {
+    public NotificationBarEntry addEntry(String text, String actionText, Callable<Void> action, boolean removeActionLinkAfterClick, ValidationState severity) {
         var pnl = new JPanel();
+        var notification = new NotificationBarEntry(pnl);
         {
             var area0 = Box.createRigidArea(new Dimension(0, 3));
             add(area0);
@@ -43,7 +45,7 @@ public class NotificationBar extends JPanel {
             var area1 = Box.createRigidArea(new Dimension(0, 3));
             add(area1);
 
-            _entryRigidAreas.put(pnl, new HashSet<>(Arrays.asList(area0, area1)));
+            _entryRigidAreas.put(notification, new HashSet<>(Arrays.asList(area0, area1)));
         }
 
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
@@ -70,7 +72,7 @@ public class NotificationBar extends JPanel {
                     if (e.getClickCount() == 1) {
                         try {
                             if (removeActionLinkAfterClick) {
-                                removeEntry(pnl);
+                                removeEntry(notification);
                             }
                             action.call();
                         } catch (Exception ex) {
@@ -89,21 +91,29 @@ public class NotificationBar extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 1) {
-                        removeEntry(pnl);
+                        removeEntry(notification);
                     }
                 }
             });
         }
+
+        _notifications.add(notification);
+        return notification;
     }
 
-    private void removeEntry(JPanel pnl) {
+
+    public void removeEntry(NotificationBarEntry notification) {
+        var pnl = notification.getPanel();
         remove(pnl);
+
         // Also remove margin boxes.
-        for (var c : _entryRigidAreas.get(pnl)) {
+        for (var c : _entryRigidAreas.get(notification)) {
             remove(c);
         }
         _entryRigidAreas.remove(pnl);
         revalidate();
+
+        _notifications.remove(notification);
     }
 
     private Icon getIcon(ValidationState severity) {
