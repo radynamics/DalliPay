@@ -187,7 +187,11 @@ public class EmbeddedServer {
                         return true;
                     }
                     if (args.sent()) {
-                        Ok(httpExchange);
+                        var payload = new JSONObject();
+                        payload.put("remainingxml", Base64.getEncoder().encodeToString(args.remainingPain001().toByteArray()));
+                        payload.put("countsent", args.countSent());
+                        payload.put("counttotal", args.countTotal());
+                        Ok(httpExchange, createSuccessJson(payload));
                         raisePaymentRequest(httpExchange.getRequestURI());
                         return true;
                     }

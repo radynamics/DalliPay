@@ -27,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -244,12 +245,22 @@ public class MainForm extends JFrame {
             return null;
         }, true);
 
-        sendingPanel.addPaymentSentListener(new PaymentSentListener() {
-            @Override
-            public void onSent() {
-                // TODO: return new pain excluding sent payments (notify user in bankingAdapter, about x payments sent, proceeding with y/z over banking system?)
+        sendingPanel.addPaymentSentListener(() -> {
+            try {
+                var exporter = sendingPanel.createPain001Exporter(args.xml());
+                var outputStream = new ByteArrayOutputStream();
+                if (exporter.sentPayments().isEmpty()) {
+                    args.xml().transferTo(outputStream);
+                } else {
+                    exporter.writeTo(outputStream);
+                }
+                args.remainingPain001(outputStream);
+                args.countSent(exporter.sentPayments().size());
+                args.countTotal(exporter.getCountBefore());
                 args.sent(true);
                 notificationBar.removeEntry(notification);
+            } catch (Exception e) {
+                ExceptionDialog.show(sendingPanel, e);
             }
         });
         sendingPanel.loadPain001(args);

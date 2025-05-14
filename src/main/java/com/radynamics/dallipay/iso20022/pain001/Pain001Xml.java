@@ -1,6 +1,8 @@
 package com.radynamics.dallipay.iso20022.pain001;
 
 import com.radynamics.dallipay.iso20022.Payment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,10 +21,15 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.Iterator;
 
 public class Pain001Xml {
+    private final static Logger log = LogManager.getLogger(Pain001Xml.class);
+
     private Document document;
     private NamespaceContext nsCtx;
     private final static String nsPrefix = "pain";
@@ -52,39 +59,47 @@ public class Pain001Xml {
         return o;
     }
 
-    public Pain001Xml remove(Payment[] payments) throws XPathExpressionException {
+    public Pain001Xml remove(Payment[] payments) {
         for (var p : payments) {
             remove(p);
         }
         return this;
     }
 
-    public boolean isRemovable(Payment p) throws XPathExpressionException {
+    public boolean isRemovable(Payment p) {
         return getCdtTrfTxInf(p) != null;
     }
 
-    private Node getCdtTrfTxInf(Payment p) throws XPathExpressionException {
-        var expression = createXPath().compile(String.format("//%s:EndToEndId[text()='%s']", nsPrefix, p.getEndToEndId()));
-        var node = (Node) expression.evaluate(document, XPathConstants.NODE);
-        return node == null ? null : node.getParentNode().getParentNode();
+    private Node getCdtTrfTxInf(Payment p) {
+        try {
+            var expression = createXPath().compile(String.format("//%s:EndToEndId[text()='%s']", nsPrefix, p.getEndToEndId()));
+            var node = (Node) expression.evaluate(document, XPathConstants.NODE);
+            return node == null ? null : node.getParentNode().getParentNode();
+        } catch (XPathExpressionException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
-    public Pain001Xml remove(Payment p) throws XPathExpressionException {
-        var nodeCdtTrfTxInf = getCdtTrfTxInf(p);
-        if (nodeCdtTrfTxInf == null) {
-            return this;
+    public Pain001Xml remove(Payment p) {
+        try {
+            var nodeCdtTrfTxInf = getCdtTrfTxInf(p);
+            if (nodeCdtTrfTxInf == null) {
+                return this;
+            }
+
+            var nodePmtInf = (Element) nodeCdtTrfTxInf.getParentNode();
+            nodePmtInf.removeChild(nodeCdtTrfTxInf);
+
+            if (nodePmtInf.getElementsByTagName("CdtTrfTxInf").getLength() == 0) {
+                nodePmtInf.getParentNode().removeChild(nodePmtInf);
+            }
+
+            updateCtrlSum(p.getAmount() * -1);
+            updateNbOfTxs(-1);
+        } catch (XPathExpressionException e) {
+            log.error(e.getMessage(), e);
         }
-
-        var nodePmtInf = (Element) nodeCdtTrfTxInf.getParentNode();
-        nodePmtInf.removeChild(nodeCdtTrfTxInf);
-
-        if (nodePmtInf.getElementsByTagName("CdtTrfTxInf").getLength() == 0) {
-            nodePmtInf.getParentNode().removeChild(nodePmtInf);
-        }
-
-        updateCtrlSum(p.getAmount() * -1);
-        updateNbOfTxs(-1);
-
         return this;
     }
 
@@ -115,20 +130,20 @@ public class Pain001Xml {
         return xpath;
     }
 
-    public int countCdtTrfTxInf() throws XPathExpressionException {
-        var expression = createXPath().compile(String.format("count(//%s:CdtTrfTxInf)", nsPrefix));
-        return ((Double) expression.evaluate(document, XPathConstants.NUMBER)).intValue();
+    public int countCdtTrfTxInf() {
+        try {
+            var expression = createXPath().compile(String.format("count(//%s:CdtTrfTxInf)", nsPrefix));
+            return ((Double) expression.evaluate(document, XPathConstants.NUMBER)).intValue();
+        } catch (XPathExpressionException e) {
+            log.error(e.getMessage(), e);
+            return 0;
+        }
     }
 
-    public void writeTo(File file) throws TransformerException, IOException {
-        var stream = new FileOutputStream(file);
-        try {
-            var tf = TransformerFactory.newInstance();
-            var t = tf.newTransformer();
-            t.transform(new DOMSource(document), new StreamResult(stream));
-        } finally {
-            stream.close();
-        }
+    public void writeTo(OutputStream stream) throws TransformerException {
+        var tf = TransformerFactory.newInstance();
+        var t = tf.newTransformer();
+        t.transform(new DOMSource(document), new StreamResult(stream));
     }
 
     private static Document readXml(InputStream is) throws ParserConfigurationException, IOException, SAXException {

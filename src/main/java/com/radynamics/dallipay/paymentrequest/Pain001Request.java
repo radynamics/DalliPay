@@ -10,6 +10,7 @@ import com.radynamics.dallipay.transformation.AccountMappingSource;
 import com.radynamics.dallipay.transformation.MemoryAccountMappingSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +22,9 @@ public class Pain001Request {
     private List<AccountWalletPair> accountWalletPairs;
     private boolean sent;
     private boolean aborted;
+    private ByteArrayOutputStream remainingPain001;
+    private int countSent;
+    private int countTotal;
 
     public String applicationName() {
         return this.applicationName;
@@ -90,5 +94,29 @@ public class Pain001Request {
             mappingSource.add(mapping);
         }
         return mappingSource;
+    }
+
+    public ByteArrayOutputStream remainingPain001() {
+        return remainingPain001;
+    }
+
+    public void remainingPain001(ByteArrayOutputStream remainingPain001) {
+        this.remainingPain001 = remainingPain001;
+    }
+
+    public int countSent() {
+        return countSent;
+    }
+
+    public void countSent(int countSent) {
+        this.countSent = countSent;
+    }
+
+    public int countTotal() {
+        return countTotal;
+    }
+
+    public void countTotal(int countTotal) {
+        this.countTotal = countTotal;
     }
 }

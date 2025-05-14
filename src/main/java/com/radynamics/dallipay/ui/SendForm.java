@@ -8,7 +8,6 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
-import com.radynamics.dallipay.cryptoledger.transaction.TransmissionState;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.db.Database;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -41,13 +40,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class SendForm extends JPanel implements MainFormPane, MappingChangedListener {
     private final static Logger log = LogManager.getLogger(Database.class);
@@ -457,28 +456,18 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
                 return;
             }
 
-            var failed = new ArrayList<Payment>();
-            var pain001 = Pain001Xml.read(new FileInputStream(txtInput.getText()));
-            var countBefore = pain001.countCdtTrfTxInf();
-            var sent = payments.stream().filter(o -> o.getTransmission() == TransmissionState.Success).collect(Collectors.toList());
-            if (sent.size() == 0) {
+            var exporter = createPain001Exporter(new FileInputStream(txtInput.getText()));
+            if (exporter.sentPayments().size() == 0) {
                 JOptionPane.showMessageDialog(this, res.getString("export.NoneSent"), res.getString("export.NoneSentTitle"), JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
-            for (var p : sent) {
-                if (pain001.isRemovable(p)) {
-                    pain001.remove(p);
-                } else {
-                    failed.add(p);
-                }
-            }
-
             var file = com.radynamics.dallipay.util.File.createWithTimeSuffix(new File(txtInput.getText()));
-            pain001.writeTo(file);
+            var count = exporter.writeTo(new FileOutputStream(file));
 
             var sb = new StringBuilder();
-            sb.append(String.format(res.getString("exportPaymentsSuccess"), pain001.countCdtTrfTxInf(), countBefore, file.getAbsolutePath()));
+            sb.append(String.format(res.getString("exportPaymentsSuccess"), count, exporter.getCountBefore(), file.getAbsolutePath()));
+            var failed = exporter.getFailed();
             if (failed.size() != 0) {
                 sb.append(" " + res.getString("exportPaymentsIgnored") + System.lineSeparator());
                 for (var f : failed) {
@@ -492,6 +481,12 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
+    }
+
+    public Pain001Exporter createPain001Exporter(InputStream inputStream) throws Exception {
+        var exporter = new Pain001Exporter(payments);
+        exporter.read(inputStream);
+        return exporter;
     }
 
     private void sendPayments() {
@@ -535,6 +530,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             sendPayments(l, payments);
         }
 
+        // TODO: handle early returns in sendPayments(Ledger, Payment[])
         raiseOnPaymentSent();
     }
 
