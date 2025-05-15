@@ -188,7 +188,7 @@ public class EmbeddedServer {
                     }
                     if (args.sent()) {
                         var payload = new JSONObject();
-                        payload.put("remainingxml", Base64.getEncoder().encodeToString(args.remainingPain001().toByteArray()));
+                        payload.put("remainingxml", args.remainingPain001() == null ? null : Base64.getEncoder().encodeToString(args.remainingPain001().toByteArray()));
                         payload.put("countsent", args.countSent());
                         payload.put("counttotal", args.countTotal());
                         Ok(httpExchange, createSuccessJson(payload));

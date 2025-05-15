@@ -252,8 +252,11 @@ public class MainForm extends JFrame {
                 var outputStream = new ByteArrayOutputStream();
                 if (exporter.sentPayments().isEmpty()) {
                     args.xml().transferTo(outputStream);
-                } else {
+                } else if (exporter.sentPayments().size() < exporter.getCountBefore()) {
                     exporter.writeTo(outputStream);
+                } else {
+                    // No payments left to send
+                    outputStream = null;
                 }
                 args.remainingPain001(outputStream);
                 args.countSent(exporter.sentPayments().size());
