@@ -241,6 +241,7 @@ public class MainForm extends JFrame {
 
         var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingSend"));
         var notification = notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
+            sendingPanel.setIsExternalAppAwaitingSend(false);
             args.aborted(true);
             return null;
         }, true);
@@ -263,6 +264,7 @@ public class MainForm extends JFrame {
                 ExceptionDialog.show(sendingPanel, e);
             }
         });
+        sendingPanel.setIsExternalAppAwaitingSend(true);
         sendingPanel.loadPain001(args);
     }
 

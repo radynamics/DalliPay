@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 public class XummSigner implements TransactionSubmitter, StateListener<Transaction> {
     private final static Logger log = LogManager.getLogger(XummSigner.class);
@@ -131,37 +131,48 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
     private void submit(Transaction t, JSONObject json, boolean pathfinding) {
         if (json == null) throw new IllegalArgumentException("Parameter 'json' cannot be null");
 
-        var auth = new CompletableFuture<Void>();
-        if (storage.getAccessToken() == null) {
-            auth = authenticate(t);
-        } else {
-            var payload = JwtPayload.create(storage.getAccessToken());
-            if (payload != null && payload.expired()) {
+        var future = new CompletableFuture<Void>();
+        Executors.newCachedThreadPool().submit(() -> {
+            var auth = new CompletableFuture<Void>();
+            if (storage.getAccessToken() == null) {
                 auth = authenticate(t);
             } else {
-                auth.complete(null);
+                var payload = JwtPayload.create(storage.getAccessToken());
+                if (payload != null && payload.expired()) {
+                    auth = authenticate(t);
+                } else {
+                    auth.complete(null);
+                }
             }
-        }
-
-        auth
-                .thenRunAsync(() -> submitAndObserve(t, json, pathfinding))
-                .thenRun(() -> {
-                    try {
-                        // Wait before stop observing
-                        while (observer.countListening() > 0) {
-                            Thread.sleep(200);
+            auth
+                    .thenRunAsync(() -> submitAndObserve(t, json, pathfinding))
+                    .thenRun(() -> {
+                        try {
+                            // Wait before stop observing
+                            while (observer.countListening() > 0) {
+                                Thread.sleep(200);
+                            }
+                            future.complete(null);
+                        } catch (InterruptedException e) {
+                            log.error(e.getMessage(), e);
+                            future.completeExceptionally(e);
                         }
-                    } catch (InterruptedException e) {
+                    })
+                    .whenComplete((result, throwable) -> observer.shutdown())
+                    .exceptionally((e) -> {
                         log.error(e.getMessage(), e);
-                    }
-                })
-                .whenComplete((result, throwable) -> observer.shutdown())
-                .exceptionally((e) -> {
-                    log.error(e.getMessage(), e);
-                    t.refreshTransmission(e);
-                    raiseFailure(t);
-                    return null;
-                });
+                        t.refreshTransmission(e);
+                        raiseFailure(t);
+                        return null;
+                    });
+        });
+
+        try {
+            // Wait for success || failure.
+            future.get(2, TimeUnit.MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private synchronized CompletableFuture<Void> authenticate(Transaction t) {

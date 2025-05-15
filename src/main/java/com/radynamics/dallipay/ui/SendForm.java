@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 public class SendForm extends JPanel implements MainFormPane, MappingChangedListener {
     private final static Logger log = LogManager.getLogger(Database.class);
@@ -55,6 +56,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
     private TransactionTranslator transactionTranslator;
     private PaymentValidator validator;
     private TransactionSubmitter submitter;
+    private boolean isExternalAppAwaiting;
 
     private JLabel lblExchange;
     private JLabel lblSigningText;
@@ -84,7 +86,7 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         pnlMain.setDropTarget(new DropTarget() {
             public synchronized void drop(DropTargetDropEvent evt) {
                 try {
-                    if (!isEnabled() || lblLoading.isLoading()) {
+                    if (!isEnabled() || lblLoading.isLoading() || isExternalAppAwaiting) {
                         return;
                     }
                     evt.acceptDrop(DnDConstants.ACTION_COPY);
@@ -525,16 +527,23 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
             return;
         }
 
+        var sentPayments = new ArrayList<Payment>();
         var ledgers = PaymentUtils.distinctLedgers(payments);
         for (var l : ledgers) {
-            sendPayments(l, payments);
+            sendPayments(l, payments, payment -> {
+                sentPayments.add(payment);
+                return null;
+            });
         }
 
-        // TODO: handle early returns in sendPayments(Ledger, Payment[])
+        if (sentPayments.isEmpty()) {
+            return;
+        }
+        setIsExternalAppAwaitingSend(false);
         raiseOnPaymentSent();
     }
 
-    private void sendPayments(Ledger ledger, Payment[] payments) {
+    private void sendPayments(Ledger ledger, Payment[] payments, Function<Payment, Boolean> successfullySent) {
         try {
             if (submitter == null && !showSigningEdit(ledger)) {
                 return;
@@ -557,7 +566,9 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
 
                 @Override
                 public void onSuccess(Transaction t) {
-                    table.refresh(getPayment(t));
+                    var p = getPayment(t);
+                    table.refresh(p);
+                    successfullySent.apply(p);
                 }
 
                 @Override
@@ -737,10 +748,16 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         loadTable(payments);
     }
 
+    public void setIsExternalAppAwaitingSend(boolean isExternalAppAwaiting) {
+        this.isExternalAppAwaiting = isExternalAppAwaiting;
+    }
+
     private void enableInputControls(boolean enabled) {
-        txtInput.setEnabled(enabled);
+        // Do not let user change input file if an external app is awaiting sending its data.
+        txtInput.setEnabled(enabled && !isExternalAppAwaiting);
         table.setEditable(enabled);
-        cmdAdd.setEnabled(enabled);
+        // Do not let user add additional payments as they are unknown for external app if returned.
+        cmdAdd.setEnabled(enabled && !isExternalAppAwaiting);
         cmdExport.setEnabled(enabled);
         cmdSendPayments.setEnabled(enabled);
     }
