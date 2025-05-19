@@ -229,14 +229,14 @@ public class MainForm extends JFrame {
         Utils.bringToFront(this);
         tabbedPane.setSelectedComponent(sendingPanel);
 
+        if (args.ledgerId() != null) {
+            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
+        }
+
         if (transformInstruction.getNetwork() == null) {
             args.aborted(true);
             JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
             return;
-        }
-
-        if (args.ledgerId() != null) {
-            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
         }
 
         var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingSend"));
@@ -275,14 +275,14 @@ public class MainForm extends JFrame {
         Utils.bringToFront(this);
         tabbedPane.setSelectedComponent(receivingPanel);
 
+        if (args.ledgerId() != null) {
+            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
+        }
+
         if (transformInstruction.getNetwork() == null) {
             args.aborted(true);
             JOptionPane.showMessageDialog(this, res.getString("cannotContinueNotConnected"), res.getString("send"), JOptionPane.INFORMATION_MESSAGE);
             return;
-        }
-
-        if (args.ledgerId() != null) {
-            askSwitchingNetwork(LedgerFactory.create(args.ledgerId()), NetworkInfoFactory.createDefaultOrNull(args.ledgerId()));
         }
 
         var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingReceive"));
@@ -309,14 +309,21 @@ public class MainForm extends JFrame {
 
     private void askSwitchingNetwork(Ledger expectedLedger, NetworkInfo expected) {
         var actual = transformInstruction.getNetwork();
-        var sameLedger = transformInstruction.getLedger().getId().sameAs(expectedLedger.getId());
-        if (!sameLedger || (expected != null && actual.getNetworkId() != expected.getNetworkId())) {
+        if (expected == null) {
+            return;
+        }
+
+        var sameLedger = transformInstruction.getLedger() != null && transformInstruction.getLedger().getId().sameAs(expectedLedger.getId());
+        var actualOrNull = actual == null ? null : actual.getNetworkId();
+        if (!sameLedger || actualOrNull != expected.getNetworkId()) {
             askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
         }
     }
 
     private void askSwitchingNetwork(Ledger actualLedger, NetworkInfo actual, Ledger expectedLedger, NetworkInfo expected) {
-        var actualText = "%s: %s (NetworkID %s)".formatted(actualLedger.getDisplayText(), actual.getDisplayName(), actual.getNetworkId());
+        var actualText = actual == null
+                ? res.getString("none")
+                : "%s: %s (NetworkID %s)".formatted(actualLedger.getDisplayText(), actual.getDisplayName(), actual.getNetworkId());
         var expectedText = "%s: %s (NetworkID %s)".formatted(expectedLedger.getDisplayText(), expected.getDisplayName(), expected.getNetworkId());
         var text = res.getString("switchNetwork").formatted(actualText, expectedText);
         int ret = JOptionPane.showConfirmDialog(this, text, res.getString("switchNetworkTitle"), JOptionPane.YES_NO_CANCEL_OPTION);
@@ -327,7 +334,7 @@ public class MainForm extends JFrame {
         if (!transformInstruction.getLedger().getId().sameAs(expectedLedger.getId())) {
             onLedgerClicked(expectedLedger);
         }
-        if (actual.getNetworkId() != expected.getNetworkId()) {
+        if (actual == null || actual.getNetworkId() != expected.getNetworkId()) {
             networkPopupMenu.setSelectedNetwork(expected);
         }
     }
