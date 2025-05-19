@@ -365,7 +365,8 @@ public class EmbeddedServer {
             try {
                 Return(httpExchange, 500);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // Occurs if peer closed the connection.
+                log.info(e.getMessage(), e);
             }
         }
 
