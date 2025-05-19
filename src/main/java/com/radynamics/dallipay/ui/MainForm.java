@@ -309,7 +309,8 @@ public class MainForm extends JFrame {
 
     private void askSwitchingNetwork(Ledger expectedLedger, NetworkInfo expected) {
         var actual = transformInstruction.getNetwork();
-        if (expected != null && actual.getNetworkId() != expected.getNetworkId()) {
+        var sameLedger = transformInstruction.getLedger().getId().sameAs(expectedLedger.getId());
+        if (!sameLedger || (expected != null && actual.getNetworkId() != expected.getNetworkId())) {
             askSwitchingNetwork(transformInstruction.getLedger(), actual, expectedLedger, expected);
         }
     }
