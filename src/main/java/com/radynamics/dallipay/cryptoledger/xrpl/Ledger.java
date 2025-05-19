@@ -193,6 +193,17 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public boolean canConnect(NetworkInfo network) {
+        var api = new JsonRpcApi(this, network);
+        try {
+            api.getEndpointInfo(network);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
         return new LedgerPaymentHistoryProvider();
     }

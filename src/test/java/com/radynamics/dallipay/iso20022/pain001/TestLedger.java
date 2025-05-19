@@ -171,6 +171,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean canConnect(NetworkInfo network) {
+        return true;
+    }
+
+    @Override
     public PaymentHistoryProvider getPaymentHistoryProvider() {
         return null;
     }

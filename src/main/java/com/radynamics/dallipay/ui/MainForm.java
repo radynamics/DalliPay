@@ -3,6 +3,7 @@ package com.radynamics.dallipay.ui;
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
+import com.radynamics.dallipay.Config;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.ReturnCode;
 import com.radynamics.dallipay.VersionController;
@@ -182,7 +183,7 @@ public class MainForm extends JFrame {
 
                     var ledger = LedgerFactory.create(wizardCtrl.ledgerId());
                     if (!transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
-                        onLedgerClicked(ledger);
+                        trySetSelectedLedger(ledger);
                     }
                 }
 
@@ -331,8 +332,8 @@ public class MainForm extends JFrame {
             return;
         }
 
-        if (!transformInstruction.getLedger().getId().sameAs(expectedLedger.getId())) {
-            onLedgerClicked(expectedLedger);
+        if (!trySetSelectedLedger(expectedLedger)) {
+            return;
         }
         if (actual == null || actual.getNetworkId() != expected.getNetworkId()) {
             networkPopupMenu.setSelectedNetwork(expected);
@@ -443,18 +444,29 @@ public class MainForm extends JFrame {
         cmdLedger.setToolTipText(item.getText());
     }
 
-    private void onLedgerClicked(Ledger ledger) {
+    private boolean trySetSelectedLedger(Ledger ledger) {
         if (transformInstruction.getLedger().getId().sameAs(ledger.getId())) {
-            return;
+            return false;
         }
         var networkId = transformInstruction.getNetwork() == null ? null : transformInstruction.getNetwork().getId();
-        setTransformInstruction(TransformInstructionFactory.create(ledger, transformInstruction.getConfig().getLoadedFilePath(), networkId));
+        var config = Config.loadOrFallback(ledger, transformInstruction.getConfig().getLoadedFilePath());
+        var network = NetworkInfoFactory.getOrDefault(ledger, config, networkId);
+
+        // Do not set selected ledger if no connection is possible.
+        if (!ledger.canConnect(network)) {
+            JOptionPane.showMessageDialog(this, res.getString("connectionFailedNetworkNotChanged"), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        setTransformInstruction(TransformInstructionFactory.create(ledger, config, network));
         try {
             refreshLedgerButton(ledger);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
+            return false;
         }
         saveLastUsedLedger(ledger.getId());
+        return true;
     }
 
     private void refreshNetworkButton() {
@@ -536,7 +548,7 @@ public class MainForm extends JFrame {
         for (var l : LedgerFactory.all()) {
             var item = new JMenuItem(l.getDisplayText(), l.getIcon());
             item.putClientProperty(ITEM_OBJECT_ID, l.getId().numericId());
-            item.addActionListener(e -> onLedgerClicked(l));
+            item.addActionListener(e -> trySetSelectedLedger(l));
             popupMenu.add(item);
         }
 

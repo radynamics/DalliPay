@@ -3,27 +3,26 @@ package com.radynamics.dallipay.transformation;
 import com.radynamics.dallipay.Config;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
+import com.radynamics.dallipay.cryptoledger.NetworkInfoFactory;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.Coinbase;
 import com.radynamics.dallipay.exchange.ExchangeRateProvider;
 import com.radynamics.dallipay.exchange.ExchangeRateProviderFactory;
-import okhttp3.HttpUrl;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 public final class TransformInstructionFactory {
     private final static Logger log = LogManager.getLogger(TransformInstructionFactory.class);
 
     public static TransformInstruction create(Ledger ledger, String configFilePath, String networkId) {
         var config = Config.loadOrFallback(ledger, configFilePath);
+        var network = NetworkInfoFactory.getOrDefault(ledger, config, networkId);
+        return create(ledger, config, network);
+    }
+
+    public static TransformInstruction create(Ledger ledger, Config config, NetworkInfo network) {
         var t = new TransformInstruction(ledger, config, new DbAccountMappingSource(ledger));
-        t.setNetwork(getNetworkOrDefault(ledger, config, networkId));
+        t.setNetwork(network);
         try (var repo = new ConfigRepo()) {
             var persistedProvider = repo.getExchangeRateProvider();
             t.setExchangeRateProvider(createExchangeRateProvider(ledger, persistedProvider.orElse(null)));
@@ -47,42 +46,5 @@ public final class TransformInstructionFactory {
         }
 
         return ExchangeRateProviderFactory.create(id, ledger);
-    }
-
-    private static NetworkInfo getNetworkOrDefault(Ledger ledger, Config config, String networkId) {
-        if (!StringUtils.isEmpty(networkId)) {
-            var networkByParam = config.getNetwork(networkId.toLowerCase(Locale.ROOT));
-            if (networkByParam.isPresent()) {
-                return networkByParam.get();
-            }
-        }
-
-        HttpUrl lastUsed = null;
-        var customSidechains = new NetworkInfo[0];
-        try (var repo = new ConfigRepo()) {
-            lastUsed = repo.getLastUsedRpcUrl(ledger);
-            customSidechains = repo.getCustomSidechains(ledger);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        if (lastUsed == null) {
-            return config.getDefaultNetworkInfo();
-        }
-
-        var available = new ArrayList<NetworkInfo>();
-        available.addAll(List.of(ledger.getDefaultNetworkInfo()));
-        available.addAll(List.of(customSidechains));
-        available.addAll(Arrays.asList(config.getNetworkInfos()));
-        for (var ni : available) {
-            if (ni.getUrl().equals(lastUsed)) {
-                return ni;
-            }
-        }
-
-        var ni = NetworkInfo.create(lastUsed, lastUsed.toString());
-        var knownNetworkIds = ledger.networkIds();
-        ni.setNetworkId(knownNetworkIds.length == 0 ? null : Integer.parseInt(knownNetworkIds[0].getKey()));
-        return ni;
     }
 }

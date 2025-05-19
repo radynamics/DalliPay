@@ -57,6 +57,8 @@ public interface Ledger {
 
     void setNetwork(NetworkInfo network);
 
+    boolean canConnect(NetworkInfo network);
+
     PaymentHistoryProvider getPaymentHistoryProvider();
 
     WalletValidator createWalletValidator();
