@@ -23,5 +23,6 @@ public class StaticWalletInfoProvider extends com.radynamics.dallipay.cryptoledg
         add("rEaC7oNDB34K6CiSbSrA6xEPeVhXNgDZRY", "Xago");
         add("rEn9eRkX25wfGPLysUMAvZ84jAzFNpT5fL", "Stably");
         add("rUN5Zxt3K1AnMRJgEWywDJT8QDMMeLH5ok", "Novatti"); // AUDD
+        add("rfgbriwuUN5CREJcaBjnb1FdAqxDujbD7k", "Schuman Financial"); // EUROP
     }
 }
