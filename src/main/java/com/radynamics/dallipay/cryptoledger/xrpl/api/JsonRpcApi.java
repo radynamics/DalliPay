@@ -134,6 +134,7 @@ public class JsonRpcApi implements TransactionSource {
             tr.setExistsWallet(exists(result.account()));
             return;
         }
+        tr.setExistsWallet(true);
 
         while (tr.transactions().length < limit && pageCounter < maxPages && result.transactions().size() > 0) {
             for (var r : result.transactions()) {
