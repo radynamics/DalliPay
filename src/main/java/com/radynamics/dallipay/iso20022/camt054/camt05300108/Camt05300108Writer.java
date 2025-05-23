@@ -42,7 +42,7 @@ public class Camt05300108Writer implements Camt054Writer {
     }
 
     @Override
-    public Object createDocument(Payment[] transactions) throws Exception {
+    public Object createDocument(Payment[] transactions, ReportBalances reportBalances) throws Exception {
         var d = new Document();
 
         d.setBkToCstmrStmt(new BankToCustomerStatementV08());
@@ -57,15 +57,24 @@ public class Camt05300108Writer implements Camt054Writer {
         for (var t : transactions) {
             var receiver = t.getReceiverWallet();
             var address = t.getReceiverAddress();
-            var ccy = ledgerCurrencyConverter.getTargetCurrency(t.getUserCcy()).getCode();
-            var stmt = getNtfctnOrNull(d, receiver, address, ccy);
+            var ccy = ledgerCurrencyConverter.getTargetCurrency(t.getUserCcy());
+            var stmt = getNtfctnOrNull(d, receiver, address, ccy.getCode());
             if (stmt == null) {
                 stmt = new AccountStatement9();
                 d.getBkToCstmrStmt().getStmt().add(stmt);
                 stmt.setId(idGenerator.createStmId());
                 stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
                 stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
-                stmt.setAcct(createAcct(receiver, address, ccy));
+                stmt.setAcct(createAcct(receiver, address, ccy.getCode()));
+
+                var opbd = reportBalances.getOpbd(ccy).orElse(null);
+                if (opbd != null) {
+                    stmt.getBal().add(createBalance("OPBD", opbd, reportBalances.getOpbdAt()));
+                }
+                var clbd = reportBalances.getClbd(ccy).orElse(null);
+                if (clbd != null) {
+                    stmt.getBal().add(createBalance("CLBD", clbd, reportBalances.getClbdAt()));
+                }
             }
 
             stmt.getNtry().add(createNtry(t));
@@ -109,16 +118,25 @@ public class Camt05300108Writer implements Camt054Writer {
         return acct;
     }
 
+    private CashBalance8 createBalance(String balanceType, Money amount, ZonedDateTime at) throws DatatypeConfigurationException {
+        var bal = new CashBalance8();
+        bal.setTp(new BalanceType13());
+        var cd = new BalanceType10Choice();
+        cd.setCd(balanceType);
+        bal.getTp().setCdOrPrtry(cd);
+        bal.setAmt(createAmt(amount));
+        bal.setCdtDbtInd(CreditDebitCode.CRDT);
+        bal.setDt(createDateAndDateTimeChoice(Utils.toXmlDateTime(at), transformInstruction.getBookingDateFormat()));
+        return bal;
+    }
+
     private ReportEntry10 createNtry(Payment trx) throws DatatypeConfigurationException {
         var ntry = new ReportEntry10();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
         ntry.setNtryRef(trx.getReceiverAccount().getUnformatted());
 
-        var m = ledgerCurrencyConverter.convert(Money.of(trx.getAmount(), trx.getUserCcy()));
-        var amt = new ActiveOrHistoricCurrencyAndAmount();
-        amt.setValue(AmountRounder.round(ledger, m, 2));
-        amt.setCcy(m.getCcy().getCode());
+        var amt = createAmt(Money.of(trx.getAmount(), trx.getUserCcy()));
 
         ntry.setAmt(amt);
         var amtDtls = trx.createCcyPair().isOneToOne() ? null : createAmtDtls(trx);
@@ -179,6 +197,14 @@ public class Camt05300108Writer implements Camt054Writer {
         }
 
         return ntry;
+    }
+
+    private ActiveOrHistoricCurrencyAndAmount createAmt(Money amount) {
+        var m = ledgerCurrencyConverter.convert(amount);
+        var amt = new ActiveOrHistoricCurrencyAndAmount();
+        amt.setValue(AmountRounder.round(ledger, m, 2));
+        amt.setCcy(m.getCcy().getCode());
+        return amt;
     }
 
     private TransactionParties6 createRltdPties(Payment trx) {

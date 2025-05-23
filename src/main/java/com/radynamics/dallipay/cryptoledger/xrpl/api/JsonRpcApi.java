@@ -40,6 +40,7 @@ import org.xrpl.xrpl4j.model.ledger.AccountRootObject;
 import org.xrpl.xrpl4j.model.transactions.*;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,6 +135,7 @@ public class JsonRpcApi implements TransactionSource {
             tr.setExistsWallet(exists(result.account()));
             return;
         }
+        tr.setExistsWallet(true);
 
         while (tr.transactions().length < limit && pageCounter < maxPages && result.transactions().size() > 0) {
             for (var r : result.transactions()) {
@@ -285,7 +287,11 @@ public class JsonRpcApi implements TransactionSource {
         return getAccountData(wallet) != null;
     }
 
-    private synchronized AccountRootObject getAccountData(Wallet wallet) {
+    private AccountRootObject getAccountData(Wallet wallet) {
+        return getAccountData(wallet, null);
+    }
+
+    private synchronized AccountRootObject getAccountData(Wallet wallet, Duration cacheDuration) {
         accountDataCache.evictOutdated();
         var key = new WalletKey(wallet);
         var data = accountDataCache.get(key);
@@ -296,11 +302,11 @@ public class JsonRpcApi implements TransactionSource {
         try {
             var requestParams = AccountInfoRequestParams.of(Address.of(wallet.getPublicKey()));
             data = xrplClient.accountInfo(requestParams).accountData();
-            accountDataCache.add(key, data);
+            accountDataCache.add(key, data, cacheDuration);
             return data;
         } catch (Exception e) {
             if (isAccountNotFound(e)) {
-                accountDataCache.add(key, null);
+                accountDataCache.add(key, null, cacheDuration);
             } else {
                 log.error(e.getMessage(), e);
             }
@@ -432,7 +438,8 @@ public class JsonRpcApi implements TransactionSource {
     }
 
     public double getTransferFee(Wallet wallet) {
-        var accountData = getAccountData(wallet);
+        // TransferFee of wallets do not change often. Keep longer in cache to improve speed of listTrustlines() for wallets with many (100+) trustlines (and reduce API calls).
+        var accountData = getAccountData(wallet, Duration.ofMinutes(15));
         if (accountData == null) {
             return 0;
         }

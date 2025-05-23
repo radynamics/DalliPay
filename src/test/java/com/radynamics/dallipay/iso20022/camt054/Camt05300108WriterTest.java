@@ -39,7 +39,7 @@ public class Camt05300108WriterTest {
         var w = new Camt05300108Writer(cryptoInstruction.getLedger(), cryptoInstruction, ProductVersion, LedgerCurrencyFormat.Native);
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
-        var actual = camtConverter.toXml(w.createDocument(payments));
+        var actual = camtConverter.toXml(w.createDocument(payments, ReportBalances.Empty));
         var expected = camtConverter.toXml(camtConverter.toDocument(getClass().getClassLoader().getResourceAsStream(expectationResourceName)));
 
         assertThat(Input.fromByteArray(actual.toByteArray()), isSimilarTo(Input.fromByteArray(expected.toByteArray())));
@@ -62,7 +62,7 @@ public class Camt05300108WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 
-        var actual = (Document) w.createDocument(payments);
+        var actual = (Document) w.createDocument(payments, ReportBalances.Empty);
 
         var rltdPties = actual.getBkToCstmrStmt().getStmt().get(0).getNtry().get(0).getNtryDtls().get(0).getTxDtls().get(0).getRltdPties();
 
@@ -83,7 +83,7 @@ public class Camt05300108WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 
-        var actual = (Document) w.createDocument(TestFactory.createTransactionsMultiCcy(ledger, ti));
+        var actual = (Document) w.createDocument(TestFactory.createTransactionsMultiCcy(ledger, ti), ReportBalances.Empty);
 
         Assertions.assertEquals(2, actual.getBkToCstmrStmt().getStmt().size());
         {
@@ -110,7 +110,7 @@ public class Camt05300108WriterTest {
         w.setIdGenerator(new FixedValueIdGenerator());
         w.setCreationDate(TestFactory.createCreationDate());
 
-        var actual = (Document) w.createDocument(TestFactory.createTransactionsMaxRmtInfUstrd(ledger, ti));
+        var actual = (Document) w.createDocument(TestFactory.createTransactionsMaxRmtInfUstrd(ledger, ti), ReportBalances.Empty);
 
         Assertions.assertEquals(2, actual.getBkToCstmrStmt().getStmt().get(0).getNtry().size());
         {

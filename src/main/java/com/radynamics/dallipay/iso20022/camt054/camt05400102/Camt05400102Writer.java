@@ -42,7 +42,7 @@ public class Camt05400102Writer implements Camt054Writer {
     }
 
     @Override
-    public Object createDocument(Payment[] transactions) throws Exception {
+    public Object createDocument(Payment[] transactions, ReportBalances reportBalances) throws Exception {
         var d = new Document();
 
         d.setBkToCstmrDbtCdtNtfctn(new BankToCustomerDebitCreditNotificationV02());

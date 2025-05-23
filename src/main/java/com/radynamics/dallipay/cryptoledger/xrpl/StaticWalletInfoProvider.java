@@ -23,5 +23,8 @@ public class StaticWalletInfoProvider extends com.radynamics.dallipay.cryptoledg
         add("rEaC7oNDB34K6CiSbSrA6xEPeVhXNgDZRY", "Xago");
         add("rEn9eRkX25wfGPLysUMAvZ84jAzFNpT5fL", "Stably");
         add("rUN5Zxt3K1AnMRJgEWywDJT8QDMMeLH5ok", "Novatti"); // AUDD
+        add("rMkEuRii9w9uBMQDnWV5AA43gvYZR9JxVK", "Schuman Financial"); // EUROP
+        add("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De", "Ripple"); // RLUSD
+        add("rB3y9EPnq1ZrZP3aXgfyfdXQThzdXMrLMc", "Braza Group"); // USDB
     }
 }
