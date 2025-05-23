@@ -6,6 +6,7 @@ import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.VersionController;
+import com.radynamics.dallipay.cryptoledger.BalanceRefresher;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
@@ -391,7 +392,8 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             }
             var camtConverter = camtExport.getConverter();
             accountMappingSource.open();
-            var s = camtConverter.toXml(w.createDocument(table.checkedPayments()));
+            var payments = table.checkedPayments();
+            var s = camtConverter.toXml(w.createDocument(payments, createCamtReportBalances(payments, w.getExportLedgerCurrencyFormat())));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
             outputStream.close();
@@ -407,6 +409,24 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 ExceptionDialog.show(this, e);
             }
         }
+    }
+
+    private ReportBalances createCamtReportBalances(Payment[] payments, LedgerCurrencyFormat ledgerCurrencyFormat) {
+        var wallet = txtInput.getValidWallet();
+        var br = new BalanceRefresher(transformInstruction.getNetwork());
+        br.refresh(transformInstruction.getLedger(), wallet);
+
+        var selectedTargetCcy = getSelectedTargetCcy();
+        var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
+        var ledgerCcy = new Currency(transformInstruction.getLedger().getNativeCcySymbol());
+
+        var b = ReportBalancesBuilder.create(wallet)
+                .targetCcy(targetCcy)
+                .ledgerCcy(ledgerCcy)
+                .ledgerCurrencyConverter(transformInstruction.getLedger().createLedgerCurrencyConverter(ledgerCurrencyFormat))
+                .currencyConverter(new CurrencyConverter(transformInstruction.getExchangeRateProvider().latestRates()))
+                .payments(payments);
+        return b.build();
     }
 
     private boolean showExportForm() {
@@ -482,7 +502,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             return;
         }
 
-        var selectedTargetCcy = ((StringPairEntry) cboTargetCcy.getSelectedItem()).getKey();
+        var selectedTargetCcy = getSelectedTargetCcy();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         if (targetCcy != null) {
             var ccyPair = new CurrencyPair(transformInstruction.getLedger().getNativeCcySymbol(), targetCcy.getCode());
@@ -532,6 +552,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 cf.completeExceptionally(e);
             }
         });
+    }
+
+    private String getSelectedTargetCcy() {
+        return ((StringPairEntry) cboTargetCcy.getSelectedItem()).getKey();
     }
 
     private void enableInputControls(boolean enabled) {

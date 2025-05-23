@@ -15,6 +15,10 @@ public class CurrencyConverter {
         this.rates = rates;
     }
 
+    public Money convertMoney(Money amount, Currency targetCcy) {
+        return Money.of(convert(amount, targetCcy), targetCcy);
+    }
+
     public double convert(Money amount, Currency targetCcy) {
         return convert(BigDecimal.valueOf(amount.getNumber().doubleValue()), amount.getCcy().getCode(), targetCcy.getCode());
     }
