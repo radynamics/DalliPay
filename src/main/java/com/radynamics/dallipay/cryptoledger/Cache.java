@@ -25,7 +25,15 @@ public class Cache<T> {
     }
 
     public void add(Key key, T data) {
-        cache.put(createKey(key), new CacheEntry<>(data));
+        add(key, data, null);
+    }
+
+    public void add(Key key, T data, Duration duration) {
+        var entry = new CacheEntry<>(data);
+        cache.put(createKey(key), entry);
+        if (duration != null) {
+            entry.setDuration(duration);
+        }
     }
 
     private String createKey(Key key) {
@@ -67,7 +75,7 @@ public class Cache<T> {
 
     public synchronized void evictOutdated() {
         var oldSize = cache.size();
-        cache.entrySet().removeIf(entry -> entry.getValue().getAge().toSeconds() > maxAge.toSeconds());
+        cache.entrySet().removeIf(entry -> entry.getValue().getAge().minus(entry.getValue().getDuration()).toSeconds() > maxAge.toSeconds());
         log.trace(String.format("Removed %s items", oldSize - cache.size()));
     }
 
