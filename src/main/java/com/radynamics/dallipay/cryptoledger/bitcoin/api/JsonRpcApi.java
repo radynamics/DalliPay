@@ -2,10 +2,7 @@ package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
 import com.radynamics.dallipay.DateTimeConvert;
 import com.radynamics.dallipay.DateTimeRange;
-import com.radynamics.dallipay.cryptoledger.EndpointInfo;
-import com.radynamics.dallipay.cryptoledger.NetworkInfo;
-import com.radynamics.dallipay.cryptoledger.TransactionResult;
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.*;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.Device;
 import com.radynamics.dallipay.cryptoledger.bitcoin.signing.BitcoinCoreRpcSubmitter;
@@ -200,13 +197,15 @@ public class JsonRpcApi {
         return openedWallets.validateAddress(publicKey);
     }
 
-    public void refreshBalance(Wallet wallet, boolean useCache) {
+    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
         var balance = openedWallets.getBalance(wallet);
         if (!balance.isPresent()) {
             log.info("refreshBalance failed. Unknown wallet %s".formatted(wallet.getPublicKey()));
-            return;
+            return new MoneyBag();
         }
-        wallet.getBalances().set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        var balances = new MoneyBag();
+        balances.set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        return balances;
     }
 
     public BigDecimal estimateSmartFee(int targetInBlocks) throws ApiException {

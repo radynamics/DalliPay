@@ -46,7 +46,7 @@ public class BalanceRefresher {
             return;
         }
 
-        ledger.refreshBalance(wallet, useCache);
+        wallet.getBalances().replaceBy(ledger.getBalance(wallet, useCache));
         if (wallet.getBalances().isEmpty()) {
             return;
         }

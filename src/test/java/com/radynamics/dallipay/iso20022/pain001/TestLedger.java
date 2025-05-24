@@ -146,8 +146,8 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public void refreshBalance(Wallet wallet, boolean useCache) {
-        // do nothing;
+    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
+        return new MoneyBag();
     }
 
     @Override
