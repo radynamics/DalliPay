@@ -1,6 +1,6 @@
 package com.radynamics.dallipay.iso20022.camt054;
 
-import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.CurrencyPair;
@@ -11,15 +11,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class ReportBalancesBuilder {
-    private final Wallet wallet;
+    private final MoneyBag balances;
     private Currency targetCcy;
     private Currency ledgerCcy;
     private Payment[] payments;
     private LedgerCurrencyConverter ledgerCurrencyConverter;
     private CurrencyConverter currencyConverter;
 
-    public ReportBalancesBuilder(Wallet wallet) {
-        this.wallet = wallet;
+    public ReportBalancesBuilder(MoneyBag balances) {
+        this.balances = balances;
     }
 
     public ReportBalances build() {
@@ -32,21 +32,21 @@ public class ReportBalancesBuilder {
         var b = ReportBalances.create();
         if (targetCcy == null) {
             // Export in the same ccy as other native amounts.
-            b.addClbd(ledgerCurrencyConverter.convert(wallet.getBalances().get(ledgerCcy).orElse(Money.zero(ledgerCcy))));
+            b.addClbd(ledgerCurrencyConverter.convert(balances.get(ledgerCcy).orElse(Money.zero(ledgerCcy))));
             b.setClbdAt(latest.getBooked());
             return b;
         }
 
         // Someone exporting in eg. USD due his accounting software expects amounts in USD. Therefore convert balance into exporting currency.
         if (currencyConverter.has(new CurrencyPair(ledgerCcy, targetCcy))) {
-            b.addClbd(currencyConverter.convertMoney(wallet.getBalances().get(ledgerCcy).orElse(Money.zero(ledgerCcy)), targetCcy));
+            b.addClbd(currencyConverter.convertMoney(balances.get(ledgerCcy).orElse(Money.zero(ledgerCcy)), targetCcy));
             b.setClbdAt(latest.getBooked());
         }
         return b;
     }
 
-    public static ReportBalancesBuilder create(Wallet wallet) {
-        return new ReportBalancesBuilder(wallet);
+    public static ReportBalancesBuilder create(MoneyBag balances) {
+        return new ReportBalancesBuilder(balances);
     }
 
     public ReportBalancesBuilder targetCcy(Currency targetCcy) {

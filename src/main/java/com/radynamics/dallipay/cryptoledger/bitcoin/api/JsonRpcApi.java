@@ -197,15 +197,12 @@ public class JsonRpcApi {
         return openedWallets.validateAddress(publicKey);
     }
 
-    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
-        var balance = openedWallets.getBalance(wallet);
-        if (!balance.isPresent()) {
-            log.info("refreshBalance failed. Unknown wallet %s".formatted(wallet.getPublicKey()));
-            return new MoneyBag();
+    public MoneyBag getBalance(WalletInput walletInput) {
+        if (ledger.isValidPublicKey(walletInput.raw())) {
+            return openedWallets.getBalance(walletInput.wallet());
+        } else {
+            return openedWallets.getBalance(walletInput.raw());
         }
-        var balances = new MoneyBag();
-        balances.set(Money.of(balance.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
-        return balances;
     }
 
     public BigDecimal estimateSmartFee(int targetInBlocks) throws ApiException {

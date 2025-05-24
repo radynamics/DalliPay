@@ -146,7 +146,7 @@ public class TestLedger implements Ledger {
     }
 
     @Override
-    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
+    public MoneyBag getBalance(WalletInput walletInput, boolean useCache) {
         return new MoneyBag();
     }
 

@@ -128,8 +128,8 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
-    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
-        return api.getBalance(WalletConverter.from(wallet), useCache);
+    public MoneyBag getBalance(WalletInput walletInput, boolean useCache) {
+        return api.getBalance(walletInput);
     }
 
     @Override

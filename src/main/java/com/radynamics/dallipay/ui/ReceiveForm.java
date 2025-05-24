@@ -6,9 +6,9 @@ import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.radynamics.dallipay.DateTimeRange;
 import com.radynamics.dallipay.VersionController;
-import com.radynamics.dallipay.cryptoledger.BalanceRefresher;
 import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.*;
@@ -375,6 +375,10 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (lblLoading.isLoading() || table.checkedPayments().length == 0) {
             return;
         }
+        var walletInput = txtInput.getWalletInput();
+        if (!walletInput.valid()) {
+            return;
+        }
 
         if (!showExportForm()) {
             return;
@@ -393,7 +397,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             var camtConverter = camtExport.getConverter();
             accountMappingSource.open();
             var payments = table.checkedPayments();
-            var s = camtConverter.toXml(w.createDocument(payments, createCamtReportBalances(payments, w.getExportLedgerCurrencyFormat())));
+            var s = camtConverter.toXml(w.createDocument(payments, createCamtReportBalances(walletInput, payments, w.getExportLedgerCurrencyFormat())));
             var outputStream = new FileOutputStream(targetFileName);
             s.writeTo(outputStream);
             outputStream.close();
@@ -411,16 +415,14 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         }
     }
 
-    private ReportBalances createCamtReportBalances(Payment[] payments, LedgerCurrencyFormat ledgerCurrencyFormat) {
-        var wallet = txtInput.getValidWallet();
-        var br = new BalanceRefresher(transformInstruction.getNetwork());
-        br.refresh(transformInstruction.getLedger(), wallet);
+    private ReportBalances createCamtReportBalances(WalletInput walletInput, Payment[] payments, LedgerCurrencyFormat ledgerCurrencyFormat) {
+        var balances = transformInstruction.getLedger().getBalance(walletInput, true);
 
         var selectedTargetCcy = getSelectedTargetCcy();
         var targetCcy = selectedTargetCcy.equals(XrplPriceOracleConfig.AsReceived) ? null : new Currency(selectedTargetCcy);
         var ledgerCcy = new Currency(transformInstruction.getLedger().getNativeCcySymbol());
 
-        var b = ReportBalancesBuilder.create(wallet)
+        var b = ReportBalancesBuilder.create(balances)
                 .targetCcy(targetCcy)
                 .ledgerCcy(ledgerCcy)
                 .ledgerCurrencyConverter(transformInstruction.getLedger().createLedgerCurrencyConverter(ledgerCurrencyFormat))
