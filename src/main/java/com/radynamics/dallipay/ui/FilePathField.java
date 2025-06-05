@@ -155,6 +155,7 @@ public class FilePathField extends JPanel {
     @Override
     public void setEnabled(boolean enabled) {
         txt.setEditable(enabled);
+        txt.setEnabled(enabled);
         cmdOpen.setEnabled(enabled);
     }
 }
