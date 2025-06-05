@@ -390,11 +390,12 @@ public class ReceiveForm extends JPanel implements MainFormPane {
                 outputStream.close();
             }
 
-            raiseOnExported(xml);
-
             var msg = isExportingToRestApi()
                     ? String.format(res.getString("exportSuccess"), exportToApplicationName)
                     : String.format(res.getString("exportSuccess"), targetFileName);
+
+            raiseOnExported(xml);
+
             JOptionPane.showMessageDialog(table, msg);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
