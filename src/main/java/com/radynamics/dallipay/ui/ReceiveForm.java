@@ -49,6 +49,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private TransformInstruction transformInstruction;
     private TransactionTranslator transactionTranslator;
     private final VersionController versionController = new VersionController();
+    private String exportToApplicationName;
 
     private PaymentTable table;
     private WalletField txtInput;
@@ -213,9 +214,6 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             table = new PaymentTable(Actor.Receiver);
             table.addProgressListener(progress -> {
                 lblLoading.update(progress);
-                if (progress.isFinished()) {
-                    raiseOnReceiveCompleted();
-                }
                 enableInputControls(isEnabled() && progress.isFinished());
             });
             table.addSelectorChangedListener(() -> cmdExport.setEnabled(table.checkedPayments().length > 0));
@@ -385,11 +383,19 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             if (xml == null) {
                 return;
             }
-            var outputStream = new FileOutputStream(targetFileName);
-            xml.writeTo(outputStream);
-            outputStream.close();
 
-            JOptionPane.showMessageDialog(table, String.format(res.getString("exportSuccess"), targetFileName));
+            if (!isExportingToRestApi()) {
+                var outputStream = new FileOutputStream(targetFileName);
+                xml.writeTo(outputStream);
+                outputStream.close();
+            }
+
+            raiseOnExported(xml);
+
+            var msg = isExportingToRestApi()
+                    ? String.format(res.getString("exportSuccess"), exportToApplicationName)
+                    : String.format(res.getString("exportSuccess"), targetFileName);
+            JOptionPane.showMessageDialog(table, msg);
         } catch (Exception e) {
             ExceptionDialog.show(this, e);
         }
@@ -475,19 +481,23 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         frm.setOutputFile(targetFileName);
         frm.setExportFormat(exportParams.getLeft());
         frm.setLedgerCurrencyFormat(exportParams.getRight());
+        frm.setExportToApplicationName(exportToApplicationName);
         frm.setVisible(true);
         if (!frm.isDialogAccepted()) {
             return false;
         }
-        if (frm.getOutputFile().length() == 0) {
+        if (isExportingToRestApi() && frm.getOutputFile().length() == 0) {
             JOptionPane.showMessageDialog(this, res.getString("exportEnterPath"));
             return false;
         }
 
         targetFileName = frm.getOutputFile();
         try (var repo = new ConfigRepo()) {
-            repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
-            repo.setDefaultExportFormat(frm.getExportFormat());
+            // Do not override custom configuration with values specified by calling application.
+            if (!isExportingToRestApi()) {
+                repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
+                repo.setDefaultExportFormat(frm.getExportFormat());
+            }
             repo.setExportLedgerCurrencyFormat(transformInstruction.getLedger().getId(), frm.getExportLedgerCurrencyFormat());
             repo.commit();
         } catch (Exception e) {
@@ -673,11 +683,25 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         listener.remove(l);
     }
 
-    private void raiseOnReceiveCompleted() {
+    private void raiseOnExported(ByteArrayOutputStream camtXml) {
         // Do not use for as the listener calls removeReceiveListener withing onReceiveCompleted.
         for (var i = listener.size() - 1; i >= 0; i--) {
-            listener.get(i).onReceiveCompleted();
+            listener.get(i).onExported(camtXml);
         }
+    }
+
+    public void setExportingTo(String applicationName) {
+        exportToApplicationName = applicationName;
+        cmdExport.setText(res.getString("exportTo").formatted(exportToApplicationName));
+    }
+
+    public void resetExportingTo() {
+        exportToApplicationName = null;
+        cmdExport.setText(res.getString("export"));
+    }
+
+    private boolean isExportingToRestApi() {
+        return exportToApplicationName != null;
     }
 
     private class StringPairEntry {

@@ -289,21 +289,16 @@ public class MainForm extends JFrame {
         var text = String.format(res.getString("restExternalAwaitingAction"), args.applicationName(), res.getString("restExternalAwaitingReceive"));
         var notification = notificationBar.addInfo(text, res.getString("restExternalAwaitingAbort"), () -> {
             args.aborted(true);
+            receivingPanel.resetExportingTo();
             return null;
         }, true);
 
         receivingPanel.changeFilter(args);
-        receivingPanel.addReceiveListener(new ReceiveListener() {
-            @Override
-            public void onReceiveCompleted() {
-                var xml = receivingPanel.createCamtOfChecked(args.camtFormat());
-                if (xml == null) {
-                    return;
-                }
-
-                args.camtXml(xml.toString());
-                notificationBar.removeEntry(notification);
-            }
+        receivingPanel.setExportingTo(args.applicationName());
+        receivingPanel.addReceiveListener(camtXml -> {
+            args.camtXml(camtXml.toString());
+            notificationBar.removeEntry(notification);
+            receivingPanel.resetExportingTo();
         });
         receivingPanel.load();
     }

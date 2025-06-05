@@ -16,6 +16,7 @@ public class ReceiveExportForm extends JDialog {
     private JComboBox<CamtFormatEntry> cboExportFormat;
     private JComboBox<LedgerCurrencyFormat> cboLedgerCurrencyFormat;
     private final FormAcceptCloseHandler formAcceptCloseHandler = new FormAcceptCloseHandler(this);
+    private final JLabel lblTitle = new JLabel();
 
     private final ResourceBundle res = ResourceBundle.getBundle("i18n." + this.getClass().getSimpleName());
 
@@ -80,11 +81,10 @@ public class ReceiveExportForm extends JDialog {
             pnl.setLayout(new BorderLayout());
             panel0.add(pnl);
             {
-                var lbl = new JLabel();
-                lbl.setText(getTitle());
-                lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
-                lbl.setOpaque(true);
-                pnl.add(lbl, BorderLayout.NORTH);
+                lblTitle.setText(getTitle());
+                lblTitle.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
+                lblTitle.setOpaque(true);
+                pnl.add(lblTitle, BorderLayout.NORTH);
             }
             {
                 var lbl = new JLabel();
@@ -235,5 +235,15 @@ public class ReceiveExportForm extends JDialog {
 
     public LedgerCurrencyFormat getExportLedgerCurrencyFormat() {
         return ((LedgerCurrencyFormat) cboLedgerCurrencyFormat.getSelectedItem());
+    }
+
+    public void setExportToApplicationName(String applicationName) {
+        var title = applicationName == null
+                ? res.getString("title")
+                : res.getString("titleExportTo").formatted(applicationName);
+        setTitle(title);
+        lblTitle.setText(title);
+        txtOutputFile.setEnabled(applicationName == null);
+        cboExportFormat.setEnabled(applicationName == null);
     }
 }
