@@ -471,6 +471,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             targetFileName = createTargetFile().getAbsolutePath();
         }
 
+        var isTargetFileInputEnabled = !isExportingToRestApi();
         var exportParams = createExportParameter();
 
         var frm = new ReceiveExportForm(transformInstruction.getLedger());
@@ -478,7 +479,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         frm.setSize(600, 300);
         frm.setModal(true);
         frm.setLocationRelativeTo(this);
-        frm.setOutputFile(targetFileName);
+        if (isTargetFileInputEnabled) {
+            frm.setOutputFile(targetFileName);
+        }
         frm.setExportFormat(exportParams.getLeft());
         frm.setLedgerCurrencyFormat(exportParams.getRight());
         frm.setExportToApplicationName(exportToApplicationName);
@@ -486,7 +489,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         if (!frm.isDialogAccepted()) {
             return false;
         }
-        if (isExportingToRestApi() && frm.getOutputFile().length() == 0) {
+        if (isTargetFileInputEnabled && frm.getOutputFile().length() == 0) {
             JOptionPane.showMessageDialog(this, res.getString("exportEnterPath"));
             return false;
         }
@@ -494,7 +497,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         targetFileName = frm.getOutputFile();
         try (var repo = new ConfigRepo()) {
             // Do not override custom configuration with values specified by calling application.
-            if (!isExportingToRestApi()) {
+            if (isTargetFileInputEnabled) {
                 repo.setDefaultOutputDirectory(new File(targetFileName).getParentFile());
                 repo.setDefaultExportFormat(frm.getExportFormat());
             }
