@@ -470,20 +470,22 @@ public class JsonRpcApi implements TransactionSource {
         return !accountData.flags().lsfDisallowXrp();
     }
 
-    public void refreshBalance(Wallet wallet, boolean useCache) {
+    public MoneyBag getBalance(Wallet wallet, boolean useCache) {
         if (!useCache) {
             var key = new WalletKey(wallet);
             accountDataCache.evict(key);
             accountTrustLineCache.evict(key);
         }
+        var balances = new MoneyBag();
         var accountData = getAccountData(wallet);
         if (accountData != null) {
-            wallet.getBalances().set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+            balances.set(Money.of(accountData.balance().toXrp().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
         }
 
         for (var t : listTrustlines(wallet)) {
-            wallet.getBalances().set(t.getBalance());
+            balances.set(t.getBalance());
         }
+        return balances;
     }
 
     public Trustline[] listTrustlines(Wallet wallet) {
@@ -539,7 +541,7 @@ public class JsonRpcApi implements TransactionSource {
         faucetClient.fundAccount(FundAccountRequest.of(address));
 
         var wallet = ledger.createWallet(address.value(), SeedCodec.getInstance().encodeSeed(randomSeed.decodedSeed().bytes(), randomSeed.decodedSeed().type().orElseThrow()));
-        ledger.refreshBalance(wallet, false);
+        wallet.getBalances().replaceBy(ledger.getBalance(wallet, false));
         return wallet;
     }
 

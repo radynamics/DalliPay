@@ -351,7 +351,7 @@ public class WalletField extends JPanel {
             return null;
         }
 
-        ledger.refreshBalance(wallet, true);
+        wallet.getBalances().replaceBy(ledger.getBalance(getWalletInput(), true));
         return wallet;
     }
 

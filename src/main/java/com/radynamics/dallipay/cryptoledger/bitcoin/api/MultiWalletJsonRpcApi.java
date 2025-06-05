@@ -1,10 +1,13 @@
 package com.radynamics.dallipay.cryptoledger.bitcoin.api;
 
+import com.radynamics.dallipay.cryptoledger.MoneyBag;
 import com.radynamics.dallipay.cryptoledger.NetworkInfo;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletCompare;
 import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.*;
+import com.radynamics.dallipay.exchange.Currency;
+import com.radynamics.dallipay.exchange.Money;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -151,10 +154,30 @@ public class MultiWalletJsonRpcApi {
         }
     }
 
-    public Optional<BigDecimal> getBalance(Wallet wallet) {
+    public MoneyBag getBalance(Wallet wallet) {
         init();
         var c = client(wallet);
-        return c.isPresent() ? Optional.of(c.orElseThrow().getBalance()) : Optional.empty();
+        Optional<BigDecimal> b = c.isPresent() ? Optional.of(c.orElseThrow().getBalance()) : Optional.empty();
+
+        if (!b.isPresent()) {
+            log.info("refreshBalance failed. Unknown wallet %s".formatted(wallet.getPublicKey()));
+            return new MoneyBag();
+        }
+        var balances = new MoneyBag();
+        balances.set(Money.of(b.orElseThrow().doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        return balances;
+    }
+
+    public MoneyBag getBalance(String account) {
+        init();
+        if (!walletClients.containsKey(account)) {
+            return new MoneyBag();
+        }
+
+        var b = walletClients.get(account).getBalance();
+        var balances = new MoneyBag();
+        balances.set(Money.of(b.doubleValue(), new Currency(ledger.getNativeCcySymbol())));
+        return balances;
     }
 
     public List<String> walletNames() {

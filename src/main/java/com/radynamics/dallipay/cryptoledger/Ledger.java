@@ -47,7 +47,7 @@ public interface Ledger {
 
     Wallet createRandomWallet(HttpUrl faucetUrl);
 
-    void refreshBalance(Wallet wallet, boolean useCache);
+    MoneyBag getBalance(WalletInput walletInput, boolean useCache);
 
     TransactionResult listPaymentsSent(Wallet wallet, long sinceDaysAgo, int limit) throws Exception;
 
