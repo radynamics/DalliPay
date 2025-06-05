@@ -22,8 +22,8 @@ public class ReceiveRequest {
         return this.applicationName;
     }
 
-    public void applicationName(String wallet) {
-        this.applicationName = wallet;
+    public void applicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     public String wallet() {
