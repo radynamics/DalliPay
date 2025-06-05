@@ -1,7 +1,6 @@
 package com.radynamics.dallipay.iso20022.camt054.camt05400109;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.WalletInfo;
 import com.radynamics.dallipay.cryptoledger.WalletInfoAggregator;
 import com.radynamics.dallipay.exchange.Money;
@@ -9,8 +8,6 @@ import com.radynamics.dallipay.iso20022.*;
 import com.radynamics.dallipay.iso20022.camt054.*;
 import com.radynamics.dallipay.iso20022.camt054.camt05400109.generated.*;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
-import com.radynamics.dallipay.transformation.AccountMappingSourceException;
-import com.radynamics.dallipay.transformation.AccountMappingSourceHelper;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +20,6 @@ import java.time.ZonedDateTime;
 public class Camt05400109Writer implements Camt054Writer {
     private final Ledger ledger;
     private final TransformInstruction transformInstruction;
-    private final AccountMappingSourceHelper accountMappingSourceHelper;
     private final String productVersion;
     private IdGenerator idGenerator;
     private ZonedDateTime creationDate;
@@ -34,7 +30,6 @@ public class Camt05400109Writer implements Camt054Writer {
     public Camt05400109Writer(Ledger ledger, TransformInstruction transformInstruction, String productVersion, LedgerCurrencyFormat ledgerCurrencyFormat) {
         this.ledger = ledger;
         this.transformInstruction = transformInstruction;
-        this.accountMappingSourceHelper = new AccountMappingSourceHelper(this.transformInstruction.getAccountMappingSource());
         this.productVersion = productVersion;
         this.idGenerator = new UUIDIdGenerator();
         this.creationDate = ZonedDateTime.now();
@@ -55,20 +50,19 @@ public class Camt05400109Writer implements Camt054Writer {
         d.getBkToCstmrDbtCdtNtfctn().getGrpHdr().getMsgPgntn().setLastPgInd(true);
 
         for (var t : transactions) {
-            var receiver = t.getReceiverWallet();
-            var address = t.getReceiverAddress();
+            var receiverAccount = t.getReceiverAccount();
             var ccy = ledgerCurrencyConverter.getTargetCurrency(t.getUserCcy()).getCode();
-            var stmt = getNtfctnOrNull(d, receiver, address, ccy);
+            var stmt = getNtfctnOrNull(d, receiverAccount, ccy);
             if (stmt == null) {
                 stmt = new AccountNotification19();
                 d.getBkToCstmrDbtCdtNtfctn().getNtfctn().add(stmt);
                 stmt.setId(idGenerator.createStmId());
                 stmt.setElctrncSeqNb(BigDecimal.valueOf(0));
                 stmt.setCreDtTm(Utils.toXmlDateTime(creationDate));
-                stmt.setAcct(createAcct(receiver, address, ccy));
+                stmt.setAcct(createAcct(receiverAccount, ccy));
             }
 
-            stmt.getNtry().add(createNtry(t));
+            stmt.getNtry().add(createNtry(t, receiverAccount));
             stmt.setElctrncSeqNb(stmt.getElctrncSeqNb().add(BigDecimal.ONE));
         }
         return d;
@@ -79,41 +73,35 @@ public class Camt05400109Writer implements Camt054Writer {
         return transformInstruction;
     }
 
-    private AccountNotification19 getNtfctnOrNull(Document d, Wallet receiver, Address address, String ccy) throws AccountMappingSourceException {
+    private AccountNotification19 getNtfctnOrNull(Document d, Account receiver, String ccy) {
         for (var ntfctn : d.getBkToCstmrDbtCdtNtfctn().getNtfctn()) {
-            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, address, ccy))) {
+            if (CashAccountCompare.isSame(ntfctn.getAcct(), createAcct(receiver, ccy))) {
                 return ntfctn;
             }
         }
         return null;
     }
 
-    private CashAccount41 createAcct(Wallet receiver, Address address, String ccy) throws AccountMappingSourceException {
+    private CashAccount41 createAcct(Account account, String ccy) {
         var acct = new CashAccount41();
         acct.setId(new AccountIdentification4Choice());
-        var account = this.accountMappingSourceHelper.getAccountOrNull(receiver, address);
-        if (account == null) {
-            acct.getId().setOthr(new GenericAccountIdentification1());
-            acct.getId().getOthr().setId(receiver.getPublicKey());
+        if (account instanceof IbanAccount) {
+            var iban = (IbanAccount) account;
+            acct.getId().setIBAN(iban.getUnformatted());
         } else {
-            if (account instanceof IbanAccount) {
-                var iban = (IbanAccount) account;
-                acct.getId().setIBAN(iban.getUnformatted());
-            } else {
-                acct.getId().setOthr(new GenericAccountIdentification1());
-                acct.getId().getOthr().setId(account.getUnformatted());
-            }
+            acct.getId().setOthr(new GenericAccountIdentification1());
+            acct.getId().getOthr().setId(account.getUnformatted());
         }
         acct.setCcy(ccy);
 
         return acct;
     }
 
-    private ReportEntry11 createNtry(Payment trx) throws DatatypeConfigurationException {
+    private ReportEntry11 createNtry(Payment trx, Account receiverAccount) throws DatatypeConfigurationException {
         var ntry = new ReportEntry11();
 
         // Seite 44: "Nicht standardisierte Verfahren: In anderen Fällen kann die «Referenz für den Kontoinhaber» geliefert werden."
-        ntry.setNtryRef(trx.getReceiverAccount().getUnformatted());
+        ntry.setNtryRef(receiverAccount.getUnformatted());
 
         var m = ledgerCurrencyConverter.convert(Money.of(trx.getAmount(), trx.getUserCcy()));
         var amt = new ActiveOrHistoricCurrencyAndAmount();
