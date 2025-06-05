@@ -56,6 +56,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     private DateTimePicker dtPickerStart;
     private DateTimePicker dtPickerEnd;
     private String targetFileName;
+    private CamtFormat predefinedExportFormat;
     private CamtFormat defaultExportFormat;
     private CamtExport camtExport;
     private JButton cmdRefresh;
@@ -526,6 +527,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
             exportLedgerCurrencyFormat = camtExport.getWriter().getExportLedgerCurrencyFormat();
         }
 
+        exportFormat = predefinedExportFormat != null ? predefinedExportFormat : exportFormat;
         return new ImmutablePair<>(exportFormat, exportLedgerCurrencyFormat);
     }
 
@@ -672,9 +674,9 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         // TODO: AccountMapping
         if (!StringUtils.isEmpty(args.format())) {
             if ("camt053".equals(args.format())) {
-                defaultExportFormat = CamtFormat.Camt05300108;
+                predefinedExportFormat = CamtFormat.Camt05300108;
             } else if ("camt054".equals(args.format())) {
-                defaultExportFormat = CamtFormat.Camt05400109;
+                predefinedExportFormat = CamtFormat.Camt05400109;
             }
         }
     }
@@ -700,6 +702,7 @@ public class ReceiveForm extends JPanel implements MainFormPane {
     }
 
     public void resetExportingTo() {
+        predefinedExportFormat = null;
         exportToApplicationName = null;
         cmdExport.setText(res.getString("export"));
     }
