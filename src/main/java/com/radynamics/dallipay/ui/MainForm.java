@@ -14,6 +14,7 @@ import com.radynamics.dallipay.paymentrequest.EmbeddedServer;
 import com.radynamics.dallipay.paymentrequest.Pain001Request;
 import com.radynamics.dallipay.paymentrequest.ReceiveRequest;
 import com.radynamics.dallipay.paymentrequest.RequestListener;
+import com.radynamics.dallipay.transformation.AccountMappingConverter;
 import com.radynamics.dallipay.transformation.PaymentRequestUri;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import com.radynamics.dallipay.transformation.TransformInstructionFactory;
@@ -247,6 +248,8 @@ public class MainForm extends JFrame {
             return null;
         }, true);
 
+        sendingPanel.setAccountMappings(AccountMappingConverter.convert(transformInstruction.getLedger(), args.accountWalletPairs()));
+
         sendingPanel.addPaymentSentListener(() -> {
             try {
                 var exporter = sendingPanel.createPain001Exporter(args.xml());
@@ -293,6 +296,7 @@ public class MainForm extends JFrame {
             return null;
         }, true);
 
+        receivingPanel.setAccountMappings(AccountMappingConverter.convert(transformInstruction.getLedger(), args.accountWalletPairs()));
         receivingPanel.changeFilter(args);
         receivingPanel.setExportingTo(args.applicationName());
         receivingPanel.addReceiveListener(camtXml -> {

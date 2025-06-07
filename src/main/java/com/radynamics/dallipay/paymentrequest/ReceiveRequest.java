@@ -66,6 +66,10 @@ public class ReceiveRequest {
         this.ledgerId = ledgerId;
     }
 
+    public List<AccountWalletPair> accountWalletPairs() {
+        return this.accountWalletPairs;
+    }
+
     public void accountWalletPairs(List<AccountWalletPair> accountWalletPairs) {
         this.accountWalletPairs = accountWalletPairs;
     }

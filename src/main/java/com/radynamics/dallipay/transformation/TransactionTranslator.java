@@ -3,10 +3,13 @@ package com.radynamics.dallipay.transformation;
 import com.radynamics.dallipay.cryptoledger.Ledger;
 import com.radynamics.dallipay.cryptoledger.LedgerId;
 import com.radynamics.dallipay.cryptoledger.Wallet;
+import com.radynamics.dallipay.cryptoledger.WalletCompare;
+import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
 import com.radynamics.dallipay.exchange.CurrencyPair;
 import com.radynamics.dallipay.exchange.ExchangeRate;
+import com.radynamics.dallipay.iso20022.AccountCompare;
 import com.radynamics.dallipay.iso20022.Payment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class TransactionTranslator {
     private final static Logger log = LogManager.getLogger(TransactionTranslator.class);
@@ -21,6 +25,7 @@ public class TransactionTranslator {
     private final CurrencyConverter currencyConverter;
     private Currency targetCcy;
     private ArrayList<Wallet> defaultSenderWallets = new ArrayList<>();
+    private List<AccountMapping> accountMappings = new ArrayList<>();
 
     public TransactionTranslator(TransformInstruction transformInstruction, CurrencyConverter currencyConverter) {
         this.transformInstruction = transformInstruction;
@@ -77,6 +82,21 @@ public class TransactionTranslator {
                 }
                 if (t.getReceiverWallet() == null) {
                     t.setReceiverWallet(mappingSourceHelper.getWalletOrNull(t.getReceiverAccount(), t.getReceiverAddress()));
+                }
+
+                for (var accountMapping : accountMappings) {
+                    if (WalletCompare.isSame(t.getSenderWallet(), accountMapping.getWallet())) {
+                        t.setSenderAccount(accountMapping.getAccount());
+                    }
+                    if (WalletCompare.isSame(t.getReceiverWallet(), accountMapping.getWallet())) {
+                        t.setReceiverAccount(accountMapping.getAccount());
+                    }
+                    if (AccountCompare.isSame(t.getSenderAccount(), accountMapping.getAccount())) {
+                        t.setSenderWallet(accountMapping.getWallet());
+                    }
+                    if (AccountCompare.isSame(t.getReceiverAccount(), accountMapping.getAccount())) {
+                        t.setSenderWallet(accountMapping.getWallet());
+                    }
                 }
             }
         } catch (AccountMappingSourceException e) {
@@ -145,5 +165,9 @@ public class TransactionTranslator {
             }
         }
         return null;
+    }
+
+    public void setAccountMappings(List<AccountMapping> accountMappings) {
+        this.accountMappings = accountMappings;
     }
 }

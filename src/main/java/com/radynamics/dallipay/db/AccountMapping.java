@@ -10,7 +10,9 @@ public class AccountMapping {
     private Account account;
     private Wallet wallet;
     private final Ledger ledger;
-    private String partyId = "";
+    private String partyId = NO_PARTY;
+
+    public static final String NO_PARTY = "";
 
     public AccountMapping(Ledger ledger) {
         this.ledger = ledger;

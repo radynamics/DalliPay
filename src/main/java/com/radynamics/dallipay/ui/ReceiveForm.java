@@ -10,6 +10,7 @@ import com.radynamics.dallipay.cryptoledger.TransactionResult;
 import com.radynamics.dallipay.cryptoledger.Wallet;
 import com.radynamics.dallipay.cryptoledger.generic.WalletInput;
 import com.radynamics.dallipay.cryptoledger.xrpl.XrplPriceOracleConfig;
+import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.exchange.*;
 import com.radynamics.dallipay.iso20022.Payment;
@@ -666,12 +667,15 @@ public class ReceiveForm extends JPanel implements MainFormPane {
         lblUsingExchangeRatesFromSource.setText(transformInstruction.getHistoricExchangeRateSource().getDisplayText());
     }
 
+    public void setAccountMappings(java.util.List<AccountMapping> accountMappings) {
+        transactionTranslator.setAccountMappings(accountMappings);
+    }
+
     public void changeFilter(ReceiveRequest args) {
         if (!StringUtils.isEmpty(args.wallet())) {
             setWallet(transformInstruction.getLedger().createWallet(args.wallet(), null));
         }
         setPeriod(DateTimeRange.of(args.from(), args.to()));
-        // TODO: AccountMapping
         if (!StringUtils.isEmpty(args.format())) {
             if ("camt053".equals(args.format())) {
                 predefinedExportFormat = CamtFormat.Camt05300108;

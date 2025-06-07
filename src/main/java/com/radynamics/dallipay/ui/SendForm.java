@@ -8,6 +8,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.api.ApiException;
 import com.radynamics.dallipay.cryptoledger.signing.NullSubmitter;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionStateListener;
 import com.radynamics.dallipay.cryptoledger.signing.TransactionSubmitter;
+import com.radynamics.dallipay.db.AccountMapping;
 import com.radynamics.dallipay.db.ConfigRepo;
 import com.radynamics.dallipay.db.Database;
 import com.radynamics.dallipay.exchange.CurrencyConverter;
@@ -804,6 +805,10 @@ public class SendForm extends JPanel implements MainFormPane, MappingChangedList
         table.init(transformInstruction, currencyConverter, validator, transactionTranslator);
         // Clear loaded payments
         load(new ArrayList<>());
+    }
+
+    public void setAccountMappings(List<AccountMapping> accountMappings) {
+        transactionTranslator.setAccountMappings(accountMappings);
     }
 
     public void addPaymentSentListener(PaymentSentListener l) {
