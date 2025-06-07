@@ -37,6 +37,32 @@ public class TransactionTranslator {
     }
 
     public synchronized Payment[] apply(Payment[] transactions, AccountMappingSourceHelper mappingSourceHelper) {
+        applyAccountMapping(transactions, mappingSourceHelper);
+
+        for (var t : transactions) {
+            var targetCcy = getTargetCcy(t);
+            if (t.getAmountTransaction().getCcy().sameCode(targetCcy)) {
+                if (t.isAmountUnknown()) {
+                    t.setAmount(t.getAmountTransaction());
+                    t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
+                } else {
+                    t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
+                }
+            } else {
+                var ccyPair = t.isCcyUnknown()
+                        ? new CurrencyPair(t.getAmountTransaction().getCcy(), targetCcy)
+                        : t.createCcyPair();
+                if (currencyConverter.has(ccyPair)) {
+                    t.setExchangeRate(currencyConverter.get(ccyPair));
+                } else {
+                    t.setUserCcy(ccyPair.getSecond());
+                }
+            }
+        }
+        return transactions;
+    }
+
+    private void applyAccountMapping(Payment[] transactions, AccountMappingSourceHelper mappingSourceHelper) {
         try {
             mappingSourceHelper.open();
             for (var t : transactions) {
@@ -52,25 +78,6 @@ public class TransactionTranslator {
                 if (t.getReceiverWallet() == null) {
                     t.setReceiverWallet(mappingSourceHelper.getWalletOrNull(t.getReceiverAccount(), t.getReceiverAddress()));
                 }
-
-                var targetCcy = getTargetCcy(t);
-                if (t.getAmountTransaction().getCcy().sameCode(targetCcy)) {
-                    if (t.isAmountUnknown()) {
-                        t.setAmount(t.getAmountTransaction());
-                        t.setExchangeRate(ExchangeRate.None(t.getAmountTransaction().getCcy().getCode()));
-                    } else {
-                        t.setExchangeRate(ExchangeRate.OneToOne(t.createCcyPair()));
-                    }
-                } else {
-                    var ccyPair = t.isCcyUnknown()
-                            ? new CurrencyPair(t.getAmountTransaction().getCcy(), targetCcy)
-                            : t.createCcyPair();
-                    if (currencyConverter.has(ccyPair)) {
-                        t.setExchangeRate(currencyConverter.get(ccyPair));
-                    } else {
-                        t.setUserCcy(ccyPair.getSecond());
-                    }
-                }
             }
         } catch (AccountMappingSourceException e) {
             log.error(e.getMessage(), e);
@@ -81,8 +88,6 @@ public class TransactionTranslator {
                 log.error(e.getMessage(), e);
             }
         }
-
-        return transactions;
     }
 
     public void applyDefaultSender(Collection<Payment> transactions) {
