@@ -2,11 +2,14 @@ package com.radynamics.dallipay.ui.paymentTable;
 
 import com.radynamics.dallipay.cryptoledger.AsyncWalletInfoLoader;
 import com.radynamics.dallipay.cryptoledger.BalanceRefresher;
+import com.radynamics.dallipay.cryptoledger.transaction.ValidationResult;
 import com.radynamics.dallipay.exchange.HistoricExchangeRateLoader;
 import com.radynamics.dallipay.iso20022.AsyncValidator;
 import com.radynamics.dallipay.iso20022.Payment;
 import com.radynamics.dallipay.iso20022.PaymentValidator;
 import com.radynamics.dallipay.transformation.TransactionTranslator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 
 public class DataLoader {
+    private final static Logger log = LogManager.getLogger(DataLoader.class);
+
     private final PaymentTableModel model;
     private HistoricExchangeRateLoader exchangeRateLoader;
     private PaymentValidator validator;
@@ -53,15 +58,26 @@ public class DataLoader {
         for (var p : payments) {
             var future = loadAsync(p, br);
             future.thenAccept((result) -> {
-                synchronized (this) {
-                    queue.remove(future);
-                    var total = payments.length;
-                    var loaded = total - queue.size();
-                    raiseProgress(new Progress(loaded, total));
-                }
+                removeFromQueue(payments, future);
+            }).exceptionally((t) -> {
+                // Eg. "FeignException$TooManyRequests" (Http 429 from xrplcluster.com).
+                log.error(t.getMessage(), t);
+
+                // Ensure UI doesn't get stuck at "Validating...".
+                model.setValidationResults(p.payment, new ValidationResult[]{ValidationResult.of(t)});
+                // Ensure UI doesn't get stuck at 'x / y loaded...".
+                removeFromQueue(payments, future);
+                return null;
             });
             queue.add(future);
         }
+    }
+
+    private synchronized void removeFromQueue(Record[] payments, CompletableFuture<Payment> future) {
+        queue.remove(future);
+        var total = payments.length;
+        var loaded = total - queue.size();
+        raiseProgress(new Progress(loaded, total));
     }
 
     private CompletableFuture<Payment> loadAsync(Record item, BalanceRefresher br) {
@@ -92,10 +108,14 @@ public class DataLoader {
         var future = new CompletableFuture<Payment>();
         var finalLoadExchangeRate = loadExchangeRate;
         Executors.newCachedThreadPool().submit(() -> {
-            CompletableFuture.allOf(loadBalancesAndHistory).join();
-            CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
-            // Validation can start after loadExchangeRate completed.
-            validateAsync(item).thenAccept((result) -> future.complete(p));
+            try {
+                CompletableFuture.allOf(loadBalancesAndHistory).join();
+                CompletableFuture.allOf(loadWalletInfo, finalLoadExchangeRate).join();
+                // Validation can start after loadExchangeRate completed.
+                validateAsync(item).thenAccept((result) -> future.complete(p));
+            } catch (Throwable t) {
+                future.completeExceptionally(t);
+            }
         });
         return future;
     }

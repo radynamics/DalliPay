@@ -11,6 +11,10 @@ public class ValidationResult {
         this.message = message;
     }
 
+    public static ValidationResult of(Throwable t) {
+        return new ValidationResult(ValidationState.Error, t.getMessage());
+    }
+
     public ValidationState getStatus() {
         return status;
     }
