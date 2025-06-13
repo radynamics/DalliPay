@@ -1,8 +1,6 @@
 package com.radynamics.dallipay.iso20022.camt054.camt05400102;
 
 import com.radynamics.dallipay.cryptoledger.Ledger;
-import com.radynamics.dallipay.cryptoledger.WalletInfo;
-import com.radynamics.dallipay.cryptoledger.WalletInfoAggregator;
 import com.radynamics.dallipay.exchange.Money;
 import com.radynamics.dallipay.iso20022.*;
 import com.radynamics.dallipay.iso20022.camt054.*;
@@ -10,7 +8,6 @@ import com.radynamics.dallipay.iso20022.camt054.camt05400102.generated.*;
 import com.radynamics.dallipay.iso20022.creditorreference.StructuredReference;
 import com.radynamics.dallipay.transformation.TransformInstruction;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -169,20 +166,20 @@ public class Camt05400102Writer implements Camt054Writer {
     private TransactionParty2 createRltdPties(Payment trx) {
         var obj = new TransactionParty2();
 
-        var aggregator = new WalletInfoAggregator(trx.getLedger().getInfoProvider());
-        obj.setDbtr(createPartyIdentification(aggregator.getNameOrDomain(trx.getSenderWallet())));
-        obj.setCdtr(createPartyIdentification(aggregator.getNameOrDomain(trx.getReceiverWallet())));
+        var helper = new RelatedPartyHelper(trx.getLedger());
+        obj.setDbtr(createPartyIdentification(helper.getNameOrDomain(trx.getSenderWallet()).orElse(null)));
+        obj.setCdtr(createPartyIdentification(helper.getNameOrDomain(trx.getReceiverWallet()).orElse(null)));
 
         return obj.getDbtr() == null && obj.getCdtr() == null ? null : obj;
     }
 
-    private PartyIdentification32 createPartyIdentification(WalletInfo wi) {
-        if (wi == null || StringUtils.isEmpty(wi.getValue())) {
+    private PartyIdentification32 createPartyIdentification(String name) {
+        if (name == null) {
             return null;
         }
 
         var obj = new PartyIdentification32();
-        obj.setNm(wi.getValue());
+        obj.setNm(name);
         return obj;
     }
 
