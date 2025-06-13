@@ -49,7 +49,7 @@ public class XummSigner implements TransactionSubmitter, StateListener<Transacti
         info = new TransactionSubmitterInfo();
         info.setTitle(res.getString("xumm.title"));
         info.setDescription(res.getString("xumm.desc"));
-        info.setDetailUri(URI.create("https://xumm.app"));
+        info.setDetailUri(URI.create("https://xaman.app"));
         info.setOrder(100);
         info.setIcon(Utils.getScaled("img/xumm.png", 64, 64));
     }
