@@ -39,7 +39,7 @@ public class GenericWalletValidator implements WalletValidator {
 
     private ValidationResult validateFormat(com.radynamics.dallipay.cryptoledger.Wallet wallet, String senderOrReceiver) {
         var prefix = senderOrReceiver == null ? "" : String.format("%s ", senderOrReceiver);
-        return wallet != null && ledger.isValidPublicKey(wallet.getPublicKey())
+        return wallet != null && ledger.isValidWallet(wallet.getPublicKey())
                 ? null
                 : new ValidationResult(ValidationState.Error, String.format(res.getString("walletInvalid"), prefix));
     }

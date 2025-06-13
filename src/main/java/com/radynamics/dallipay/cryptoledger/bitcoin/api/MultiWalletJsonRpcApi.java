@@ -112,6 +112,11 @@ public class MultiWalletJsonRpcApi {
 
     public Optional<BitcoinJSONRPCClient> client(Wallet wallet) {
         init();
+        // Return by alias like eg bitbox02.
+        if (walletClients.containsKey(wallet.getPublicKey())) {
+            return Optional.of(walletClients.get(wallet.getPublicKey()));
+        }
+
         for (var c : walletClients.values()) {
             var ext = new BitcoinCoreRpcClientExt(c);
             for (var l : ext.listLabels()) {
@@ -142,6 +147,14 @@ public class MultiWalletJsonRpcApi {
     public BitcoindRpcClient.DecodedScript decodeScript(String hex) {
         init();
         return genericClient.decodeScript(hex);
+    }
+
+    public boolean isValidWallet(String identification) {
+        init();
+        if (walletClients.containsKey(identification)) {
+            return true;
+        }
+        return validateAddress(identification);
     }
 
     public boolean validateAddress(String address) {

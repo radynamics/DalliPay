@@ -39,7 +39,7 @@ public class SenderPane extends JPanel {
         var defaultSenderWalletText = txtDefaultSenderWallet.getText();
         if (defaultSenderWalletText.length() == 0) {
             repo.setDefaultSenderWallet(ledger.getId(), null);
-        } else if (ledger.isValidPublicKey(defaultSenderWalletText)) {
+        } else if (ledger.isValidWallet(defaultSenderWalletText)) {
             repo.setDefaultSenderWallet(ledger.getId(), ledger.createWallet(defaultSenderWalletText, null));
         }
     }

@@ -215,6 +215,10 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     private boolean isSelectable(ValidationState highestStatus) {
+        // If sending a payments failed for any reasons, always allow user to change things and try again.
+        if (actor == Actor.Sender) {
+            return true;
+        }
         return highestStatus != ValidationState.Error;
     }
 

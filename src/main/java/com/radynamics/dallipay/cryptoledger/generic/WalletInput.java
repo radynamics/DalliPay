@@ -18,7 +18,7 @@ public class WalletInput {
             return wallet;
         }
 
-        if (ledger.isValidPublicKey(raw)) {
+        if (ledger.isValidWallet(raw)) {
             wallet = ledger.createWallet(raw, null);
             return wallet;
         }
@@ -33,7 +33,7 @@ public class WalletInput {
     }
 
     public boolean valid() {
-        return ledger.isValidPublicKey(raw) || wallet() != null;
+        return ledger.isValidWallet(raw) || wallet() != null;
     }
 
     public String raw() {
