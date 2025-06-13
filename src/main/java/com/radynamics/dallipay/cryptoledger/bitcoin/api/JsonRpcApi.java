@@ -193,6 +193,9 @@ public class JsonRpcApi {
         return new BitcoinCoreRpcSubmitter(ledger, privateKeyProvider, openedWallets);
     }
 
+    public boolean isValidWallet(String identification) {
+        return openedWallets.isValidWallet(identification);
+    }
     public boolean validateAddress(String publicKey) {
         return openedWallets.validateAddress(publicKey);
     }

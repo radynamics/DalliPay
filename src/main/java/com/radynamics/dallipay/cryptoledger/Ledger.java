@@ -71,6 +71,8 @@ public interface Ledger {
 
     void setInfoProvider(WalletInfoProvider[] walletInfoProvider);
 
+    boolean isValidWallet(String identification);
+
     boolean isValidPublicKey(String publicKey);
 
     boolean isSecretValid(Wallet wallet);

@@ -210,6 +210,11 @@ public class TestLedger implements Ledger {
     }
 
     @Override
+    public boolean isValidWallet(String identification) {
+        return isValidPublicKey(identification);
+    }
+
+    @Override
     public boolean isValidPublicKey(String publicKey) {
         var map = new HashSet<String>();
         map.add("aaa");

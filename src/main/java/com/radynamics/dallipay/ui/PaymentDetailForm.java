@@ -189,6 +189,7 @@ public class PaymentDetailForm extends JDialog {
                 }
                 {
                     txtSenderWallet = new WalletField(pnlMain);
+                    txtSenderWallet.allowGeneralTerm(true);
                     txtSenderWallet.setLedger(payment.getLedger());
                     txtSenderWallet.setWallet(payment.getSenderWallet());
                     txtSenderWallet.setShowDetailVisible(true);

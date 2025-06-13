@@ -189,6 +189,14 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     }
 
     @Override
+    public boolean isValidWallet(String identification) {
+        if (!networkConfigured()) {
+            return true;
+        }
+        return api.isValidWallet(identification);
+    }
+
+    @Override
     public boolean isValidPublicKey(String publicKey) {
         if (!networkConfigured()) {
             return true;
