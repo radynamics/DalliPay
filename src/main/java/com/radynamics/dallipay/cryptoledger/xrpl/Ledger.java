@@ -291,7 +291,7 @@ public class Ledger implements com.radynamics.dallipay.cryptoledger.Ledger {
     @Override
     public NetworkInfo[] getDefaultNetworkInfo() {
         var networks = new NetworkInfo[2];
-        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://xrplcluster.com/"), "Mainnet");
+        networks[0] = NetworkInfo.createLivenet(HttpUrl.get("https://s2.ripple.com:51234/"), "Mainnet");
         networks[0].setNetworkId(NETWORKID_LIVENET);
         networks[1] = NetworkInfo.createTestnet(HttpUrl.get("https://s.altnet.rippletest.net:51234/"), "Testnet");
         networks[1].setNetworkId(NETWORKID_TESTNET);
