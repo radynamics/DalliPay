@@ -21,15 +21,19 @@ public class KeyPoolJsonSerializer {
     public static JSONObject toJson(KeyPool keyPool) {
         var o = new JSONObject();
         o.put("desc", keyPool.desc());
-        var r = new JSONArray();
-        r.put(keyPool.range().getMinimum());
-        r.put(keyPool.range().getMaximum());
-        o.put("range", r);
+        putRange(o, keyPool.range());
         o.put("timestamp", keyPool.timestamp());
         o.put("internal", keyPool.internal());
         o.put("keypool", keyPool.keypool());
         o.put("active", keyPool.active());
         o.put("watchonly", keyPool.watchonly());
         return o;
+    }
+
+    public static void putRange(JSONObject options, Range<Integer> range) {
+        var r = new JSONArray();
+        r.put(range.getMinimum());
+        r.put(range.getMaximum());
+        options.put("range", r);
     }
 }

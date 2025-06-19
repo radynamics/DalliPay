@@ -8,6 +8,7 @@ import com.radynamics.dallipay.cryptoledger.bitcoin.Ledger;
 import com.radynamics.dallipay.cryptoledger.bitcoin.hwi.*;
 import com.radynamics.dallipay.exchange.Currency;
 import com.radynamics.dallipay.exchange.Money;
+import org.apache.commons.lang3.Range;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -21,10 +22,8 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MultiWalletJsonRpcApi {
     final static Logger log = LogManager.getLogger(MultiWalletJsonRpcApi.class);
@@ -198,9 +197,21 @@ public class MultiWalletJsonRpcApi {
         return new ArrayList<>(walletClients.keySet());
     }
 
+    public boolean walletImported(String walletName) {
+        for (var name : walletNames()) {
+            if (name.equals(walletName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void importWallet(String walletName, LocalDateTime historicTransactionSince, Wallet wallet) throws ApiException {
         init();
-        createWallet(walletName);
+        // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
+        if (!walletImported(walletName)) {
+            createWallet(walletName);
+        }
 
         var walletAddress = wallet.getPublicKey();
         var ext = new BitcoinCoreRpcClientExt(genericClient);
@@ -208,7 +219,7 @@ public class MultiWalletJsonRpcApi {
 
         // Eg. "importdescriptors '[{"desc": "addr(myMubgMuPBGtkgxKz2SaQrD3YMPdTUbVMU)#ky756quq", "timestamp": "now"}]'"
         var options = "[{\"desc\": \"addr(%s)#%s\", \"timestamp\": %s}]".formatted(walletAddress, resultGetDescriptor.checksum(), toTimestamp(historicTransactionSince));
-        importDescriptors(walletName, options);
+        importDescriptors(walletName, new JSONArray(options));
     }
 
     private static Object toTimestamp(LocalDateTime historicTransactionSince) {
@@ -234,8 +245,11 @@ public class MultiWalletJsonRpcApi {
             arr.put(KeyPoolJsonSerializer.toJson(kp));
         }
 
-        createWallet(walletName);
-        importDescriptors(walletName, arr.toString());
+        // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
+        if (!walletImported(walletName)) {
+            createWallet(walletName);
+        }
+        importDescriptors(walletName, arr);
     }
 
     private void createWallet(String name) throws ApiException {
@@ -243,15 +257,49 @@ public class MultiWalletJsonRpcApi {
         ext.createWallet(name);
     }
 
-    private void importDescriptors(String walletName, String jsonOptions) throws ApiException {
+    private void importDescriptors(String walletName, JSONArray jsonOptions) throws ApiException {
+        importDescriptors(walletName, jsonOptions, 0);
+    }
+
+    private void importDescriptors(String walletName, JSONArray jsonOptions, int tryCounter) throws ApiException {
         var walletClient = createClient(network, walletName);
         try {
             var ext = new BitcoinCoreRpcClientExt(walletClient);
-            ext.importDescriptors(jsonOptions);
+            ext.importDescriptors(jsonOptions.toString());
+        } catch (ApiException e) {
+            // bitcoind returns following exception despite the range is the same as while calling importdescriptors the first time.
+            // "importdescriptors failed (-8 :new range must include current range = [0,1001])"
+            var msg = e.getMessage();
+            if (tryCounter <= 3 && msg.contains("-8 :new range must include current range")) {
+                importDescriptors(walletName, fixDescriptorParams(e, jsonOptions), ++tryCounter);
+                return;
+            }
+            throw e;
         } finally {
             // If user aborts rescan in bitcoinCore, we're able to fetch already scanned data.
             walletClients.put(walletName, walletClient);
         }
+    }
+
+    private static JSONArray fixDescriptorParams(ApiException e, JSONArray jsonOptions) {
+        // "importdescriptors failed (-8 :new range must include current range = [0,1001])"
+        var msg = e.getMessage();
+
+        var indexStart = msg.indexOf("[");
+        var indexEnd = msg.lastIndexOf("]");
+        // Eg. "[0,1001]" -> "0,1001"
+        var rangeText = msg.substring(indexStart + 1, indexEnd);
+        List<Integer> values = Arrays.stream(rangeText.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+        if (values.size() != 2) {
+            log.error("could not parse new range from exception text (%s).".formatted(msg));
+        }
+        var range = Range.between(values.get(0), values.get(1));
+        for (var i = 0; i < jsonOptions.length(); i++) {
+            KeyPoolJsonSerializer.putRange(jsonOptions.getJSONObject(i), range);
+        }
+        return jsonOptions;
     }
 
     public BitcoindRpcClient.SmartFeeResult estimateSmartFee(int targetInBlocks) {

@@ -41,18 +41,10 @@ public class BitcoinCoreWalletImport implements WalletSetupProcess {
             try {
                 if (frm.importWalletAddress() && !StringUtils.isEmpty(frm.walletAddress())) {
                     var walletName = frm.walletName().orElse(frm.walletAddress());
-                    // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
-                    if (ledger.walletImported(walletName)) {
-                        return WalletImportTaskResult.ALREADY_IMPORTED;
-                    }
                     ledger.importWallet(walletName, frm.historicTransactionSince(), ledger.createWallet(frm.walletAddress()));
                     return WalletImportTaskResult.IMPORTED;
                 } else if (frm.importDevice() && frm.device() != null) {
                     var walletName = frm.walletName().orElse(frm.device().type());
-                    // Only import if not yet exists (prevent BitcoinRPCException "Database already exists").
-                    if (ledger.walletImported(walletName)) {
-                        return WalletImportTaskResult.ALREADY_IMPORTED;
-                    }
                     ledger.importWallet(walletName, frm.historicTransactionSince(), frm.device());
                     return WalletImportTaskResult.IMPORTED;
                 } else {

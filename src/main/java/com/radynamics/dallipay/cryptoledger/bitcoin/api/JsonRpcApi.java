@@ -237,12 +237,7 @@ public class JsonRpcApi {
     }
 
     public boolean walletImported(String walletName) {
-        for (var name : walletNames()) {
-            if (name.equals(walletName)) {
-                return true;
-            }
-        }
-        return false;
+        return openedWallets.walletImported(walletName);
     }
 
     public void importWallet(String walletName, LocalDateTime historicTransactionSince, Wallet wallet) throws ApiException {
