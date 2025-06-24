@@ -87,23 +87,32 @@ public class BitcoinCoreWalletImportForm extends JDialog {
         pnlMain.add(panel1);
         pnlMain.add(panel3);
 
-        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 60));
-        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 60));
+        panel0.setMinimumSize(new Dimension(Integer.MAX_VALUE, 90));
+        panel0.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        panel0.setPreferredSize(new Dimension(Integer.MAX_VALUE, 90));
         panel3.setMinimumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         panel3.setPreferredSize(new Dimension(Integer.MAX_VALUE, 50));
 
         {
             var pnl = new JPanel();
-            pnl.setLayout(new BorderLayout());
+            pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
             panel0.add(pnl);
             {
                 var lbl = new JLabel();
                 lbl.setText(getTitle());
                 lbl.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
                 lbl.setOpaque(true);
-                pnl.add(lbl, BorderLayout.NORTH);
+                pnl.add(lbl);
+            }
+            {
+                panel0.add(Box.createVerticalStrut(10));
+            }
+            {
+                var lbl = new JLabel();
+                lbl.setText("<html><body>%s</body></html>".formatted(res.getString("subtitle")));
+                lbl.setOpaque(true);
+                pnl.add(lbl);
             }
             {
                 var group = new ButtonGroup();
