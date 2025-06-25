@@ -167,7 +167,11 @@ public class Camt05400102Writer implements Camt054Writer {
         var obj = new TransactionParty2();
 
         var helper = new RelatedPartyHelper(trx.getLedger());
-        obj.setDbtr(createPartyIdentification(helper.getNameOrDomain(trx.getSenderWallet()).orElse(trx.getSenderWallet().getPublicKey())));
+        // Null if sender could not get determined (eg. Bitcoin).
+        var dbtr = helper.getNameOrDomain(trx.getSenderWallet()).orElse(trx.getSenderWallet() == null ? null : trx.getSenderWallet().getPublicKey());
+        if (dbtr != null) {
+            obj.setDbtr(createPartyIdentification(dbtr));
+        }
         obj.setCdtr(createPartyIdentification(helper.getNameOrDomain(trx.getReceiverWallet()).orElse(null)));
 
         return obj.getDbtr() == null && obj.getCdtr() == null ? null : obj;
